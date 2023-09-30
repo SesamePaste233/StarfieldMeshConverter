@@ -184,6 +184,9 @@ class ExportSFMeshOperator(bpy.types.Operator):
             # Apply the Data Transfer modifier
             bpy.context.view_layer.objects.active = new_obj
             bpy.ops.object.modifier_apply(modifier=data_transfer_modifier.name)
+
+            if context.scene.use_world_origin:
+                bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             
             selected_obj = new_obj
             
@@ -330,8 +333,10 @@ class ExportSFMeshPanel(bpy.types.Panel):
         # Export settings
         layout.label(text="Export Settings:")
         layout.prop(context.scene, "mesh_scale", text="Scale")
+        layout.prop(context.scene, "use_world_origin", text="Use world origin")
         
         
+        layout.label(text="Export Datatypes:") 
         # Create a checkbox for each item
         for item in export_items:
             layout.prop(context.scene, item[0], text=item[1])
@@ -352,6 +357,11 @@ def register():
     bpy.types.Scene.mesh_scale = bpy.props.FloatProperty(
         name="Scale",
         default=1,
+    )
+    bpy.types.Scene.use_world_origin = bpy.props.BoolProperty(
+        name="Use world origin",
+        description="Use world instead of object origin as output geometry's origin.",
+        default=True
     )
     bpy.types.Scene.GEO = bpy.props.BoolProperty(
         name="Geometry",
@@ -398,6 +408,7 @@ def unregister():
     bpy.utils.unregister_class(ExportSFMeshPanel)
     del bpy.types.Scene.export_mesh_folder_path
     del bpy.types.Scene.mesh_scale
+    del bpy.types.Scene.use_world_origin
     del bpy.types.Scene.GEO
     del bpy.types.Scene.NORM
     del bpy.types.Scene.VERTCOLOR
