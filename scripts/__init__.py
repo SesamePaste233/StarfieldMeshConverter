@@ -19,6 +19,16 @@ bl_info = {
     "category": "Import-Export",
     }
 
+def sanitize_filename(filename):
+    illegal_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+    replacement_char = '_'  # You can replace illegal characters with another character or remove them
+
+    # Replace illegal characters with the replacement character
+    for char in illegal_chars:
+        filename = filename.replace(char, replacement_char)
+
+    return filename
+
 def hash_string(input_string):
     # Create a SHA-1 hash object
     sha1 = hashlib.sha1()
@@ -266,13 +276,14 @@ class ExportSFMeshOperator(bpy.types.Operator):
             bpy.context.view_layer.objects.active = old_obj
             bpy.data.meshes.remove(selected_obj.data)
             try:
+                active_object_folder_name = sanitize_filename(active_object_name)
                 if context.scene.export_sf_mesh_hash_result:
-                    hash_folder, hash_name = hash_string(active_object_name)
-                    result_file_folder = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_name, hash_folder)
+                    hash_folder, hash_name = hash_string(active_object_folder_name)
+                    result_file_folder = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_folder_name, hash_folder)
                     os.makedirs(result_file_folder)
                     result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
                 else:
-                    result_file_path = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_name + ".mesh")
+                    result_file_path = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_folder_name + ".mesh")
                 
                 log_file_path = os.path.join(utils_path, "console.log")
                 with open(log_file_path, "w") as log_file:
