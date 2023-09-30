@@ -590,6 +590,8 @@ inline void ThrowIfFailed(HRESULT hr)
 	}
 }
 
+// Perform mesh cleaning and optimization. This function is largely taken from the DirectXMesh sample: 
+// https://github.com/microsoft/DirectX-Graphics-Samples/blob/master/Samples/Desktop/D3D12MeshShaders/src/WavefrontConverter/MeshProcessor.cpp
 void MeshIO::Optimize(std::vector<uint16_t>&	a_indices,
 		std::vector<XMFLOAT3>&					a_positions,
 		std::vector<XMFLOAT3>&					a_normals,
@@ -630,8 +632,8 @@ void MeshIO::Optimize(std::vector<uint16_t>&	a_indices,
 
 
 	///
-	// Use DirectXMesh to optimize our vertex buffer data
-
+	// Use DirectXMesh to optimize our vertex buffer data. 
+	
 	// Clean the mesh, sort faces by material, and reorder
 	ThrowIfFailed(DirectX::Clean(reinterpret_cast<uint16_t*>(temp_indices.data()), m_triCount, m_vertexCount, nullptr, DUMMY_attributes.data(), m_dupVerts, true));
 	ThrowIfFailed(DirectX::AttributeSort(m_triCount, DUMMY_attributes.data(), m_faceRemap.data()));
