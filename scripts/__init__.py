@@ -273,11 +273,14 @@ class ExportSFMeshOperator(bpy.types.Operator):
                     result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
                 else:
                     result_file_path = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_name + ".mesh")
-                result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
+                
+                log_file_path = os.path.join(utils_path, "console.log")
+                with open(log_file_path, "w") as log_file:
+                    result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
                                     os.path.join(temp_path, "mesh_data.json"),
                                     result_file_path,
                                     str(context.scene.mesh_scale),
-                                    ])
+                                    ],stdout=log_file)
 
 
                 if result.returncode == 0:
