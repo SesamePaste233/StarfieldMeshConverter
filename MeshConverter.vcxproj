@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\MeshIO.h" />
+    <ClInclude Include="include\WavefrontWriter.h" />
     <ClInclude Include="lib\json.hpp" />
   </ItemGroup>
   <ItemGroup>

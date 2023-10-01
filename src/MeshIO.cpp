@@ -524,6 +524,56 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	return true;
 }
 
+bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
+	//remove the suffix of the filename
+	std::string new_filename = filename;
+
+	WavefrontWriter wfw;
+	if (!wfw.Write(new_filename + ".obj", obj_name, this->indices, this->positions, this->UV_list1, this->normals)) {
+		return false;
+	}
+
+	std::ofstream file(new_filename + ".json");
+
+	if (!file.is_open()) {
+		std::cout << "Error: Failed to open JSON file." << std::endl;
+		return false;
+	}
+
+	json jsonData;
+
+	// Save vertex colors in json format
+	json vertColorData = json::array();
+	for (auto vc : this->vert_colors) {
+		json vc_l = json::array();
+		vc_l.push_back(vc.r / 255.0f);
+		vc_l.push_back(vc.g / 255.0f);
+		vc_l.push_back(vc.b / 255.0f);
+		vc_l.push_back(vc.a / 255.0f);
+		vertColorData.push_back(vc_l);
+	}
+	jsonData["vertex_color"] = vertColorData;
+
+	// Save vertex weights in json format
+	json weightData = json::array();
+	for (auto vw : this->weights) {
+		json vw_l = json::array();
+		for (int i = 0; i < this->num_weightsPerVertex; i++) {
+			json vw_per_vert_per_bone_l = json::array();
+			vw_per_vert_per_bone_l.push_back(vw[i].bone);
+			vw_per_vert_per_bone_l.push_back(vw[i].weight / 65535.f);
+			vw_l.push_back(vw_per_vert_per_bone_l);
+		}
+		weightData.push_back(vw_l);
+	}
+	jsonData["vertex_weights"] = weightData;
+
+	// Write the json data to file
+	file << jsonData.dump(4);
+
+	return true;
+}
+
 void MeshIO::Clear()
 {
 	this->scale = 1.0f;
