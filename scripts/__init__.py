@@ -154,7 +154,7 @@ class ExportSFMeshOperator(bpy.types.Operator):
             os.makedirs(temp_path)
 
         old_obj = bpy.context.active_object
-        if old_obj:
+        if old_obj and old_obj.type == 'MESH':
             active_object_name = bpy.context.active_object.name
             new_obj = old_obj.copy()
             new_obj.data = old_obj.data.copy()
@@ -186,12 +186,14 @@ class ExportSFMeshOperator(bpy.types.Operator):
             bpy.ops.object.modifier_apply(modifier=data_transfer_modifier.name)
 
             if context.scene.use_world_origin:
+                old_obj.select_set(False)
                 bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+                old_obj.select_set(True)
             
             selected_obj = new_obj
             
         else:
-            print("No object is selected.")
+            print("No valid object is selected.")
             selected_obj = None
             return {'CANCELLED'}
 
@@ -239,7 +241,7 @@ class ExportSFMeshOperator(bpy.types.Operator):
                 data["uv_coords"] = [[] for i in bm.verts]
                 for face in bm.faces:
                     for vert, loop in zip(face.verts, face.loops):
-                        data["uv_coords"][vert.index] = [loop[uv_layer].uv[0], loop[uv_layer].uv[1]]
+                        data["uv_coords"][vert.index] = [loop[uv_layer].uv[0], 1 - loop[uv_layer].uv[1]]
             
             if context.scene.GEO:
                 for f in bm.faces:
