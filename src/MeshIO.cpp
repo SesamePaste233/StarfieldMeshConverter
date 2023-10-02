@@ -543,6 +543,7 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 	json jsonData;
 
 	// Save vertex colors in json format
+	int vertex_color_count = 0;
 	json vertColorData = json::array();
 	for (auto vc : this->vert_colors) {
 		json vc_l = json::array();
@@ -551,10 +552,13 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		vc_l.push_back(vc.b / 255.0f);
 		vc_l.push_back(vc.a / 255.0f);
 		vertColorData.push_back(vc_l);
+		++vertex_color_count;
 	}
 	jsonData["vertex_color"] = vertColorData;
+	std::cout << "Vertex color count: " << std::to_string(vertex_color_count) << std::endl;
 
 	// Save vertex weights in json format
+	int vertex_weight_count = 0;
 	json weightData = json::array();
 	for (auto vw : this->weights) {
 		json vw_l = json::array();
@@ -565,8 +569,45 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 			vw_l.push_back(vw_per_vert_per_bone_l);
 		}
 		weightData.push_back(vw_l);
+		++vertex_weight_count;
 	}
 	jsonData["vertex_weights"] = weightData;
+	std::cout << "Vertex weight count: " << std::to_string(vertex_weight_count) << std::endl;
+
+	// Save meshlets in json format
+	int meshlet_count = 0;
+	json meshletData = json::array();
+	for (auto meshlet : this->meshlets) {
+		json meshlet_l = json::array();
+		meshlet_l.push_back(meshlet.VertCount);
+		meshlet_l.push_back(meshlet.VertOffset);
+		meshlet_l.push_back(meshlet.PrimCount);
+		meshlet_l.push_back(meshlet.PrimOffset);
+		meshletData.push_back(meshlet_l);
+		++meshlet_count;
+	}
+	jsonData["meshlets"] = meshletData;
+	std::cout << "Meshlet count: " << std::to_string(meshlet_count) << std::endl;
+
+	// Save culldata in json format
+	int culldata_count = 0;
+	json culldata = json::array();
+	for (auto cd : this->culldata) {
+		json cd_l = json::array();
+		cd_l.push_back(cd.BoundingSphere.Center.x);
+		cd_l.push_back(cd.BoundingSphere.Center.y);
+		cd_l.push_back(cd.BoundingSphere.Center.z);
+		cd_l.push_back(cd.BoundingSphere.Radius);
+		cd_l.push_back(cd.NormalCone.x);
+		cd_l.push_back(cd.NormalCone.y);
+		cd_l.push_back(cd.NormalCone.z);
+		cd_l.push_back(cd.NormalCone.w);
+		cd_l.push_back(cd.ApexOffset);
+		culldata.push_back(cd_l);
+		++culldata_count;
+	}
+	jsonData["culldata"] = culldata;
+	std::cout << "Culldata count: " << std::to_string(culldata_count) << std::endl;
 
 	// Write the json data to file
 	file << jsonData.dump(4);
@@ -825,6 +866,23 @@ bool MeshIO::GenerateMeshlets() {
 
 	auto uniqueVertexIndices = reinterpret_cast<const uint16_t*>(uniqueVertexIB.data());
 	size_t vertIndices = uniqueVertexIB.size() / sizeof(uint16_t);
+
+	std::vector<uint16_t> uniqueVertexIndices_l;
+	uniqueVertexIndices_l.resize(vertIndices);
+	std::memcpy(uniqueVertexIndices_l.data(), uniqueVertexIndices, vertIndices * sizeof(uint16_t));
+
+	// Convert meshlet triangles to normal triangles
+	std::vector<uint16_t> indices_l;
+	for (auto& _mesh_let : meshlets) {
+		for (int i = 0; i < _mesh_let.PrimCount; i++) {
+			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i0]);
+			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i1]);
+			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i2]);
+		}
+	}
+	
+	std::swap(this->indices, indices_l);
+
 
 	std::vector<CullData>& cull = this->culldata;
 	cull.clear();

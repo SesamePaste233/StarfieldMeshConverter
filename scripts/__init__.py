@@ -6,8 +6,12 @@ import bmesh
 import json
 import hashlib
 import datetime
-import re
+from collections import defaultdict
+import mathutils
+import numpy as np
+from mathutils import Color
 
+DEBUG_MESHLETS = False
 
 bl_info = {
     "name": "Starfield Mesh Exporter",
@@ -139,6 +143,405 @@ export_items = [
     ("WEIGHTS", "Weights", "Export vertex groups data."),
 ]
 
+def ExportMesh(options, context, filepath, operator):
+    export_mesh_file_path = filepath
+    export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
+    utils_path, temp_path = update_path(os.path.dirname(__file__))
+    
+    if not os.path.isdir(temp_path):
+        os.makedirs(temp_path)
+
+    old_obj = bpy.context.active_object
+    if old_obj and old_obj.type == 'MESH':
+        active_object_name = bpy.context.active_object.name
+        new_obj = old_obj.copy()
+        new_obj.data = old_obj.data.copy()
+        new_obj.animation_data_clear()
+        bpy.context.collection.objects.link(new_obj)
+        
+        bpy.ops.object.mode_set(mode='EDIT')
+        
+        # Select all edges
+        bpy.ops.mesh.select_all(action='SELECT')
+        
+        # Switch to Edge Select mode in UV Editor
+        bpy.ops.uv.select_all(action='SELECT')
+        
+        bpy.ops.uv.seams_from_islands()
+        
+        
+        bpy.ops.object.mode_set(mode='OBJECT')
+        
+        # Add a Data Transfer modifier to the new object
+        data_transfer_modifier = new_obj.modifiers.new(name="Data Transfer", type='DATA_TRANSFER')
+        data_transfer_modifier.use_loop_data = True
+        data_transfer_modifier.data_types_loops = {'CUSTOM_NORMAL'}   # Copy vertex normals
+
+        data_transfer_modifier.object = old_obj
+
+        # Apply the Data Transfer modifier
+        bpy.context.view_layer.objects.active = new_obj
+        bpy.ops.object.modifier_apply(modifier=data_transfer_modifier.name)
+
+        if options.use_world_origin:
+            old_obj.select_set(False)
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            old_obj.select_set(True)
+        
+        selected_obj = new_obj
+        
+    else:
+        print("No valid object is selected.")
+        selected_obj = None
+        return {'CANCELLED'}
+
+    # Check if the selected object is a mesh
+    if selected_obj and selected_obj.type == 'MESH':
+        # Create a BMesh from the selected object
+        bm = bmesh.new()
+        bm.from_mesh(selected_obj.data)
+        
+        uv_layer = bm.loops.layers.uv.active
+        
+        
+        seams = [e for e in bm.edges if e.seam]
+        # split on seams
+        bmesh.ops.split_edges(bm, edges=seams)
+        
+        # Triangulate the mesh
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        # Initialize dictionaries to store data
+        data = {
+            "positions": [],
+            "positions_raw": [],
+            "vertex_indices": [],
+            "vertex_indices_raw": [],
+            "normals": [],
+            "uv_coords": [],
+            "vertex_color": [],
+            "bone_list":[],
+            "vertex_weights": []
+        }
+        # Extract data from the mesh
+        color_layer = bm.loops.layers.color.active
+        for v in bm.verts:
+            #data["positions"].append(list(v.co))
+            if options.GEO:
+                data["positions_raw"].extend(list(v.co))
+            if options.NORM:
+                data["normals"].append(list(v.normal))
+
+            
+            if options.VERTCOLOR and color_layer:
+                loop = v.link_loops[0]
+                data["vertex_color"].append([loop[color_layer][0],loop[color_layer][1],loop[color_layer][2],loop[color_layer][3]])
+        
+        if options.UV and uv_layer:
+            data["uv_coords"] = [[] for i in bm.verts]
+            for face in bm.faces:
+                for vert, loop in zip(face.verts, face.loops):
+                    data["uv_coords"][vert.index] = [loop[uv_layer].uv[0], 1 - loop[uv_layer].uv[1]]
+        
+        if options.GEO:
+            for f in bm.faces:
+                #data["vertex_indices"].append([v.index for v in f.verts])
+                data["vertex_indices_raw"].extend([v.index for v in f.verts])
+
+        # Extract vertex weights and bones
+        if options.WEIGHTS:
+            vertex_groups = selected_obj.vertex_groups
+            vgrp_names = [vg.name for vg in vertex_groups]
+            data["bone_list"] = vgrp_names
+            
+            bm.verts.layers.deform.verify()
+
+            deform = bm.verts.layers.deform.active
+            
+            for v in bm.verts:
+                g = v[deform]
+                
+                if len(g.items()) > 0 :
+                    data["vertex_weights"].append(g.items())
+                else:
+                    data["vertex_weights"].append([[0, 0]])
+
+        # Save the data to a JSON file
+        output_file = os.path.join(temp_path, "mesh_data.json")
+        with open(output_file, 'w') as json_file:
+            json.dump(data, json_file, indent=4)
+        print(f"Data saved to {output_file}")
+
+        # Cleanup
+        bm.to_mesh(selected_obj.data)
+        bm.free()
+    else:
+        print("Selected object is not a mesh.")
+        return {'CANCELLED'}
+
+    if selected_obj:
+        bpy.context.view_layer.objects.active = old_obj
+        bpy.data.meshes.remove(selected_obj.data)
+        try:
+            if options.export_sf_mesh_hash_result:
+                hash_folder, hash_name = hash_string(active_object_name)
+                result_file_folder = os.path.join(os.path.splitext(export_mesh_file_path)[0], hash_folder)
+                os.makedirs(result_file_folder)
+                result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
+            else:
+                result_file_path = export_mesh_file_path
+            
+            log_file_path = os.path.join(utils_path, "console.log")
+            with open(log_file_path, "w") as log_file:
+                result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
+                                '-m',
+                                os.path.join(temp_path, "mesh_data.json"),
+                                result_file_path,
+                                str(options.mesh_scale),
+                                ],stdout=log_file)
+
+
+            if result.returncode == 0:
+                operator.report({'INFO'}, "Starfield .mesh exported successfully")
+
+                if options.export_sf_mesh_open_folder == True:
+                    open_folder(bpy.path.abspath(export_mesh_folder_path))
+
+                return {'FINISHED'}
+                
+            else:
+                operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+                return {'CANCELLED'}
+            
+        except subprocess.CalledProcessError as e:
+            operator.report({'WARNING'}, f"Execution failed with return code {e.returncode}: {e.stderr}")
+            return {'CANCELLED'}
+        except FileNotFoundError:
+            operator.report({'WARNING'}, "Executable not found.")
+            return {'CANCELLED'}
+
+    return {'CANCELLED'}
+
+def ImportMesh(options, context, operator):
+    import_path = options.filepath
+    utils_path, temp_path = update_path(os.path.dirname(__file__))
+
+    log_file_path = os.path.join(utils_path, "console_import.log")
+    with open(log_file_path, "w") as log_file:
+        result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
+                            '-b',
+                            import_path,
+                            os.path.join(temp_path, "mesh_data_import"),
+                            ],stdout=log_file)
+
+
+    if result.returncode == 0:
+        operator.report({'INFO'}, "Starfield .mesh exported successfully")
+        
+        bpy.ops.import_scene.obj(
+            filepath=os.path.join(temp_path, "mesh_data_import.obj"),
+            axis_forward='Y',
+            axis_up='Z',  # Customize other import options here
+        )
+
+        obj = bpy.context.selected_objects[0]
+        if obj:
+            mesh = obj.data
+            if not mesh.vertex_colors:
+                mesh.vertex_colors.new()
+
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+
+            col = obj.data.vertex_colors.active
+
+            with open(os.path.join(temp_path, "mesh_data_import.json"), 'r') as json_file:
+                data = json.load(json_file)
+
+                if len(data["vertex_weights"]) > 0:
+                    num_bones = len(data["vertex_weights"][0])
+                    bones = []
+                    for i in range(num_bones):
+                        bones.append(obj.vertex_groups.new(name='bone' + str(i+1)))
+
+                    if len(bm.verts) != len(data["vertex_weights"]):
+                        operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")
+                        return {'CANCELLED'}
+                    
+                    for v in bm.verts:
+                        for i in range(num_bones):
+                            if data["vertex_weights"][v.index][i][1] != 0:
+                                bones[int(data["vertex_weights"][v.index][i][0])].add([v.index], data["vertex_weights"][v.index][i][1],'REPLACE')
+
+
+                vertex_map = defaultdict(list)
+                for poly in obj.data.polygons:
+                    for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
+                        vertex_map[v_ix].append(l_ix)
+
+                if len(data["vertex_color"]) > 0:
+                    if len(bm.verts) != len(data["vertex_weights"]):
+                        operator.report({'WARNING'}, f"Vertex data mismatched. Contact the author for assistance.")
+                        return {'CANCELLED'}
+                    for v_ix, l_ixs in vertex_map.items():
+                        for l_ix in l_ixs:
+                            col.data[l_ix].color = (data["vertex_color"][v_ix][0],data["vertex_color"][v_ix][1],data["vertex_color"][v_ix][2],data["vertex_color"][v_ix][3])
+                
+                
+                if DEBUG_MESHLETS and len(data['meshlets']) > 0:
+                    num_meshlets = len(data['meshlets'])
+
+                    for i in range(num_meshlets):
+                        material_name = f"Meshlet_{i}"
+                        material = bpy.data.materials.new(name=material_name)
+                        _h = (0.1 + 0.3*i) % 1.0
+                        _s = 1.0
+                        _v = 0.8
+                        _c = Color()
+                        _c.hsv = _h, _s, _v
+                        material.diffuse_color = _c[:] + (1.0,)
+                        mesh.materials.append(material)
+
+
+                    for i in range(num_meshlets):
+                        tri_counts = data['meshlets'][i][2]
+                        tri_offset = data['meshlets'][i][3]
+                        for j in range(tri_offset, tri_offset + tri_counts):
+                            mesh.polygons[j].material_index = i + 1
+
+                    cull_data = data['culldata']
+                    
+                    for i in range(num_meshlets):
+                        center = data['culldata'][i][:3]
+                        radius = data['culldata'][i][3]
+                        normal = data['culldata'][i][4:7]
+                        marker = data['culldata'][i][7]
+                        apex = data['culldata'][i][8]
+
+                        bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=center)
+                        bpy.context.object.display_type = 'BOUNDS'
+                        bpy.context.object.display_bounds_type = 'SPHERE'
+                        bpy.context.object.show_bounds = True
+                        bpy.context.object.name = f"Meshlet_{i}"
+
+                        normal_float = [(_i/255.0)*2 - 1 for _i in normal]
+                        is_degenerate = (marker == 255)
+                        angle = np.arccos(-marker/255.0) - (3.1415926 / 2)
+                        depth = radius / np.tan(angle)
+                        cone_center = [_i + _j * depth * 0.5 for _i,_j in zip(center, normal_float)]
+
+                        if not is_degenerate:
+                            bpy.ops.mesh.primitive_cone_add(vertices=32, radius1 = radius, depth = depth, location=cone_center)
+                            # Calculate the rotation matrix to align the up direction with the normal vector
+                            up_vector = mathutils.Vector((0, 0, 1)) 
+                            rotation_matrix = up_vector.rotation_difference(mathutils.Vector(normal_float)).to_matrix()
+
+                            # Apply the rotation to the cone
+                            bpy.context.object.rotation_euler = rotation_matrix.to_euler()
+
+                            bpy.context.object.display_type = 'BOUNDS'
+                            bpy.context.object.display_bounds_type = 'CONE'
+                            bpy.context.object.show_bounds = True
+                            bpy.context.object.name = f"CullCone_{i}"
+                            pass
+                        else:
+
+                            pass
+
+
+                        
+
+            return {'FINISHED'}
+        else:
+            operator.report({'WARNING'}, f"Unknown error. Contact the author for assistance.")
+            return {'CANCELLED'}
+
+    else:
+        operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+        return {'CANCELLED'}
+
+
+# Export operator
+class ExportCustomMesh(bpy.types.Operator):
+    bl_idname = "export.custom_mesh"
+    bl_label = "Export Custom Mesh"
+    
+    filepath: bpy.props.StringProperty(options={'HIDDEN'})
+    filename: bpy.props.StringProperty(default='untitled.mesh')
+    filter_glob: bpy.props.StringProperty(default="*.mesh", options={'HIDDEN'})
+
+    mesh_scale: bpy.props.FloatProperty(
+        name="Scale",
+        default=1,
+    )
+    use_world_origin: bpy.props.BoolProperty(
+        name="Use world origin",
+        description="Use world instead of object origin as output geometry's origin.",
+        default=True
+    )
+    GEO: bpy.props.BoolProperty(
+        name="Geometry",
+        description=export_items[0][2],
+        default=True
+    )
+    NORM: bpy.props.BoolProperty(
+        name="Normals",
+        description=export_items[1][2],
+        default=True
+    )
+    UV: bpy.props.BoolProperty(
+        name="UV",
+        description=export_items[2][2],
+        default=True
+    )
+    VERTCOLOR: bpy.props.BoolProperty(
+        name="Vertex Color",
+        description=export_items[3][2],
+        default=True
+    )
+    WEIGHTS: bpy.props.BoolProperty(
+        name="Weights",
+        description=export_items[4][2],
+        default=True
+    )
+
+    export_sf_mesh_open_folder: bpy.props.BoolProperty(
+        name="Open folder after export",
+        default=False,
+    )
+    export_sf_mesh_hash_result: bpy.props.BoolProperty(
+        name="Generate hash names",
+        description="Export into [hex1]\\[hex2].mesh instead of [name].mesh",
+        default=False,
+    )
+
+    def execute(self,context):
+        return ExportMesh(self,context,self.filepath,self)
+
+    def invoke(self, context, event):
+        _obj = context.active_object
+        if _obj:
+            self.filename = _obj.name + '.mesh'
+        else:
+            self.filename = 'untitled.mesh'
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+# Import operator
+class ImportCustomMesh(bpy.types.Operator):
+    bl_idname = "import.custom_mesh"
+    bl_label = "Import Custom Mesh"
+    
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filename: bpy.props.StringProperty(default='untitled.mesh')
+    custom_option: bpy.props.StringProperty(name="Custom Option")
+
+    def execute(self, context):
+        return ImportMesh(self, context, self)
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
 class ExportSFMeshOperator(bpy.types.Operator):
     """Export the active object"""
     bl_idname = "export.sfmesh"
@@ -147,176 +550,10 @@ class ExportSFMeshOperator(bpy.types.Operator):
     folder_path: bpy.props.StringProperty(subtype="DIR_PATH", default="")
 
     def execute(self, context):
-        # Check if the folder path is valid
-        utils_path, temp_path = update_path(os.path.dirname(__file__))
-        
-        if not os.path.isdir(temp_path):
-            os.makedirs(temp_path)
-
-        old_obj = bpy.context.active_object
-        if old_obj and old_obj.type == 'MESH':
+        _obj = bpy.context.active_object
+        if _obj and _obj.type == 'MESH':
             active_object_name = bpy.context.active_object.name
-            new_obj = old_obj.copy()
-            new_obj.data = old_obj.data.copy()
-            new_obj.animation_data_clear()
-            bpy.context.collection.objects.link(new_obj)
-            
-            bpy.ops.object.mode_set(mode='EDIT')
-            
-            # Select all edges
-            bpy.ops.mesh.select_all(action='SELECT')
-            
-            # Switch to Edge Select mode in UV Editor
-            bpy.ops.uv.select_all(action='SELECT')
-            
-            bpy.ops.uv.seams_from_islands()
-            
-            
-            bpy.ops.object.mode_set(mode='OBJECT')
-            
-            # Add a Data Transfer modifier to the new object
-            data_transfer_modifier = new_obj.modifiers.new(name="Data Transfer", type='DATA_TRANSFER')
-            data_transfer_modifier.use_loop_data = True
-            data_transfer_modifier.data_types_loops = {'CUSTOM_NORMAL'}   # Copy vertex normals
-
-            data_transfer_modifier.object = old_obj
-
-            # Apply the Data Transfer modifier
-            bpy.context.view_layer.objects.active = new_obj
-            bpy.ops.object.modifier_apply(modifier=data_transfer_modifier.name)
-
-            if context.scene.use_world_origin:
-                old_obj.select_set(False)
-                bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-                old_obj.select_set(True)
-            
-            selected_obj = new_obj
-            
-        else:
-            print("No valid object is selected.")
-            selected_obj = None
-            return {'CANCELLED'}
-
-        # Check if the selected object is a mesh
-        if selected_obj and selected_obj.type == 'MESH':
-            # Create a BMesh from the selected object
-            bm = bmesh.new()
-            bm.from_mesh(selected_obj.data)
-            
-            uv_layer = bm.loops.layers.uv.active
-            
-            
-            seams = [e for e in bm.edges if e.seam]
-            # split on seams
-            bmesh.ops.split_edges(bm, edges=seams)
-            
-            # Triangulate the mesh
-            bmesh.ops.triangulate(bm, faces=bm.faces)
-            # Initialize dictionaries to store data
-            data = {
-                "positions": [],
-                "positions_raw": [],
-                "vertex_indices": [],
-                "vertex_indices_raw": [],
-                "normals": [],
-                "uv_coords": [],
-                "vertex_color": [],
-                "bone_list":[],
-                "vertex_weights": []
-            }
-            # Extract data from the mesh
-            color_layer = bm.loops.layers.color.active
-            for v in bm.verts:
-                #data["positions"].append(list(v.co))
-                if context.scene.GEO:
-                    data["positions_raw"].extend(list(v.co))
-                if context.scene.NORM:
-                    data["normals"].append(list(v.normal))
-                loop = v.link_loops[0]
-                
-                if context.scene.VERTCOLOR and color_layer:
-                    data["vertex_color"].append([loop[color_layer][0],loop[color_layer][1],loop[color_layer][2],loop[color_layer][3]])
-            
-            if context.scene.UV:
-                data["uv_coords"] = [[] for i in bm.verts]
-                for face in bm.faces:
-                    for vert, loop in zip(face.verts, face.loops):
-                        data["uv_coords"][vert.index] = [loop[uv_layer].uv[0], 1 - loop[uv_layer].uv[1]]
-            
-            if context.scene.GEO:
-                for f in bm.faces:
-                    #data["vertex_indices"].append([v.index for v in f.verts])
-                    data["vertex_indices_raw"].extend([v.index for v in f.verts])
-
-            # Extract vertex weights and bones
-            if context.scene.WEIGHTS:
-                vertex_groups = selected_obj.vertex_groups
-                vgrp_names = [vg.name for vg in vertex_groups]
-                data["bone_list"] = vgrp_names
-                
-                bm.verts.layers.deform.verify()
-
-                deform = bm.verts.layers.deform.active
-                
-                for v in bm.verts:
-                    g = v[deform]
-                    
-                    if len(g.items()) > 0 :
-                        data["vertex_weights"].append(g.items())
-
-            # Save the data to a JSON file
-            output_file = os.path.join(temp_path, "mesh_data.json")
-            with open(output_file, 'w') as json_file:
-                json.dump(data, json_file, indent=4)
-            print(f"Data saved to {output_file}")
-
-            # Cleanup
-            bm.to_mesh(selected_obj.data)
-            bm.free()
-        else:
-            print("Selected object is not a mesh.")
-            return {'CANCELLED'}
-
-        if selected_obj:
-            bpy.context.view_layer.objects.active = old_obj
-            bpy.data.meshes.remove(selected_obj.data)
-            try:
-                active_object_folder_name = sanitize_filename(active_object_name)
-                if context.scene.export_sf_mesh_hash_result:
-                    hash_folder, hash_name = hash_string(active_object_folder_name)
-                    result_file_folder = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_folder_name, hash_folder)
-                    os.makedirs(result_file_folder)
-                    result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
-                else:
-                    result_file_path = os.path.join(bpy.path.abspath(context.scene.export_mesh_folder_path), active_object_folder_name + ".mesh")
-                
-                log_file_path = os.path.join(utils_path, "console.log")
-                with open(log_file_path, "w") as log_file:
-                    result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
-                                    os.path.join(temp_path, "mesh_data.json"),
-                                    result_file_path,
-                                    str(context.scene.mesh_scale),
-                                    ],stdout=log_file)
-
-
-                if result.returncode == 0:
-                    self.report({'INFO'}, "Starfield .mesh exported successfully")
-                    
-                else:
-                    self.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
-                    return {'CANCELLED'}
-                
-            except subprocess.CalledProcessError as e:
-                self.report({'WARN'}, f"Execution failed with return code {e.returncode}: {e.stderr}")
-            except FileNotFoundError:
-                self.report({'WARN'}, "Executable not found.")
-
-            if context.scene.export_sf_mesh_open_folder == True:
-                open_folder(bpy.path.abspath(context.scene.export_mesh_folder_path))
-
-            return {'FINISHED'}
-
-        return {'CANCELLED'}
+        return ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path,active_object_name + '.mesh'), self)
 
 class ExportSFMeshPanel(bpy.types.Panel):
     """Panel for the Export Starfield Mesh functionality"""
@@ -350,6 +587,20 @@ class ExportSFMeshPanel(bpy.types.Panel):
         layout.operator("export.sfmesh", text="Export .mesh")
 
 
+# Add custom menu entries in the File menu
+def menu_func_export(self, context):
+    self.layout.operator(
+        ExportCustomMesh.bl_idname,
+        text="Starfield Geometry (.mesh)",
+    )
+
+def menu_func_import(self, context):
+    self.layout.operator(
+        ImportCustomMesh.bl_idname,
+        text="Starfield Geometry (.mesh)",
+    )
+
+# Register the operators and menu entries
 def register():
     bpy.types.Scene.export_mesh_folder_path = bpy.props.StringProperty(
         name="Export Folder",
@@ -401,13 +652,21 @@ def register():
         description="Export into [hex1]\\[hex2].mesh instead of [model_name].mesh",
         default=False,
     )
+
+    bpy.utils.register_class(ExportCustomMesh)
+    bpy.utils.register_class(ImportCustomMesh)
     bpy.utils.register_class(ExportSFMeshOperator)
     bpy.utils.register_class(ExportSFMeshPanel)
-
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 def unregister():
     bpy.utils.unregister_class(ExportSFMeshOperator)
     bpy.utils.unregister_class(ExportSFMeshPanel)
+    bpy.utils.unregister_class(ExportCustomMesh)
+    bpy.utils.unregister_class(ImportCustomMesh)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     del bpy.types.Scene.export_mesh_folder_path
     del bpy.types.Scene.mesh_scale
     del bpy.types.Scene.use_world_origin

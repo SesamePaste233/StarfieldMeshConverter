@@ -74,7 +74,7 @@ int meshToBlender(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-int main(int argc, char* argv[]) {
+int __main(int argc, char* argv[]) {
 	// Check the first command-line argument
 	if (argc < 2) {
 		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-void _main() {
+void main() {
 	// Create a MeshIO object
 	MeshIO reader;
 
@@ -119,7 +119,7 @@ void _main() {
 	return;
 }
 
-void __main() {
+void _main() {
 	MeshIO reader;
 
 	reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, true, false, true);
