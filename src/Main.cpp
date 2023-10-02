@@ -74,7 +74,7 @@ int meshToBlender(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-int __main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	// Check the first command-line argument
 	if (argc < 2) {
 		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
@@ -96,7 +96,7 @@ int __main(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-void main() {
+void __main() {
 	// Create a MeshIO object
 	MeshIO reader;
 
