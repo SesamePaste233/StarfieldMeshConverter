@@ -11,12 +11,11 @@ import mathutils
 import numpy as np
 from mathutils import Color
 
-DEBUG_MESHLETS = False
 
 bl_info = {
     "name": "Starfield Mesh Exporter",
-    "version": (1, 0, 0),
-    "blender": (3, 0, 0),
+    "version": (0, 5, 0),
+    "blender": (3, 5, 0),
     "location": "File > Import-Export",
     "description": "Export .mesh geometry file for starfield.",
     "warning": "",
@@ -202,7 +201,7 @@ def ExportMesh(options, context, filepath, operator):
         bm.from_mesh(selected_obj.data)
         
         uv_layer = bm.loops.layers.uv.active
-        
+        uv_layer_mesh = selected_obj.data.uv_layers.active
         
         seams = [e for e in bm.edges if e.seam]
         # split on seams
@@ -210,6 +209,9 @@ def ExportMesh(options, context, filepath, operator):
         
         # Triangulate the mesh
         bmesh.ops.triangulate(bm, faces=bm.faces)
+
+        bm.to_mesh(selected_obj.data)
+
         # Initialize dictionaries to store data
         data = {
             "positions": [],
@@ -224,7 +226,9 @@ def ExportMesh(options, context, filepath, operator):
         }
         # Extract data from the mesh
         color_layer = bm.loops.layers.color.active
+        verts_count = 0
         for v in bm.verts:
+            verts_count += 1
             #data["positions"].append(list(v.co))
             if options.GEO:
                 data["positions_raw"].extend(list(v.co))
@@ -235,35 +239,53 @@ def ExportMesh(options, context, filepath, operator):
             if options.VERTCOLOR and color_layer:
                 loop = v.link_loops[0]
                 data["vertex_color"].append([loop[color_layer][0],loop[color_layer][1],loop[color_layer][2],loop[color_layer][3]])
-        
-        if options.UV and uv_layer:
-            data["uv_coords"] = [[] for i in bm.verts]
-            for face in bm.faces:
-                for vert, loop in zip(face.verts, face.loops):
-                    data["uv_coords"][vert.index] = [loop[uv_layer].uv[0], 1 - loop[uv_layer].uv[1]]
-        
-        if options.GEO:
-            for f in bm.faces:
-                #data["vertex_indices"].append([v.index for v in f.verts])
-                data["vertex_indices_raw"].extend([v.index for v in f.verts])
 
-        # Extract vertex weights and bones
-        if options.WEIGHTS:
-            vertex_groups = selected_obj.vertex_groups
-            vgrp_names = [vg.name for vg in vertex_groups]
-            data["bone_list"] = vgrp_names
-            
-            bm.verts.layers.deform.verify()
+        
+        try:
+            if options.UV and uv_layer:
+                vertex_map = defaultdict(list)
+                for poly in selected_obj.data.polygons:
+                    for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
+                        vertex_map[v_ix].append(l_ix)
 
-            deform = bm.verts.layers.deform.active
+                data["uv_coords"] = [[] for i in range(verts_count)]
+                for face in selected_obj.data.polygons:
+                    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+                        uv_coords = selected_obj.data.uv_layers.active.data[loop_idx].uv
+                        data["uv_coords"][vert_idx] = [uv_coords[0],1-uv_coords[1]]
+
+                for _l in data["uv_coords"]:
+                    if len(_l) == 0:
+                        operator.report({'WARNING'}, f"UV map is invalid.")
+                        print(data["uv_coords"], verts_count)
+                        return {'CANCELLED'}
+                    
             
-            for v in bm.verts:
-                g = v[deform]
+            if options.GEO:
+                for f in bm.faces:
+                    #data["vertex_indices"].append([v.index for v in f.verts])
+                    data["vertex_indices_raw"].extend([v.index for v in f.verts])
+
+            # Extract vertex weights and bones
+            if options.WEIGHTS:
+                vertex_groups = selected_obj.vertex_groups
+                vgrp_names = [vg.name for vg in vertex_groups]
+                data["bone_list"] = vgrp_names
                 
-                if len(g.items()) > 0 :
-                    data["vertex_weights"].append(g.items())
-                else:
-                    data["vertex_weights"].append([[0, 0]])
+                bm.verts.layers.deform.verify()
+
+                deform = bm.verts.layers.deform.active
+                
+                for v in bm.verts:
+                    g = v[deform]
+                    
+                    if len(g.items()) > 0 :
+                        data["vertex_weights"].append(g.items())
+                    elif len(data["bone_list"])>0:
+                        data["vertex_weights"].append([[0, 0]])
+        except IndexError:
+            operator.report({'WARNING'}, "The mesh may have loose vertices, try to Clean Up the mesh or contact the author.")
+            return {'CANCELLED'}
 
         # Save the data to a JSON file
         output_file = os.path.join(temp_path, "mesh_data.json")
@@ -284,7 +306,8 @@ def ExportMesh(options, context, filepath, operator):
         try:
             if options.export_sf_mesh_hash_result:
                 hash_folder, hash_name = hash_string(active_object_name)
-                result_file_folder = os.path.join(os.path.splitext(export_mesh_file_path)[0], hash_folder)
+                object_folder_name = sanitize_filename(active_object_name)
+                result_file_folder = os.path.join(os.path.dirname(export_mesh_file_path), object_folder_name, hash_folder)
                 os.makedirs(result_file_folder)
                 result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
             else:
@@ -337,10 +360,10 @@ def ImportMesh(options, context, operator):
     if result.returncode == 0:
         operator.report({'INFO'}, "Starfield .mesh exported successfully")
         
-        bpy.ops.import_scene.obj(
+        bpy.ops.wm.obj_import(
             filepath=os.path.join(temp_path, "mesh_data_import.obj"),
-            axis_forward='Y',
-            axis_up='Z',  # Customize other import options here
+            forward_axis='Y',
+            up_axis ='Z',  # Customize other import options here
         )
 
         obj = bpy.context.selected_objects[0]
@@ -358,7 +381,14 @@ def ImportMesh(options, context, operator):
                 data = json.load(json_file)
 
                 if len(data["vertex_weights"]) > 0:
-                    num_bones = len(data["vertex_weights"][0])
+                    num_bones_per_vert = len(data["vertex_weights"][0])
+                    num_bones = -1
+                    for v in bm.verts:
+                        for i in range(num_bones_per_vert):
+                            if data["vertex_weights"][v.index][i][0] > num_bones:
+                                num_bones = data["vertex_weights"][v.index][i][0]
+                    
+                    num_bones += 1
                     bones = []
                     for i in range(num_bones):
                         bones.append(obj.vertex_groups.new(name='bone' + str(i+1)))
@@ -368,10 +398,12 @@ def ImportMesh(options, context, operator):
                         return {'CANCELLED'}
                     
                     for v in bm.verts:
-                        for i in range(num_bones):
-                            if data["vertex_weights"][v.index][i][1] != 0:
-                                bones[int(data["vertex_weights"][v.index][i][0])].add([v.index], data["vertex_weights"][v.index][i][1],'REPLACE')
-
+                        for i in range(num_bones_per_vert):
+                            cur_boneweight = data["vertex_weights"][v.index][i]
+                            
+                            if cur_boneweight[1] != 0:
+                                bones[int(cur_boneweight[0])].add([v.index], cur_boneweight[1],'ADD')
+                        #print(v.index, v.co, data["vertex_weights"][v.index])
 
                 vertex_map = defaultdict(list)
                 for poly in obj.data.polygons:
@@ -387,7 +419,7 @@ def ImportMesh(options, context, operator):
                             col.data[l_ix].color = (data["vertex_color"][v_ix][0],data["vertex_color"][v_ix][1],data["vertex_color"][v_ix][2],data["vertex_color"][v_ix][3])
                 
                 
-                if DEBUG_MESHLETS and len(data['meshlets']) > 0:
+                if options.meshlets_debug and len(data['meshlets']) > 0:
                     num_meshlets = len(data['meshlets'])
 
                     for i in range(num_meshlets):
@@ -406,46 +438,47 @@ def ImportMesh(options, context, operator):
                         tri_counts = data['meshlets'][i][2]
                         tri_offset = data['meshlets'][i][3]
                         for j in range(tri_offset, tri_offset + tri_counts):
-                            mesh.polygons[j].material_index = i + 1
+                            mesh.polygons[j].material_index = i
 
-                    cull_data = data['culldata']
-                    
-                    for i in range(num_meshlets):
-                        center = data['culldata'][i][:3]
-                        radius = data['culldata'][i][3]
-                        normal = data['culldata'][i][4:7]
-                        marker = data['culldata'][i][7]
-                        apex = data['culldata'][i][8]
+                    if options.culldata_debug:
+                        
+                        for i in range(num_meshlets):
+                            center = data['culldata'][i][:3]
+                            radius = data['culldata'][i][3]
+                            normal = data['culldata'][i][4:7]
+                            marker = data['culldata'][i][7]
+                            apex = data['culldata'][i][8]
 
-                        bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=center)
-                        bpy.context.object.display_type = 'BOUNDS'
-                        bpy.context.object.display_bounds_type = 'SPHERE'
-                        bpy.context.object.show_bounds = True
-                        bpy.context.object.name = f"Meshlet_{i}"
-
-                        normal_float = [(_i/255.0)*2 - 1 for _i in normal]
-                        is_degenerate = (marker == 255)
-                        angle = np.arccos(-marker/255.0) - (3.1415926 / 2)
-                        depth = radius / np.tan(angle)
-                        cone_center = [_i + _j * depth * 0.5 for _i,_j in zip(center, normal_float)]
-
-                        if not is_degenerate:
-                            bpy.ops.mesh.primitive_cone_add(vertices=32, radius1 = radius, depth = depth, location=cone_center)
-                            # Calculate the rotation matrix to align the up direction with the normal vector
-                            up_vector = mathutils.Vector((0, 0, 1)) 
-                            rotation_matrix = up_vector.rotation_difference(mathutils.Vector(normal_float)).to_matrix()
-
-                            # Apply the rotation to the cone
-                            bpy.context.object.rotation_euler = rotation_matrix.to_euler()
-
+                            bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=center)
                             bpy.context.object.display_type = 'BOUNDS'
-                            bpy.context.object.display_bounds_type = 'CONE'
+                            bpy.context.object.display_bounds_type = 'SPHERE'
                             bpy.context.object.show_bounds = True
-                            bpy.context.object.name = f"CullCone_{i}"
-                            pass
-                        else:
+                            bpy.context.object.name = f"Meshlet_{i}"
 
-                            pass
+                        
+                            normal_float = [(_i/255.0)*2 - 1 for _i in normal]
+                            is_degenerate = (marker == 255)
+                            angle = np.arccos(-marker/255.0) - (3.1415926 / 2)
+                            depth = radius / np.tan(angle)
+                            cone_center = [_i + _j * depth * 0.5 for _i,_j in zip(center, normal_float)]
+
+                            if not is_degenerate:
+                                bpy.ops.mesh.primitive_cone_add(vertices=32, radius1 = radius, depth = depth, location=cone_center)
+                                # Calculate the rotation matrix to align the up direction with the normal vector
+                                up_vector = mathutils.Vector((0, 0, 1)) 
+                                rotation_matrix = up_vector.rotation_difference(mathutils.Vector(normal_float)).to_matrix()
+
+                                # Apply the rotation to the cone
+                                bpy.context.object.rotation_euler = rotation_matrix.to_euler()
+
+                                bpy.context.object.display_type = 'BOUNDS'
+                                bpy.context.object.display_bounds_type = 'CONE'
+                                bpy.context.object.show_bounds = True
+                                bpy.context.object.name = f"CullCone_{i}"
+                                pass
+                            else:
+
+                                pass
 
 
                         
@@ -533,7 +566,16 @@ class ImportCustomMesh(bpy.types.Operator):
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
     filename: bpy.props.StringProperty(default='untitled.mesh')
-    custom_option: bpy.props.StringProperty(name="Custom Option")
+    meshlets_debug: bpy.props.BoolProperty(
+        name="Debug Meshlets",
+        description="Debug option. DO NOT USE.",
+        default=False
+    )
+    culldata_debug: bpy.props.BoolProperty(
+        name="Debug CullData",
+        description="Debug option. DO NOT USE.",
+        default=False
+    )
 
     def execute(self, context):
         return ImportMesh(self, context, self)

@@ -121,7 +121,9 @@ void __main() {
 
 void _main() {
 	MeshIO reader;
+	reader.Deserialize("C:\\repo\\MeshConverter\\test.mesh");
 
+	reader.Clear();
 	reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, true, false, true);
 
 	reader.Serialize("C:\\repo\\MeshConverter\\mesh_data.mesh");

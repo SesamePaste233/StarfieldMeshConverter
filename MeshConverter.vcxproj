@@ -133,6 +133,9 @@
       <AdditionalLibraryDirectories>C:\repo\DirectXMesh-main\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>DirectXMesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "C:\repo\MeshConverter\x64\Release\MeshConverter.exe" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\MeshConverter.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -153,6 +156,9 @@
       <AdditionalLibraryDirectories>C:\repo\DirectXMesh-main\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>DirectXMesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "C:\repo\MeshConverter\x64\Release\MeshConverter.exe" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\MeshConverter.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

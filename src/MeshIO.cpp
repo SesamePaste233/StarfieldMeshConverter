@@ -66,7 +66,7 @@ bool MeshIO::Deserialize(const std::string filename)
 		auto uv1 = Util::readHalfAsFull(file, 2);
 		this->UV_list1.emplace_back(uv1);
 	}
-			
+
 	this->num_uv2 = Util::readUInt32(file)[0];
 
 	for (int i = 0; i < num_uv2; i++) {
@@ -80,7 +80,7 @@ bool MeshIO::Deserialize(const std::string filename)
 		auto color = Util::readUInt8(file, 4);
 		this->vert_colors.push_back({ color[0],color[1],color[2],color[3] });
 	}
-			
+
 
 	this->num_normals = Util::readUInt32(file)[0];
 
@@ -89,7 +89,7 @@ bool MeshIO::Deserialize(const std::string filename)
 		auto normal = Util::decodeUDEC3_2(n);
 		this->normals.emplace_back(normal);
 	}
-	
+
 	this->num_tangents = Util::readUInt32(file)[0];
 
 	for (int i = 0; i < num_tangents; i++) {
@@ -99,7 +99,9 @@ bool MeshIO::Deserialize(const std::string filename)
 	}
 
 	this->num_weights = Util::readUInt32(file)[0];
-	auto num_entries = this->num_vertices;
+	auto num_entries = 0;
+	if (this->num_weights !=0 )
+		num_entries = this->num_vertices;
 
 	for (int i = 0; i < num_entries; i++) {
 		vertex_weight vw = new bone_binding[num_weightsPerVertex];
@@ -381,6 +383,12 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	const json& normalsData = jsonData["normals"];
 
 	if (normalsData.is_array()) {
+		// Check if length of normalsData is equal to the number of vertices
+		if (normalsData.size() > 0 && normalsData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'normals' is not equal to the number of vertices." << std::endl;
+			return false;
+		}
+
 		this->num_normals = normalsData.size();
 		for (const auto& n : normalsData) {
 			if (n.is_array()) {
@@ -403,9 +411,20 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	const json& UVData = jsonData["uv_coords"];
 
 	if (UVData.is_array()) {
+		// Check if length of UVData is equal to the number of vertices
+		if (UVData.size() > 0 && UVData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'uv_coords' is not equal to the number of vertices." << std::endl;
+			return false;
+		}
+
 		this->num_uv1 = UVData.size();
 		for (const auto& uv : UVData) {
 			if (uv.is_array()) {
+				if (uv.size() != 2) {
+					std::cout << "Error: Length of 'uv_coords' is not equal to 2." << std::endl;
+					return false;
+				}
+
 				std::vector<float> uv_l;
 				for (const auto& element : uv) {
 					if (element.is_number()) {
@@ -425,6 +444,12 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	const json& vertColorData = jsonData["vertex_color"];
 
 	if (vertColorData.is_array()) {
+		// Check if length of vertColorData is equal to the number of vertices
+		if (vertColorData.size() > 0 && vertColorData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'vertex_color' is not equal to the number of vertices." << std::endl;
+			return false;
+		}
+
 		this->num_vert_colors = vertColorData.size();
 		for (const auto& vc : vertColorData) {
 			if (vc.is_array()) {
@@ -447,6 +472,12 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	const json& weightData = jsonData["vertex_weights"];
 
 	if (weightData.is_array()) {
+		// Check if length of weightData is equal to the number of vertices
+		if (weightData.size() > 0 && weightData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'vertex_weights' is not equal to the number of vertices." << std::endl;
+			return false;
+		}
+
 		this->num_weights = weightData.size();
 		for (const auto& vw : weightData) {
 			if (vw.is_array()) {
@@ -620,6 +651,7 @@ void MeshIO::Clear()
 	this->scale = 1.0f;
 	this->num_weightsPerVertex = 0;
 	this->num_triangles = 0;
+	this->num_positions = 0;
 	this->num_vertices = 0;
 	this->num_uv1 = 0;
 	this->num_uv2 = 0;
@@ -846,6 +878,7 @@ bool MeshIO::GenerateTangents() {
 		this->tangents[j].push_back(DX_tangents[j].y);
 		this->tangents[j].push_back(DX_tangents[j].z);
 	}
+	this->num_tangents = this->tangents.size();
 }
 
 bool MeshIO::GenerateMeshlets() {
