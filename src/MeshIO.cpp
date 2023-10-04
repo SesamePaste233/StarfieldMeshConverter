@@ -502,21 +502,21 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
 			memset(vw_l, 0, sizeof(bone_binding)* this->num_weightsPerVertex);
 
-			std::vector<std::vector<float>> bb_raw;
+			std::vector<std::vector<double>> bb_raw;
 			std::vector<std::vector<uint16_t>> bb_l;
-			double sum_weight = 0.00001;
+			double sum_weight = 0;
 			for (const auto& element : vw) {
 
-				std::vector<float> bb_per_vert_per_bone_raw;
+				std::vector<double> bb_per_vert_per_bone_raw;
 
 
 				for (const auto& e : element) {
-					float _e = e;
+					double _e = e;
 					bb_per_vert_per_bone_raw.push_back(_e);
 				}
 
-				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
 				sum_weight += bb_per_vert_per_bone_raw[1];
+				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
 					
 				bb_raw.emplace_back(bb_per_vert_per_bone_raw);
 			}
@@ -526,10 +526,24 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
 				uint16_t weight = 0;
 
-				if (normalize_weight) 
-					weight = uint16_t(bb_per_vert_per_bone_raw[1] / sum_weight);
-				else 
+				uint16_t _Max = uint16_t(-1);
+				if (normalize_weight) {
+					double _w = bb_per_vert_per_bone_raw[1] / sum_weight;
+
+					// Make sure the weights is never going to overflow
+					if (_w > _Max)
+						weight = _Max;
+					else if (_w < 0)
+						weight = uint16_t(0);
+					else
+						weight = uint16_t(_w);
+
+					_Max = _Max - weight;
+
+				}
+				else {
 					weight = uint16_t(bb_per_vert_per_bone_raw[1]);
+				}
 
 				vw_l[_i].bone = bone_id;
 				vw_l[_i].weight = weight;
