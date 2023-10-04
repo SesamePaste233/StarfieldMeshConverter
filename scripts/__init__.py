@@ -147,11 +147,26 @@ def ExportMesh(options, context, filepath, operator):
     export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
     utils_path, temp_path = update_path(os.path.dirname(__file__))
     
+    # Initialize dictionaries to store data
+    data = {
+        "positions": [],
+        "positions_raw": [],
+        "vertex_indices": [],
+        "vertex_indices_raw": [],
+        "normals": [],
+        "uv_coords": [],
+        "vertex_color": [],
+        "bone_list":[],
+        "vertex_weights": [],
+        "smooth_group": []
+    }
+
     if not os.path.isdir(temp_path):
         os.makedirs(temp_path)
 
     old_obj = bpy.context.active_object
     if old_obj and old_obj.type == 'MESH':
+        
         active_object_name = bpy.context.active_object.name
         new_obj = old_obj.copy()
         new_obj.data = old_obj.data.copy()
@@ -193,6 +208,8 @@ def ExportMesh(options, context, filepath, operator):
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             old_obj.select_set(True)
         
+        
+
         selected_obj = new_obj
         
     else:
@@ -207,9 +224,8 @@ def ExportMesh(options, context, filepath, operator):
         bm.from_mesh(selected_obj.data)
         
         uv_layer = bm.loops.layers.uv.active
-        uv_layer_mesh = selected_obj.data.uv_layers.active
         
-        seams = [e for e in bm.edges if e.seam]
+        seams = [e for e in bm.edges if e.seam or not e.smooth]
         # split on seams
         bmesh.ops.split_edges(bm, edges=seams)
         
@@ -217,19 +233,79 @@ def ExportMesh(options, context, filepath, operator):
         bmesh.ops.triangulate(bm, faces=bm.faces)
 
         bm.to_mesh(selected_obj.data)
+        bm.free()
 
-        # Initialize dictionaries to store data
-        data = {
-            "positions": [],
-            "positions_raw": [],
-            "vertex_indices": [],
-            "vertex_indices_raw": [],
-            "normals": [],
-            "uv_coords": [],
-            "vertex_color": [],
-            "bone_list":[],
-            "vertex_weights": []
-        }
+        #bpy.ops.wm.obj_export(filepath = os.path.join(temp_path, "mesh_data.obj"), export_materials=False,export_selected_objects = True)
+
+        # Create a list to store the vertex indices of sharp edges
+        sharp_edge_vertices = []
+
+        # Ensure we are in Edit Mode
+        if selected_obj.mode != 'EDIT':
+            bpy.ops.object.mode_set(mode='EDIT')
+
+        # Deselect all
+        bpy.ops.mesh.select_all(action='DESELECT')
+
+        _obj = bpy.context.edit_object
+        _me = _obj.data
+
+        _bm = bmesh.from_edit_mesh(_me)
+        for e in _bm.edges:
+            if not e.smooth:
+                e.select = True
+        
+        bmesh.update_edit_mesh(_me)
+
+        # Switch to Vertex Select Mode
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+
+        # Switch back to Object Mode
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        # Iterate through selected vertices and add their indices to the list
+        for vertex in selected_obj.data.vertices:
+            if vertex.select:
+                sharp_edge_vertices.append(vertex.index)
+
+        data["smooth_group"] = []
+
+        for vertex in selected_obj.data.vertices:
+            if vertex.index not in sharp_edge_vertices:
+                data["smooth_group"].append(vertex.index)
+
+        if "SMOOTH_GROUP" in selected_obj.vertex_groups:
+            data["smooth_group"] = []
+            smooth_group = selected_obj.vertex_groups["SMOOTH_GROUP"]
+            
+            for vertex in selected_obj.data.vertices:
+                # Check if the vertex is in the "SMOOTH_GROUP"
+                for group_element in vertex.groups:
+                    if group_element.group == smooth_group.index:
+                        data["smooth_group"].append(vertex.index)
+
+            # Remove the vertex group
+            selected_obj.vertex_groups.remove(smooth_group)
+
+        if "SHARP_GROUP" in selected_obj.vertex_groups:
+            data["smooth_group"] = []
+            sharp_group = selected_obj.vertex_groups["SHARP_GROUP"]
+
+            for vertex in selected_obj.data.vertices:
+                is_sharp = False
+                for group_element in vertex.groups:
+                    if group_element.group == sharp_group.index:
+                        is_sharp = True
+                        break
+                
+                if not is_sharp and vertex.index not in sharp_edge_vertices:
+                    data["smooth_group"].append(vertex.index)
+
+            selected_obj.vertex_groups.remove(sharp_group)
+            
+        bm = bmesh.new()
+        bm.from_mesh(selected_obj.data)
+
         # Extract data from the mesh
         color_layer = bm.loops.layers.color.active
         verts_count = 0
@@ -289,6 +365,8 @@ def ExportMesh(options, context, filepath, operator):
                         data["vertex_weights"].append(g.items())
                     elif len(data["bone_list"])>0:
                         data["vertex_weights"].append([[0, 0]])
+
+
         except IndexError:
             operator.report({'WARNING'}, "The mesh may have loose vertices, try to Clean Up the mesh or contact the author.")
             return {'CANCELLED'}
@@ -328,6 +406,7 @@ def ExportMesh(options, context, filepath, operator):
                                 result_file_path,
                                 str(options.mesh_scale),
                                 str(int(options.smooth_edge_normals)),
+                                str(int(options.normalize_weights)),
                                 ],stdout=log_file)
 
 
@@ -524,6 +603,11 @@ class ExportCustomMesh(bpy.types.Operator):
         description="Average out normals of overlapping vertices",
         default=False,
     )
+    normalize_weights: bpy.props.BoolProperty(
+        name="Normalize weights",
+        description="",
+        default=False,
+    )
     GEO: bpy.props.BoolProperty(
         name="Geometry",
         description=export_items[0][2],
@@ -629,6 +713,7 @@ class ExportSFMeshPanel(bpy.types.Panel):
         layout.prop(context.scene, "mesh_scale", text="Scale")
         layout.prop(context.scene, "use_world_origin", text="Use world origin")
         layout.prop(context.scene, "smooth_edge_normals", text="Smooth seam normals")
+        layout.prop(context.scene, "normalize_weights", text="Normalize weights")
         
         
         layout.label(text="Export Datatypes:") 
@@ -675,6 +760,11 @@ def register():
     bpy.types.Scene.smooth_edge_normals = bpy.props.BoolProperty(
         name="Smooth seam normals",
         description="Average out normals of overlapping vertices.",
+        default=False
+    )
+    bpy.types.Scene.normalize_weights = bpy.props.BoolProperty(
+        name="Normalize weights",
+        description="",
         default=False
     )
     bpy.types.Scene.GEO = bpy.props.BoolProperty(
@@ -732,6 +822,7 @@ def unregister():
     del bpy.types.Scene.mesh_scale
     del bpy.types.Scene.use_world_origin
     del bpy.types.Scene.smooth_edge_normals
+    del bpy.types.Scene.normalize_weights
     del bpy.types.Scene.GEO
     del bpy.types.Scene.NORM
     del bpy.types.Scene.VERTCOLOR

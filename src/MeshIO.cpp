@@ -504,7 +504,7 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 
 			std::vector<std::vector<float>> bb_raw;
 			std::vector<std::vector<uint16_t>> bb_l;
-			double sum_weight = 0;
+			double sum_weight = 0.00001;
 			for (const auto& element : vw) {
 
 				std::vector<float> bb_per_vert_per_bone_raw;
@@ -515,8 +515,8 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 					bb_per_vert_per_bone_raw.push_back(_e);
 				}
 
-				sum_weight += bb_per_vert_per_bone_raw[1];
 				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
+				sum_weight += bb_per_vert_per_bone_raw[1];
 					
 				bb_raw.emplace_back(bb_per_vert_per_bone_raw);
 			}

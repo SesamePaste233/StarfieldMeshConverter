@@ -8,8 +8,8 @@ using namespace mesh;
 
 int blenderToMesh(int argc, char* argv[]) {
 	// Check if the user provided the correct number of command-line arguments
-	if (argc != 6) {
-		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale bool_smooth_edge_normal" << std::endl;
+	if (argc != 7) {
+		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale bool_smooth_edge_normal bool_normalize_weights" << std::endl;
 		return 1; // Return an error code
 	}
 
@@ -18,12 +18,13 @@ int blenderToMesh(int argc, char* argv[]) {
 	std::string outputMesh = argv[3];
 	float scale = std::stof(argv[4]);
 	bool smooth_edge_normal = std::stoi(argv[5]);
+	bool normalize_weights = std::stoi(argv[6]);
 
 	// Create a MeshIO object
 	MeshIO reader;
 
 	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, scale, true, false, false, smooth_edge_normal)) {
+	if (!reader.Load(inputJson, scale, true, normalize_weights, true, smooth_edge_normal)) {
 		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
 		return 2; // Return an error code
 	}
