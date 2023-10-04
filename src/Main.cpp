@@ -23,7 +23,7 @@ int blenderToMesh(int argc, char* argv[]) {
 	MeshIO reader;
 
 	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, scale, true, false, true, smooth_edge_normal)) {
+	if (!reader.Load(inputJson, scale, true, false, false, smooth_edge_normal)) {
 		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
 		return 2; // Return an error code
 	}

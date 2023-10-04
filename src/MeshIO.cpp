@@ -26,6 +26,8 @@ bool MeshIO::Deserialize(const std::string filename)
 		return false;
 	}
 
+	std::cout << "Offset of Indices: " << std::hex << file.tellg() << std::endl;
+
 	this->indices_size = Util::readUInt32(file)[0];
 
 	this->num_triangles = indices_size / 3;
@@ -36,14 +38,12 @@ bool MeshIO::Deserialize(const std::string filename)
 		this->indices.emplace_back(index);
 	}
 
-	std::cout << std::hex << file.tellg() << std::endl;
-
 	this->scale = Util::readFloat(file)[0];
 
 	this->num_weightsPerVertex = Util::readUInt32(file)[0];
 
 
-	std::cout << std::hex << file.tellg() << std::endl;
+	std::cout << "Offset of Positions: " << std::hex << file.tellg() << std::endl;
 
 	this->num_vertices = Util::readUInt32(file)[0];
 
@@ -52,13 +52,11 @@ bool MeshIO::Deserialize(const std::string filename)
 	for (int i = 0; i < num_positions; i++) {
 		auto pos = Util::readInt16(file)[0];
 		auto d = Util::snorm_to_double(pos, scale);
-		auto r = Util::double_to_snorm(d, scale);
 
 		this->positions.emplace_back(d);
 	}
 
-	// Get current position in file and display as hex
-	std::cout << std::hex << file.tellg() << std::endl;
+	std::cout << "Offset of UV1: " << std::hex << file.tellg() << std::endl;
 
 	this->num_uv1 = Util::readUInt32(file)[0];
 
@@ -67,12 +65,17 @@ bool MeshIO::Deserialize(const std::string filename)
 		this->UV_list1.emplace_back(uv1);
 	}
 
+	// Offset of UV2
+	std::cout << "Offset of UV2: " << std::hex << file.tellg() << std::endl;
+
 	this->num_uv2 = Util::readUInt32(file)[0];
 
 	for (int i = 0; i < num_uv2; i++) {
 		auto uv2 = Util::readHalfAsFull(file, 2);
 		this->UV_list2.emplace_back(uv2);
 	}
+
+	std::cout << "Offset of Vertex Colors: " << std::hex << file.tellg() << std::endl;
 
 	this->num_vert_colors = Util::readUInt32(file)[0];
 
@@ -81,6 +84,7 @@ bool MeshIO::Deserialize(const std::string filename)
 		this->vert_colors.push_back({ color[0],color[1],color[2],color[3] });
 	}
 
+	std::cout << "Offset of Normals: " << std::hex << file.tellg() << std::endl;
 
 	this->num_normals = Util::readUInt32(file)[0];
 
@@ -90,6 +94,8 @@ bool MeshIO::Deserialize(const std::string filename)
 		this->normals.emplace_back(normal);
 	}
 
+	std::cout << "Offset of Tangents: " << std::hex << file.tellg() << std::endl;
+
 	this->num_tangents = Util::readUInt32(file)[0];
 
 	for (int i = 0; i < num_tangents; i++) {
@@ -97,6 +103,8 @@ bool MeshIO::Deserialize(const std::string filename)
 		auto tangent = Util::decodeUDEC3_2(t);
 		this->tangents.emplace_back(tangent);
 	}
+
+	std::cout << "Offset of Weights: " << std::hex << file.tellg() << std::endl;
 
 	this->num_weights = Util::readUInt32(file)[0];
 	auto num_entries = 0;
@@ -117,6 +125,8 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	this->unk_uint32_t = Util::readUInt32(file)[0];
 
+	std::cout << "Offset of Meshlets: " << std::hex << file.tellg() << std::endl;
+
 	this->num_meshlets = Util::readUInt32(file)[0];
 
 	for (int i = 0; i < num_meshlets; i++) {
@@ -130,6 +140,8 @@ bool MeshIO::Deserialize(const std::string filename)
 
 		this->meshlets.emplace_back(ml);
 	}
+
+	std::cout << "Offset of Culldata: " << std::hex << file.tellg() << std::endl;
 
 	this->num_culldata = Util::readUInt32(file)[0];
 	for (int i = 0; i < num_meshlets; i++) {
@@ -269,7 +281,7 @@ bool MeshIO::Serialize(const std::string filename)
 	}
 
 	if (export_weights) {
-		this->num_weights = this->weights.size();
+		this->num_weights = this->weights.size() * this->num_weightsPerVertex;
 		Util::writeAsHex(file, this->num_weights);
 
 		for (auto vw : this->weights) {
@@ -478,7 +490,7 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 			return false;
 		}
 
-		this->num_weights = weightData.size();
+		this->num_weights = weightData.size() * this->num_weightsPerVertex;
 		for (const auto& vw : weightData) {
 			if (vw.is_array()) {
 				if (vw.size() > this->num_weightsPerVertex) {
@@ -534,17 +546,33 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		return false;
 	}
 
+	const json& smoothGroupData = jsonData["smooth_group"];
+
+	if (smoothGroupData.is_array()) {
+		this->num_smooth_group = smoothGroupData.size();
+		// Read indices from the smooth group data
+		for (const auto& sg : smoothGroupData) {
+			if (sg.is_number()) {
+				this->smooth_group.push_back(sg);
+			}
+		}
+	}
+	else {
+		std::cout << "Error: 'smooth_group' is not an array." << std::endl;
+		return false;
+	}
+
+	if (naive_edge_smooth) {
+		auto merged = NaiveEdgeSmooth();
+		std::cout << "Merged " << merged << " vertices." << std::endl;
+	}
+
 	this->UpdateDXAttr();
 
 	if (do_optimize) {
 		Optimize(this->indices, DX_positions, DX_normals, DX_uvs, this->weights, this->vert_colors);
 
 		this->UpdateAttrFromDX();
-	}
-
-	if (naive_edge_smooth) {
-		auto merged = NaiveEdgeSmooth();
-		std::cout << "Merged " << merged << " vertices." << std::endl;
 	}
 
 	if (generate_tangents_if_NA && this->tangents.empty()) {
@@ -667,6 +695,7 @@ void MeshIO::Clear()
 	this->unk_uint32_t = 0;
 	this->num_meshlets = 0;
 	this->num_culldata = 0;
+	this->num_smooth_group = 0;
 
 	this->indices.clear();
 	this->positions.clear();
@@ -678,6 +707,7 @@ void MeshIO::Clear()
 	this->weights.clear();
 	this->meshlets.clear();
 	this->culldata.clear();
+	this->smooth_group.clear();
 
 	this->indices_size = 0;
 
@@ -940,6 +970,7 @@ bool MeshIO::GenerateMeshlets() {
 
 size_t mesh::MeshIO::NaiveEdgeSmooth()
 {
+
 	// convert std::vector<double> to std::vector<float>
 	std::vector<float> positions_f;
 	positions_f.resize(this->positions.size());
@@ -958,11 +989,21 @@ size_t mesh::MeshIO::NaiveEdgeSmooth()
 
 	auto merged  = array_ops::normalizeByAttributes(positions_f, normals_f);
 
-	// convert std::vector<float> back to std::vector<std::vector<float>>
-	for (size_t i = 0; i < this->normals.size(); ++i) {
-		this->normals[i][0] = normals_f[i * 3];
-		this->normals[i][1] = normals_f[i * 3 + 1];
-		this->normals[i][2] = normals_f[i * 3 + 2];
+
+	if (this->num_smooth_group != 0) {
+		// convert std::vector<float> back to std::vector<std::vector<float>>
+		for (size_t i: this->smooth_group) {
+			this->normals[i][0] = normals_f[i * 3];
+			this->normals[i][1] = normals_f[i * 3 + 1];
+			this->normals[i][2] = normals_f[i * 3 + 2];
+		}
+	}
+	else {
+		for (size_t i = 0; i < this->normals.size(); ++i) {
+			this->normals[i][0] = normals_f[i * 3];
+			this->normals[i][1] = normals_f[i * 3 + 1];
+			this->normals[i][2] = normals_f[i * 3 + 2];
+		}
 	}
 
 	return merged;

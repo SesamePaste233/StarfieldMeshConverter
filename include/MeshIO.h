@@ -84,6 +84,9 @@ namespace mesh {
 		uint32_t num_culldata;
 		std::vector<DirectX::CullData> culldata;
 
+		uint32_t num_smooth_group;
+		std::vector<uint16_t> smooth_group;
+
 		void UpdateDXAttr();
 		void UpdateAttrFromDX();
 		std::vector<DirectX::XMFLOAT3> DX_positions;

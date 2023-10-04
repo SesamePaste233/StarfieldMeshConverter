@@ -272,6 +272,7 @@ namespace array_ops {
 	size_t normalizeByAttributes(const std::vector<float>& plainAttributes, std::vector<float>& plainValues);
 
 }
+
 // Custom hash function for FloatArray
 namespace std {
 	template <>
