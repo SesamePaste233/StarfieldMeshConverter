@@ -321,7 +321,7 @@ bool MeshIO::Serialize(const std::string filename)
 }
 
 using json = nlohmann::json;
-bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const bool generate_tangents_if_NA, const bool normalize_weight,const bool do_optimize) {
+bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const bool generate_tangents_if_NA, const bool normalize_weight,const bool do_optimize, const bool naive_edge_smooth) {
 	this->Clear();
 
 	std::ifstream file(jsonBlenderFile);
@@ -540,6 +540,11 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		Optimize(this->indices, DX_positions, DX_normals, DX_uvs, this->weights, this->vert_colors);
 
 		this->UpdateAttrFromDX();
+	}
+
+	if (naive_edge_smooth) {
+		auto merged = NaiveEdgeSmooth();
+		std::cout << "Merged " << merged << " vertices." << std::endl;
 	}
 
 	if (generate_tangents_if_NA && this->tangents.empty()) {
@@ -931,4 +936,34 @@ bool MeshIO::GenerateMeshlets() {
 	}
 
 	this->num_culldata = this->culldata.size();
+}
+
+size_t mesh::MeshIO::NaiveEdgeSmooth()
+{
+	// convert std::vector<double> to std::vector<float>
+	std::vector<float> positions_f;
+	positions_f.resize(this->positions.size());
+	for (size_t i = 0; i < this->positions.size(); ++i) {
+		positions_f[i] = float(this->positions[i]);
+	}
+
+	// flatten std::vector<std::vector<float>> to std::vector<float>
+	std::vector<float> normals_f;
+	normals_f.resize(this->normals.size() * 3);
+	for (size_t i = 0; i < this->normals.size(); ++i) {
+		normals_f[i * 3] = this->normals[i][0];
+		normals_f[i * 3 + 1] = this->normals[i][1];
+		normals_f[i * 3 + 2] = this->normals[i][2];
+	}
+
+	auto merged  = array_ops::normalizeByAttributes(positions_f, normals_f);
+
+	// convert std::vector<float> back to std::vector<std::vector<float>>
+	for (size_t i = 0; i < this->normals.size(); ++i) {
+		this->normals[i][0] = normals_f[i * 3];
+		this->normals[i][1] = normals_f[i * 3 + 1];
+		this->normals[i][2] = normals_f[i * 3 + 2];
+	}
+
+	return merged;
 }

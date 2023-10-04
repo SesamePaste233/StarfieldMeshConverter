@@ -168,6 +168,11 @@ def ExportMesh(options, context, filepath, operator):
         
         bpy.ops.uv.seams_from_islands()
         
+        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True)
+        bpy.ops.mesh.edge_split(type='EDGE')
+        bpy.ops.mesh.select_all(action='DESELECT')
         
         bpy.ops.object.mode_set(mode='OBJECT')
         
@@ -184,6 +189,7 @@ def ExportMesh(options, context, filepath, operator):
 
         if options.use_world_origin:
             old_obj.select_set(False)
+            new_obj.select_set(True)
             bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
             old_obj.select_set(True)
         
@@ -315,11 +321,13 @@ def ExportMesh(options, context, filepath, operator):
             
             log_file_path = os.path.join(utils_path, "console.log")
             with open(log_file_path, "w") as log_file:
+                print("REPORT:",result_file_path)
                 result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
                                 '-m',
                                 os.path.join(temp_path, "mesh_data.json"),
                                 result_file_path,
                                 str(options.mesh_scale),
+                                str(int(options.smooth_edge_normals)),
                                 ],stdout=log_file)
 
 
@@ -511,6 +519,11 @@ class ExportCustomMesh(bpy.types.Operator):
         description="Use world instead of object origin as output geometry's origin.",
         default=True
     )
+    smooth_edge_normal: bpy.props.BoolProperty(
+        name="Smooth seam normals",
+        description="Average out normals of overlapping vertices",
+        default=False,
+    )
     GEO: bpy.props.BoolProperty(
         name="Geometry",
         description=export_items[0][2],
@@ -595,7 +608,7 @@ class ExportSFMeshOperator(bpy.types.Operator):
         _obj = bpy.context.active_object
         if _obj and _obj.type == 'MESH':
             active_object_name = bpy.context.active_object.name
-        return ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path,active_object_name + '.mesh'), self)
+        return ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.mesh'), self)
 
 class ExportSFMeshPanel(bpy.types.Panel):
     """Panel for the Export Starfield Mesh functionality"""
@@ -615,6 +628,7 @@ class ExportSFMeshPanel(bpy.types.Panel):
         layout.label(text="Export Settings:")
         layout.prop(context.scene, "mesh_scale", text="Scale")
         layout.prop(context.scene, "use_world_origin", text="Use world origin")
+        layout.prop(context.scene, "smooth_edge_normals", text="Smooth seam normals")
         
         
         layout.label(text="Export Datatypes:") 
@@ -657,6 +671,11 @@ def register():
         name="Use world origin",
         description="Use world instead of object origin as output geometry's origin.",
         default=True
+    )
+    bpy.types.Scene.smooth_edge_normals = bpy.props.BoolProperty(
+        name="Smooth seam normals",
+        description="Average out normals of overlapping vertices.",
+        default=False
     )
     bpy.types.Scene.GEO = bpy.props.BoolProperty(
         name="Geometry",
@@ -712,6 +731,7 @@ def unregister():
     del bpy.types.Scene.export_mesh_folder_path
     del bpy.types.Scene.mesh_scale
     del bpy.types.Scene.use_world_origin
+    del bpy.types.Scene.smooth_edge_normals
     del bpy.types.Scene.GEO
     del bpy.types.Scene.NORM
     del bpy.types.Scene.VERTCOLOR

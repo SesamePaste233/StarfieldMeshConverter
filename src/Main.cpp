@@ -8,8 +8,8 @@ using namespace mesh;
 
 int blenderToMesh(int argc, char* argv[]) {
 	// Check if the user provided the correct number of command-line arguments
-	if (argc != 5) {
-		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale" << std::endl;
+	if (argc != 6) {
+		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale bool_smooth_edge_normal" << std::endl;
 		return 1; // Return an error code
 	}
 
@@ -17,12 +17,13 @@ int blenderToMesh(int argc, char* argv[]) {
 	std::string inputJson = argv[2];
 	std::string outputMesh = argv[3];
 	float scale = std::stof(argv[4]);
+	bool smooth_edge_normal = std::stoi(argv[5]);
 
 	// Create a MeshIO object
 	MeshIO reader;
 
 	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, scale, true, false, true)) {
+	if (!reader.Load(inputJson, scale, true, false, true, smooth_edge_normal)) {
 		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
 		return 2; // Return an error code
 	}
@@ -34,6 +35,12 @@ int blenderToMesh(int argc, char* argv[]) {
 	}
 
 	std::cout << "Mesh loaded from " << inputJson << " and serialized to " << outputMesh << std::endl;
+
+	// Print mesh statistics
+	std::cout << "Number of vertices: " << std::to_string(reader.num_vertices) << std::endl;
+	std::cout << "Number of triangles: " << std::to_string(reader.num_triangles) << std::endl;
+	std::cout << "Number of weights per vertex: " << std::to_string(reader.num_weightsPerVertex) << std::endl;
+
 
 	return 0; // Return success
 }

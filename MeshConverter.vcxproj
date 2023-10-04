@@ -25,6 +25,7 @@
     <ClInclude Include="lib\json.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\Common.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshIO.cpp" />
   </ItemGroup>

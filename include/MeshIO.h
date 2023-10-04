@@ -29,7 +29,7 @@ namespace mesh {
 
 		bool Serialize(const std::string filename);
 
-		bool Load(const std::string filename, const float scale_factor = 1.f, const bool generate_tangents_if_NA = false, const bool normalize_weight = false, const bool do_optimize = false);
+		bool Load(const std::string filename, const float scale_factor = 1.f, const bool generate_tangents_if_NA = false, const bool normalize_weight = false, const bool do_optimize = false, const bool naive_edge_smooth = false);
 		
 		bool SaveOBJ(const std::string filename, const std::string obj_name);
 
@@ -92,6 +92,7 @@ namespace mesh {
 
 		bool GenerateTangents();
 		bool GenerateMeshlets();
+		size_t NaiveEdgeSmooth();
 
 		// Export controlles
 		bool export_geometry = true;
