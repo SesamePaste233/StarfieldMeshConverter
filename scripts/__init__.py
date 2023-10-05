@@ -598,7 +598,7 @@ class ExportCustomMesh(bpy.types.Operator):
         description="Use world instead of object origin as output geometry's origin.",
         default=True
     )
-    smooth_edge_normal: bpy.props.BoolProperty(
+    smooth_edge_normals: bpy.props.BoolProperty(
         name="Smooth seam normals",
         description="Average out normals of overlapping vertices",
         default=False,
@@ -606,7 +606,7 @@ class ExportCustomMesh(bpy.types.Operator):
     normalize_weights: bpy.props.BoolProperty(
         name="Normalize weights",
         description="",
-        default=False,
+        default=True,
     )
     GEO: bpy.props.BoolProperty(
         name="Geometry",
