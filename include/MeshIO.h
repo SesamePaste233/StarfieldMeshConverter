@@ -76,7 +76,8 @@ namespace mesh {
 		uint32_t num_tangents;
 		std::vector<std::vector<float>> tangents;
 
-		uint32_t unk_uint32_t;
+		uint32_t num_lods;
+		std::vector<std::vector<uint16_t>> lods;
 
 		uint32_t num_meshlets;
 		std::vector<DirectX::Meshlet> meshlets;

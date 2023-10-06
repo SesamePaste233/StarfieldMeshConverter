@@ -162,12 +162,22 @@ public:
 		// Normalize the value to the range [-1, 1]
 		value /= scale;
 
+		// Clamp the value to the range [-1, 1]
+		if (value > 1) {
+			value = 1;
+		}
+		else if (value < -1) {
+			value = -1;
+		}
+
+		//value *= 0.9999; // This is to avoid rounding 1 to -1 or the other way around
+
 		// Convert the normalized value to the snorm range and return as uint16_t
 		if (value >= 0) {
 			return static_cast<int16_t>(value * 32767.0);
 		}
 		else {
-			return static_cast<int16_t>(value * 32768.0);
+			return static_cast<int16_t>(value * 32767.0);
 		}
 	}
 

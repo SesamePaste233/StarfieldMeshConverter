@@ -123,7 +123,18 @@ bool MeshIO::Deserialize(const std::string filename)
 		this->weights.emplace_back(vw);
 	}
 
-	this->unk_uint32_t = Util::readUInt32(file)[0];
+	std::cout << "Offset of LoDs: " << std::hex << file.tellg() << std::endl;
+
+	this->num_lods = Util::readUInt32(file)[0];
+
+	for (int i = 0; i < num_lods; i++) {
+		auto num_lod = Util::readUInt32(file)[0];
+		std::vector<uint16_t> lod;
+		for (int j = 0; j < num_lod; j++) {
+			auto index = Util::readUInt16(file)[0];
+			lod.emplace_back(index);
+		}
+	}
 
 	std::cout << "Offset of Meshlets: " << std::hex << file.tellg() << std::endl;
 
@@ -295,7 +306,7 @@ bool MeshIO::Serialize(const std::string filename)
 		Util::writeAsHex(file, dummy);
 	}
 
-	Util::writeAsHex(file, this->unk_uint32_t);
+	Util::writeAsHex(file, this->num_lods);
 
 	if (export_meshlets) {
 		this->num_meshlets = this->meshlets.size();
@@ -367,8 +378,8 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		std::cout << "Error: 'positions_raw' is not an array." << std::endl;
 		return false;
 	}
-
-	this->scale = pos_max;
+	// To prevent overflow
+	this->scale = pos_max * 65535.0 / 65534.0;
 
 	if (this->num_vertices > uint16_t(-1)) {
 		std::cout << "Error: Number of vertices has exceeded the maximum amount of 65535. Please split the mesh into smaller pieces before encoding." << std::endl;
@@ -706,7 +717,7 @@ void MeshIO::Clear()
 	this->num_normals = 0;
 	this->num_tangents = 0;
 	this->num_weights = 0;
-	this->unk_uint32_t = 0;
+	this->num_lods = 0;
 	this->num_meshlets = 0;
 	this->num_culldata = 0;
 	this->num_smooth_group = 0;
