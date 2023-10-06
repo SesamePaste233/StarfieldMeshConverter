@@ -478,7 +478,7 @@ def ImportMesh(options, context, operator):
                     num_bones += 1
                     bones = []
                     for i in range(num_bones):
-                        bones.append(obj.vertex_groups.new(name='bone' + str(i+1)))
+                        bones.append(obj.vertex_groups.new(name='bone' + str(i)))
 
                     if len(bm.verts) != len(data["vertex_weights"]):
                         operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")
@@ -692,7 +692,10 @@ class ExportSFMeshOperator(bpy.types.Operator):
         _obj = bpy.context.active_object
         if _obj and _obj.type == 'MESH':
             active_object_name = bpy.context.active_object.name
-        return ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.mesh'), self)
+            return ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.mesh'), self)
+        
+        self.report({'WARNING'}, "You didn't choose a object with geometry!")
+        return {'CANCELLED'}
 
 class ExportSFMeshPanel(bpy.types.Panel):
     """Panel for the Export Starfield Mesh functionality"""
