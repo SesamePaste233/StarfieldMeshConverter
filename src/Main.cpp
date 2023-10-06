@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "MeshIO.h"
+#include "MorphIO.h"
 
 #include <iostream>
 
@@ -82,7 +83,7 @@ int meshToBlender(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-int main(int argc, char* argv[]) {
+int relmain(int argc, char* argv[]) {
 	// Check the first command-line argument
 	if (argc < 2) {
 		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
@@ -137,5 +138,13 @@ void _main() {
 	reader.Serialize("C:\\repo\\MeshConverter\\mesh_data.mesh");
 
 	std::cout << "complete" << std::endl;
+	return;
+}
+
+void main() {
+	// Test read in MorphIO
+	MorphIO reader;
+	reader.Deserialize("C:\\repo\\MeshConverter\\morph.dat");
+
 	return;
 }

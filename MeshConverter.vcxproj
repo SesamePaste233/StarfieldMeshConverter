@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\MeshIO.h" />
+    <ClInclude Include="include\MorphIO.h" />
     <ClInclude Include="include\WavefrontWriter.h" />
     <ClInclude Include="lib\json.hpp" />
   </ItemGroup>
@@ -28,6 +29,7 @@
     <ClCompile Include="include\Common.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshIO.cpp" />
+    <ClCompile Include="src\MorphIO.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

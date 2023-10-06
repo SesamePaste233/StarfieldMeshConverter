@@ -107,11 +107,11 @@ bool MeshIO::Deserialize(const std::string filename)
 	std::cout << "Offset of Weights: " << std::hex << file.tellg() << std::endl;
 
 	this->num_weights = Util::readUInt32(file)[0];
-	auto num_entries = 0;
+	auto num_shape_keys = 0;
 	if (this->num_weights !=0 )
-		num_entries = this->num_vertices;
+		num_shape_keys = this->num_vertices;
 
-	for (int i = 0; i < num_entries; i++) {
+	for (int i = 0; i < num_shape_keys; i++) {
 		vertex_weight vw = new bone_binding[num_weightsPerVertex];
 
 		for (int j = 0; j < num_weightsPerVertex; j++) {

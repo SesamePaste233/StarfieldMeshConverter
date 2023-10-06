@@ -240,7 +240,62 @@ public:
 		return result;
 	}
 
+	static std::string readString(std::ifstream& file, int counts = 1) {
+		std::string result;
+		result.reserve(counts);
+		for (int i = 0; i < counts; ++i) {
+			char value;
+			file.read(reinterpret_cast<char*>(&value), sizeof(char));
+			result.push_back(value);
+		}
+		return result;
+	}
 
+	static uint32_t binary_count(uint32_t n) {
+		uint32_t count = 0;
+		while (n) {
+			count += n & 1;
+			n >>= 1;
+		}
+		return count;
+	}
+
+	static uint32_t binary_count(uint32_t* n, uint32_t length) {
+		uint32_t count = 0;
+		for (int i = 0; i < length; i++) {
+			count += binary_count(n[i]);
+		}
+		return count;
+	}
+
+	static std::vector<uint32_t> binary_positions(uint32_t n) {
+		std::vector<uint32_t> positions;
+		uint32_t count = 0;
+		while (n) {
+			if (n & 1) {
+				positions.push_back(count);
+			}
+			count++;
+			n >>= 1;
+		}
+		return positions;
+	}
+
+	static std::vector<uint32_t> binary_positions(uint32_t* n, uint32_t length) {
+		std::vector<uint32_t> positions;
+		uint32_t count = 0;
+		for (int i = 0; i < length; i++) {
+			uint32_t _n = n[i];
+			while (_n) {
+				if (_n & 1) {
+					positions.push_back(count);
+				}
+				count++;
+				_n >>= 1;
+			}
+		}
+		return positions;
+	}
 };
 namespace array_ops {
 	struct FloatArray {

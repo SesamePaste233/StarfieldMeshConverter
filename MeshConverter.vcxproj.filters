@@ -27,6 +27,9 @@
     <ClInclude Include="include\WavefrontWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\MorphIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\Common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MorphIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
