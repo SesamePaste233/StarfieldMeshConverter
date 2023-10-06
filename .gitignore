@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 *.json
 *.mesh
+*.dat
