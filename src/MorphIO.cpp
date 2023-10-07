@@ -6,6 +6,7 @@ bool MorphIO::Deserialize(const std::string filename)
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 	if (extension != "dat")
 	{
+		std::cout << "Invalid file extension" << std::endl;
 		return false;
 	}
 
@@ -14,6 +15,7 @@ bool MorphIO::Deserialize(const std::string filename)
 	file.open(filename, std::ios::binary);
 	if (!file.is_open())
 	{
+		std::cout << "Error opening file" << std::endl;
 		return false;
 	}
 
@@ -59,6 +61,8 @@ bool MorphIO::Deserialize(const std::string filename)
 			_morph_data_sn.v[j] = Util::snorm_to_double(_morph_data.v[j], 1.f);
 		}
 		this->morph_data_raw.push_back(_morph_data);
+		this->morph_data_raw_hf.push_back(_morph_data_hf);
+		this->morph_data_raw_sn.push_back(_morph_data_sn);
 	}
 
 	// Print file pointer position in hex
