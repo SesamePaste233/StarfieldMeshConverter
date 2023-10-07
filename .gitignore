@@ -365,3 +365,4 @@ FodyWeavers.xsd
 *.mesh
 /morph.dat
 *.dat
+*.txt
