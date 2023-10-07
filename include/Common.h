@@ -7,6 +7,9 @@
 #include <sstream>
 #include <algorithm>
 #include <unordered_map>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class Util {
 public:
@@ -295,6 +298,15 @@ public:
 			}
 		}
 		return positions;
+	}
+
+	static size_t getFilePaths(std::string _dir, std::vector<std::string>& _output, std::string extension) {
+		for (const auto& entry : fs::recursive_directory_iterator(_dir)) {
+			if (fs::is_regular_file(entry) && entry.path().extension() == extension) {
+				_output.push_back(entry.path().string());
+			}
+		}
+		return _output.size();
 	}
 };
 namespace array_ops {

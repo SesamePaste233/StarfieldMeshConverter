@@ -1,17 +1,24 @@
 #pragma once
 #include "Common.h"
 
+#define _EXTENDED_MORPH_DATA
 
 typedef struct {
-	int16_t v[8];
+	int16_t v[3];
+	int16_t _padding;
+	float x, y;
 }morph_data;
 
 typedef struct {
-	float v[8];
+	float v[3];
+	int16_t _padding;
+	float x, y;
 }morph_data_hf;
 
 typedef struct {
-	float v[8];
+	float v[3];
+	int16_t _padding;
+	float x, y;
 }morph_data_sn;
 
 typedef enum {
@@ -56,7 +63,6 @@ typedef struct {
 }IOffset;
 
 
-
 class MorphIO
 {
 public:
@@ -79,17 +85,19 @@ public:
 
 	std::vector<morph_data> morph_data_raw;
 
-	std::vector<morph_data_hf> morph_data_raw_hf;
-
-	std::vector<morph_data_sn> morph_data_raw_sn;
-
 	std::vector<IOffset> offsets_list;
 
 	std::vector<std::vector<morph_data>> per_vert_morph_data;
 
+#ifdef _EXTENDED_MORPH_DATA
+	std::vector<morph_data_hf> morph_data_raw_hf;
+
+	std::vector<morph_data_sn> morph_data_raw_sn;
+
 	std::vector<std::vector<morph_data_hf>> per_vert_morph_data_hf;
 
 	std::vector<std::vector<morph_data_sn>> per_vert_morph_data_sn;
+#endif
 
 	std::vector<std::vector<uint32_t>> per_vert_morph_key_indices;
 

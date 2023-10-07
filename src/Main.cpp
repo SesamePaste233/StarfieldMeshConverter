@@ -142,7 +142,37 @@ void _main() {
 }
 
 void main() {
-	// Test read in MorphIO
+	//// Recursively get all filepaths with .dat extension from the directory
+	//std::vector<std::string> filepaths;
+	//Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
+
+	//// Test read in MorphIO
+	//std::vector<std::pair<std::string, MorphIO>> database;
+	//database.reserve(filepaths.size());
+
+	//// Create a log file
+	//std::ofstream log_file;
+	//log_file.open("log.txt");
+
+	//for (int i = 0; i < filepaths.size(); i++) {
+	//	log_file << filepaths[i] << std::endl;
+
+	//	MorphIO reader;
+	//	reader.Deserialize(filepaths[i]);
+
+	//	for (int k = 0; k < reader.num_vertices; k++) {
+	//		int16_t padding = 0;
+	//		for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
+	//			if (reader.per_vert_morph_data[k][j]._padding != padding) {
+	//				padding = reader.per_vert_morph_data[k][j]._padding;
+	//				log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
+	//			}
+	//		}
+	//	}
+
+	//	database.push_back(std::make_pair(filepaths[i], reader));
+	//}
+
 	MorphIO reader;
 	reader.Deserialize("C:\\repo\\MeshConverter\\morph.dat");
 
