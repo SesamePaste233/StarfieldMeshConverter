@@ -366,3 +366,6 @@ FodyWeavers.xsd
 /morph.dat
 *.dat
 *.txt
+*.ipynb
+/morph_analysis.py
+*.csv
