@@ -239,7 +239,7 @@ def ExportMesh(options, context, filepath, operator):
 
         # Create a list to store the vertex indices of sharp edges
         sharp_edge_vertices = []
-
+        smooth_edge_vertices = []
         # Ensure we are in Edit Mode
         if selected_obj.mode != 'EDIT':
             bpy.ops.object.mode_set(mode='EDIT')
@@ -260,13 +260,15 @@ def ExportMesh(options, context, filepath, operator):
         # Switch to Vertex Select Mode
         bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
 
-        # Switch back to Object Mode
-        bpy.ops.object.mode_set(mode='OBJECT')
 
         # Iterate through selected vertices and add their indices to the list
         for vertex in selected_obj.data.vertices:
             if vertex.select:
                 sharp_edge_vertices.append(vertex.index)
+
+
+        # Switch back to Object Mode
+        bpy.ops.object.mode_set(mode='OBJECT')
 
         data["smooth_group"] = []
 
@@ -401,7 +403,7 @@ def ExportMesh(options, context, filepath, operator):
             with open(log_file_path, "w") as log_file:
                 print("REPORT:",result_file_path)
                 result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
-                                '-m',
+                                '-g',
                                 os.path.join(temp_path, "mesh_data.json"),
                                 result_file_path,
                                 str(options.mesh_scale),
@@ -579,6 +581,142 @@ def ImportMesh(options, context, operator):
         operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
         return {'CANCELLED'}
 
+def ImportMorph(options, context, operator):
+    #import_path = os.path.join(os.path.dirname(options.filepath),'morph.dat')
+    import_path = options.filepath
+    utils_path, temp_path = update_path(os.path.dirname(__file__))
+    data_path = os.path.join(temp_path, "morph_data_import.json")
+
+    log_file_path = os.path.join(utils_path, "console_import_morph.log")
+    with open(log_file_path, "w") as log_file:
+        result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
+                            '-bm',
+                            import_path,
+                            data_path,
+                            ],stdout=log_file)
+        
+    if result.returncode != 0:
+        operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+        return {"CANCELLED"}
+    
+
+    with open(data_path, 'r') as json_file:
+        if json_file == None:
+            operator.report({'WARNING'}, f"Unable to open json file.")
+            return {"CANCELLED"}
+        
+        jsondata = json.load(json_file)
+
+        vert_count = jsondata["numVertices"]
+        shape_keys = list(jsondata["shapeKeys"])
+        morph_data = jsondata["morphData"]
+
+        target_obj = bpy.context.active_object
+
+        if target_obj == None or len(target_obj.data.vertices) != vert_count:
+            target_obj = None
+            for _obj in bpy.data.objects:
+                if len(_obj.data.vertices) == vert_count:
+                    target_obj = _obj
+                    break
+        
+        if target_obj == None:
+            operator.report({'WARNING'}, f"No matching mesh found for the morph.")
+            return {"CANCELLED"}
+        
+        verts = target_obj.data.vertices
+
+        target_obj.shape_key_clear()
+        sk_basis = target_obj.shape_key_add(name = 'Basis', from_mix=False)
+        sk_basis.interpolation = 'KEY_LINEAR'
+        target_obj.data.shape_keys.use_relative = True
+
+        padding = 0
+
+        for n, key_name in enumerate(shape_keys):
+            print(key_name)
+            # Create new shape key
+            sk = target_obj.shape_key_add(name = key_name, from_mix=False)
+            sk.interpolation = 'KEY_LINEAR'
+            sk.relative_key = sk_basis
+            sk.slider_min = 0
+            sk.slider_max = 1
+            # position each vert
+            for i in range(len(verts)):
+                sk.data[i].co.x += morph_data[n][i][0]
+                sk.data[i].co.y += morph_data[n][i][1]
+                sk.data[i].co.z += morph_data[n][i][2]
+                #if padding is not morph_data[n][i][3]:
+                #    padding = morph_data[n][i][3]
+                #    operator.report({'WARNING'}, f"Padding changed to {padding}.")
+        operator.report({'INFO'}, f"Import Morph Successful.")
+        return {'FINISHED'}
+    
+
+def ExportMorph(options, context, export_file_path, operator):
+    export_path = export_file_path
+    utils_path, temp_path = update_path(os.path.dirname(__file__))
+    data_path = os.path.join(temp_path, "morph_data_export.json")
+
+    target_obj = bpy.context.active_object
+    if target_obj == None:
+        operator.report({'WARNING'}, f"Must select an object to export.")
+        return {"FINISHED"}
+
+    num_shape_keys = len(target_obj.data.shape_keys.key_blocks)
+    print(list(target_obj.data.shape_keys.key_blocks))
+    key_blocks = target_obj.data.shape_keys.key_blocks
+    if num_shape_keys < 2:
+        operator.report({'WARNING'}, f"No enough shape keys to export.")
+        return {"FINISHED"}
+    
+    if key_blocks[0].name != 'Basis':
+        operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
+        return {"FINISHED"}
+
+    jsondata = {
+        "numVertices": 0,
+        "shapeKeys": [],
+        "morphData": [],
+        "normals":[]
+    }
+
+    jsondata["numVertices"] = len(target_obj.data.vertices)
+    jsondata["shapeKeys"] = [kb.name for kb in key_blocks[1:]]
+    
+    shape_keys = key_blocks[1:]
+    
+    for i in range(num_shape_keys):
+        jsondata["morphData"].append([])
+        for j in range(jsondata["numVertices"]):
+            jsondata["morphData"][i].append([0,0,0])
+    
+    Basis = key_blocks[0]
+    for n, sk in enumerate(shape_keys):
+        for i in range(len(target_obj.data.vertices)):
+            jsondata["morphData"][n][i][0] = sk.data[i].co.x - Basis.data[i].co.x
+            jsondata["morphData"][n][i][1] = sk.data[i].co.y - Basis.data[i].co.y
+            jsondata["morphData"][n][i][2] = sk.data[i].co.z - Basis.data[i].co.z
+            #jsondata["morphData"][n][i][3] = [_k - _b for _k, _b in zip(sk.normals_vertex_get()[i],target_obj.data.vertices[i].normal)]
+
+    with open(data_path, 'w') as json_file:
+        json.dump(jsondata, json_file, indent=4)
+    print(f"Data saved to {data_path}")
+
+    log_file_path = os.path.join(utils_path, "console_export_morph.log")
+    with open(log_file_path, "w") as log_file:
+        result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
+                            '-gm',
+                            data_path,
+                            export_path,
+                            ],stdout=log_file)
+        
+    if result.returncode != 0:
+        operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+        return {"CANCELLED"}
+
+    operator.report({'INFO'}, f"Export morph successful.")
+    return {"FINISHED"}
 
 # Export operator
 class ExportCustomMesh(bpy.types.Operator):
@@ -643,9 +781,24 @@ class ExportCustomMesh(bpy.types.Operator):
         description="Export into [hex1]\\[hex2].mesh instead of [name].mesh",
         default=False,
     )
+    export_morph: bpy.props.BoolProperty(
+        name="Export morph data (if any)",
+        description="Export shape keys as morph keys",
+        default=False,
+    )
 
     def execute(self,context):
-        return ExportMesh(self,context,self.filepath,self)
+        mesh_success = ExportMesh(self,context,self.filepath,self)
+
+        if 'FINISHED' in mesh_success and self.export_morph:
+            _file_name, _ =os.path.splitext(self.filepath)
+            morph_success = ExportMorph(self,context, _file_name + ".dat", self)
+            if 'FINISHED' in morph_success:
+                self.report({'INFO'}, "Operation successful.")
+
+            return morph_success
+        
+        return mesh_success
 
     def invoke(self, context, event):
         _obj = context.active_object
@@ -681,6 +834,36 @@ class ImportCustomMesh(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+class ImportCustomMorph(bpy.types.Operator):
+    bl_idname = "import.custom_morph"
+    bl_label = "Import Custom Morph"
+    
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filename: bpy.props.StringProperty(default='morph.dat')
+
+    def execute(self, context):
+        return ImportMorph(self, context, self)
+
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+class ExportCustomMorph(bpy.types.Operator):
+    bl_idname = "export.custom_morph"
+    bl_label = "Export Custom Morph"
+    
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filename: bpy.props.StringProperty(default='morph.dat')
+    filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
+
+    def execute(self, context):
+        return ExportMorph(self, context, self.filepath, self)
+
+    def invoke(self, context, event):
+        self.filename = "morph.dat"
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
 class ExportSFMeshOperator(bpy.types.Operator):
     """Export the active object"""
     bl_idname = "export.sfmesh"
@@ -692,7 +875,17 @@ class ExportSFMeshOperator(bpy.types.Operator):
         _obj = bpy.context.active_object
         if _obj and _obj.type == 'MESH':
             active_object_name = bpy.context.active_object.name
-            return ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.mesh'), self)
+            success = ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.mesh'), self)
+
+            if 'FINISHED' in success and context.scene.export_morph:
+                morph_success = ExportMorph(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.dat'), self)
+                
+                if 'FINISHED' in morph_success:
+                    self.report({'INFO'}, "Operation successful.")
+
+                return morph_success
+            
+            return success
         
         self.report({'WARNING'}, "You didn't choose a object with geometry!")
         return {'CANCELLED'}
@@ -723,6 +916,8 @@ class ExportSFMeshPanel(bpy.types.Panel):
         # Create a checkbox for each item
         for item in export_items:
             layout.prop(context.scene, item[0], text=item[1])
+        
+        layout.prop(context.scene, "export_morph", text="Morph Data")
            
         layout.label(text="After Export:") 
         layout.prop(context.scene, "export_sf_mesh_open_folder", text="Open export folder")
@@ -742,6 +937,18 @@ def menu_func_import(self, context):
     self.layout.operator(
         ImportCustomMesh.bl_idname,
         text="Starfield Geometry (.mesh)",
+    )
+
+def menu_func_import_morph(self, context):
+    self.layout.operator(
+        ImportCustomMorph.bl_idname,
+        text="Starfield Morph File (.dat)",
+    )
+
+def menu_func_export_morph(self, context):
+    self.layout.operator(
+        ExportCustomMorph.bl_idname,
+        text="Starfield Morph File (.dat)",
     )
 
 # Register the operators and menu entries
@@ -795,7 +1002,11 @@ def register():
         description=export_items[4][2],
         default=True
     )
-
+    bpy.types.Scene.export_morph = bpy.props.BoolProperty(
+        name="Morph Data",
+        description="Export shape keys as morph keys",
+        default=True
+    )
 
     bpy.types.Scene.export_sf_mesh_open_folder = bpy.props.BoolProperty(
         name="Open folder",
@@ -809,18 +1020,26 @@ def register():
 
     bpy.utils.register_class(ExportCustomMesh)
     bpy.utils.register_class(ImportCustomMesh)
+    bpy.utils.register_class(ImportCustomMorph)
+    bpy.utils.register_class(ExportCustomMorph)
     bpy.utils.register_class(ExportSFMeshOperator)
     bpy.utils.register_class(ExportSFMeshPanel)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_import_morph)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export_morph)
 
 def unregister():
     bpy.utils.unregister_class(ExportSFMeshOperator)
     bpy.utils.unregister_class(ExportSFMeshPanel)
     bpy.utils.unregister_class(ExportCustomMesh)
     bpy.utils.unregister_class(ImportCustomMesh)
+    bpy.utils.unregister_class(ImportCustomMorph)
+    bpy.utils.unregister_class(ExportCustomMorph)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_morph)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_morph)
     del bpy.types.Scene.export_mesh_folder_path
     del bpy.types.Scene.mesh_scale
     del bpy.types.Scene.use_world_origin
@@ -832,6 +1051,8 @@ def unregister():
     del bpy.types.Scene.UV
     del bpy.types.Scene.WEIGHTS
     del bpy.types.Scene.export_sf_mesh_open_folder
+    del bpy.types.Scene.export_sf_mesh_hash_result
+    del bpy.types.Scene.export_morph
 
 if __name__ == "__main__":
     register()

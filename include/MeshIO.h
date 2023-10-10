@@ -18,6 +18,14 @@ namespace mesh {
 	class MeshIO
 	{
 	public:
+		enum Options {
+			None = 0,
+			GenerateTangentIfNA = 1 << 0,
+			NormalizeWeight = 1 << 1,
+			DoOptimize = 1 << 2,
+			SmoothEdgeNormal = 1 << 3
+		};
+
 		MeshIO() {
 			Clear();
 		};
@@ -29,9 +37,11 @@ namespace mesh {
 
 		bool Serialize(const std::string filename);
 
-		bool Load(const std::string filename, const float scale_factor = 1.f, const bool generate_tangents_if_NA = false, const bool normalize_weight = false, const bool do_optimize = false, const bool naive_edge_smooth = false);
+		bool Load(const std::string filename, const float scale_factor = 1.f, const uint32_t options = Options::None);
 		
 		bool SaveOBJ(const std::string filename, const std::string obj_name);
+
+		bool PostProcess(const uint32_t options = Options::None);
 
 		// Clear existing mesh data
 		void Clear();

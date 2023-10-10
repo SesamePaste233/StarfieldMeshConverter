@@ -1,25 +1,21 @@
 #pragma once
 #include "Common.h"
+#include "json.hpp"
 
 #define _EXTENDED_MORPH_DATA
 
 typedef struct {
-	int16_t v[3];
+	uint16_t _offset[3];
 	int16_t _padding;
-	float x, y;
+	uint32_t x, y;
 }morph_data;
 
 typedef struct {
-	float v[3];
+	float _offset[3];
 	int16_t _padding;
-	float x, y;
+	float nx, ny, nz;
+	uint32_t y;
 }morph_data_hf;
-
-typedef struct {
-	float v[3];
-	int16_t _padding;
-	float x, y;
-}morph_data_sn;
 
 typedef enum {
 	None = 0,
@@ -66,10 +62,28 @@ typedef struct {
 class MorphIO
 {
 public:
-	MorphIO() = default;
+	enum Options {
+		None = 0,
+	};
+
+	MorphIO(){
+		this->Clear();
+	};
 	~MorphIO() = default;
 
 	bool Deserialize(const std::string filename);
+
+	bool Serialize(const std::string filename);
+
+	bool Load(const std::string jsonMorphFile, const uint32_t options);
+
+	bool Save(const std::string jsonMorphFile);
+
+	bool PostProcess(const uint32_t options);
+
+	void Clear();
+
+	void FakeEmpty(const uint32_t n_verts, const uint8_t n_morphs = 3);
 
 	uint32_t num_axis;
 
@@ -92,11 +106,8 @@ public:
 #ifdef _EXTENDED_MORPH_DATA
 	std::vector<morph_data_hf> morph_data_raw_hf;
 
-	std::vector<morph_data_sn> morph_data_raw_sn;
-
 	std::vector<std::vector<morph_data_hf>> per_vert_morph_data_hf;
 
-	std::vector<std::vector<morph_data_sn>> per_vert_morph_data_sn;
 #endif
 
 	std::vector<std::vector<uint32_t>> per_vert_morph_key_indices;

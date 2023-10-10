@@ -138,7 +138,8 @@
       <AdditionalDependencies>DirectXMesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "C:\repo\MeshConverter\x64\Release\MeshConverter.exe" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\MeshConverter.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -2,8 +2,6 @@
 
 using namespace array_ops;
 
-
-
 const std::vector<FloatArray> array_ops::organizeData(const std::vector<float>& plain)
 {
 	std::vector<FloatArray> organized;

@@ -13,7 +13,10 @@ namespace fs = std::filesystem;
 
 class Util {
 public:
-	static std::vector<float> decodeUDEC3_2(uint32_t n) {
+	static std::vector<float> decodeDEC3N_CHECK(uint32_t n, uint8_t _check_w) {
+		if (n == 0)
+			return { 0,0,0 };
+
 		float x, y, z, w;
 		x = ((n & 1023) / 511.5) - 1.0;
 
@@ -21,12 +24,30 @@ public:
 
 		z = (((n >> 20) & 1023) / 511.5) - 1.0;
 
-		w = (n >> 30) & 3;
+		w = (n >> 30) & 0b11;
+
+		if (w != _check_w) {
+			std::cout << w << std::endl;
+			throw 2;
+		}
 
 		return { x,y,z };
 	}
 
-	static std::uint32_t encodeUDEC3_2(const std::vector<float>& values, bool w) {
+	static std::vector<float> decodeDEC3N(uint32_t n) {
+		float x, y, z, w;
+		x = ((n & 1023) / 511.5) - 1.0;
+
+		y = (((n >> 10) & 1023) / 511.5) - 1.0;
+
+		z = (((n >> 20) & 1023) / 511.5) - 1.0;
+
+		w = (n >> 30) & 0b11;
+
+		return { x,y,z };
+	}
+
+	static std::uint32_t encodeDEC3N(const std::vector<float>& values, bool w) {
 
 		std::uint32_t n = 0;
 		n |= static_cast<std::uint32_t>((values[0] + 1.0f) * 511.5f) & 1023;
@@ -254,6 +275,10 @@ public:
 		return result;
 	}
 
+	static void writeString(std::ofstream& file, const std::string& value) {
+		file.write(value.c_str(), value.size());
+	}
+
 	static uint32_t binary_count(uint32_t n) {
 		uint32_t count = 0;
 		while (n) {
@@ -289,7 +314,7 @@ public:
 		uint32_t count = 0;
 		for (int i = 0; i < length; i++) {
 			uint32_t _n = n[i];
-			while (_n) {
+			for (int j = 0; j<32; j++) {
 				if (_n & 1) {
 					positions.push_back(count);
 				}
@@ -308,6 +333,26 @@ public:
 		}
 		return _output.size();
 	}
+
+	static uint32_t* positions_to_binary(std::vector<uint32_t> pos) {
+		_ASSERT(pos.size() <= 128);
+		uint32_t* binary = new uint32_t[4];
+		memset(binary, 0, 4 * sizeof(uint32_t));
+		for (int i = 0; i < pos.size(); i++) {
+			binary[pos[i] / 32] |= 1 << (pos[i] % 32);
+		}
+		return binary;
+	}
+
+	static uint32_t* fill_binary(uint32_t n) {
+		_ASSERT(n <= 128);
+		uint32_t* binary = new uint32_t[4];
+		memset(binary, 0, 4 * sizeof(uint32_t));
+		for (int i = 0; i < n; i++) {
+			binary[i / 32] |= 1 << (i % 32);
+		}
+		return binary;
+	}
 };
 namespace array_ops {
 	struct FloatArray {
@@ -322,7 +367,7 @@ namespace array_ops {
 
 		// Overload the equality operator to use FloatArray as a key in unordered_map
 		bool operator==(const FloatArray& other) const {
-			return std::memcmp(values, other.values, sizeof(values)) == 0;
+			return std::memcmp(values, other.values, 3 * sizeof(float)) == 0;
 		}
 
 		void operator=(const FloatArray& other) {

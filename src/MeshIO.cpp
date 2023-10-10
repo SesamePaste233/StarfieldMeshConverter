@@ -90,7 +90,7 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	for (int i = 0; i < num_normals; i++) {
 		auto n = Util::readUInt32(file)[0];
-		auto normal = Util::decodeUDEC3_2(n);
+		auto normal = Util::decodeDEC3N(n);
 		this->normals.emplace_back(normal);
 	}
 
@@ -100,7 +100,7 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	for (int i = 0; i < num_tangents; i++) {
 		auto t = Util::readUInt32(file)[0];
-		auto tangent = Util::decodeUDEC3_2(t);
+		auto tangent = Util::decodeDEC3N(t);
 		this->tangents.emplace_back(tangent);
 	}
 
@@ -240,9 +240,9 @@ bool MeshIO::Serialize(const std::string filename)
 
 		for (auto uv2 : this->UV_list2) {
 			auto u = Util::floatToHalf(uv2[0]);
-			auto v = Util::floatToHalf(uv2[1]);
+			auto _offset = Util::floatToHalf(uv2[1]);
 			Util::writeAsHex(file, u);
-			Util::writeAsHex(file, v);
+			Util::writeAsHex(file, _offset);
 		}
 	}
 	else {
@@ -270,7 +270,7 @@ bool MeshIO::Serialize(const std::string filename)
 		Util::writeAsHex(file, this->num_normals);
 
 		for (auto normal : this->normals) {
-			auto n = Util::encodeUDEC3_2(normal, 1);
+			auto n = Util::encodeDEC3N(normal, 1);
 			Util::writeAsHex(file, n);
 		}
 	}
@@ -283,7 +283,7 @@ bool MeshIO::Serialize(const std::string filename)
 		Util::writeAsHex(file, this->num_tangents);
 
 		for (auto tangent : this->tangents) {
-			auto t = Util::encodeUDEC3_2(tangent, 0);
+			auto t = Util::encodeDEC3N(tangent, 0);
 			Util::writeAsHex(file, t);
 		}
 	}
@@ -344,7 +344,7 @@ bool MeshIO::Serialize(const std::string filename)
 }
 
 using json = nlohmann::json;
-bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const bool generate_tangents_if_NA, const bool normalize_weight,const bool do_optimize, const bool naive_edge_smooth) {
+bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const uint32_t options) {
 	this->Clear();
 
 	std::ifstream file(jsonBlenderFile);
@@ -538,7 +538,7 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 				uint16_t weight = 0;
 
 				uint16_t _Max = uint16_t(-1);
-				if (normalize_weight) {
+				if (options & Options::NormalizeWeight) {
 					double _w = bb_per_vert_per_bone_raw[1] / sum_weight;
 
 					// Make sure the weights is never going to overflow
@@ -587,30 +587,7 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		return false;
 	}
 
-	if (naive_edge_smooth) {
-		auto merged = NaiveEdgeSmooth();
-		std::cout << "Merged " << merged << " vertices." << std::endl;
-	}
-
-	this->UpdateDXAttr();
-
-	if (do_optimize) {
-		Optimize(this->indices, DX_positions, DX_normals, DX_uvs, this->weights, this->vert_colors);
-
-		this->UpdateAttrFromDX();
-	}
-
-	if (generate_tangents_if_NA && this->tangents.empty()) {
-		if (!this->GenerateTangents()) {
-			return false;
-		}
-	}
-
-	if (!this->GenerateMeshlets()) {
-		return false;
-	}
-	
-	return true;
+	return this->PostProcess(options);
 }
 
 bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
@@ -700,6 +677,34 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 
 	// Write the json data to file
 	file << jsonData.dump(4);
+
+	return true;
+}
+
+bool mesh::MeshIO::PostProcess(const uint32_t options)
+{
+	if (options & Options::SmoothEdgeNormal) {
+		auto merged = NaiveEdgeSmooth();
+		std::cout << "Merged " << merged << " vertices." << std::endl;
+	}
+
+	this->UpdateDXAttr();
+
+	if (options & Options::DoOptimize) {
+		Optimize(this->indices, DX_positions, DX_normals, DX_uvs, this->weights, this->vert_colors);
+
+		this->UpdateAttrFromDX();
+	}
+
+	if ((options & Options::GenerateTangentIfNA) && this->tangents.empty()) {
+		if (!this->GenerateTangents()) {
+			return false;
+		}
+	}
+
+	if (!this->GenerateMeshlets()) {
+		return false;
+	}
 
 	return true;
 }
@@ -995,25 +1000,38 @@ bool MeshIO::GenerateMeshlets() {
 
 size_t mesh::MeshIO::NaiveEdgeSmooth()
 {
-
 	// convert std::vector<double> to std::vector<float>
 	std::vector<float> positions_f;
-	positions_f.resize(this->positions.size());
-	for (size_t i = 0; i < this->positions.size(); ++i) {
-		positions_f[i] = float(this->positions[i]);
-	}
-
-	// flatten std::vector<std::vector<float>> to std::vector<float>
+	positions_f.resize(this->num_vertices * 3);
 	std::vector<float> normals_f;
 	normals_f.resize(this->normals.size() * 3);
-	for (size_t i = 0; i < this->normals.size(); ++i) {
-		normals_f[i * 3] = this->normals[i][0];
-		normals_f[i * 3 + 1] = this->normals[i][1];
-		normals_f[i * 3 + 2] = this->normals[i][2];
+
+	if (this->num_smooth_group != 0) {
+		for (size_t i: this->smooth_group) {
+			positions_f[i * 3] = float(this->positions[i * 3]);
+			positions_f[i * 3 + 1] = float(this->positions[i * 3 + 1]);
+			positions_f[i * 3 + 2] = float(this->positions[i * 3 + 2]);
+		}
+		for (size_t i: this->smooth_group) {
+			normals_f[i * 3] = this->normals[i][0];
+			normals_f[i * 3 + 1] = this->normals[i][1];
+			normals_f[i * 3 + 2] = this->normals[i][2];
+		}
+	}
+	else {
+		for (size_t i = 0; i < this->num_vertices; ++i) {
+			positions_f[i * 3] = float(this->positions[i * 3]);
+			positions_f[i * 3 + 1] = float(this->positions[i * 3 + 1]);
+			positions_f[i * 3 + 2] = float(this->positions[i * 3 + 2]);
+		}
+		for (size_t i = 0; i < this->normals.size(); ++i) {
+			normals_f[i * 3] = this->normals[i][0];
+			normals_f[i * 3 + 1] = this->normals[i][1];
+			normals_f[i * 3 + 2] = this->normals[i][2];
+		}
 	}
 
 	auto merged  = array_ops::normalizeByAttributes(positions_f, normals_f);
-
 
 	if (this->num_smooth_group != 0) {
 		// convert std::vector<float> back to std::vector<std::vector<float>>

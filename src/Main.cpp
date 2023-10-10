@@ -24,8 +24,16 @@ int blenderToMesh(int argc, char* argv[]) {
 	// Create a MeshIO object
 	MeshIO reader;
 
+	uint32_t opt = MeshIO::Options::DoOptimize | MeshIO::Options::GenerateTangentIfNA;
+	if (normalize_weights) {
+		opt |= MeshIO::Options::NormalizeWeight;
+	}
+	if (smooth_edge_normal) {
+		opt |= MeshIO::Options::SmoothEdgeNormal;
+	}
+
 	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, scale, true, normalize_weights, true, smooth_edge_normal)) {
+	if (!reader.Load(inputJson, scale, opt)) {
 		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
 		return 2; // Return an error code
 	}
@@ -83,7 +91,68 @@ int meshToBlender(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-int relmain(int argc, char* argv[]) {
+int morphToBlender(int argc, char* argv[]){
+	// Check if the user provided the correct number of command-line arguments
+	if (argc != 4) {
+		std::cerr << "Usage: " << argv[0] << " -blender_morph input_morph.dat output_name.json" << std::endl;
+		return 1; // Return an error code
+	}
+
+	// Extract command-line arguments
+	std::string inputMorph = argv[2];
+	std::string outputName = argv[3];
+
+	// Create a MorphIO object
+	MorphIO reader;
+
+	// Load the morph from the input morph file
+	if (!reader.Deserialize(inputMorph)) {
+		std::cerr << "Failed to load morph from " << inputMorph << std::endl;
+		return 6; // Return an error code
+	}
+
+	// Save the morph to the output file
+	if (!reader.Save(outputName)) {
+		std::cerr << "Failed to save json to " << outputName << std::endl;
+		return 7; // Return an error code
+	}
+
+	std::cout << "Morph loaded from " << inputMorph << " and saved to " << outputName << std::endl;
+
+	return 0; // Return success
+}
+
+int blenderToMorph(int argc, char* argv[]) {
+	// Check if the user provided the correct number of command-line arguments
+	if (argc != 4) {
+		std::cerr << "Usage: " << argv[0] << " -game_morph input_morph.json output_name.dat" << std::endl;
+		return 1; // Return an error code
+	}
+
+	// Extract command-line arguments
+	std::string inputMorph = argv[2];
+	std::string outputName = argv[3];
+
+	// Create a MorphIO object
+	MorphIO reader;
+
+	// Load the morph from the input morph file
+	if (!reader.Load(inputMorph, 0)) {
+		std::cerr << "Failed to load json from " << inputMorph << std::endl;
+		return 8; // Return an error code
+	}
+
+	// Save the morph to the output file
+	if (!reader.Serialize(outputName)) {
+		std::cerr << "Failed to serialize morph to " << outputName << std::endl;
+		return 9; // Return an error code
+	}
+
+	std::cout << "Json loaded from " << inputMorph << " and serialized to " << outputName << std::endl;
+	return 0;
+}
+
+int main(int argc, char* argv[]) {
 	// Check the first command-line argument
 	if (argc < 2) {
 		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
@@ -91,7 +160,7 @@ int relmain(int argc, char* argv[]) {
 	}
 
 	// Check if the user wants to convert from Blender to Mesh
-	if (strcmp(argv[1], "-mesh") == 0 || strcmp(argv[1], "-m") == 0) {
+	if (strcmp(argv[1], "-game") == 0 || strcmp(argv[1], "-g") == 0) {
 		std::cout << "Converting from Blender to Mesh" << std::endl;
 		return blenderToMesh(argc, argv);
 	}
@@ -100,6 +169,16 @@ int relmain(int argc, char* argv[]) {
 	if (strcmp(argv[1], "-blender") == 0 || strcmp(argv[1], "-b") == 0) {
 		std::cout << "Converting from Mesh to Blender" << std::endl;
 		return meshToBlender(argc, argv);
+	}
+
+	if (strcmp(argv[1], "-blender_morph") == 0 || strcmp(argv[1], "-bm") == 0) {
+		std::cout << "Converting from Morph to Blender" << std::endl;
+		return morphToBlender(argc, argv);
+	}
+
+	if (strcmp(argv[1], "-game_morph") == 0 || strcmp(argv[1], "-gm") == 0) {
+		std::cout << "Converting from Blender to Morph" << std::endl;
+		return blenderToMorph(argc, argv);
 	}
 
 	return 0; // Return success
@@ -130,10 +209,7 @@ void __main() {
 
 void _main() {
 	MeshIO reader;
-	reader.Deserialize("C:\\repo\\MeshConverter\\test.mesh");
-
-	reader.Clear();
-	reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, true, false, true);
+	reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, MeshIO::Options::NormalizeWeight | MeshIO::Options::GenerateTangentIfNA | MeshIO::Options::SmoothEdgeNormal | MeshIO::Options::DoOptimize);
 
 	reader.Serialize("C:\\repo\\MeshConverter\\mesh_data.mesh");
 
@@ -141,8 +217,8 @@ void _main() {
 	return;
 }
 
-void main() {
-	//// Recursively get all filepaths with .dat extension from the directory
+void testmain() {
+	// Recursively get all filepaths with .dat extension from the directory
 	//std::vector<std::string> filepaths;
 	//Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
 
@@ -173,8 +249,33 @@ void main() {
 	//	database.push_back(std::make_pair(filepaths[i], reader));
 	//}
 
+	//MorphIO reader;
+	//reader.Deserialize("C:\\repo\\MeshConverter\\morph_3_2077.dat");
+
+	//std::ofstream file;
+	//file.open("C:\\repo\\MeshConverter\\morph_data.csv");
+
+	//// Write the per_vert_morph_data_hf to a file
+	//file<<"X,Y,Z,Padding,Unk1,Unk2" << std::endl;
+	//for (int i = 0; i < reader.num_vertices; i++) {
+	//	auto data = reader.per_vert_morph_data_hf[i];
+	//	for ( auto& d : data) {
+	//		file << std::setprecision(6) << d._offset[0] << "," << d._offset[1] << "," << d._offset[2] << "," << std::to_string(d._padding) << "," << std::to_string(d.x) << "," << std::to_string(d.y) << std::endl;
+	//	}
+	//}
+	//file.close();
+
+	//reader.Serialize("C:\\repo\\MeshConverter\\morph_changed.dat");
 	MorphIO reader;
-	reader.Deserialize("C:\\repo\\MeshConverter\\morph.dat");
+	/*reader.Load("C:\\repo\\MeshConverter\\morph_data_export.json", 0);
+
+	reader.Serialize("C:\\repo\\MeshConverter\\mesh_data.dat");*/
+
+	reader.Deserialize("C:\\repo\\MeshConverter\\morph_3_2077_f.dat");
+
+	reader.Save("C:\\repo\\MeshConverter\\morph_3_2077_f.json");
+
+	std::cout << "complete" << std::endl;
 
 	return;
 }
