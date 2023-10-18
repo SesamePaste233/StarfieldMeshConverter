@@ -8,11 +8,21 @@
 #include <algorithm>
 #include <unordered_map>
 #include <filesystem>
+#include <corecrt_wstring.h>
 
 namespace fs = std::filesystem;
 
 class Util {
 public:
+	static const wchar_t* charToWchar(const char* c)
+	{
+		const size_t cSize = strlen(c) + 1;
+		wchar_t* wc = new wchar_t[cSize];
+		mbsrtowcs_s(nullptr, wc, cSize, &c, cSize, nullptr);
+
+		return wc;
+	}
+
 	static std::vector<float> decodeDEC3N_CHECK(uint32_t n, uint8_t _check_w) {
 		if (n == 0)
 			return { 0,0,0 };
@@ -182,9 +192,9 @@ public:
 		}
 	}
 
-	static int16_t double_to_snorm(double value, double scale) {
+	static int16_t double_to_snorm(double value, double max_border) {
 		// Normalize the value to the range [-1, 1]
-		value /= scale;
+		value /= max_border;
 
 		// Clamp the value to the range [-1, 1]
 		if (value > 1) {
@@ -201,7 +211,7 @@ public:
 			return static_cast<int16_t>(value * 32767.0);
 		}
 		else {
-			return static_cast<int16_t>(value * 32767.0);
+			return static_cast<int16_t>(value * 32768.0);
 		}
 	}
 

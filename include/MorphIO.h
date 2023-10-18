@@ -2,7 +2,9 @@
 #include "Common.h"
 #include "json.hpp"
 
+#ifdef _DEBUG
 #define _EXTENDED_MORPH_DATA
+#endif
 
 typedef struct {
 	uint16_t _offset[3];
@@ -10,12 +12,14 @@ typedef struct {
 	uint32_t x, y;
 }morph_data;
 
+#ifdef _EXTENDED_MORPH_DATA
 typedef struct {
-	float _offset[3];
-	int16_t _padding;
-	float nx, ny, nz;
-	uint32_t y;
-}morph_data_hf;
+	float _offset[3]; // Vertex offset/displacement as half-floats.
+	int16_t _padding; // Unknown. Always zero or 0xFFFF or always divisible by 0x20.
+	float nx, ny, nz; // Delta normal, in DEC3N format.
+	float tx, ty, tz; // Delta tangent, in DEC3N format.
+}morph_data_hf; // 16 bytes
+#endif
 
 typedef enum {
 	None = 0,
@@ -112,5 +116,7 @@ public:
 
 	std::vector<std::vector<uint32_t>> per_vert_morph_key_indices;
 
+
+	std::vector<std::vector<uint8_t>> per_vert_morph_key_selection;
 };
 

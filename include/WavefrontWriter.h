@@ -32,7 +32,6 @@ public:
                 << std::endl;
             vertex_count++;
         }
-        std::cout << "Vertex count: " << std::to_string(vertex_count) << std::endl;
 
         // Write UVs
         for (int i = 0; i < UV_list.size(); i++) {
@@ -53,7 +52,6 @@ public:
                 << std::endl;
             face_count++;
         }
-        std::cout << "Face count: " << std::to_string(face_count) << std::endl;
         return true;
     }
 };

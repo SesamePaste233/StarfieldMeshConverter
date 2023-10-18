@@ -2,6 +2,7 @@
 
 using namespace DirectX;
 using namespace mesh;
+using json = nlohmann::json;
 
 bool MeshIO::Deserialize(const std::string filename)
 {
@@ -38,7 +39,7 @@ bool MeshIO::Deserialize(const std::string filename)
 		this->indices.emplace_back(index);
 	}
 
-	this->scale = Util::readFloat(file)[0];
+	this->max_border = Util::readFloat(file)[0];
 
 	this->num_weightsPerVertex = Util::readUInt32(file)[0];
 
@@ -51,7 +52,7 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	for (int i = 0; i < num_positions; i++) {
 		auto pos = Util::readInt16(file)[0];
-		auto d = Util::snorm_to_double(pos, scale);
+		auto d = Util::snorm_to_double(pos, max_border);
 
 		this->positions.emplace_back(d);
 	}
@@ -134,6 +135,7 @@ bool MeshIO::Deserialize(const std::string filename)
 			auto index = Util::readUInt16(file)[0];
 			lod.emplace_back(index);
 		}
+		this->lods.emplace_back(lod);
 	}
 
 	std::cout << "Offset of Meshlets: " << std::hex << file.tellg() << std::endl;
@@ -169,6 +171,31 @@ bool MeshIO::Deserialize(const std::string filename)
 
 		this->culldata.emplace_back(cd);
 	}
+	// Print max border
+	std::cout << "Border: " << std::to_string(this->max_border) << std::endl;
+
+	// Print vertex number
+	std::cout << "Vertex count: " << std::to_string(this->num_vertices) << std::endl;
+
+	// Print triangle number
+	std::cout << "Face count: " << std::to_string(this->num_triangles) << std::endl;
+
+	// Print vertex color number
+	std::cout << "Vertex color count: " << std::to_string(this->num_vert_colors) << std::endl;
+
+	// Print vertex weight number
+	std::cout << "Vertex weight count: " << std::to_string(this->num_weightsPerVertex == 0 ? 0 : this->num_weights / this->num_weightsPerVertex) << std::endl;
+
+	// Print LoD number
+	std::cout << "LoD count: " << std::to_string(this->num_lods) << std::endl;
+
+	// Print meshlet number
+	std::cout << "Meshlet count: " << std::to_string(this->num_meshlets) << std::endl;
+
+	// Print culldata number
+	std::cout << "Culldata count: " << std::to_string(this->num_culldata) << std::endl;
+
+
 
 	return true;
 }
@@ -188,6 +215,24 @@ bool MeshIO::Serialize(const std::string filename)
 
 	uint32_t dummy = 0;
 
+	// Print vertex number
+	std::cout << "Vertex count: " << std::to_string(this->num_vertices) << std::endl;
+
+	// Print triangle number
+	std::cout << "Face count: " << std::to_string(this->num_triangles) << std::endl;
+
+	// Print vertex color number
+	std::cout << "Vertex color count: " << std::to_string(this->num_vert_colors) << std::endl;
+
+	// Print vertex weight number
+	std::cout << "Vertex weight count: " << std::to_string(this->num_weightsPerVertex == 0 ? 0 : this->num_weights / this->num_weightsPerVertex) << std::endl;
+
+	// Print meshlet number
+	std::cout << "Meshlet count: " << std::to_string(this->num_meshlets) << std::endl;
+
+	// Print culldata number
+	std::cout << "Culldata count: " << std::to_string(this->num_culldata) << std::endl;
+
 	if (export_geometry) {
 		this->indices_size = this->indices.size();
 		Util::writeAsHex(file, this->indices_size);
@@ -195,7 +240,7 @@ bool MeshIO::Serialize(const std::string filename)
 			Util::writeAsHex(file, index);
 		}
 
-		Util::writeAsHex(file, this->scale);
+		Util::writeAsHex(file, this->max_border);
 
 		if (export_weights) {
 			Util::writeAsHex(file, this->num_weightsPerVertex);
@@ -208,13 +253,13 @@ bool MeshIO::Serialize(const std::string filename)
 		Util::writeAsHex(file, this->num_vertices);
 
 		for (auto pos : this->positions) {
-			auto p = Util::double_to_snorm(pos, this->scale);
+			auto p = Util::double_to_snorm(pos, this->max_border);
 			Util::writeAsHex(file, p);
 		}
 	}
 	else {
 		Util::writeAsHex(file, dummy);
-		Util::writeAsHex(file, this->scale);
+		Util::writeAsHex(file, this->max_border);
 		if (export_weights) {
 			Util::writeAsHex(file, this->num_weightsPerVertex);
 		}
@@ -343,20 +388,16 @@ bool MeshIO::Serialize(const std::string filename)
 	return true;
 }
 
-using json = nlohmann::json;
-bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const uint32_t options) {
-	this->Clear();
-
-	std::ifstream file(jsonBlenderFile);
-	if (!file.is_open()) {
-		std::cout << "Error: Failed to open JSON file." << std::endl;
-		return false;
+template<typename T>
+inline bool _larger_then_replace(T& target, const T& value) {
+	if (value > target) {
+		target = value;
+		return true;
 	}
+	return false;
+}
 
-	json jsonData;
-	file >> jsonData;
-	file.close();
-
+bool MeshIO::GeometryFromJson(const json& jsonData, float scale_factor) {
 	const json& positionsRaw = jsonData["positions_raw"];
 
 	float pos_max = 0;
@@ -379,11 +420,24 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		return false;
 	}
 	// To prevent overflow
-	this->scale = pos_max * 65535.0 / 65534.0;
+	this->max_border = pos_max + 0.2;
+
+	if (this->max_border < 1) {
+		this->max_border = 1;
+	}
 
 	if (this->num_vertices > uint16_t(-1)) {
 		std::cout << "Error: Number of vertices has exceeded the maximum amount of 65535. Please split the mesh into smaller pieces before encoding." << std::endl;
 		return false;
+	}
+
+	float settings_max_border = jsonData["max_border"];
+	if (settings_max_border > pos_max) {
+		this->max_border = settings_max_border;
+	}
+	else {
+		if (settings_max_border != 0)
+			std::cout << "Warning: Max border too low." << std::endl;
 	}
 
 	const json& indicesRaw = jsonData["vertex_indices_raw"];
@@ -399,38 +453,11 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		}
 	}
 	else {
-		std::cout<< "Error: 'vertex_indices_raw' is not an array." << std::endl;
+		std::cout << "Error: 'vertex_indices_raw' is not an array." << std::endl;
 		return false;
 	}
 
-	const json& normalsData = jsonData["normals"];
-
-	if (normalsData.is_array()) {
-		// Check if length of normalsData is equal to the number of vertices
-		if (normalsData.size() > 0 && normalsData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'normals' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_normals = normalsData.size();
-		for (const auto& n : normalsData) {
-			if (n.is_array()) {
-				std::vector<float> n_l;
-				for (const auto& element : n) {
-					if (element.is_number()) {
-						float _n = element;
-						n_l.push_back(_n);
-					}
-				}
-				this->normals.push_back(n_l);
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'normals' is not an array." << std::endl;
-		return false;
-	}
-
+	
 	const json& UVData = jsonData["uv_coords"];
 
 	if (UVData.is_array()) {
@@ -461,6 +488,134 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	}
 	else {
 		std::cout << "Error: 'uv_coords' is not an array." << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_factor)
+{
+	WaveFrontReader<uint16_t> wfr;
+
+	if (wfr.Load(Util::charToWchar(filename.c_str())) != S_OK) {
+		return false;
+	}
+
+	std::swap(this->indices, wfr.indices);
+	
+	for (auto& v : wfr.vertices) {
+		this->positions.emplace_back(v.position.x * scale_factor);
+		_larger_then_replace(this->max_border, abs(v.position.x * scale_factor));
+
+		this->positions.emplace_back(v.position.y * scale_factor);
+		_larger_then_replace(this->max_border, abs(v.position.y * scale_factor));
+
+		this->positions.emplace_back(v.position.z * scale_factor);
+		_larger_then_replace(this->max_border, abs(v.position.z * scale_factor));
+
+		std::vector<float> uv = { v.textureCoordinate.x, v.textureCoordinate.y };
+		this->UV_list1.emplace_back(uv);
+	}
+
+	this->indices_size = this->indices.size();
+	this->num_triangles = this->indices.size() / 3;
+
+	this->num_positions = this->positions.size();
+	this->num_vertices = this->positions.size() / 3;
+
+	this->num_uv1 = this->UV_list1.size();
+
+	if (this->max_border < 1) {
+		this->max_border = 1;
+	}
+
+	return true;
+}
+
+bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const uint32_t options) {
+	this->Clear();
+
+	std::ifstream file(jsonBlenderFile);
+	if (!file.is_open()) {
+		std::cout << "Error: Failed to open JSON file." << std::endl;
+		return false;
+	}
+
+	json jsonData;
+	file >> jsonData;  
+	file.close();
+
+	// Swap jsonBlenderFile's extension to .obj
+	/*std::string objFile = jsonBlenderFile.substr(0, jsonBlenderFile.find_last_of(".")) + ".obj";
+
+	if (!this->GeometryFromOBJ(objFile, scale_factor)){
+		std::cout << "Error: Failed to load OBJ file." << std::endl;
+		return false;
+	}*/
+
+	if (!this->GeometryFromJson(jsonData, scale_factor)) {
+		std::cout << "Error: Failed to load JSON file." << std::endl;
+		return false;
+	}
+
+	const json& normalsData = jsonData["normals"];
+
+	if (normalsData.is_array()) {
+		// Check if length of normalsData is equal to the number of vertices
+		if (normalsData.size() > 0 && normalsData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'normals' is not equal to the number of vertices." << std::endl;
+			return false;
+		}
+
+		this->num_normals = normalsData.size();
+		for (const auto& n : normalsData) {
+			if (n.is_array()) {
+				std::vector<float> n_l;
+				float norm = 0;
+				for (const auto& element : n) {
+					if (element.is_number()) {
+						float _n = element;
+						n_l.push_back(_n);
+						norm += _n * _n;
+					}
+				}
+				norm = std::sqrt(norm);
+				this->normals.push_back({ n_l[0] / norm, n_l[1] / norm, n_l[2] / norm });
+			}
+		}
+	}
+	else {
+		std::cout << "Error: 'normals' is not an array." << std::endl;
+		return false;
+	}
+
+	// Load tangents
+	const json& tangentsData = jsonData["tangents"];
+
+	if (tangentsData.is_array()) {
+		// Check if length of tangentsData is equal to the number of vertices
+		if (tangentsData.size() > 0 && tangentsData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'tangents' is not equal to the number of vertices." << std::endl;
+			return false;
+		}
+
+		this->num_tangents = tangentsData.size();
+		for (const auto& t : tangentsData) {
+			if (t.is_array()) {
+				std::vector<float> t_l;
+				for (const auto& element : t) {
+					if (element.is_number()) {
+						float _t = element;
+						t_l.push_back(_t);
+					}
+				}
+				this->tangents.push_back(t_l);
+			}
+		}
+	}
+	else {
+		std::cout << "Error: 'tangents' is not an array." << std::endl;
 		return false;
 	}
 
@@ -498,10 +653,11 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 		// Check if length of weightData is equal to the number of vertices
 		if (weightData.size() > 0 && weightData.size() != this->num_vertices) {
 			std::cout << "Error: Length of 'vertex_weights' is not equal to the number of vertices." << std::endl;
+			std::cout << "Length of 'vertex_weights': " << weightData.size() << std::endl;
+			std::cout << "Number of vertices: " << this->num_vertices << std::endl;
 			return false;
 		}
 
-		this->num_weights = weightData.size() * this->num_weightsPerVertex;
 		for (const auto& vw : weightData) {
 			if (vw.is_array()) {
 				if (vw.size() > this->num_weightsPerVertex) {
@@ -509,6 +665,9 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 				}
 			}
 		}
+
+		this->num_weights = weightData.size() * this->num_weightsPerVertex;
+
 		for (const auto& vw : weightData) {
 			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
 			memset(vw_l, 0, sizeof(bone_binding)* this->num_weightsPerVertex);
@@ -606,7 +765,22 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		return false;
 	}
 
+	// Save tangent vectors in json format
 	json jsonData;
+	int tangents_count = 0;
+
+	jsonData["max_border"] = this->max_border;
+
+	json tangentsData = json::array();
+	for (auto t : this->tangents) {
+		json t_l = json::array();
+		t_l.push_back(t[0]);
+		t_l.push_back(t[1]);
+		t_l.push_back(t[2]);
+		tangentsData.push_back(t_l);
+		++tangents_count;
+	}
+	jsonData["tangents"] = tangentsData;
 
 	// Save vertex colors in json format
 	int vertex_color_count = 0;
@@ -621,7 +795,6 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		++vertex_color_count;
 	}
 	jsonData["vertex_color"] = vertColorData;
-	std::cout << "Vertex color count: " << std::to_string(vertex_color_count) << std::endl;
 
 	// Save vertex weights in json format
 	int vertex_weight_count = 0;
@@ -631,14 +804,18 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		for (int i = 0; i < this->num_weightsPerVertex; i++) {
 			json vw_per_vert_per_bone_l = json::array();
 			vw_per_vert_per_bone_l.push_back(vw[i].bone);
-			vw_per_vert_per_bone_l.push_back(vw[i].weight / 65535.f);
+			if (vw[i].weight <= 1){
+				vw_per_vert_per_bone_l.push_back(0);
+			}
+			else {
+				vw_per_vert_per_bone_l.push_back(vw[i].weight / 65535.f);
+			}
 			vw_l.push_back(vw_per_vert_per_bone_l);
 		}
 		weightData.push_back(vw_l);
 		++vertex_weight_count;
 	}
 	jsonData["vertex_weights"] = weightData;
-	std::cout << "Vertex weight count: " << std::to_string(vertex_weight_count) << std::endl;
 
 	// Save meshlets in json format
 	int meshlet_count = 0;
@@ -653,7 +830,6 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		++meshlet_count;
 	}
 	jsonData["meshlets"] = meshletData;
-	std::cout << "Meshlet count: " << std::to_string(meshlet_count) << std::endl;
 
 	// Save culldata in json format
 	int culldata_count = 0;
@@ -673,7 +849,6 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		++culldata_count;
 	}
 	jsonData["culldata"] = culldata;
-	std::cout << "Culldata count: " << std::to_string(culldata_count) << std::endl;
 
 	// Write the json data to file
 	file << jsonData.dump(4);
@@ -697,7 +872,7 @@ bool mesh::MeshIO::PostProcess(const uint32_t options)
 	}
 
 	if ((options & Options::GenerateTangentIfNA) && this->tangents.empty()) {
-		if (!this->GenerateTangents()) {
+		if (!this->GenerateTangents(options)) {
 			return false;
 		}
 	}
@@ -711,7 +886,7 @@ bool mesh::MeshIO::PostProcess(const uint32_t options)
 
 void MeshIO::Clear()
 {
-	this->scale = 1.0f;
+	this->max_border = 1.0f;
 	this->num_weightsPerVertex = 0;
 	this->num_triangles = 0;
 	this->num_positions = 0;
@@ -924,24 +1099,36 @@ void MeshIO::UpdateAttrFromDX()
 		UV_list1[j] = std::vector<float>{ DX_uvs[j].x,DX_uvs[j].y };
 	}
 }
-bool MeshIO::GenerateTangents() {
-	std::vector<XMFLOAT4> DX_tangents;
+bool MeshIO::GenerateTangents(const uint32_t& options) {
+	std::vector<XMFLOAT3> DX_tangents;
 	DX_tangents.resize(this->num_vertices);
+	std::vector<XMFLOAT3> DX_bitangents;
+	DX_bitangents.resize(this->num_vertices);
 
 	if (FAILED(ComputeTangentFrame(this->indices.data(), this->num_triangles,
 		DX_positions.data(), DX_normals.data(),
 		DX_uvs.data(), this->num_vertices,
-		DX_tangents.data())))
+		DX_tangents.data(), DX_bitangents.data())))
 	{
 		std::cout << "Error: Failed to generate tangents for the mesh." << std::endl;
 		return false;
 	}
 	this->tangents.clear();
 	this->tangents.resize(this->num_vertices);
-	for (size_t j = 0; j < this->num_vertices; ++j) {
-		this->tangents[j].push_back(DX_tangents[j].x);
-		this->tangents[j].push_back(DX_tangents[j].y);
-		this->tangents[j].push_back(DX_tangents[j].z);
+
+	if (options & Options::FlipTangent) {
+		for (size_t j = 0; j < this->num_vertices; ++j) {
+			this->tangents[j].push_back(-DX_tangents[j].x/* * DX_tangents[j].w*/);
+			this->tangents[j].push_back(-DX_tangents[j].y/* * DX_tangents[j].w*/);
+			this->tangents[j].push_back(-DX_tangents[j].z/* * DX_tangents[j].w*/);
+		}
+	}
+	else {
+		for (size_t j = 0; j < this->num_vertices; ++j) {
+			this->tangents[j].push_back(DX_tangents[j].x/* * DX_tangents[j].w*/);
+			this->tangents[j].push_back(DX_tangents[j].y/* * DX_tangents[j].w*/);
+			this->tangents[j].push_back(DX_tangents[j].z/* * DX_tangents[j].w*/);
+		}
 	}
 	this->num_tangents = this->tangents.size();
 }
@@ -1008,9 +1195,9 @@ size_t mesh::MeshIO::NaiveEdgeSmooth()
 
 	if (this->num_smooth_group != 0) {
 		for (size_t i: this->smooth_group) {
-			positions_f[i * 3] = float(this->positions[i * 3]);
-			positions_f[i * 3 + 1] = float(this->positions[i * 3 + 1]);
-			positions_f[i * 3 + 2] = float(this->positions[i * 3 + 2]);
+			positions_f[i * 3] = float(Util::double_to_snorm(this->positions[i * 3], this->max_border));
+			positions_f[i * 3 + 1] = float(Util::double_to_snorm(this->positions[i * 3 + 1], this->max_border));
+			positions_f[i * 3 + 2] = float(Util::double_to_snorm(this->positions[i * 3 + 2], this->max_border));
 		}
 		for (size_t i: this->smooth_group) {
 			normals_f[i * 3] = this->normals[i][0];
@@ -1020,9 +1207,9 @@ size_t mesh::MeshIO::NaiveEdgeSmooth()
 	}
 	else {
 		for (size_t i = 0; i < this->num_vertices; ++i) {
-			positions_f[i * 3] = float(this->positions[i * 3]);
-			positions_f[i * 3 + 1] = float(this->positions[i * 3 + 1]);
-			positions_f[i * 3 + 2] = float(this->positions[i * 3 + 2]);
+			positions_f[i * 3] = float(Util::double_to_snorm(this->positions[i * 3], this->max_border));
+			positions_f[i * 3 + 1] = float(Util::double_to_snorm(this->positions[i * 3 + 1], this->max_border));
+			positions_f[i * 3 + 2] = float(Util::double_to_snorm(this->positions[i * 3 + 2], this->max_border));
 		}
 		for (size_t i = 0; i < this->normals.size(); ++i) {
 			normals_f[i * 3] = this->normals[i][0];

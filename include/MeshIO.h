@@ -2,6 +2,7 @@
 #include "Common.h"
 #include <DirectXMesh.h>
 #include "WavefrontWriter.h"
+#include <WaveFrontReader.h>
 #include "json.hpp"
 
 namespace mesh {
@@ -23,7 +24,8 @@ namespace mesh {
 			GenerateTangentIfNA = 1 << 0,
 			NormalizeWeight = 1 << 1,
 			DoOptimize = 1 << 2,
-			SmoothEdgeNormal = 1 << 3
+			SmoothEdgeNormal = 1 << 3,
+			FlipTangent = 1 << 4,
 		};
 
 		MeshIO() {
@@ -43,6 +45,10 @@ namespace mesh {
 
 		bool PostProcess(const uint32_t options = Options::None);
 
+		bool GeometryFromJson(const nlohmann::json& jsonData, float scale_factor);
+
+		bool GeometryFromOBJ(const std::string filename, float scale_factor);
+
 		// Clear existing mesh data
 		void Clear();
 
@@ -53,7 +59,7 @@ namespace mesh {
 			std::vector<vertex_weight>& a_weights,
 			std::vector<vertex_color>& a_vertColors);
 
-		float scale;
+		float max_border;
 
 		uint32_t num_weightsPerVertex;
 
@@ -104,7 +110,7 @@ namespace mesh {
 		std::vector<DirectX::XMFLOAT3> DX_normals;
 		std::vector<DirectX::XMFLOAT2> DX_uvs;
 
-		bool GenerateTangents();
+		bool GenerateTangents(const uint32_t& options);
 		bool GenerateMeshlets();
 		size_t NaiveEdgeSmooth();
 

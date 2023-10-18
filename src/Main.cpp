@@ -9,31 +9,42 @@ using namespace mesh;
 
 int blenderToMesh(int argc, char* argv[]) {
 	// Check if the user provided the correct number of command-line arguments
-	if (argc != 7) {
-		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale bool_smooth_edge_normal bool_normalize_weights" << std::endl;
+	if (argc != 8) {
+		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale bool_smooth_edge_normal bool_normalize_weights bool_do_optimization" << std::endl;
 		return 1; // Return an error code
 	}
 
 	// Extract command-line arguments
 	std::string inputJson = argv[2];
 	std::string outputMesh = argv[3];
-	float scale = std::stof(argv[4]);
+	float max_border = std::stof(argv[4]);
 	bool smooth_edge_normal = std::stoi(argv[5]);
 	bool normalize_weights = std::stoi(argv[6]);
+	bool do_optimization = std::stoi(argv[7]);
 
 	// Create a MeshIO object
 	MeshIO reader;
 
-	uint32_t opt = MeshIO::Options::DoOptimize | MeshIO::Options::GenerateTangentIfNA;
+	uint32_t opt = MeshIO::Options::GenerateTangentIfNA /*| MeshIO::Options::FlipTangent*/;
 	if (normalize_weights) {
 		opt |= MeshIO::Options::NormalizeWeight;
 	}
 	if (smooth_edge_normal) {
 		opt |= MeshIO::Options::SmoothEdgeNormal;
 	}
+	if (do_optimization) {
+		opt |= MeshIO::Options::DoOptimize;
+	}
+
+	// Print options
+	std::cout << "# Options: " << std::endl;
+	std::cout << "# Scale: " << std::to_string(max_border) << std::endl;
+	std::cout << "# Smooth edge normal: " << std::to_string(smooth_edge_normal) << std::endl;
+	std::cout << "# Normalize weights: " << std::to_string(normalize_weights) << std::endl;
+	std::cout << "# Do optimization: " << std::to_string(do_optimization) << std::endl;
 
 	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, scale, opt)) {
+	if (!reader.Load(inputJson, max_border, opt)) {
 		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
 		return 2; // Return an error code
 	}
@@ -45,12 +56,6 @@ int blenderToMesh(int argc, char* argv[]) {
 	}
 
 	std::cout << "Mesh loaded from " << inputJson << " and serialized to " << outputMesh << std::endl;
-
-	// Print mesh statistics
-	std::cout << "Number of vertices: " << std::to_string(reader.num_vertices) << std::endl;
-	std::cout << "Number of triangles: " << std::to_string(reader.num_triangles) << std::endl;
-	std::cout << "Number of weights per vertex: " << std::to_string(reader.num_weightsPerVertex) << std::endl;
-
 
 	return 0; // Return success
 }
@@ -152,6 +157,7 @@ int blenderToMorph(int argc, char* argv[]) {
 	return 0;
 }
 
+#ifndef _DEBUG
 int main(int argc, char* argv[]) {
 	// Check the first command-line argument
 	if (argc < 2) {
@@ -185,39 +191,72 @@ int main(int argc, char* argv[]) {
 }
 
 void __main() {
+	// Recursively get all filepaths with .dat extension from the directory
+	std::vector<std::string> filepaths;
+	Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
+
+	// Test read in MorphIO
+	std::vector<std::pair<std::string, MorphIO>> database;
+	database.reserve(filepaths.size());
+
+	// Create a log file
+	std::ofstream log_file;
+	log_file.open("log.txt");
+
+	for (int i = 0; i < filepaths.size(); i++) {
+		log_file << filepaths[i] << std::endl;
+
+		MorphIO reader;
+		reader.Deserialize(filepaths[i]);
+
+		for (int k = 0; k < reader.num_vertices; k++) {
+			int16_t padding = 0;
+			for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
+				if (reader.per_vert_morph_data[k][j]._padding != padding) {
+					padding = reader.per_vert_morph_data[k][j]._padding;
+					log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
+				}
+			}
+		}
+
+		database.push_back(std::make_pair(filepaths[i], reader));
+	}
+}
+
+#endif
+
+#ifdef _DEBUG
+void main() {
 	// Create a MeshIO object
-	MeshIO reader;
+	MorphIO reader;
+	
+	reader.Load("C:\\repo\\MeshConverter\\morph_data_export.json",0);
 
-	std::string inputMesh = "C:\\repo\\MeshConverter\\test.mesh";
-	std::string outputName = "C:\\Users\\26553\\AppData\\Roaming\\Blender Foundation\\Blender\\3.5\\scripts\\addons\\tool_export_mesh\\Temp\\mesh_data_import";
+	std::cout << "complete" << std::endl;
+	return;
+}
 
-	// Load the mesh from the input mesh file
-	if (!reader.Deserialize(inputMesh)) {
-		std::cerr << "Failed to load mesh from " << inputMesh << std::endl;
-		return; // Return an error code
-	}
+void __main() {
+	//MeshIO reader;
+	//reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, MeshIO::Options::NormalizeWeight | MeshIO::Options::GenerateTangentIfNA /*| MeshIO::Options::SmoothEdgeNormal | MeshIO::Options::DoOptimize*/);
 
-	// Save the mesh to the output file
-	if (!reader.SaveOBJ(outputName, "test")) {
-		std::cerr << "Failed to save mesh to " << outputName << std::endl;
-		return; // Return an error code
-	}
+	MeshIO reader1;
+	reader1.Deserialize("C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).mesh.mesh");
+
+	MeshIO reader2;
+	reader2.Deserialize("C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).mesh");
+
+	//for (int i = 0; i < reader1.num_positions; i++) {
+	//	if (abs(reader1.positions[i] - reader2.positions[i]) > 0.02) {
+	//		std::cout << "Position " << i << " is different" << std::endl;
+	//	}
+	//}
 
 	std::cout << "complete" << std::endl;
 	return;
 }
 
 void _main() {
-	MeshIO reader;
-	reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, MeshIO::Options::NormalizeWeight | MeshIO::Options::GenerateTangentIfNA | MeshIO::Options::SmoothEdgeNormal | MeshIO::Options::DoOptimize);
-
-	reader.Serialize("C:\\repo\\MeshConverter\\mesh_data.mesh");
-
-	std::cout << "complete" << std::endl;
-	return;
-}
-
-void testmain() {
 	// Recursively get all filepaths with .dat extension from the directory
 	//std::vector<std::string> filepaths;
 	//Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
@@ -279,3 +318,4 @@ void testmain() {
 
 	return;
 }
+#endif
