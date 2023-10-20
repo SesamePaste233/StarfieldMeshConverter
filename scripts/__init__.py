@@ -10,11 +10,12 @@ from collections import defaultdict
 import mathutils
 import numpy as np
 from mathutils import Color
-
+import ctypes
+import time
 
 bl_info = {
     "name": "Starfield Mesh Exporter",
-    "version": (0, 5, 0),
+    "version": (0, 10, 0),
     "blender": (3, 5, 0),
     "location": "File > Import-Export",
     "description": "Export .mesh geometry file for starfield.",
@@ -26,6 +27,18 @@ read_only_marker = '[READONLY]'
 mix_normal = False
 
 invert_UV_tile_tangent = False
+
+
+# Load the DLL
+_dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
+print(_dll)
+# Define the function signature
+_dll_export_mesh = _dll.ExportMesh
+_dll_export_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_bool, ctypes.c_bool, ctypes.c_bool]
+
+_dll_export_morph = _dll.ExportMorph
+_dll_export_morph.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    
 
 def sanitize_filename(filename):
     illegal_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
@@ -364,6 +377,7 @@ def GetNormalTangents(mesh, with_tangent = True):
     verts_count = len(mesh.vertices)
     Normals = [np.array([0,0,0]) for i in range(verts_count)]
     if with_tangent:
+        Bitangent_sign = [1 for i in range(verts_count)]
         Tangents = [np.array([0,0,0]) for i in range(verts_count)]
 
     mesh.calc_normals_split()
@@ -373,16 +387,18 @@ def GetNormalTangents(mesh, with_tangent = True):
         for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
             Normals[vert_idx] = Normals[vert_idx] + np.array(mesh.loops[loop_idx].normal)
             if with_tangent:
+                Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
                 Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
 
     _Normals = [Normalize(n) for n in Normals]
 
     if with_tangent:
-        _Tangents = [GramSchmidtOrthogonalize(t, np.array(n)) for t,n in zip(Tangents, _Normals)]
+        _Tangents = [GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
     else:
         _Tangents = None
+        Bitangent_sign = None
 
-    return _Normals, _Tangents
+    return _Normals, _Tangents, Bitangent_sign
 
 def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
     bm = bmesh.new()
@@ -444,45 +460,17 @@ def ExportMesh(options, context, filepath, operator):
 
     # Check if the selected object is a mesh
     if selected_obj and selected_obj.type == 'MESH':
+        
+        if "SMOOTH_GROUP" in selected_obj.vertex_groups:
+            smooth_group = selected_obj.vertex_groups["SMOOTH_GROUP"]
+            selected_obj.vertex_groups.remove(smooth_group)
+            operator.report({"INFO"},f"SMOOTH_GROUP is no longer needed in this version.")
 
-        #if options.smooth_edge_normals:
-        #    sharp_edge_vertices = GetSharpGroups(selected_obj)
+        if "SHARP_GROUP" in selected_obj.vertex_groups:
+            sharp_group = selected_obj.vertex_groups["SHARP_GROUP"]
+            selected_obj.vertex_groups.remove(sharp_group)
+            operator.report({"INFO"},f"SHARP_GROUP is no longer needed in this version.")
 
-        #    data["smooth_group"] = []
-
-        #    for vertex in selected_obj.data.vertices:
-        #        if vertex.index not in sharp_edge_vertices:
-        #            data["smooth_group"].append(vertex.index)
-
-        #    if "SMOOTH_GROUP" in selected_obj.vertex_groups:
-        #        data["smooth_group"] = []
-        #        smooth_group = selected_obj.vertex_groups["SMOOTH_GROUP"]
-                
-        #        for vertex in selected_obj.data.vertices:
-                    # Check if the vertex is in the "SMOOTH_GROUP"
-        #            for group_element in vertex.groups:
-        #                if group_element.group == smooth_group.index:
-        #                    data["smooth_group"].append(vertex.index)
-
-                # Remove the vertex group
-        #        selected_obj.vertex_groups.remove(smooth_group)
-
-        #    if "SHARP_GROUP" in selected_obj.vertex_groups:
-        #        data["smooth_group"] = []
-        #        sharp_group = selected_obj.vertex_groups["SHARP_GROUP"]
-
-        #        for vertex in selected_obj.data.vertices:
-        #            is_sharp = False
-        #            for group_element in vertex.groups:
-        #                if group_element.group == sharp_group.index:
-        #                    is_sharp = True
-        #                    break
-                    
-        #            if not is_sharp and vertex.index not in sharp_edge_vertices:
-        #                data["smooth_group"].append(vertex.index)
-
-        #        selected_obj.vertex_groups.remove(sharp_group)
-            
         bm = bmesh.new()
         bm.from_mesh(selected_obj.data)
 
@@ -543,32 +531,31 @@ def ExportMesh(options, context, filepath, operator):
             data["uv_coords"] = [[] for i in range(verts_count)]
             Tangents = [np.array([0,0,0]) for i in range(verts_count)]
             Normals = [np.array([0,0,0]) for i in range(verts_count)]
-            flipped_verts = [1 for i in range(verts_count)]
+            Bitangent_sign = [1 for i in range(verts_count)]
             selected_obj.data.calc_tangents()
             selected_obj.data.calc_normals_split()
 
             for face in selected_obj.data.polygons:
                 for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
                     uv_coords = selected_obj.data.uv_layers.active.data[loop_idx].uv
-                    data["uv_coords"][vert_idx] = [uv_coords[0],1-uv_coords[1]]
-                    if uv_coords[1] > 1 and invert_UV_tile_tangent:
-                        flipped_verts[vert_idx] = -1
+                    data["uv_coords"][vert_idx] = [uv_coords[0],1 - uv_coords[1]]
+
+                    Bitangent_sign[vert_idx] = selected_obj.data.loops[loop_idx].bitangent_sign 
                     Tangents[vert_idx] = Tangents[vert_idx] + np.array(selected_obj.data.loops[loop_idx].tangent)
                     Normals[vert_idx] = Normals[vert_idx] + np.array(selected_obj.data.loops[loop_idx].normal)
 
             data["normals"] = [list(Normalize(n)) for n in Normals]
-            data["tangents"] = [list(f * GramSchmidtOrthogonalize(t, np.array(n))) for t, n, f in zip(Tangents, data["normals"], flipped_verts)]
+            data["tangents"] = [list(GramSchmidtOrthogonalize(t, np.array(n))) + [3 if f < 0 else 0] for t, n, f in zip(Tangents, data["normals"], Bitangent_sign)]
 
             for _l in data["uv_coords"]:
                 if len(_l) == 0:
-                    operator.report({'WARNING'}, f"UV map is invalid.")
+                    operator.report({'WARNING'}, f"Some verts don't have UV coords.")
                     print(data["uv_coords"], verts_count)
                     return {'CANCELLED'}
                     
             
             if options.GEO:
                 for f in bm.faces:
-                    #data["vertex_indices"].append([v.index for v in f.verts])
                     data["vertex_indices_raw"].extend([v.index for v in f.verts])
 
             # Extract vertex weights and bones
@@ -589,16 +576,9 @@ def ExportMesh(options, context, filepath, operator):
                     elif len(data["bone_list"])>0:
                         data["vertex_weights"].append([[0, 0]])
 
-
         except IndexError:
             operator.report({'WARNING'}, "The mesh may have loose vertices, try to Clean Up the mesh or contact the author.")
             return {'CANCELLED'}
-
-        # Save the data to a JSON file
-        output_file = os.path.join(temp_path, "mesh_data.json")
-        with open(output_file, 'w') as json_file:
-            json.dump(data, json_file, indent=4)
-        print(f"Data saved to {output_file}")
 
         # Cleanup
         bm.to_mesh(selected_obj.data)
@@ -611,49 +591,32 @@ def ExportMesh(options, context, filepath, operator):
         bpy.context.view_layer.objects.active = old_obj
         old_obj.select_set(True)
         bpy.data.meshes.remove(selected_obj.data)
-        try:
-            if options.export_sf_mesh_hash_result:
-                hash_folder, hash_name = hash_string(active_object_name)
-                object_folder_name = sanitize_filename(active_object_name)
-                result_file_folder = os.path.join(os.path.dirname(export_mesh_file_path), object_folder_name, hash_folder)
-                os.makedirs(result_file_folder)
-                result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
-            else:
-                result_file_path = export_mesh_file_path
+
+        if options.export_sf_mesh_hash_result:
+            hash_folder, hash_name = hash_string(active_object_name)
+            object_folder_name = sanitize_filename(active_object_name)
+            result_file_folder = os.path.join(os.path.dirname(export_mesh_file_path), object_folder_name, hash_folder)
+            os.makedirs(result_file_folder)
+            result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
+        else:
+            result_file_path = export_mesh_file_path
+        
+        json_data = json.dumps(data)
+
+        returncode = _dll_export_mesh(json_data.encode('utf-8'), result_file_path.encode('utf-8'), options.mesh_scale, False, options.normalize_weights, False)
+
+        if returncode == 0:
+            operator.report({'INFO'}, "Starfield .mesh exported successfully")
+
+            if options.export_sf_mesh_open_folder == True:
+                open_folder(bpy.path.abspath(export_mesh_folder_path))
+
+            return {'FINISHED'}
             
-            log_file_path = os.path.join(utils_path, "console.log")
-            with open(log_file_path, "w") as log_file:
-                print("REPORT:",result_file_path)
-                result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
-                                '-g',
-                                os.path.join(temp_path, "mesh_data.json"),
-                                result_file_path,
-                                str(options.mesh_scale),
-                                str(0),
-                                str(int(options.normalize_weights)),
-                                str(0),
-                                ],stdout=log_file)
-
-
-            if result.returncode == 0:
-                operator.report({'INFO'}, "Starfield .mesh exported successfully")
-
-                if options.export_sf_mesh_open_folder == True:
-                    open_folder(bpy.path.abspath(export_mesh_folder_path))
-
-                return {'FINISHED'}
-                
-            else:
-                operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
-                return {'CANCELLED'}
-            
-        except subprocess.CalledProcessError as e:
-            operator.report({'WARNING'}, f"Execution failed with return code {e.returncode}: {e.stderr}")
+        else:
+            operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
             return {'CANCELLED'}
-        except FileNotFoundError:
-            operator.report({'WARNING'}, "Executable not found.")
-            return {'CANCELLED'}
-
+        
     return {'CANCELLED'}
 
 def ImportMesh(options, context, operator):
@@ -806,7 +769,11 @@ def ImportMesh(options, context, operator):
                         verts = [v.co for v in bm.verts] + [(t[0] * scale + v.co[0], t[1] * scale + v.co[1], t[2] * scale + v.co[2]) for t, v in zip(data['tangents'], bm.verts)]
                         edges = [[i,i + len(bm.verts)] for i in range(len(bm.verts))]
                         mesh.from_pydata(verts, edges, [])
-
+                        for v_ix, l_ixs in vertex_map.items():
+                            for l_ix in l_ixs:
+                                w = data['tangents'][v_ix][3] / 3.0
+                                col.data[l_ix].color = (w, w, w, w)
+                
                 if options.import_as_read_only:
                     obj.name = read_only_marker + obj.name
 
@@ -876,7 +843,7 @@ def ImportMorph(options, context, operator):
         target_obj.data.shape_keys.use_relative = True
 
         if options.debug_delta_normal:
-            normals, tangents = GetNormalTangents(target_obj.data, True)
+            normals, tangents, signs = GetNormalTangents(target_obj.data, True)
             
         padding = 0
 
@@ -904,8 +871,17 @@ def ImportMorph(options, context, operator):
                     delta_tangents[i] = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
             
             if options.debug_delta_normal:
+                #col = target_obj.data.vertex_colors.active
+                #for face in target_obj.data.polygons:
+                #    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+                #        w = delta_tangents[vert_idx][3] / 3.0
+                #        color = [0,0,0,1]
+                #        if w != 0:
+                #            color[n] = w
+                #            col.data[loop_idx].color = tuple(color)
+
                 VisualizeVectors(target_obj.data, offsets, [[n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]] for n, dn in zip(normals, delta_normals)], key_name)
-                VisualizeVectors(target_obj.data, offsets, [[n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]] for n, dn in zip(tangents, delta_tangents)], key_name)
+                VisualizeVectors(target_obj.data, offsets, [[n[0] + s * dn[0], n[1] + s * dn[1], n[2] + s * dn[2]] for n, dn, s in zip(tangents, delta_tangents, signs)], key_name)
 
         operator.report({'INFO'}, f"Import Morph Successful.")
         return {'FINISHED'}
@@ -973,9 +949,8 @@ def ExportMorph(options, context, export_file_path, operator):
             for ref_key in ref_key_blocks:
                 ref_key.value = 0
 
-    target_obj, proxy_obj = PreprocessAndProxy(target_obj, False, False)
+    target_obj, proxy_obj = PreprocessAndProxy(target_obj, options.use_world_origin, False)
     verts_count = len(proxy_obj.data.vertices)
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     key_blocks = proxy_obj.data.shape_keys.key_blocks
 
     SmoothPerimeterNormal(proxy_obj, s_objs, True)
@@ -1012,7 +987,7 @@ def ExportMorph(options, context, export_file_path, operator):
             jsondata["morphData"][n][i][1] = sk.data[i].co.y - Basis.data[i].co.y
             jsondata["morphData"][n][i][2] = sk.data[i].co.z - Basis.data[i].co.z
 
-    basis_normals, basis_tangents = GetNormalTangents(proxy_obj.data, True)
+    basis_normals, basis_tangents, basis_tangentsigns = GetNormalTangents(proxy_obj.data, True)
 
     for n, cur_key in enumerate(original_shape_keys):
         shape_key_index = key_blocks.keys().index(cur_key.name)
@@ -1043,11 +1018,11 @@ def ExportMorph(options, context, export_file_path, operator):
 
         SmoothPerimeterNormal(me_obj, [ref_obj], True, target_obj)
 
-        normals, tangents = GetNormalTangents(me, True)
+        normals, tangents, _ = GetNormalTangents(me, True)
 
         for i in range(verts_count):
             jsondata["morphData"][n][i][3] = list(normals[i] - basis_normals[i])
-            jsondata["morphData"][n][i][4] = list(tangents[i] - basis_tangents[i])
+            jsondata["morphData"][n][i][4] = list(basis_tangentsigns[i] * (tangents[i] - basis_tangents[i]))
 
         bpy.data.meshes.remove(me)
         
@@ -1063,24 +1038,16 @@ def ExportMorph(options, context, export_file_path, operator):
 
     target_obj.active_shape_key_index = 0
 
-    with open(data_path, 'w') as json_file:
-        json.dump(jsondata, json_file, indent=4)
-    print(f"Data saved to {data_path}")
+    json_data = json.dumps(jsondata)
 
-    log_file_path = os.path.join(utils_path, "console_export_morph.log")
-    with open(log_file_path, "w") as log_file:
-        result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
-                            '-gm',
-                            data_path,
-                            export_path,
-                            ],stdout=log_file)
-        
-    if result.returncode != 0:
+    returncode = _dll_export_morph(json_data.encode(), export_path.encode())
+
+    if returncode != 0:
         bpy.data.meshes.remove(proxy_obj.data)
         
         SetActiveObject(target_obj)
 
-        operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+        operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
         return {"CANCELLED"}
 
     bpy.data.meshes.remove(proxy_obj.data)
@@ -1138,6 +1105,11 @@ class ExportCustomMesh(bpy.types.Operator):
         description=export_items[4][2],
         default=True
     )
+    export_morph: bpy.props.BoolProperty(
+        name="Export morph data (if any)",
+        description="Export shape keys as morph keys",
+        default=False,
+    )
 
     export_sf_mesh_open_folder: bpy.props.BoolProperty(
         name="Open folder after export",
@@ -1146,11 +1118,6 @@ class ExportCustomMesh(bpy.types.Operator):
     export_sf_mesh_hash_result: bpy.props.BoolProperty(
         name="Generate hash names",
         description="Export into [hex1]\\[hex2].mesh instead of [name].mesh",
-        default=False,
-    )
-    export_morph: bpy.props.BoolProperty(
-        name="Export morph data (if any)",
-        description="Export shape keys as morph keys",
         default=False,
     )
 
@@ -1177,6 +1144,19 @@ class ExportCustomMesh(bpy.types.Operator):
             self.filename = _obj.name + '.mesh'
         else:
             self.filename = 'untitled.mesh'
+
+        self.mesh_scale = context.scene.mesh_scale
+        self.max_border = context.scene.max_border
+        self.use_world_origin = context.scene.use_world_origin
+        self.normalize_weights = context.scene.normalize_weights
+        self.GEO = context.scene.GEO
+        self.NORM = context.scene.NORM
+        self.VERTCOLOR = context.scene.VERTCOLOR
+        self.WEIGHTS = context.scene.WEIGHTS
+        self.export_sf_mesh_open_folder = context.scene.export_sf_mesh_open_folder
+        self.export_sf_mesh_hash_result = context.scene.export_sf_mesh_hash_result
+        self.export_morph = context.scene.export_morph
+
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -1188,6 +1168,8 @@ class ImportCustomMesh(bpy.types.Operator):
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
     filename: bpy.props.StringProperty(default='untitled.mesh')
     
+    filter_glob: bpy.props.StringProperty(default="*.mesh", options={'HIDDEN'})
+
     import_as_read_only: bpy.props.BoolProperty(
         name="As Read Only",
         description="The object will be marked as read only. You can import morph once, however, as long as there's morph data in this object, any attempt to import a new morph will be prohibited.",
@@ -1222,6 +1204,7 @@ class ImportCustomMorph(bpy.types.Operator):
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
     filename: bpy.props.StringProperty(default='morph.dat')
+    filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
     debug_delta_normal: bpy.props.BoolProperty(
         name="Debug Delta Normals",
         description="Debug option. DO NOT USE.",
@@ -1242,11 +1225,18 @@ class ExportCustomMorph(bpy.types.Operator):
     filename: bpy.props.StringProperty(default='morph.dat')
     filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
 
+    use_world_origin: bpy.props.BoolProperty(
+        name="Use world origin",
+        description="Use world instead of object origin as output geometry's origin.",
+        default=True
+    )
+
     def execute(self, context):
         return ExportMorph(self, context, self.filepath, self)
 
     def invoke(self, context, event):
         self.filename = "morph.dat"
+        self.use_world_origin = context.scene.use_world_origin
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -1343,6 +1333,7 @@ def menu_func_export_morph(self, context):
 
 # Register the operators and menu entries
 def register():
+
     bpy.types.Scene.export_mesh_folder_path = bpy.props.StringProperty(
         name="Export Folder",
         subtype='DIR_PATH',

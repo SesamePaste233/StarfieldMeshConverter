@@ -40,7 +40,9 @@ namespace mesh {
 		bool Serialize(const std::string filename);
 
 		bool Load(const std::string filename, const float scale_factor = 1.f, const uint32_t options = Options::None);
-		
+
+		bool LoadFromString(const std::string json_data, const float scale_factor = 1.f, const uint32_t options = Options::None);
+
 		bool SaveOBJ(const std::string filename, const std::string obj_name);
 
 		bool PostProcess(const uint32_t options = Options::None);
@@ -91,6 +93,7 @@ namespace mesh {
 
 		uint32_t num_tangents;
 		std::vector<std::vector<float>> tangents;
+		std::vector<int> tangent_signs;
 
 		uint32_t num_lods;
 		std::vector<std::vector<uint16_t>> lods;

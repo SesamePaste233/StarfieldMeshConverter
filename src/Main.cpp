@@ -6,6 +6,7 @@
 
 using namespace DirectX;
 using namespace mesh;
+using namespace morph;
 
 int blenderToMesh(int argc, char* argv[]) {
 	// Check if the user provided the correct number of command-line arguments
@@ -17,7 +18,7 @@ int blenderToMesh(int argc, char* argv[]) {
 	// Extract command-line arguments
 	std::string inputJson = argv[2];
 	std::string outputMesh = argv[3];
-	float max_border = std::stof(argv[4]);
+	float scale = std::stof(argv[4]);
 	bool smooth_edge_normal = std::stoi(argv[5]);
 	bool normalize_weights = std::stoi(argv[6]);
 	bool do_optimization = std::stoi(argv[7]);
@@ -38,13 +39,13 @@ int blenderToMesh(int argc, char* argv[]) {
 
 	// Print options
 	std::cout << "# Options: " << std::endl;
-	std::cout << "# Scale: " << std::to_string(max_border) << std::endl;
+	std::cout << "# Scale: " << std::to_string(scale) << std::endl;
 	std::cout << "# Smooth edge normal: " << std::to_string(smooth_edge_normal) << std::endl;
 	std::cout << "# Normalize weights: " << std::to_string(normalize_weights) << std::endl;
 	std::cout << "# Do optimization: " << std::to_string(do_optimization) << std::endl;
 
 	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, max_border, opt)) {
+	if (!reader.Load(inputJson, scale, opt)) {
 		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
 		return 2; // Return an error code
 	}

@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <corecrt_wstring.h>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
@@ -57,7 +58,20 @@ public:
 		return { x,y,z };
 	}
 
-	static std::uint32_t encodeDEC3N(const std::vector<float>& values, bool w) {
+	static std::vector<float> decodeDEC3N_w(uint32_t n, float& w) {
+		float x, y, z;
+		x = ((n & 1023) / 511.5) - 1.0;
+
+		y = (((n >> 10) & 1023) / 511.5) - 1.0;
+
+		z = (((n >> 20) & 1023) / 511.5) - 1.0;
+
+		w = (n >> 30) & 0b11;
+
+		return { x,y,z };
+	}
+
+	static std::uint32_t encodeDEC3N(const std::vector<float>& values, float w) {
 
 		std::uint32_t n = 0;
 		n |= static_cast<std::uint32_t>((values[0] + 1.0f) * 511.5f) & 1023;
@@ -65,7 +79,7 @@ public:
 		n |= (static_cast<std::uint32_t>((values[2] + 1.0f) * 511.5f) & 1023) << 20;
 
 		// Add the encoded 'w' value (default is 1).
-		if(w) n |= 1 << 30;
+		n |= (uint8_t)w << 30;
 
 		return n;
 	}
@@ -362,6 +376,203 @@ public:
 			binary[i / 32] |= 1 << (i % 32);
 		}
 		return binary;
+	}
+	template<class T>
+	static T* _vector_subtract_noalloc(T* a, T* b, size_t length) {
+		for (int i = 0; i < length; i++) {
+			a[i] = a[i] - b[i];
+		}
+		return a;
+	}
+
+	template<class T>
+	static T* _vector_subtract(T* a, T* b, size_t length) {
+		T* result = new T[length];
+		for (int i = 0; i < length; i++) {
+			result[i] = a[i] - b[i];
+		}
+		return result;
+	}
+
+	template<class T>
+	static void _vector_addition_noalloc(T* a, T* b, size_t length) {
+		for (int i = 0; i < length; i++) {
+			a[i] = a[i] + b[i];
+		}
+		return;
+	}
+
+	template<class T>
+	static T* _vector_normalize(T* a, size_t length) {
+		T* result = new T[length];
+		T sum = 0;
+		for (int i = 0; i < length; i++) {
+			sum += a[i] * a[i];
+		}
+		T inv_sum = _fast_inv_sqrt(sum);
+		for (int i = 0; i < length; i++) {
+			result[i] = a[i] * inv_sum;
+		}
+		return result;
+	}
+
+	template<class T>
+	static void _vector_normalize_noalloc(T* a, size_t length) {
+		T sum = 0;
+		for (int i = 0; i < length; i++) {
+			sum += a[i] * a[i];
+		}
+		T inv_sum = _fast_inv_sqrt(sum);
+		for (int i = 0; i < length; i++) {
+			a[i] = a[i] * inv_sum;
+		}
+		return;
+	}
+
+	template<class T>
+	static T _vector_dotproduct(T* a, T* b, size_t length) {
+		T sum = 0;
+		for (int i = 0; i < length; i++) {
+			sum += a[i] * b[i];
+		}
+		return sum;
+	}
+
+	template<class T>
+	static void _vector_multiply_noalloc(T* a, T b, size_t length) {
+		for (int i = 0; i < length; i++) {
+			a[i] = a[i] * b;
+		}
+		return;
+	}
+	template<class T>
+	static T* _vector_multiply(T* a, T b, size_t length) {
+		T* result = new T[length];
+		for (int i = 0; i < length; i++) {
+			result[i] = a[i] * b;
+		}
+		return result;
+	}
+
+	template<class T>
+	static T* _vector_crossproduct(T* a, T* b) {
+		T* result = new T[3];
+		result[0] = a[1] * b[2] - a[2] * b[1];
+		result[1] = a[2] * b[0] - a[0] * b[2];
+		result[2] = a[0] * b[1] - a[1] * b[0];
+		return result;
+	}
+
+	template<class T>
+	static T _fast_inv_sqrt(T sum) {
+		T x2 = sum * 0.5f;
+		T y = sum;
+		long i = *(long*)&y;
+		i = 0x5f3759df - (i >> 1);
+		y = *(T*)&i;
+		y = y * (1.5f - (x2 * y * y));
+		return y;
+	}
+
+
+
+	static void ComputeTangentFrameImpl(uint32_t vertex_count, uint32_t tri_count, uint16_t* indices, float* positions, float* UV, float* normals, float* tan, float* bit) {
+		memset(tan, 0, vertex_count * 4 * sizeof(float));
+		memset(bit, 0, vertex_count * 3 * sizeof(float));
+
+		for (int t = 0; t < tri_count; t++) {
+			uint16_t* tri = indices + t * 3;
+
+			int i1 = tri[0];
+			int i2 = tri[1];
+			int i3 = tri[2];
+
+			float* v1 = positions + i1 * 3;
+			float* v2 = positions + i2 * 3;
+			float* v3 = positions + i3 * 3;
+
+			float* w1 = UV + i1 * 2;
+			float* w2 = UV + i2 * 2;
+			float* w3 = UV + i3 * 2;
+
+			auto pdx = _vector_subtract(v2, v1, 3);
+			auto pdy = _vector_subtract(v3, v1, 3);
+
+			auto tcdx = _vector_subtract(w2, w1, 2);
+			auto tcdy = _vector_subtract(w3, w1, 2);
+
+			float r = tcdx[0] * tcdy[1] - tcdy[0] * tcdx[1];
+
+			r = r >= 0 ? 1 : -1;
+
+			std::vector<float> _tdir{
+				(tcdy[1] * pdx[0] - tcdx[1] * pdy[0]) * r,
+				(tcdy[1] * pdx[1] - tcdx[1] * pdy[1]) * r,
+				(tcdy[1] * pdx[2] - tcdx[1] * pdy[2]) * r
+			};
+
+			std::vector<float> _bdir{
+				(tcdx[0] * pdy[0] - tcdy[0] * pdx[0]) * r,
+				(tcdx[0] * pdy[1] - tcdy[0] * pdx[1]) * r,
+				(tcdx[0] * pdy[2] - tcdy[0] * pdx[2]) * r
+			};
+
+			auto tdir = _vector_normalize(_tdir.data(), 3);
+			auto bdir = _vector_normalize(_bdir.data(), 3);
+
+			for (int j = 0; j < 3; j++) {
+				int i = tri[j];
+
+				_vector_addition_noalloc(tan + i * 4, tdir, 3);
+				_vector_addition_noalloc(bit + i * 3, bdir, 3);
+			}
+
+			// free memory
+			delete[] pdx;
+			delete[] pdy;
+			delete[] tcdx;
+			delete[] tcdy;
+			delete[] tdir;
+			delete[] bdir;
+		}
+
+		float* zeros = new float[3] { 0, 0, 0 };
+		for (int i = 0; i < vertex_count; i++) {
+			float* n = normals + i * 3;
+
+			float* t = tan + i * 4;
+			float* b = bit + i * 3;
+
+
+			if (memcmp(t, zeros, 3) == 0|| memcmp(b, zeros, 3) == 0) {
+				t[0] = n[1]; t[1] = n[2]; t[2] = n[0];
+				auto rtn = _vector_crossproduct(n, t);
+				memcpy(b, rtn, 3 * sizeof(float));
+				delete[] rtn;
+			}
+			else {
+				_vector_normalize_noalloc(t, 3);
+				auto rtn1 = _vector_multiply(n, _vector_dotproduct(n, t, 3), 3);
+				auto bi = _vector_crossproduct(n, t);
+				_vector_subtract_noalloc(t, rtn1, 3);
+				_vector_normalize_noalloc(t, 3);
+				delete[] rtn1;
+
+				_vector_normalize_noalloc(b, 3);
+				const float w = _vector_dotproduct(bi, b, 3);
+				auto rtn2 = _vector_multiply(n, _vector_dotproduct(n, b, 3), 3);
+				_vector_subtract_noalloc(b, rtn2, 3);
+				auto rtn3 = _vector_multiply(t, _vector_dotproduct(t, b, 3), 3);
+				_vector_subtract_noalloc(b, rtn3, 3);
+				_vector_normalize_noalloc(b, 3);
+				delete[] rtn2;
+				delete[] rtn3;
+				delete[] bi;
+
+				t[3] = w < 0 ? -1.f : 1.f;
+			}
+		}
+		delete[] zeros;
 	}
 };
 namespace array_ops {

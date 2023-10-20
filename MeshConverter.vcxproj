@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Common.h" />
+    <ClInclude Include="include\MeshConverter.h" />
     <ClInclude Include="include\MeshIO.h" />
     <ClInclude Include="include\MorphIO.h" />
     <ClInclude Include="include\WavefrontWriter.h" />
@@ -28,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="include\Common.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\MeshConverter.cpp" />
     <ClCompile Include="src\MeshIO.cpp" />
     <ClCompile Include="src\MorphIO.cpp" />
   </ItemGroup>
@@ -60,7 +62,7 @@
     <SpectreMitigation>false</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -159,11 +161,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\repo\DirectXMesh-main\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\repo\DirectXMesh-main\DirectXMesh\Bin\Desktop_2022\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>DirectXMesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "C:\repo\MeshConverter\x64\Release\MeshConverter.exe" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\MeshConverter.exe"</Command>
+      <Command>copy "$(TargetPath)" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
