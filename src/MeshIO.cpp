@@ -1340,6 +1340,7 @@ bool MeshIO::GenerateTangents(const uint32_t& options) {
 			this->tangents[j].push_back(DX_tangents[j].x /** DX_tangents[j].w*/);
 			this->tangents[j].push_back(DX_tangents[j].y /** DX_tangents[j].w*/);
 			this->tangents[j].push_back(DX_tangents[j].z /** DX_tangents[j].w*/);
+			this->tangent_signs[j] = DX_tangents[j].w == 1? 0 : 3;
 		}
 		/*for (size_t j = 0; j < this->num_vertices; ++j) {
 			this->tangents[j].push_back(DX_tangents[j].x);

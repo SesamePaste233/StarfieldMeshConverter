@@ -227,7 +227,7 @@ void __main() {
 #endif
 
 #ifdef _DEBUG
-void main() {
+void _main() {
 	// Create a MeshIO object
 	MorphIO reader;
 	
@@ -257,65 +257,39 @@ void __main() {
 	return;
 }
 
-void _main() {
+void main() {
 	// Recursively get all filepaths with .dat extension from the directory
-	//std::vector<std::string> filepaths;
-	//Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
+	std::vector<std::string> filepaths;
+	Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
 
-	//// Test read in MorphIO
-	//std::vector<std::pair<std::string, MorphIO>> database;
-	//database.reserve(filepaths.size());
+	// Test read in MorphIO
+	std::vector<std::pair<std::string, MorphIO>> database;
+	database.reserve(filepaths.size());
 
-	//// Create a log file
-	//std::ofstream log_file;
-	//log_file.open("log.txt");
+	// Create a log file
+	std::ofstream log_file;
+	log_file.open("log.txt");
 
-	//for (int i = 0; i < filepaths.size(); i++) {
-	//	log_file << filepaths[i] << std::endl;
+	for (int i = 0; i < filepaths.size(); i++) {
+		log_file << filepaths[i] << std::endl;
 
-	//	MorphIO reader;
-	//	reader.Deserialize(filepaths[i]);
+		MorphIO reader;
+		reader.Deserialize(filepaths[i]);
 
-	//	for (int k = 0; k < reader.num_vertices; k++) {
-	//		int16_t padding = 0;
-	//		for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
-	//			if (reader.per_vert_morph_data[k][j]._padding != padding) {
-	//				padding = reader.per_vert_morph_data[k][j]._padding;
-	//				log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
-	//			}
-	//		}
-	//	}
+		for (int k = 0; k < reader.num_vertices; k++) {
+			int16_t padding = 0;
+			_ASSERT(reader.per_vert_morph_key_indices[k].size());
+			for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
+				if (reader.per_vert_morph_data[k][j]._padding != padding) {
+					padding = reader.per_vert_morph_data[k][j]._padding;
+					log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
+				}
+			}
+		}
 
-	//	database.push_back(std::make_pair(filepaths[i], reader));
-	//}
+		database.push_back(std::make_pair(filepaths[i], reader));
+	}
 
-	//MorphIO reader;
-	//reader.Deserialize("C:\\repo\\MeshConverter\\morph_3_2077.dat");
-
-	//std::ofstream file;
-	//file.open("C:\\repo\\MeshConverter\\morph_data.csv");
-
-	//// Write the per_vert_morph_data_hf to a file
-	//file<<"X,Y,Z,Padding,Unk1,Unk2" << std::endl;
-	//for (int i = 0; i < reader.num_vertices; i++) {
-	//	auto data = reader.per_vert_morph_data_hf[i];
-	//	for ( auto& d : data) {
-	//		file << std::setprecision(6) << d._offset[0] << "," << d._offset[1] << "," << d._offset[2] << "," << std::to_string(d._padding) << "," << std::to_string(d.x) << "," << std::to_string(d.y) << std::endl;
-	//	}
-	//}
-	//file.close();
-
-	//reader.Serialize("C:\\repo\\MeshConverter\\morph_changed.dat");
-	MorphIO reader;
-	/*reader.Load("C:\\repo\\MeshConverter\\morph_data_export.json", 0);
-
-	reader.Serialize("C:\\repo\\MeshConverter\\mesh_data.dat");*/
-
-	reader.Deserialize("C:\\repo\\MeshConverter\\morph_3_2077_f.dat");
-
-	reader.Save("C:\\repo\\MeshConverter\\morph_3_2077_f.json");
-
-	std::cout << "complete" << std::endl;
 
 	return;
 }

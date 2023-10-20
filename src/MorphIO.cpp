@@ -94,7 +94,7 @@ bool MorphIO::Deserialize(const std::string filename)
 	//std::cout << std::hex << file.tellg() << std::endl;
 
 	for (int i = 0; i < this->num_offsets; i++) {
-		IOffset _offset_data;
+		IOffset _offset_data{};
 		_offset_data._offset = Util::readUInt32(file)[0];
 
 		for (int j = 0; j < 4; j++) {
@@ -202,7 +202,7 @@ bool MorphIO::Serialize(const std::string filename)
 	//std::cout << std::hex << file.tellp() << std::endl;
 
 	for (int i = 0; i < this->num_morph_data; i++) {
-		auto data = this->morph_data_raw[i];
+		auto& data = this->morph_data_raw[i];
 		Util::writeAsHex(file, data);
 	}
 
@@ -250,10 +250,10 @@ bool MorphIO::Load(const std::string jsonMorphFile, const uint32_t options)
 		std::vector<morph_data> _morph_data;
 		std::vector<uint32_t> _morph_key_selection;
 		for (int j = 0; j < this->num_shape_keys; j++) {
-			auto morphData = jsonData["morphData"][j][i];
+			auto& morphData = jsonData["morphData"][j][i];
 
 			if (abs(float(morphData[0])) > 1e-4 || abs(float(morphData[1])) > 1e-4 || abs(float(morphData[2])) > 1e-4) {
-				morph_data _data;
+				morph_data _data{};
 				_morph_key_selection.push_back(j);
 				_data._offset[0] = Util::floatToHalf(morphData[0]);
 				_data._offset[1] = Util::floatToHalf(morphData[1]);
@@ -274,7 +274,7 @@ bool MorphIO::Load(const std::string jsonMorphFile, const uint32_t options)
 	this->num_offsets = this->num_vertices;
 	uint32_t offset = 0;
 	for(int i = 0; i < this->num_vertices; i++) {
-		IOffset _offset_data;
+		IOffset _offset_data{};
 		_offset_data._offset = offset;
 		
 		//auto binary = Util::fill_binary(this->num_shape_keys);
@@ -314,10 +314,10 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 		std::vector<morph_data> _morph_data;
 		std::vector<uint32_t> _morph_key_selection;
 		for (int j = 0; j < this->num_shape_keys; j++) {
-			auto morphData = jsonData["morphData"][j][i];
+			auto& morphData = jsonData["morphData"][j][i];
 
 			if (abs(float(morphData[0])) > 1e-4 || abs(float(morphData[1])) > 1e-4 || abs(float(morphData[2])) > 1e-4) {
-				morph_data _data;
+				morph_data _data{};
 				_morph_key_selection.push_back(j);
 				_data._offset[0] = Util::floatToHalf(morphData[0]);
 				_data._offset[1] = Util::floatToHalf(morphData[1]);
@@ -338,7 +338,7 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 	this->num_offsets = this->num_vertices;
 	uint32_t offset = 0;
 	for (int i = 0; i < this->num_vertices; i++) {
-		IOffset _offset_data;
+		IOffset _offset_data{};
 		_offset_data._offset = offset;
 
 		//auto binary = Util::fill_binary(this->num_shape_keys);
@@ -381,7 +381,7 @@ bool MorphIO::Save(const std::string jsonMorphFile)
 	}
 
 	for (int i = 0; i < this->num_vertices; i++) {
-		auto indices = this->per_vert_morph_key_indices[i];
+		auto& indices = this->per_vert_morph_key_indices[i];
 		for (int j = 0; j < indices.size();++j) {
 			auto& id = indices[j];
 			auto& data = this->per_vert_morph_data[i][j];
@@ -461,7 +461,7 @@ void MorphIO::FakeEmpty(const uint32_t n_verts, const uint8_t n_morphs)
 	this->num_morph_data = 1;
 	this->morph_data_raw.push_back(morph_data());
 	for (int i = 0; i < n_verts; i++) {
-		IOffset _offset_data;
+		IOffset _offset_data{};
 		_offset_data._offset = 0;
 		std::memset(_offset_data._marker, 0, 4 * sizeof(uint32_t));
 		this->offsets_list.push_back(_offset_data);
