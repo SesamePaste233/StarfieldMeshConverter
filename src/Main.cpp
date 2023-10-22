@@ -1,6 +1,9 @@
 #include "Common.h"
 #include "MeshIO.h"
 #include "MorphIO.h"
+#include "NifIO.h"
+
+#include "MeshConverter.h"
 
 #include <iostream>
 
@@ -227,17 +230,30 @@ void __main() {
 #endif
 
 #ifdef _DEBUG
-void _main() {
+void amain() {
 	// Create a MeshIO object
-	MorphIO reader;
-	
-	reader.Load("C:\\repo\\MeshConverter\\morph_data_export.json",0);
+	nif::NifIO reader;
 
-	std::cout << "complete" << std::endl;
+	// Load the mesh from the input mesh file
+	if (!reader.Deserialize("C:\\repo\\MeshConverter\\naked_m.nif")) {
+		std::cerr << "Failed to load mesh from " << "C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).nif" << std::endl;
+		return; // Return an error code
+	}
+
+	// Serialize the mesh to the output file
+	if (!reader.Serialize("C:\\repo\\MeshConverter\\naked_m1.nif")) {
+		std::cerr << "Failed to serialize mesh to " << "C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).nif" << std::endl;
+		return; // Return an error code
+	}
+
 	return;
 }
 
-void __main() {
+void main() {
+	CreateNif("", "C:\\repo\\MeshConverter\\test.nif");
+}
+
+void _main() {
 	//MeshIO reader;
 	//reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, MeshIO::Options::NormalizeWeight | MeshIO::Options::GenerateTangentIfNA /*| MeshIO::Options::SmoothEdgeNormal | MeshIO::Options::DoOptimize*/);
 
@@ -257,7 +273,7 @@ void __main() {
 	return;
 }
 
-void main() {
+void __main() {
 	// Recursively get all filepaths with .dat extension from the directory
 	std::vector<std::string> filepaths;
 	Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");

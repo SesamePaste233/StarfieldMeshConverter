@@ -33,6 +33,12 @@
     <ClInclude Include="include\MeshConverter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NifIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NifTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -48,6 +54,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MeshConverter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NifIO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NifTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

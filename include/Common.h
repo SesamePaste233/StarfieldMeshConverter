@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <corecrt_wstring.h>
 #include <chrono>
+#include <limits>
 
 namespace fs = std::filesystem;
 
@@ -160,11 +161,11 @@ public:
 	}
 
 	template<typename T>
-	static void writeAsHex(std::ofstream& file, T& value) {
+	static void writeAsHex(std::ostream& file, T& value) {
 		file.write(reinterpret_cast<const char*>(&value), sizeof(value));
 	}
 
-	static std::vector<float> readHalfAsFull(std::ifstream& file, int counts = 1) {
+	static std::vector<float> readHalfAsFull(std::istream& file, int counts = 1) {
 		std::vector<float> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -176,7 +177,7 @@ public:
 	}
 
 	// Equivalent of readDouble in C++
-	static std::vector<double> readDouble(std::ifstream& file, int counts = 1) {
+	static std::vector<double> readDouble(std::istream& file, int counts = 1) {
 		std::vector<double> result;
 		result.reserve(8 * counts);
 		for (int i = 0; i < 8 * counts; ++i) {
@@ -230,7 +231,7 @@ public:
 	}
 
 	// Equivalent of readUInt32 in C++
-	static std::vector<uint32_t> readUInt32(std::ifstream& file, int counts = 1) {
+	static std::vector<uint32_t> readUInt32(std::istream& file, int counts = 1) {
 		std::vector<uint32_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -242,7 +243,7 @@ public:
 	}
 
 	// Equivalent of readFloat in C++
-	static std::vector<float> readFloat(std::ifstream& file, int counts = 1) {
+	static std::vector<float> readFloat(std::istream& file, int counts = 1) {
 		std::vector<float> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -254,7 +255,7 @@ public:
 	}
 
 	// Equivalent of readUInt8AsInt in C++
-	static std::vector<uint8_t> readUInt8(std::ifstream& file, int counts = 1) {
+	static std::vector<uint8_t> readUInt8(std::istream& file, int counts = 1) {
 		std::vector<uint8_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -266,7 +267,7 @@ public:
 	}
 
 	// Equivalent of readUInt16 in C++
-	static std::vector<uint16_t> readUInt16(std::ifstream& file, int counts = 1) {
+	static std::vector<uint16_t> readUInt16(std::istream& file, int counts = 1) {
 		std::vector<uint16_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -277,7 +278,7 @@ public:
 		return result;
 	}
 
-	static std::vector<int16_t> readInt16(std::ifstream& file, int counts = 1) {
+	static std::vector<int16_t> readInt16(std::istream& file, int counts = 1) {
 		std::vector<int16_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -288,7 +289,7 @@ public:
 		return result;
 	}
 
-	static std::string readString(std::ifstream& file, int counts = 1) {
+	static std::string readString(std::istream& file, int counts = 1) {
 		std::string result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -299,8 +300,13 @@ public:
 		return result;
 	}
 
-	static void writeString(std::ofstream& file, const std::string& value) {
+	static void writeString(std::ostream& file, const std::string& value) {
 		file.write(value.c_str(), value.size());
+	}
+
+	template<class T>
+	static void writeStream(std::ostream& file, const T* buffer, const size_t bytes) {
+		file.write(reinterpret_cast<const char*>(buffer), bytes);
 	}
 
 	static uint32_t binary_count(uint32_t n) {

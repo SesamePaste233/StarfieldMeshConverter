@@ -23,6 +23,8 @@
     <ClInclude Include="include\MeshConverter.h" />
     <ClInclude Include="include\MeshIO.h" />
     <ClInclude Include="include\MorphIO.h" />
+    <ClInclude Include="include\NifIO.h" />
+    <ClInclude Include="include\NifTypes.h" />
     <ClInclude Include="include\WavefrontWriter.h" />
     <ClInclude Include="lib\json.hpp" />
   </ItemGroup>
@@ -32,6 +34,8 @@
     <ClCompile Include="src\MeshConverter.cpp" />
     <ClCompile Include="src\MeshIO.cpp" />
     <ClCompile Include="src\MorphIO.cpp" />
+    <ClCompile Include="src\NifIO.cpp" />
+    <ClCompile Include="src\NifTypes.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
