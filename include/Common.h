@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -7,6 +8,7 @@
 #include <sstream>
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 #include <filesystem>
 #include <corecrt_wstring.h>
 #include <chrono>

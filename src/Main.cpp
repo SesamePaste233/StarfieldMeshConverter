@@ -250,7 +250,13 @@ void amain() {
 }
 
 void main() {
-	CreateNif("", "C:\\repo\\MeshConverter\\test.nif");
+	nif::NifIO reader;
+
+	reader.Deserialize("C:\\repo\\MeshConverter\\skeleton.nif");
+
+	nif::Armature armature;
+	armature.FromNif(reader, true);
+	armature.ToJson("C:\\repo\\MeshConverter\\skeleton.json");
 }
 
 void _main() {

@@ -1,4 +1,5 @@
 #include "NifIO.h"
+#include "stack"
 
 bool nif::NifIO::Deserialize(const std::string filename)
 {
@@ -35,10 +36,10 @@ bool nif::NifIO::Deserialize(const std::string filename)
 		auto block = CreateBlock(type, type_id, bytes);
 		block->Deserialize(file);
 
+		this->blocks.push_back(block);
+
 		UpdateBlockReference(block);
 		UpdateStringReference(block);
-
-		this->blocks.push_back(block);
 	}
 
     return true;
@@ -359,7 +360,7 @@ uint32_t nif::NifIO::NiStringManager::AddReference(const uint32_t& index, const 
 	return index;
 }
 
-std::string nif::NifIO::NiStringManager::GetString(const uint32_t index)
+std::string nif::NifIO::NiStringManager::GetString(const uint32_t index) const
 {
 	if (index >= header->num_strings)
 		return "";
@@ -367,7 +368,7 @@ std::string nif::NifIO::NiStringManager::GetString(const uint32_t index)
 	return header->strings[index];
 }
 
-uint32_t nif::NifIO::NiStringManager::FindString(const std::string& str)
+uint32_t nif::NifIO::NiStringManager::FindString(const std::string& str) const
 {
 	for (int i = 0; i < header->num_strings; i++) {
 		if (header->strings[i] == str)
@@ -434,15 +435,15 @@ uint32_t nif::NifIO::NiBlockManager::AddReference(const uint32_t& index, const u
 	return index;
 }
 
-nif::NiNodeBase* nif::NifIO::NiBlockManager::GetBlock(const uint32_t index)
+nif::NiNodeBase* nif::NifIO::NiBlockManager::GetBlock(const uint32_t index) const
 {
 	if (index >= header->num_blocks)
-		throw std::exception("Invalid block index");
+		return nullptr;
 
 	return nif->blocks[index];
 }
 
-uint32_t nif::NifIO::NiBlockManager::FindBlock(const nif::NiNodeBase* block)
+uint32_t nif::NifIO::NiBlockManager::FindBlock(const nif::NiNodeBase* block) const
 {
 	for (int i = 0; i < header->num_blocks; i++) {
 		if (nif->blocks[i] == block)
@@ -451,7 +452,7 @@ uint32_t nif::NifIO::NiBlockManager::FindBlock(const nif::NiNodeBase* block)
 	return nif::NiNodeBase::NO_REF;
 }
 
-uint32_t nif::NifIO::NiBlockManager::FindBlockByName(const std::string& name)
+uint32_t nif::NifIO::NiBlockManager::FindBlockByName(const std::string& name) const
 {
 	if (name.empty())
 		return nif::NiNodeBase::NO_REF;
@@ -571,6 +572,70 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 
 	nif.UpdateBlockReferences();
 	nif.UpdateStringReferences();
+
+	return true;
+}
+
+bool nif::Armature::FromNif(const NifIO& nif, const bool skeleton_mode)
+{
+	auto& manager = nif.block_manager;
+
+	auto _root = manager.GetBlock(manager.FindBlockByName("Root"));
+
+	if (!_root)
+		return false;
+
+	auto bone_root = dynamic_cast<NiNode*>(_root);
+
+	this->root = new Bone;
+	if (!this->root->FromNiNode(bone_root, nif)) {
+		delete this->root;
+		this->root = nullptr;
+		return false;
+	}
+
+	std::stack<std::pair<NiNode*,Bone*>> nodeStack;
+	nodeStack.push(std::make_pair(bone_root, this->root));
+
+	while (!nodeStack.empty()) {
+		NiNode* current = nodeStack.top().first;
+		Bone* current_bone = nodeStack.top().second;
+
+		nodeStack.pop();
+
+		for (int i = current->children.size() - 1; i >= 0; --i) {
+			auto _child = manager.GetBlock(current->children[i]);
+
+			auto name = nif.string_manager.GetString(_child->name_index);
+
+			if (skeleton_mode && skeleton_bones.find(name) == skeleton_bones.end())
+				continue;
+
+			if (_child != nullptr) {
+				auto child = dynamic_cast<NiNode*>(_child);
+				Bone* child_bone = new Bone;
+				if (!child_bone->FromNiNode(child, nif)) {
+					delete child_bone;
+					child_bone = nullptr;
+					continue;
+				}
+				child_bone->SetParent(current_bone);
+				nodeStack.push(std::make_pair(child, child_bone));
+			}
+		}
+	}
+}
+
+using namespace nlohmann;
+bool nif::Armature::ToJson(const std::string& file)
+{
+	json json_armature;
+
+	json_armature = this->Serialize(this->root);
+
+	std::ofstream out(file);
+	out << std::setw(4) << json_armature << std::endl;
+	out.close();
 
 	return true;
 }
