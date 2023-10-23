@@ -224,6 +224,62 @@ namespace nif {
 		};
 	};
 
+	class NiStringExtraData : public NiNodeBase {
+	public:
+		NiStringExtraData() = default;
+		~NiStringExtraData() = default;
+
+		uint32_t string_index = NO_REF;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+			if (string_index == old_id) {
+				string_index = new_id;
+			}
+		};
+		std::string GetRTTI() override {
+			return "NiStringExtraData";
+		};
+		std::vector<uint32_t> GetBlockReference() override {
+			return std::vector<uint32_t>();
+		};
+		std::vector<uint32_t> GetStringReference() override {
+			auto refs = NiNodeBase::GetStringReference();
+			if (string_index != NO_REF) {
+				refs.push_back(string_index);
+			}
+			return refs;
+		};
+	};
+
+	class NiIntegersExtraData : public NiNodeBase {
+	public:
+		NiIntegersExtraData() = default;
+		~NiIntegersExtraData() = default;
+
+		uint32_t num_integers = 0;
+		std::vector<uint32_t> integers;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+		};
+		std::string GetRTTI() override {
+			return "NiIntegersExtraData";
+		};
+		std::vector<uint32_t> GetBlockReference() override {
+			return std::vector<uint32_t>();
+		};
+		std::vector<uint32_t> GetStringReference() override {
+			return NiNodeBase::GetStringReference();
+		};
+	};
+
 	class SkinAttach : public NiNodeBase {
 	public:
 		SkinAttach() = default;
@@ -259,8 +315,8 @@ namespace nif {
 			uint32_t skeleton_root = NO_REF;
 			uint32_t bone_data = NO_REF;
 
-			uint32_t num_bone_attrs = 0;
-			std::vector<uint32_t> bone_attrs;
+			uint32_t num_bone_attachs = 0;
+			std::vector<uint32_t> bone_attach_refs;
 
 			uint32_t num_bone_scales = 0;
 			std::vector<float> bone_scales;
@@ -350,4 +406,53 @@ namespace nif {
 		};
 	};
 
+	class BoneTranslations : public NiNodeBase {
+	public:
+		typedef struct BoneTranslation {
+			std::string bone_name;
+			float translation[3] = { 0,0,0 };
+		};
+
+		BoneTranslations() = default;
+		~BoneTranslations() = default;
+
+		uint32_t num_translations = 0;
+		std::vector<BoneTranslation> bone_translations;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+		};
+		std::string GetRTTI() override {
+			return "BoneTranslations";
+		};
+		std::vector<uint32_t> GetBlockReference() override {
+			return std::vector<uint32_t>();
+		};
+	};
+
+	class UnkBinaryBlock : public NiNodeBase {
+	public:
+		UnkBinaryBlock(uint32_t bytes) :binary_bytes(bytes) {};
+		~UnkBinaryBlock() = default;
+
+		std::string RTTI = "NiNodeBase";
+		uint32_t binary_bytes = 0;
+		uint8_t* binary_data = nullptr;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+		};
+		std::string GetRTTI() override {
+			return RTTI;
+		};
+		std::vector<uint32_t> GetBlockReference() override {
+			return std::vector<uint32_t>();
+		};
+	};
 }

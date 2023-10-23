@@ -226,9 +226,9 @@ void nif::BSSkin::Instance::Deserialize(std::istream& file)
 	this->skeleton_root = Util::readUInt32(file)[0];
 	this->bone_data = Util::readUInt32(file)[0];
 
-	this->num_bone_attrs = Util::readUInt32(file)[0];
-	for (int i = 0; i < this->num_bone_attrs; ++i) {
-		this->bone_attrs.push_back(Util::readUInt32(file)[0]);
+	this->num_bone_attachs = Util::readUInt32(file)[0];
+	for (int i = 0; i < this->num_bone_attachs; ++i) {
+		this->bone_attach_refs.push_back(Util::readUInt32(file)[0]);
 	}
 
 	this->num_bone_scales = Util::readUInt32(file)[0];
@@ -243,9 +243,9 @@ void nif::BSSkin::Instance::Serialize(std::ostream& file)
 	Util::writeAsHex(file, this->skeleton_root);
 	Util::writeAsHex(file, this->bone_data);
 
-	Util::writeAsHex(file, this->num_bone_attrs);
-	for (int i = 0; i < this->num_bone_attrs; ++i) {
-		Util::writeAsHex(file, this->bone_attrs[i]);
+	Util::writeAsHex(file, this->num_bone_attachs);
+	for (int i = 0; i < this->num_bone_attachs; ++i) {
+		Util::writeAsHex(file, this->bone_attach_refs[i]);
 	}
 
 	Util::writeAsHex(file, this->num_bone_scales);
@@ -257,7 +257,7 @@ void nif::BSSkin::Instance::Serialize(std::ostream& file)
 
 size_t nif::BSSkin::Instance::GetSize()
 {
-	return 16 + 4 * (this->num_bone_attrs + this->num_bone_scales);
+	return 16 + 4 * (this->num_bone_attachs + this->num_bone_scales);
 }
 
 void nif::BSLightingShaderProperty::Deserialize(std::istream& file)
@@ -308,4 +308,98 @@ void nif::BSSkin::BoneData::Serialize(std::ostream& file)
 size_t nif::BSSkin::BoneData::GetSize()
 {
 	return 4 + sizeof(BoneInfo) * this->num_bone_infos;
+}
+
+void nif::BoneTranslations::Deserialize(std::istream& file)
+{
+	this->name_index = Util::readUInt32(file)[0];
+	this->num_translations = Util::readUInt32(file)[0];
+
+	for (int i = 0; i < this->num_translations; ++i) {
+		uint32_t name_l = Util::readUInt32(file)[0];
+		this->bone_translations[i].bone_name = Util::readString(file, name_l);
+		std::memcpy(this->bone_translations[i].translation, Util::readFloat(file, 3).data(), 3 * sizeof(float));
+	}
+}
+
+void nif::BoneTranslations::Serialize(std::ostream& file)
+{
+	Util::writeAsHex(file, this->name_index);
+	Util::writeAsHex(file, this->num_translations);
+
+	for (int i = 0; i < this->num_translations; ++i) {
+		uint32_t name_l = this->bone_translations[i].bone_name.length();
+		Util::writeAsHex(file, name_l);
+		Util::writeString(file, this->bone_translations[i].bone_name);
+		Util::writeStream(file, this->bone_translations[i].translation, 3 * sizeof(float));
+	}
+}
+
+size_t nif::BoneTranslations::GetSize()
+{
+	size_t count = 0;
+	for (auto& bone : this->bone_translations) {
+		count += 4 + bone.bone_name.length() + 12;
+	}
+	return 8 + count;
+}
+
+void nif::UnkBinaryBlock::Deserialize(std::istream& file)
+{
+	if (this->binary_bytes > 0) {
+		this->binary_data = new uint8_t[this->binary_bytes];
+		std::memcpy(this->binary_data, Util::readString(file, this->binary_bytes).data(), this->binary_bytes);
+	}
+}
+
+void nif::UnkBinaryBlock::Serialize(std::ostream& file)
+{
+	if (this->binary_bytes > 0 && this->binary_data) {
+		Util::writeStream(file, this->binary_data, this->binary_bytes);
+	}
+}
+
+size_t nif::UnkBinaryBlock::GetSize()
+{
+	return this->binary_bytes;
+}
+
+void nif::NiStringExtraData::Deserialize(std::istream& file)
+{
+	this->name_index = Util::readUInt32(file)[0];
+	this->string_index = Util::readUInt32(file)[0];
+}
+
+void nif::NiStringExtraData::Serialize(std::ostream& file)
+{
+	Util::writeAsHex(file, this->name_index);
+	Util::writeAsHex(file, this->string_index);
+}
+
+size_t nif::NiStringExtraData::GetSize()
+{
+	return 8;
+}
+
+void nif::NiIntegersExtraData::Deserialize(std::istream& file)
+{
+	this->name_index = Util::readUInt32(file)[0];
+	this->num_integers = Util::readUInt32(file)[0];
+	for (int i = 0; i < this->num_integers; ++i) {
+		this->integers.push_back(Util::readUInt32(file)[0]);
+	}
+}
+
+void nif::NiIntegersExtraData::Serialize(std::ostream& file)
+{
+	Util::writeAsHex(file, this->name_index);
+	Util::writeAsHex(file, this->num_integers);
+	for (int i = 0; i < this->num_integers; ++i) {
+		Util::writeAsHex(file, this->integers[i]);
+	}
+}
+
+size_t nif::NiIntegersExtraData::GetSize()
+{
+	return 8 + 4 * this->num_integers;
 }

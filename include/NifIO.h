@@ -1,9 +1,12 @@
 #pragma once
 #include "Common.h"
 #include "NifTypes.h"
+#include "MeshIO.h"
 
 namespace nif {
-	
+	class NifIO;
+	class ni_template::NiTemplateBase;
+
 	class NifIO
 	{
 	public:
@@ -67,6 +70,8 @@ namespace nif {
 			NiNodeBase* GetBlock(const uint32_t index);
 
 			uint32_t FindBlock(const NiNodeBase* block);
+
+			uint32_t FindBlockByName(const std::string& name);
 		};
 
 		bool Deserialize(const std::string filename);
@@ -81,7 +86,7 @@ namespace nif {
 
 		void Clear();
 
-		static NiNodeBase* CreateBlock(const std::string type_name, const uint32_t type_index = -1);
+		static NiNodeBase* CreateBlock(const std::string type_name, const uint32_t type_index = -1, const uint32_t block_bytes = -1);
 		
 		NiNodeBase* AddBlock(const std::string type_name, const std::string block_name = "");
 
@@ -121,5 +126,72 @@ namespace nif {
 		NiStringManager string_manager = NiStringManager(&header, this);
 
 		NiBlockManager block_manager = NiBlockManager(&header, this);
+
+		std::vector<NiNodeBase*> GetRTTIBlocks(const std::string& RTTI);
+
+		bool FromTemplate(ni_template::NiTemplateBase* template_ptr);
 	};
+
+
+	namespace ni_template {
+		class NiTemplateBase {
+		public:
+			virtual bool ToNif(NifIO& source) = 0;
+		};
+
+		class NiRootSceneTemplate :public NiTemplateBase {
+		public:
+			NiRootSceneTemplate() = default;
+			~NiRootSceneTemplate() = default;
+
+			float root_rotation_matrix[3][3] = { 1,0,0,0,1,0,0,0,1 };
+			float root_translation[3] = { 0,0,0 };
+			float root_scale = 1;
+			uint32_t root_flags = 0x2000000E;
+			std::string root_name = "ExportScene";
+
+			bool ToNif(NifIO& source) override;
+		};
+		
+		class NiSimpleGeometryTemplate :public NiRootSceneTemplate {
+		public:
+			typedef struct MeshInfo {
+				mesh::MeshIO* entry = nullptr;
+				std::string factory_path = "";
+			};
+
+			NiSimpleGeometryTemplate() = default;
+			~NiSimpleGeometryTemplate() = default;
+
+			uint32_t bsx_flags = 65536;
+
+			float geo_rotation_matrix[3][3] = { 1,0,0,0,1,0,0,0,1 };
+			float geo_translation[3] = { 0,0,0 };
+			float geo_scale = 1;
+			uint32_t geo_flags = 0x0000000E;
+			std::string geo_name = "";
+
+			MeshInfo geo_mesh_lod[4];
+
+			uint32_t mat_id = 0;
+			std::string mat_path = "";
+
+			bool ToNif(NifIO& source) override;
+		};
+
+		class NiSkinInstanceTemplate :public NiSimpleGeometryTemplate {
+		public:
+			typedef nif::BSSkin::BoneData::BoneInfo BoneInfo;
+
+			NiSkinInstanceTemplate() = default;
+			~NiSkinInstanceTemplate() = default;
+
+			std::vector<std::string> bone_names;
+			std::vector<std::string> bone_refs;
+			std::vector<BoneInfo> bone_infos;
+
+			bool ToNif(NifIO& source) override;
+		};
+	};
+
 }

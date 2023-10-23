@@ -548,14 +548,6 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 	file >> jsonData;  
 	file.close();
 
-	// Swap jsonBlenderFile's extension to .obj
-	/*std::string objFile = jsonBlenderFile.substr(0, jsonBlenderFile.find_last_of(".")) + ".obj";
-
-	if (!this->GeometryFromOBJ(objFile, scale_factor)){
-		std::cout << "Error: Failed to load OBJ file." << std::endl;
-		return false;
-	}*/
-
 	if (!this->GeometryFromJson(jsonData, scale_factor)) {
 		std::cout << "Error: Failed to load JSON file." << std::endl;
 		return false;

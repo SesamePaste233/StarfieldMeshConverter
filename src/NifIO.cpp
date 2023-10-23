@@ -31,7 +31,8 @@ bool nif::NifIO::Deserialize(const std::string filename)
 	for (int i = 0; i < _num_blocks; i++) {
 		auto type_id = this->header.block_type_indices[i];
 		auto type = this->header.block_types[type_id];
-		auto block = CreateBlock(type, type_id);
+		auto bytes = this->header.block_sizes[i];
+		auto block = CreateBlock(type, type_id, bytes);
 		block->Deserialize(file);
 
 		UpdateBlockReference(block);
@@ -248,7 +249,7 @@ void nif::NifIO::Clear()
 	blocks.clear();
 }
 
-nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint32_t type_index)
+nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint32_t type_index, const uint32_t block_bytes)
 {
 	NiNodeBase* block = nullptr;
 
@@ -276,8 +277,16 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 	else if (type_name == "BSLightingShaderProperty") {
 		block = new BSLightingShaderProperty();
 	}
+	else if (type_name == "NiStringExtraData") {
+		block = new NiStringExtraData();
+	}
+	else if (type_name == "NiIntegersExtraData") {
+		block = new NiIntegersExtraData();
+	}
 	else {
-		throw std::exception("Not implemented");
+		_ASSERT(block_bytes != -1);
+		block = new UnkBinaryBlock(block_bytes);
+		dynamic_cast<UnkBinaryBlock*>(block)->RTTI = type_name;
 	}
 
 	if (block != nullptr)
@@ -307,10 +316,28 @@ nif::NiNodeBase* nif::NifIO::AddBlock(const std::string type_name, const std::st
 	return nullptr;
 }
 
+std::vector<nif::NiNodeBase*> nif::NifIO::GetRTTIBlocks(const std::string& RTTI)
+{
+	std::vector<nif::NiNodeBase*> result;
+
+	for (auto& block : blocks) {
+		if (block->GetRTTI() == RTTI) {
+			result.push_back(block);
+		}
+	}
+
+	return result;
+}
+
+bool nif::NifIO::FromTemplate(ni_template::NiTemplateBase* template_ptr)
+{
+	return template_ptr->ToNif(*this);
+}
+
 uint32_t nif::NifIO::NiStringManager::AddString(const std::string& str, const uint32_t& who)
 {
 	auto id = FindString(str);
-	if (FindString(str) != -1) {
+	if (FindString(str) != nif::NiNodeBase::NO_REF) {
 		return AddReference(id, who);
 	}
 
@@ -335,7 +362,7 @@ uint32_t nif::NifIO::NiStringManager::AddReference(const uint32_t& index, const 
 std::string nif::NifIO::NiStringManager::GetString(const uint32_t index)
 {
 	if (index >= header->num_strings)
-		throw std::exception("Invalid string index");
+		return "";
 
 	return header->strings[index];
 }
@@ -346,7 +373,7 @@ uint32_t nif::NifIO::NiStringManager::FindString(const std::string& str)
 		if (header->strings[i] == str)
 			return i;
 	}
-	return -1;
+	return nif::NiNodeBase::NO_REF;
 }
 
 void nif::NifIO::NiStringManager::MoveString(const std::vector<uint32_t> new_order)
@@ -377,7 +404,7 @@ uint32_t nif::NifIO::NiBlockManager::RegisterBlock(nif::NiNodeBase* block)
 	}
 
 	if(!block || block->GetRTTI() == "NiNodeBase")
-		return -1;
+		return nif::NiNodeBase::NO_REF;
 
 	auto result = std::find(header->block_types.begin(), header->block_types.end(), block->GetRTTI());
 	if (result == header->block_types.end()) {
@@ -421,5 +448,129 @@ uint32_t nif::NifIO::NiBlockManager::FindBlock(const nif::NiNodeBase* block)
 		if (nif->blocks[i] == block)
 			return i;
 	}
-	return -1;
+	return nif::NiNodeBase::NO_REF;
+}
+
+uint32_t nif::NifIO::NiBlockManager::FindBlockByName(const std::string& name)
+{
+	if (name.empty())
+		return nif::NiNodeBase::NO_REF;
+
+	for (int i = 0; i < header->num_blocks; i++) {
+		if (nif->string_manager.GetString(nif->blocks[i]->name_index) == name)
+			return i;
+	}
+
+	return nif::NiNodeBase::NO_REF;
+}
+
+bool nif::ni_template::NiRootSceneTemplate::ToNif(NifIO& source)
+{
+	source.Clear();
+	auto root_node = dynamic_cast<nif::NiNode*>(source.AddBlock("NiNode", this->root_name));
+	return true;
+}
+
+bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
+{
+	if(!NiRootSceneTemplate::ToNif(nif))
+		return false;
+
+	auto root_node = dynamic_cast<nif::NiNode*>(nif.GetRTTIBlocks("NiNode")[0]);
+
+	auto bsxflags = dynamic_cast<nif::BSXFlags*>(nif.AddBlock("BSXFlags", "BSX"));
+
+	root_node->AddExtraData(nif.block_manager.FindBlock(bsxflags));
+
+	auto bsgeometry = dynamic_cast<nif::BSGeometry*>(nif.AddBlock("BSGeometry", this->geo_name)); // Mesh name
+
+	root_node->AddChild(nif.block_manager.FindBlock(bsgeometry));
+
+	auto niintegerextra = dynamic_cast<nif::NiIntegerExtraData*>(nif.AddBlock("NiIntegerExtraData", "MaterialID"));
+
+	niintegerextra->data = this->mat_id;// Material ID
+
+	bsgeometry->AddExtraData(nif.block_manager.FindBlock(niintegerextra));
+
+	auto lighting_shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(nif.AddBlock("BSLightingShaderProperty", this->mat_path));// Material path
+
+	bsgeometry->shader_property = nif.block_manager.FindBlock(lighting_shader_property);
+
+	bsgeometry->flags = this->geo_flags;
+
+	for (MeshInfo& mesh : this->geo_mesh_lod) {
+		if (!mesh.entry)
+			continue;
+		nif::BSGeometry::MeshData mesh_data;
+
+		// Write mesh info here
+		mesh_data.num_indices = mesh.entry->indices_size;
+		mesh_data.num_vertices = mesh.entry->num_vertices;
+		mesh_data.mesh_path = mesh.factory_path;
+		mesh_data.path_length = mesh_data.mesh_path.length();
+
+		bsgeometry->AddMesh(mesh_data);
+	}
+
+	std::memcpy(bsgeometry->rotation, this->geo_rotation_matrix, 9 * sizeof(float));
+	std::memcpy(bsgeometry->translation, this->geo_translation, 3 * sizeof(float));
+	bsgeometry->scale = this->geo_scale;
+
+
+	nif.UpdateBlockReferences();
+	nif.UpdateStringReferences();
+
+	return true;
+}
+
+bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
+{
+	if(!NiSimpleGeometryTemplate::ToNif(nif))
+		return false;
+
+	uint32_t num_bones = this->bone_names.size();
+
+	auto root_node = dynamic_cast<nif::NiNode*>(nif.GetRTTIBlocks("NiNode")[0]);
+	auto bsgeometry = dynamic_cast<nif::BSGeometry*>(nif.GetRTTIBlocks("BSGeometry")[0]);
+
+	auto skin_attach = dynamic_cast<nif::SkinAttach*>(nif.AddBlock("SkinAttach", "SkinBMP"));
+
+	skin_attach->bone_names = this->bone_names;
+	skin_attach->num_bone_names = num_bones;
+
+	bsgeometry->AddExtraData(nif.block_manager.FindBlock(skin_attach));
+
+	auto skin_instance = dynamic_cast<nif::BSSkin::Instance*>(nif.AddBlock("BSSkin::Instance"));
+
+	auto skin_bonedata = dynamic_cast<nif::BSSkin::BoneData*>(nif.AddBlock("BSSkin::BoneData"));
+
+	skin_bonedata->bone_infos = this->bone_infos;
+	skin_bonedata->num_bone_infos = num_bones;
+
+	skin_instance->skeleton_root = nif.block_manager.FindBlock(root_node);
+	skin_instance->bone_data = nif.block_manager.FindBlock(skin_bonedata);
+	skin_instance->num_bone_attachs = num_bones;
+
+	if (this->bone_refs.size() == num_bones) {
+		for (int i = 0; i < num_bones; i++) {
+			auto rtn = nif.block_manager.FindBlockByName(this->bone_refs[i]);
+
+			if (rtn == (uint32_t)-1)
+				std::cout << "Warning: Invalid bone attach reference name: " << this->bone_refs[i] << std::endl;
+
+			skin_instance->bone_attach_refs.push_back(rtn);
+		}
+	}
+	else {
+		for (int i = 0; i < num_bones; i++) {
+			skin_instance->bone_attach_refs.push_back(nif::NiNodeBase::NO_REF);
+		}
+	}
+
+	bsgeometry->skin_instance = nif.block_manager.FindBlock(skin_instance);
+
+	nif.UpdateBlockReferences();
+	nif.UpdateStringReferences();
+
+	return true;
 }
