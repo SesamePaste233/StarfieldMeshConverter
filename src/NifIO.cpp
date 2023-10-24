@@ -943,7 +943,7 @@ nlohmann::json nif::ni_template::NiSingleSkinInstanceTemplate::Serialize() const
 	for (int i = 0; i < this->bone_infos.size(); i++) {
 		nlohmann::json bone_info;
 		for (int j = 0; j < 3; ++j) {
-			bone_info["translation"][j] = this->bone_infos[i].center[j];
+			bone_info["center"][j] = this->bone_infos[i].center[j];
 		}
 		bone_info["radius"] = this->bone_infos[i].radius;
 

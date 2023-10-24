@@ -271,8 +271,18 @@ void main() {
 
 	auto jsondata = t_ptr->Serialize();
 
+
 	std::ofstream out("C:\\repo\\MeshConverter\\naked_m.json");
 	out << jsondata.dump(4);
+
+	auto t_ptr2 = new nif::ni_template::NiSingleSkinInstanceTemplate();
+
+	t_ptr2->Deserialize(jsondata);
+
+	auto jsondata2 = t_ptr2->Serialize();
+
+	std::ofstream out2("C:\\repo\\MeshConverter\\naked_m2.json");
+	out2 << jsondata2.dump(4);
 }
 
 void _main() {
