@@ -240,9 +240,23 @@ namespace nif {
 
 		bool FromNif(const NifIO& source, const bool skeleton_mode = true);
 
-		bool ToJson(const std::string& file);
+		bool ToJson(const std::string& file, bool global_heads_tails = false);
 
-		nlohmann::json Serialize(Bone* current) {
+		nlohmann::json Serialize(Bone* current, bool global_heads_tails = false) {
+			if (!current) {
+				return nullptr;
+			}
+
+			if (global_heads_tails) {
+				Eigen::Matrix4f root_axis = Eigen::Matrix4f::Identity();
+				return SerializeGlobalImpl(current, root_axis);
+			}
+			else {
+				return SerializeImpl(current);
+			}
+		}
+
+		nlohmann::json SerializeImpl(Bone* current) {
 			if (!current) {
 				return nullptr;
 			}
@@ -261,8 +275,39 @@ namespace nif {
 				serialized["translation"].push_back(current->translation[i]);
 			}
 			serialized["scale"] = current->scale;
+
+			serialized["children"] = nlohmann::json::array();
 			for (Bone* child : current->children) {
 				serialized["children"].push_back(Serialize(child));
+			}
+
+			return serialized;
+		}
+
+		nlohmann::json SerializeGlobalImpl(Bone* current, Eigen::Matrix4f& cur_axis) {
+			if (!current) {
+				return nullptr;
+			}
+
+			nlohmann::json serialized;
+
+			Eigen::Matrix4f T = xf::createTransformationMatrix(current->rotation, current->translation, current->scale);
+
+			Eigen::Matrix4f new_axis = cur_axis * T;
+			auto rtn = xf::toAxis(new_axis, 0.07);
+
+			serialized["name"] = current->name;
+			serialized["head"].push_back(rtn.first.x());
+			serialized["head"].push_back(rtn.first.y());
+			serialized["head"].push_back(rtn.first.z());
+			serialized["tail"].push_back(rtn.second.x());
+			serialized["tail"].push_back(rtn.second.y());
+			serialized["tail"].push_back(rtn.second.z());
+			serialized["scale"] = current->scale;
+
+			serialized["children"] = nlohmann::json::array();
+			for (Bone* child : current->children) {
+				serialized["children"].push_back(SerializeGlobalImpl(child, new_axis));
 			}
 
 			return serialized;

@@ -627,11 +627,11 @@ bool nif::Armature::FromNif(const NifIO& nif, const bool skeleton_mode)
 }
 
 using namespace nlohmann;
-bool nif::Armature::ToJson(const std::string& file)
+bool nif::Armature::ToJson(const std::string& file, bool global_heads_tails)
 {
 	json json_armature;
 
-	json_armature = this->Serialize(this->root);
+	json_armature = this->Serialize(this->root, global_heads_tails);
 
 	std::ofstream out(file);
 	out << std::setw(4) << json_armature << std::endl;

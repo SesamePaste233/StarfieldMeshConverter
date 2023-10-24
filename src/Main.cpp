@@ -256,7 +256,7 @@ void main() {
 
 	nif::Armature armature;
 	armature.FromNif(reader, true);
-	armature.ToJson("C:\\repo\\MeshConverter\\skeleton.json");
+	armature.ToJson("C:\\Users\\26553\\AppData\\Roaming\\Blender Foundation\\Blender\\3.5\\scripts\\addons\\tool_export_mesh\\Assets\\skeleton.json", true);
 }
 
 void _main() {
