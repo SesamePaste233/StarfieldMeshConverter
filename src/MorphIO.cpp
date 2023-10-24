@@ -361,6 +361,26 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 
 bool MorphIO::Save(const std::string jsonMorphFile)
 {
+	std::string jsonData;
+
+	if (!SerializeToJson(jsonData)) {
+		std::cout << "Error: Failed to serialize JSON data." << std::endl;
+		return false;
+	}
+
+	std::ofstream file(jsonMorphFile);
+	if (!file.is_open()) {
+		std::cout << "Error: Failed to open JSON file." << std::endl;
+		return false;
+	}
+
+	file << jsonData;
+
+	return true;
+}
+
+bool morph::MorphIO::SerializeToJson(std::string& json_data)
+{
 	json jsonData;
 	// Save vertex count
 	jsonData["numVertices"] = this->num_vertices;
@@ -376,13 +396,13 @@ bool MorphIO::Save(const std::string jsonMorphFile)
 	for (int i = 0; i < this->num_shape_keys; i++) {
 		jsonData["morphData"].push_back(json::array());
 		for (int j = 0; j < this->num_vertices; j++) {
-			jsonData["morphData"][i].push_back(json::array({0, 0, 0, 0, 0, 0, 0, 0, 0, 0}));
+			jsonData["morphData"][i].push_back(json::array({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
 		}
 	}
 
 	for (int i = 0; i < this->num_vertices; i++) {
 		auto& indices = this->per_vert_morph_key_indices[i];
-		for (int j = 0; j < indices.size();++j) {
+		for (int j = 0; j < indices.size(); ++j) {
 			auto& id = indices[j];
 			auto& data = this->per_vert_morph_data[i][j];
 			jsonData["morphData"][id][i][0] = Util::halfToFloat(data._offset[0]);
@@ -400,20 +420,13 @@ bool MorphIO::Save(const std::string jsonMorphFile)
 			jsonData["morphData"][id][i][8] = delta_tan[1];
 			jsonData["morphData"][id][i][9] = delta_tan[2];
 			//jsonData["morphData"][id][i][10] = w;
-			
+
 			// print w
 			//std::cout << std::dec << w << std::endl;
 		}
 	}
 
-	std::ofstream file(jsonMorphFile);
-	if (!file.is_open()) {
-		std::cout << "Error: Failed to open JSON file." << std::endl;
-		return false;
-	}
-
-	file << jsonData.dump(4);
-
+	json_data = jsonData.dump(4);
 	return true;
 }
 

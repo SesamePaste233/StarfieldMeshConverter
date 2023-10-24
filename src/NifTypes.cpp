@@ -403,3 +403,72 @@ size_t nif::NiIntegersExtraData::GetSize()
 {
 	return 8 + 4 * this->num_integers;
 }
+
+std::string nif::RTTIToString(const NiRTTI& rtti)
+{
+	switch (rtti) {
+	case NiRTTI::NiNodeBase:
+		return "NiNodeBase";
+	case NiRTTI::NiObject:
+		return "NiObject";
+	case NiRTTI::NiNode:
+		return "NiNode";
+	case NiRTTI::BSGeometry:
+		return "BSGeometry";
+	case NiRTTI::BSXFlags:
+		return "BSXFlags";
+	case NiRTTI::NiIntegerExtraData:
+		return "NiIntegerExtraData";
+	case NiRTTI::SkinAttach:
+		return "SkinAttach";
+	case NiRTTI::BSSkinInstance:
+		return "BSSkin::Instance";
+	case NiRTTI::BSLightingShaderProperty:
+		return "BSLightingShaderProperty";
+	case NiRTTI::BSSkinBoneData:
+		return "BSSkin::BoneData";
+	case NiRTTI::BoneTranslations:
+		return "BoneTranslations";
+	case NiRTTI::NiStringExtraData:
+		return "NiStringExtraData";
+	case NiRTTI::NiIntegersExtraData:
+		return "NiIntegersExtraData";
+	case NiRTTI::UnkBinaryBlock:
+		return "UnkBinaryBlock";
+	}
+
+	throw std::runtime_error("Unknown RTTI");
+	return "";
+}
+
+nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
+{
+	if (rtti == "NiNodeBase")
+		return NiRTTI::NiNodeBase;
+	if (rtti == "NiObject")
+		return NiRTTI::NiObject;
+	if (rtti == "NiNode")
+		return NiRTTI::NiNode;
+	if (rtti == "BSGeometry")
+		return NiRTTI::BSGeometry;
+	if (rtti == "BSXFlags")
+		return NiRTTI::BSXFlags;
+	if (rtti == "NiIntegerExtraData")
+		return NiRTTI::NiIntegerExtraData;
+	if (rtti == "SkinAttach")
+		return NiRTTI::SkinAttach;
+	if (rtti == "BSSkin::Instance")
+		return NiRTTI::BSSkinInstance;
+	if (rtti == "BSLightingShaderProperty")
+		return NiRTTI::BSLightingShaderProperty;
+	if (rtti == "BSSkin::BoneData")
+		return NiRTTI::BSSkinBoneData;
+	if (rtti == "BoneTranslations")
+		return NiRTTI::BoneTranslations;
+	if (rtti == "NiStringExtraData")
+		return NiRTTI::NiStringExtraData;
+	if (rtti == "NiIntegersExtraData")
+		return NiRTTI::NiIntegersExtraData;
+
+	return NiRTTI::UnkBinaryBlock;
+}

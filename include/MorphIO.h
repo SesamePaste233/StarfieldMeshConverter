@@ -86,6 +86,8 @@ namespace morph{
 
 		bool Save(const std::string jsonMorphFile);
 
+		bool SerializeToJson(std::string& json_data);
+
 		bool PostProcess(const uint32_t options);
 
 		void Clear();

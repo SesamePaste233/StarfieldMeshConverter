@@ -45,6 +45,8 @@ namespace mesh {
 
 		bool SaveOBJ(const std::string filename, const std::string obj_name);
 
+		bool SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name);
+
 		bool PostProcess(const uint32_t options = Options::None);
 
 		bool GeometryFromJson(const nlohmann::json& jsonData, float scale_factor);

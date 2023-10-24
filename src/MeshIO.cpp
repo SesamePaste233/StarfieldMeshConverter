@@ -941,8 +941,9 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 	//remove the suffix of the filename
 	std::string new_filename = filename;
 
-	WavefrontWriter wfw;
-	if (!wfw.Write(new_filename + ".obj", obj_name, this->indices, this->positions, this->UV_list1, this->normals)) {
+	std::string json_data;
+	if (!this->SerializeToJson(json_data, filename, obj_name)) {
+		std::cout << "Error: Failed to serialize to JSON." << std::endl;
 		return false;
 	}
 
@@ -950,6 +951,21 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 
 	if (!file.is_open()) {
 		std::cout << "Error: Failed to open JSON file." << std::endl;
+		return false;
+	}
+
+	file << json_data;
+
+	return true;
+}
+
+bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name)
+{
+	//remove the suffix of the filename
+	std::string new_filename = filename;
+
+	WavefrontWriter wfw;
+	if (!wfw.Write(new_filename + ".obj", obj_name, this->indices, this->positions, this->UV_list1, this->normals)) {
 		return false;
 	}
 
@@ -995,7 +1011,7 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 		for (int i = 0; i < this->num_weightsPerVertex; i++) {
 			json vw_per_vert_per_bone_l = json::array();
 			vw_per_vert_per_bone_l.push_back(vw[i].bone);
-			if (vw[i].weight <= 1){
+			if (vw[i].weight <= 1) {
 				vw_per_vert_per_bone_l.push_back(0);
 			}
 			else {
@@ -1042,7 +1058,7 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 	jsonData["culldata"] = culldata;
 
 	// Write the json data to file
-	file << jsonData.dump(4);
+	json_data = jsonData.dump(4);
 
 	return true;
 }

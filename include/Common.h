@@ -30,6 +30,12 @@ public:
 		return wc;
 	}
 
+	static const char* make_copy(std::string str) {
+		char* cstr = new char[str.length() + 1];
+		std::memcpy(cstr, str.c_str(), str.length() + 1);
+		return cstr;
+	}
+
 	static std::vector<float> decodeDEC3N_CHECK(uint32_t n, uint8_t _check_w) {
 		if (n == 0)
 			return { 0,0,0 };

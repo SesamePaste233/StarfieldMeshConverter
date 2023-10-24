@@ -49,21 +49,64 @@ uint32_t ExportMorph(const char* json_data, const char* output_file)
 	return 0;
 }
 
-uint32_t ImportMesh(const char* input_file, char* json_data)
+const char* ImportMesh(const char* input_file, const char* output_name)
 {
-	return 0;
+	std::string inputMesh(input_file);
+	std::string outputName(output_name);
+
+	size_t const p(inputMesh.find_last_of('.'));
+	size_t const lastSlash = inputMesh.find_last_of("/\\");
+	std::string const name(inputMesh.substr(lastSlash + 1, p));
+
+	// Create a MeshIO object
+	mesh::MeshIO reader;
+
+	// Load the mesh from the input mesh file
+	if (!reader.Deserialize(inputMesh)) {
+		std::cerr << "Failed to load mesh from " << inputMesh << std::endl;
+		return ""; // Return an error code
+	}
+
+	// Save the mesh to the output file
+	std::string JsonData;
+	if (!reader.SerializeToJson(JsonData, outputName, name)) {
+		std::cerr << "Failed to serialize mesh to json" << std::endl;
+		return ""; // Return an error code
+	}
+
+	std::cout << "Mesh loaded from " << inputMesh << std::endl;
+	
+	return Util::make_copy(JsonData);
 }
 
-uint32_t ImportMorph(const char* input_file, char* json_data)
+const char* ImportMorph(const char* input_file)
 {
-	return 0;
+	std::string inputMorph(input_file);
+
+	// Create a MorphIO object
+	morph::MorphIO morphReader;
+
+	// Load the morph from the input morph file
+	if (!morphReader.Deserialize(inputMorph)) {
+		std::cerr << "Failed to load morph from " << inputMorph << std::endl;
+		return ""; // Return an error code
+	}
+
+	// Save the morph to the output file
+	std::string JsonData;
+	if (!morphReader.SerializeToJson(JsonData)) {
+		std::cerr << "Failed to serialize morph to json" << std::endl;
+		return "";
+	}
+
+	return Util::make_copy(JsonData);
 }
 
 uint32_t CreateNif(const char* json_data, const char* output_file)
 {
 	nif::NifIO nif;
 
-	nif::ni_template::NiSkinInstanceTemplate skin;
+	nif::ni_template::NiSingleSkinInstanceTemplate skin;
 
 	nif.FromTemplate(&skin);
 
@@ -75,4 +118,31 @@ uint32_t CreateNif(const char* json_data, const char* output_file)
 	std::cout << "Nif serialized to " << output_file << std::endl;
 
 	return 0;
+}
+
+const char* ImportNif(const char* input_file)
+{
+	nif::NifIO nif;
+
+	if (!nif.Deserialize(input_file)) {
+		std::cerr << "Failed to load nif from " << input_file << std::endl;
+		return "";
+	}
+
+	auto t_ptr = nif.ToTemplate<nif::ni_template::NiSingleSkinInstanceTemplate>();
+
+	if (t_ptr == nullptr) {
+		std::cerr << "Failed to convert nif to template" << std::endl;
+		return "";
+	}
+	else {
+		std::cout << "Nif converted to template RTTI: " << (uint32_t)t_ptr->GetRTTI() << std::endl;
+	}
+
+	auto jsondata = t_ptr->Serialize();
+
+	std::cout << "Nif serialized to json" << std::endl;
+
+	
+	return Util::make_copy(jsondata.dump());
 }

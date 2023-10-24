@@ -8,8 +8,31 @@ namespace nif {
 	namespace ni_template {
 		class NiTemplateBase;
 		class NiRootSceneTemplate;
-		class NiSimpleGeometryTemplate;
-		class NiSkinInstanceTemplate;
+		class NiSingleGeometryTemplate;
+		class NiSingleSkinInstanceTemplate;
+
+		enum class RTTI {
+			None = 0,
+			NiRootScene,
+			NiSingleGeometry,
+			NiSingleSkinInstance,
+		};
+
+		template<class _template_type>
+		NiTemplateBase* slice_cast(NiTemplateBase*& ptr) {
+			NiTemplateBase* _ptr = new _template_type;
+			auto n_ptr = dynamic_cast<_template_type*>(ptr);
+			if (n_ptr == nullptr) {
+				delete _ptr;
+				return nullptr;
+			}
+			*_ptr = *n_ptr;
+			delete ptr;
+			ptr = nullptr;
+			return _ptr;
+		};
+
+		NiTemplateBase* slice_cast(NiTemplateBase*& ptr, const RTTI& rtti);
 	};
 
 	class NifIO
@@ -95,6 +118,9 @@ namespace nif {
 		
 		NiNodeBase* AddBlock(const std::string type_name, const std::string block_name = "");
 
+		NiNodeBase* AddBlock(const nif::NiRTTI rtti, const std::string block_name = "");
+
+
 		void UpdateBlockReference(NiNodeBase* block) {
 			for (const auto& ref : block->GetBlockReference()) {
 				block_manager.AddReference(ref, block_manager.FindBlock(block));
@@ -126,22 +152,52 @@ namespace nif {
 
 		Header header;
 
+		std::string assets_path = "";
+
 		std::vector<NiNodeBase*> blocks;
 
 		NiStringManager string_manager = NiStringManager(&header, this);
 
 		NiBlockManager block_manager = NiBlockManager(&header, this);
 
-		std::vector<NiNodeBase*> GetRTTIBlocks(const std::string& RTTI);
+		std::vector<NiNodeBase*> GetRTTIBlocks(const NiRTTI& RTTI, const bool use_name = false, const std::string& name = "") const;
 
 		bool FromTemplate(ni_template::NiTemplateBase* template_ptr);
+
+		template<class _template_type>
+		ni_template::NiTemplateBase* ToTemplate() const {
+			nif::ni_template::NiTemplateBase* t_ptr = new _template_type;
+			auto rtti = t_ptr->FromNif(*this);
+			if (rtti != t_ptr->GetRTTI()) {
+				return ni_template::slice_cast(t_ptr, rtti);
+			}
+			return (ni_template::NiTemplateBase*)t_ptr;
+		};
+
+		std::vector<NiNodeBase*> GetReferencedBlocks(const NiNodeBase* referer, const NiRTTI& RTTI = NiRTTI::None, const bool use_name = false, const std::string& name = "") const;
+
+		void SetAssetsPath(const std::string& path) {
+			// Append "geometries" to the path if it doesn't end with it
+			if (path.substr(path.length() - 11) != "geometries/") {
+				assets_path = path + "geometries/";
+			}
+			else
+				assets_path = path;
+		};
+
+		mesh::MeshIO* GetMesh(const std::string& mesh_factory_path) const;
 	};
 
 
 	namespace ni_template {
+
 		class NiTemplateBase {
 		public:
+			virtual RTTI GetRTTI() const = 0;
 			virtual bool ToNif(NifIO& source) = 0;
+			virtual RTTI FromNif(const NifIO& source) = 0;
+			virtual nlohmann::json Serialize() const = 0;
+			virtual bool Deserialize(nlohmann::json data) = 0;
 		};
 
 		class NiRootSceneTemplate :public NiTemplateBase {
@@ -155,18 +211,27 @@ namespace nif {
 			uint32_t root_flags = 0x2000000E;
 			std::string root_name = "ExportScene";
 
+			RTTI GetRTTI() const override {
+				return RTTI::NiRootScene;
+			};
 			bool ToNif(NifIO& source) override;
+			RTTI FromNif(const NifIO& source) override;
+			nlohmann::json Serialize() const override;
+			bool Deserialize(nlohmann::json data) override;
+
 		};
 		
-		class NiSimpleGeometryTemplate :public NiRootSceneTemplate {
+		class NiSingleGeometryTemplate :public NiRootSceneTemplate {
 		public:
 			typedef struct MeshInfo {
-				mesh::MeshIO* entry = nullptr;
+				bool has_mesh = false;
+				uint32_t num_indices = 0;
+				uint32_t num_vertices = 0;
 				std::string factory_path = "";
 			};
 
-			NiSimpleGeometryTemplate() = default;
-			~NiSimpleGeometryTemplate() = default;
+			NiSingleGeometryTemplate() = default;
+			~NiSingleGeometryTemplate() = default;
 
 			uint32_t bsx_flags = 65536;
 
@@ -181,21 +246,33 @@ namespace nif {
 			uint32_t mat_id = 0;
 			std::string mat_path = "";
 
+			RTTI GetRTTI() const override {
+				return RTTI::NiSingleGeometry;
+			};
 			bool ToNif(NifIO& source) override;
+			RTTI FromNif(const NifIO& source) override;
+			nlohmann::json Serialize() const override;
+			bool Deserialize(nlohmann::json data) override;
 		};
 
-		class NiSkinInstanceTemplate :public NiSimpleGeometryTemplate {
+		class NiSingleSkinInstanceTemplate :public NiSingleGeometryTemplate {
 		public:
 			typedef nif::BSSkin::BoneData::BoneInfo BoneInfo;
 
-			NiSkinInstanceTemplate() = default;
-			~NiSkinInstanceTemplate() = default;
+			NiSingleSkinInstanceTemplate() = default;
+			~NiSingleSkinInstanceTemplate() = default;
 
 			std::vector<std::string> bone_names;
 			std::vector<std::string> bone_refs;
 			std::vector<BoneInfo> bone_infos;
 
+			RTTI GetRTTI() const override {
+				return RTTI::NiSingleSkinInstance;
+			};
 			bool ToNif(NifIO& source) override;
+			RTTI FromNif(const NifIO& source) override;
+			nlohmann::json Serialize() const override;
+			bool Deserialize(nlohmann::json data) override;
 		};
 	};
 

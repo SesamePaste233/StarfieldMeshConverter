@@ -2,6 +2,28 @@
 #include "Common.h"
 
 namespace nif {
+	enum class NiRTTI {
+		None = 0,
+		NiNodeBase,
+		NiObject,
+		NiNode,
+		BSXFlags,
+		BSGeometry,
+		NiIntegerExtraData,
+		NiStringExtraData,
+		NiIntegersExtraData,
+		SkinAttach,
+		BSSkinInstance,
+		BSSkinBoneData,
+		BSLightingShaderProperty,
+		BoneTranslations,
+		UnkBinaryBlock,
+	};
+
+	std::string RTTIToString(const NiRTTI& rtti);
+
+	NiRTTI StringToRTTI(const std::string& rtti);
+
 	class NiNodeBase {
 	public:
 		static constexpr uint32_t NO_REF = 0xffffffff;
@@ -20,11 +42,11 @@ namespace nif {
 				name_index = new_id;
 			}
 		};
-		virtual std::string GetRTTI() {
-			return "NiNodeBase";
+		virtual NiRTTI GetRTTI() const{
+			return NiRTTI::NiNodeBase;
 		};
-		virtual std::vector<uint32_t> GetBlockReference() = 0;
-		virtual std::vector<uint32_t> GetStringReference() {
+		virtual std::vector<uint32_t> GetBlockReference() const = 0;
+		virtual std::vector<uint32_t> GetStringReference() const {
 			std::vector<uint32_t> refs;
 			if (name_index != NO_REF) {
 				refs.push_back(name_index);
@@ -56,10 +78,10 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "NiObject";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::NiObject;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			std::vector<uint32_t> refs;
 			if (controller_index != NO_REF) {
 				refs.push_back(controller_index);
@@ -72,7 +94,7 @@ namespace nif {
 			}
 			return refs;
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
 
@@ -96,17 +118,17 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiObject::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "NiNode";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::NiNode;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			std::vector<uint32_t> refs = NiObject::GetBlockReference();
 			for (const auto& ref : children) {
 				refs.push_back(ref);
 			}
 			return refs;
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiObject::GetStringReference();
 		};
 
@@ -129,13 +151,13 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "BSXFlags";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BSXFlags;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
 	};
@@ -175,10 +197,10 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiObject::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "BSGeometry";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BSGeometry;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			std::vector<uint32_t> refs = NiObject::GetBlockReference();
 			if (skin_instance != NO_REF) {
 				refs.push_back(skin_instance);
@@ -191,7 +213,7 @@ namespace nif {
 			}
 			return refs;
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
 
@@ -213,13 +235,13 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "NiIntegerExtraData";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::NiIntegerExtraData;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
 	};
@@ -240,13 +262,13 @@ namespace nif {
 				string_index = new_id;
 			}
 		};
-		std::string GetRTTI() override {
-			return "NiStringExtraData";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::NiStringExtraData;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			auto refs = NiNodeBase::GetStringReference();
 			if (string_index != NO_REF) {
 				refs.push_back(string_index);
@@ -269,13 +291,13 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "NiIntegersExtraData";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::NiIntegersExtraData;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
 	};
@@ -294,13 +316,13 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "SkinAttach";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::SkinAttach;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
-		std::vector<uint32_t> GetStringReference() override {
+		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
 	};
@@ -327,10 +349,10 @@ namespace nif {
 			void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 				NiNodeBase::UpdateStrings(old_id, new_id);
 			};
-			std::string GetRTTI() override {
-				return "BSSkin::Instance";
+			NiRTTI GetRTTI() const override {
+				return NiRTTI::BSSkinInstance;
 			};
-			std::vector<uint32_t> GetBlockReference() override {
+			std::vector<uint32_t> GetBlockReference() const override {
 				std::vector<uint32_t> refs;
 				if (skeleton_root != NO_REF) {
 					refs.push_back(skeleton_root);
@@ -340,7 +362,7 @@ namespace nif {
 				}
 				return refs;
 			};
-			std::vector<uint32_t> GetStringReference() override {
+			std::vector<uint32_t> GetStringReference() const override {
 				return NiNodeBase::GetStringReference();
 			};
 		};
@@ -366,10 +388,10 @@ namespace nif {
 			void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 				NiNodeBase::UpdateStrings(old_id, new_id);
 			};
-			std::string GetRTTI() override {
-				return "BSSkin::BoneData";
+			NiRTTI GetRTTI() const override {
+				return NiRTTI::BSSkinBoneData;
 			};
-			std::vector<uint32_t> GetBlockReference() override {
+			std::vector<uint32_t> GetBlockReference() const override {
 				return std::vector<uint32_t>();
 			};
 		};
@@ -391,10 +413,10 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "BSLightingShaderProperty";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BSLightingShaderProperty;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			std::vector<uint32_t> refs;
 			if (controller != NO_REF) {
 				refs.push_back(controller);
@@ -425,10 +447,10 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return "BoneTranslations";
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BoneTranslations;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
 	};
@@ -438,7 +460,7 @@ namespace nif {
 		UnkBinaryBlock(uint32_t bytes) :binary_bytes(bytes) {};
 		~UnkBinaryBlock() = default;
 
-		std::string RTTI = "NiNodeBase";
+		std::string RTTI = "Unknown";
 		uint32_t binary_bytes = 0;
 		uint8_t* binary_data = nullptr;
 
@@ -448,10 +470,10 @@ namespace nif {
 		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
-		std::string GetRTTI() override {
-			return RTTI;
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::NiNodeBase;
 		};
-		std::vector<uint32_t> GetBlockReference() override {
+		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
 	};

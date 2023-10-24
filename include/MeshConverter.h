@@ -4,12 +4,12 @@
 #include "NifIO.h"
 #include "Common.h"
 
-#define _DLLEXPORT
+//#define _DLLEXPORT
 
 #ifdef _DLLEXPORT
 #define DLL __declspec(dllexport)
 #else
-#define DLL __declspec(dllimport)
+#define DLL
 #endif
 extern "C" {
 	uint32_t DLL ExportMesh(const char* json_data,
@@ -22,9 +22,11 @@ extern "C" {
 	uint32_t DLL ExportMorph(const char* json_data,
 		const char* output_file);
 
-	uint32_t DLL ImportMesh(const char* input_file, char* json_data);
+	const char * DLL ImportMesh(const char* input_file, const char* output_name);
 
-	uint32_t DLL ImportMorph(const char* input_file, char* json_data);
+	const char* DLL ImportMorph(const char* input_file);
 
 	uint32_t DLL CreateNif(const char* json_data, const char* output_file);
+
+	const char* DLL ImportNif(const char* input_file);
 }

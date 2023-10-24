@@ -250,13 +250,29 @@ void amain() {
 }
 
 void main() {
-	nif::NifIO reader;
+	nif::NifIO nif;
 
-	reader.Deserialize("C:\\repo\\MeshConverter\\skeleton.nif");
+	std::string input_file = "C:\\repo\\MeshConverter\\naked_m.nif";
 
-	nif::Armature armature;
-	armature.FromNif(reader, true);
-	armature.ToJson("C:\\Users\\26553\\AppData\\Roaming\\Blender Foundation\\Blender\\3.5\\scripts\\addons\\tool_export_mesh\\Assets\\skeleton.json", true);
+	if (!nif.Deserialize(input_file)) {
+		std::cerr << "Failed to load nif from " << input_file << std::endl;
+		return;
+	}
+
+	auto t_ptr = nif.ToTemplate<nif::ni_template::NiSingleSkinInstanceTemplate>();
+
+	if (t_ptr == nullptr) {
+		std::cerr << "Failed to convert nif to template" << std::endl;
+		return;
+	}
+	else {
+		std::cout << "Nif converted to template RTTI: " << (uint32_t)t_ptr->GetRTTI() << std::endl;
+	}
+
+	auto jsondata = t_ptr->Serialize();
+
+	std::ofstream out("C:\\repo\\MeshConverter\\naked_m.json");
+	out << jsondata.dump(4);
 }
 
 void _main() {
