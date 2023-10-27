@@ -154,6 +154,10 @@ const char* ImportNif(const char* input_file)
 		std::cout << "Nif converted to template RTTI: " << (uint32_t)t_ptr->GetRTTI() << std::endl;
 	}
 
+	/*if (t_ptr->GetRTTI() == nif::ni_template::RTTI::NiArmature) {
+		dynamic_cast<nif::ni_template::NiArmatureTemplate*>(t_ptr)->skeleton_mode = true;
+	}*/
+
 	auto jsondata = t_ptr->Serialize();
 
 	jsondata["TEMPLATE_RTTI"] = (uint32_t)t_ptr->GetRTTI();

@@ -574,16 +574,17 @@ def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name 
 
     bpy.ops.object.mode_set(mode='OBJECT')
 
-    for skin_object in skin_objects:
-        if skin_object:
-            modifier = skin_object.modifiers.new(name = "Armature", type='ARMATURE')
-            modifier.object = arm_obj
-            skin_object.parent = arm_obj
+    if skin_objects != None:
+        for skin_object in skin_objects:
+            if skin_object:
+                modifier = skin_object.modifiers.new(name = "Armature", type='ARMATURE')
+                modifier.object = arm_obj
+                skin_object.parent = arm_obj
 
-            if armature_name == None:
-                arm_obj.name = skin_object.name
-            else:
-                arm_obj.name = armature_name
+                if armature_name == None:
+                    arm_obj.name = skin_object.name
+                else:
+                    arm_obj.name = armature_name
 
     SetSelectObjects(old_selected)
     SetActiveObject(old_active)
