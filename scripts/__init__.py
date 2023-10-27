@@ -1,6 +1,5 @@
 import bpy
 import os
-import subprocess
 import shutil
 import bmesh
 import json
@@ -10,12 +9,14 @@ from collections import defaultdict
 import mathutils
 import numpy as np
 from mathutils import Color
+import math
 import ctypes
 import time
+import pickle
 
 bl_info = {
     "name": "Starfield Mesh Exporter",
-    "version": (0, 10, 0),
+    "version": (0, 11, 0),
     "blender": (3, 5, 0),
     "location": "File > Import-Export",
     "description": "Export .mesh geometry file for starfield.",
@@ -25,9 +26,7 @@ bl_info = {
 
 read_only_marker = '[READONLY]'
 mix_normal = False
-
-invert_UV_tile_tangent = False
-
+default_assets_folder = 'YOUR_LOOSE_DATA_FOLDER'
 
 # Load the DLL
 _dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
@@ -38,7 +37,48 @@ _dll_export_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, c
 
 _dll_export_morph = _dll.ExportMorph
 _dll_export_morph.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
-    
+
+_dll_export_nif = _dll.CreateNif
+_dll_export_nif.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+
+_dll_import_nif = _dll.ImportNif
+_dll_import_nif.argtypes = [ctypes.c_char_p]
+_dll_import_nif.restype = ctypes.c_char_p
+
+_dll_import_mesh = _dll.ImportMesh
+_dll_import_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+_dll_import_mesh.restype = ctypes.c_char_p
+
+_dll_import_morph = _dll.ImportMorph
+_dll_import_morph.argtypes = [ctypes.c_char_p]
+_dll_import_morph.restype = ctypes.c_char_p
+
+def save(filename, *args):
+    # Get global dictionary
+    glob = globals()
+    d = {}
+    for v in args:
+        # Copy over desired values
+        d[v] = glob[v]
+    with open(os.path.join(os.path.dirname(__file__), filename), 'wb') as f:
+        # Put them in the file 
+        pickle.dump(d, f)
+
+def load(filename):
+    # Get global dictionary
+    glob = globals()
+    try:
+        with open(os.path.join(os.path.dirname(__file__), filename), 'rb') as f:
+            for k, v in pickle.load(f).items():
+                # Set each global variable to the value from the file
+                glob[k] = v
+    except FileNotFoundError:
+        print("No cached paths.")
+        global export_mesh_folder_path
+        export_mesh_folder_path = os.path.join(os.path.dirname(__file__),'Result')
+        global assets_folder
+        assets_folder = default_assets_folder
+
 
 def sanitize_filename(filename):
     illegal_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
@@ -166,8 +206,14 @@ def GramSchmidtOrthogonalize(tangent, normal):
     # Subtract the projection from the original tangent to make it orthogonal to the normal
     orthogonal_tangent = tangent - projection
 
-    # Normalize the resulting orthogonal tangent
-    normalized_orthogonal_tangent = orthogonal_tangent / np.linalg.norm(orthogonal_tangent)
+    # Handle degenerated tangents
+    norm = np.linalg.norm(orthogonal_tangent)
+
+    if norm == 0:
+        normalized_orthogonal_tangent = np.array([normal[1],normal[2],normal[0]])
+    else:
+        # Normalize the resulting orthogonal tangent
+        normalized_orthogonal_tangent = orthogonal_tangent / np.linalg.norm(orthogonal_tangent)
 
     return normalized_orthogonal_tangent
 
@@ -181,7 +227,8 @@ def SetSelectObjects(objs):
     original_selected = bpy.context.selected_objects
     bpy.ops.object.select_all(action='DESELECT')
     for obj in objs:
-        obj.select_set(state=True)
+        if obj != None:
+            obj.select_set(state=True)
     return original_selected
 
 def GetActiveObject():
@@ -190,7 +237,8 @@ def GetActiveObject():
 def SetActiveObject(obj):
     original_active = GetActiveObject()
     #bpy.ops.object.select_all(action='DESELECT')
-    obj.select_set(True)
+    if obj != None:
+        obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
     return original_active
 
@@ -316,7 +364,7 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
         modifier.use_loop_data = True
         modifier.data_types_loops = {'CUSTOM_NORMAL'}
         modifier.use_max_distance = True
-        modifier.max_distance = 0.01
+        modifier.max_distance = 0.001
         modifier.loop_mapping = "TOPOLOGY"
 
         bpy.ops.object.modifier_apply(modifier=modifier.name)
@@ -339,6 +387,15 @@ def GetSelectedObjs(exclude_active):
             l.append(obj)
     return l
 
+def move_object_to_collection(objs, coll):
+    for obj in objs:
+        if obj != None:
+            old_colls = [c for c in obj.users_collection]
+            coll.objects.link(obj)
+            for c in old_colls:
+                if c != None:
+                    c.objects.unlink(obj)
+
 def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, base_obj = None):
     if active_obj in selected_obj_list:
         selected_obj_list.remove(active_obj)
@@ -352,7 +409,7 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
         modifier.use_loop_data = True
         modifier.data_types_loops = {'CUSTOM_NORMAL'}
         modifier.use_max_distance = True
-        modifier.max_distance = 0.01
+        modifier.max_distance = 0.001
         modifier.loop_mapping = "TOPOLOGY"
         if apply_as_mesh:
             bpy.ops.object.modifier_apply(modifier=modifier.name)
@@ -364,7 +421,7 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
             modifier.use_loop_data = True
             modifier.data_types_loops = {'CUSTOM_NORMAL'}
             modifier.use_max_distance = True
-            modifier.max_distance = 0.01
+            modifier.max_distance = 0.001
             if mix_normal:
                 modifier.mix_mode = 'ADD'
             if apply_as_mesh:
@@ -419,6 +476,165 @@ def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
         mesh.from_pydata(verts, edges, [])
 
     bm.free()
+
+def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict, options, context, operator):
+    _objects = []
+    is_node = False
+    if (armature_dict["geometry_index"] != 4294967295):
+        data = root_dict["geometries"][armature_dict["geometry_index"]]
+        geo_name = armature_dict['name']
+        loaded = False
+
+        lod = 0
+        for mesh_info in data['geo_mesh_lod']:
+            if options.max_lod != 0 and lod == options.max_lod:
+                break
+
+            factory_path = mesh_info['factory_path']
+            options.filepath = os.path.join(assets_folder, 'geometries', factory_path + '.mesh')
+            rtn = ImportMesh(options, context, operator, factory_path)
+            _objects.append(GetActiveObject())
+            _objects[-1].name = geo_name + f'_LOD:{lod}'
+            lod += 1
+            if 'FINISHED' in rtn:
+                loaded = True
+            else:
+                operator.report({'WARNING'}, f'{factory_path}.mesh cannot be loaded.')
+
+        if loaded == False:
+            operator.report({'WARNING'}, f'No mesh was loaded for {geo_name}.')
+
+
+        if 'has_skin' in data.keys() and data['has_skin'] == True:
+            for obj in _objects:
+                SetWeightKeys(obj, data['bone_names'])
+            
+            ImportArmatureFromJson(_objects, collection, geo_name)
+
+    else:
+        is_node = True
+        Axis = bpy.data.objects.new(armature_dict['name'], None, )
+        Axis.empty_display_type = 'ARROWS'
+        Axis.show_name = True
+        Axis.empty_display_size = 0.015
+        _objects.append(Axis)
+
+    move_object_to_collection(_objects, collection)
+    for obj in _objects:
+        if parent_node != None:
+            obj.parent = parent_node
+        T = mathutils.Matrix()
+        for i in range(4):
+            for j in range(4):
+                T[i][j] = armature_dict['matrix'][i][j]
+        
+        obj.matrix_world = T
+        scale = armature_dict['scale']
+        obj.scale = tuple([scale,scale,scale])
+    
+
+    print(armature_dict['name'])
+
+
+    for child_dict in armature_dict['children']:
+        TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, context, operator)
+
+def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones):
+
+    b = edit_bones.new(armature_dict['name'])
+    b.head = tuple(armature_dict['head'])
+    b.tail = tuple(armature_dict['tail'])
+    T = mathutils.Matrix()
+    for i in range(4):
+        for j in range(4):
+            T[i][j] = armature_dict['matrix'][i][j]
+    
+    correction = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')
+    b.matrix = T @ correction
+    print(armature_dict['name'])
+    if parent_bone != None:
+        b.parent = parent_bone
+
+    for child_dict in armature_dict['children']:
+        CreateArmatureRecursive(child_dict, b, edit_bones)
+
+def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name = None):
+    old_active = GetActiveObject()
+    old_selected = GetSelectedObjs(True)
+
+    armature = bpy.data.armatures.new('skeleton')
+    
+    arm_obj = bpy.data.objects.new('skeleton', armature)
+    collection.objects.link(arm_obj)
+    SetActiveObject(arm_obj)
+    bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+    edit_bones = arm_obj.data.edit_bones
+
+    CreateArmatureRecursive(armature_dict, None, edit_bones)
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+    for skin_object in skin_objects:
+        if skin_object:
+            modifier = skin_object.modifiers.new(name = "Armature", type='ARMATURE')
+            modifier.object = arm_obj
+            skin_object.parent = arm_obj
+
+            if armature_name == None:
+                arm_obj.name = skin_object.name
+            else:
+                arm_obj.name = armature_name
+
+    SetSelectObjects(old_selected)
+    SetActiveObject(old_active)
+    return arm_obj
+
+def ImportArmatureFromJson(skin_objs, collection, armature_name = None):
+    utils_path, temp_path = update_path(os.path.dirname(__file__))
+    skeleton_path = os.path.join(utils_path, "Assets", "skeleton.json")
+
+    with open(skeleton_path, 'r') as json_file:
+        data = json.load(json_file)
+
+        return CreateArmature(data, skin_objs, collection, armature_name)
+
+def SetWeightKeys(obj, weight_keys:list):
+    if len(weight_keys) != len(obj.vertex_groups):
+        return False
+
+    for vg, name in zip(obj.vertex_groups, weight_keys):
+        vg.name = name
+
+    return True
+
+def ImportNif(options, context, operator):
+    assets_folder = options.assets_folder
+    nifname = os.path.basename(options.filepath)
+    
+    if assets_folder == default_assets_folder:
+        operator.report({'WARNING'}, 'Setup your assets folder before importing!')
+        return {'CANCELLED'} 
+    
+    json_str = _dll_import_nif(options.filepath.encode('utf-8')).decode('utf-8')
+    
+    if json_str == "":
+        operator.report({'WARNING'}, f'Nif failed to load.')
+        return {'CANCELLED'}
+
+    _data = json.loads(json_str)
+
+    prev_coll = bpy.data.collections.new(nifname)
+    bpy.context.scene.collection.children.link(prev_coll)
+
+    if "geometries" not in _data.keys():
+        CreateArmature(_data, None, prev_coll, "Armature")
+        operator.report({'WARNING'}, f'Nif failed to load.')
+        return {'FINISHED'}
+    else:
+        TraverseNodeRecursive(_data, None, prev_coll, _data, options, context, operator)
+
+    operator.report({'INFO'}, f'Meshes loaded for {nifname}.')
+    return {'FINISHED'}
 
 def ExportMesh(options, context, filepath, operator):
     export_mesh_file_path = filepath
@@ -619,21 +835,19 @@ def ExportMesh(options, context, filepath, operator):
         
     return {'CANCELLED'}
 
-def ImportMesh(options, context, operator):
+def ImportMesh(options, context, operator, mesh_name_override = None):
     import_path = options.filepath
     utils_path, temp_path = update_path(os.path.dirname(__file__))
 
-    log_file_path = os.path.join(utils_path, "console_import.log")
-    with open(log_file_path, "w") as log_file:
-        result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
-                            '-b',
-                            import_path,
-                            os.path.join(temp_path, "mesh_data_import"),
-                            ],stdout=log_file)
+    rtn = _dll_import_mesh(import_path.encode('utf-8'), os.path.join(temp_path, "mesh_data_import").encode('utf-8')).decode('utf-8')
 
+    if rtn == "":
+        returncode = -1 
+    else:
+        returncode = 0
 
-    if result.returncode == 0:
-        operator.report({'INFO'}, "Starfield .mesh exported successfully")
+    if returncode == 0:
+        operator.report({'INFO'}, "Starfield .mesh imported successfully")
         
         bpy.ops.wm.obj_import(
             filepath=os.path.join(temp_path, "mesh_data_import.obj"),
@@ -644,6 +858,8 @@ def ImportMesh(options, context, operator):
         obj = bpy.context.selected_objects[0]
         if obj:
             mesh = obj.data
+            if mesh_name_override != None:
+                mesh.name = mesh_name_override
             if not mesh.vertex_colors:
                 mesh.vertex_colors.new()
 
@@ -652,239 +868,249 @@ def ImportMesh(options, context, operator):
 
             col = obj.data.vertex_colors.active
 
-            with open(os.path.join(temp_path, "mesh_data_import.json"), 'r') as json_file:
-                data = json.load(json_file)
+            data = json.loads(rtn)
 
-                if len(data["vertex_weights"]) > 0:
-                    num_bones_per_vert = len(data["vertex_weights"][0])
-                    num_bones = -1
-                    for v in bm.verts:
-                        for i in range(num_bones_per_vert):
-                            if data["vertex_weights"][v.index][i][0] > num_bones:
-                                num_bones = data["vertex_weights"][v.index][i][0]
+            if len(data["vertex_weights"]) > 0:
+                num_bones_per_vert = len(data["vertex_weights"][0])
+                num_bones = -1
+                for v in bm.verts:
+                    for i in range(num_bones_per_vert):
+                        if data["vertex_weights"][v.index][i][0] > num_bones:
+                            num_bones = data["vertex_weights"][v.index][i][0]
+                
+                num_bones += 1
+                bones = []
+                for i in range(num_bones):
+                    bones.append(obj.vertex_groups.new(name='bone' + str(i)))
+
+                if len(bm.verts) != len(data["vertex_weights"]):
+                    operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")
+                    return {'CANCELLED'}
+                
+                for v in bm.verts:
+                    for i in range(num_bones_per_vert):
+                        cur_boneweight = data["vertex_weights"][v.index][i]
+                        
+                        if cur_boneweight[1] != 0:
+                            bones[int(cur_boneweight[0])].add([v.index], cur_boneweight[1],'ADD')
+                    #print(v.index, v.co, data["vertex_weights"][v.index])
+
+            vertex_map = defaultdict(list)
+            for poly in obj.data.polygons:
+                for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
+                    vertex_map[v_ix].append(l_ix)
+
+            if len(data["vertex_color"]) > 0:
+                if len(bm.verts) != len(data["vertex_color"]):
+                    operator.report({'WARNING'}, f"Vertex data mismatched. Contact the author for assistance.")
+                    return {'CANCELLED'}
+                for v_ix, l_ixs in vertex_map.items():
+                    for l_ix in l_ixs:
+                        col.data[l_ix].color = (data["vertex_color"][v_ix][0],data["vertex_color"][v_ix][1],data["vertex_color"][v_ix][2],data["vertex_color"][v_ix][3])
+            
+                
+            if options.meshlets_debug and len(data['meshlets']) > 0:
+                num_meshlets = len(data['meshlets'])
+
+                for i in range(num_meshlets):
+                    material_name = f"Meshlet_{i}"
+                    material = bpy.data.materials.new(name=material_name)
+                    _h = (0.1 + 0.3*i) % 1.0
+                    _s = 1.0
+                    _v = 0.8
+                    _c = Color()
+                    _c.hsv = _h, _s, _v
+                    material.diffuse_color = _c[:] + (1.0,)
+                    mesh.materials.append(material)
+
+
+                for i in range(num_meshlets):
+                    tri_counts = data['meshlets'][i][2]
+                    tri_offset = data['meshlets'][i][3]
+                    for j in range(tri_offset, tri_offset + tri_counts):
+                        mesh.polygons[j].material_index = i
+
+                if options.culldata_debug:
                     
-                    num_bones += 1
-                    bones = []
-                    for i in range(num_bones):
-                        bones.append(obj.vertex_groups.new(name='bone' + str(i)))
+                    for i in range(num_meshlets):
+                        center = data['culldata'][i][:3]
+                        radius = data['culldata'][i][3]
+                        normal = data['culldata'][i][4:7]
+                        marker = data['culldata'][i][7]
+                        apex = data['culldata'][i][8]
 
-                    if len(bm.verts) != len(data["vertex_weights"]):
-                        operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")
-                        return {'CANCELLED'}
+                        bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=center)
+                        bpy.context.object.display_type = 'BOUNDS'
+                        bpy.context.object.display_bounds_type = 'SPHERE'
+                        bpy.context.object.show_bounds = True
+                        bpy.context.object.name = f"Meshlet_{i}"
+
                     
-                    for v in bm.verts:
-                        for i in range(num_bones_per_vert):
-                            cur_boneweight = data["vertex_weights"][v.index][i]
-                            
-                            if cur_boneweight[1] != 0:
-                                bones[int(cur_boneweight[0])].add([v.index], cur_boneweight[1],'ADD')
-                        #print(v.index, v.co, data["vertex_weights"][v.index])
+                        normal_float = [(_i/255.0)*2 - 1 for _i in normal]
+                        is_degenerate = (marker == 255)
+                        angle = np.arccos(-marker/255.0) - (3.1415926 / 2)
+                        depth = radius / np.tan(angle)
+                        cone_center = [_i + _j * depth * 0.5 for _i,_j in zip(center, normal_float)]
 
-                vertex_map = defaultdict(list)
-                for poly in obj.data.polygons:
-                    for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
-                        vertex_map[v_ix].append(l_ix)
+                        if not is_degenerate:
+                            bpy.ops.mesh.primitive_cone_add(vertices=32, radius1 = radius, depth = depth, location=cone_center)
+                            # Calculate the rotation matrix to align the up direction with the normal vector
+                            up_vector = mathutils.Vector((0, 0, 1)) 
+                            rotation_matrix = up_vector.rotation_difference(mathutils.Vector(normal_float)).to_matrix()
 
-                if len(data["vertex_color"]) > 0:
-                    if len(bm.verts) != len(data["vertex_weights"]):
-                        operator.report({'WARNING'}, f"Vertex data mismatched. Contact the author for assistance.")
-                        return {'CANCELLED'}
+                            # Apply the rotation to the cone
+                            bpy.context.object.rotation_euler = rotation_matrix.to_euler()
+
+                            bpy.context.object.display_type = 'BOUNDS'
+                            bpy.context.object.display_bounds_type = 'CONE'
+                            bpy.context.object.show_bounds = True
+                            bpy.context.object.name = f"CullCone_{i}"
+                            pass
+                        else:
+
+                            pass
+
+
+            if options.tangents_debug and len(data['tangents']) > 0:
+                num_tangents = len(data['tangents'])
+                if num_tangents != len(bm.verts):
+                    operator.report({'WARNING'}, f"Tangent data mismatched.")
+                else:
+                    mesh = bpy.data.meshes.new("Tangents")  # add a new mesh
+                    obj = bpy.data.objects.new("Tangents", mesh)  # add a new object using the mesh
+
+                    bpy.context.collection.objects.link(obj)
+                    scale = 0.02
+                    verts = [v.co for v in bm.verts] + [(t[0] * scale + v.co[0], t[1] * scale + v.co[1], t[2] * scale + v.co[2]) for t, v in zip(data['tangents'], bm.verts)]
+                    edges = [[i,i + len(bm.verts)] for i in range(len(bm.verts))]
+                    mesh.from_pydata(verts, edges, [])
                     for v_ix, l_ixs in vertex_map.items():
                         for l_ix in l_ixs:
-                            col.data[l_ix].color = (data["vertex_color"][v_ix][0],data["vertex_color"][v_ix][1],data["vertex_color"][v_ix][2],data["vertex_color"][v_ix][3])
-                
-                
-                if options.meshlets_debug and len(data['meshlets']) > 0:
-                    num_meshlets = len(data['meshlets'])
-
-                    for i in range(num_meshlets):
-                        material_name = f"Meshlet_{i}"
-                        material = bpy.data.materials.new(name=material_name)
-                        _h = (0.1 + 0.3*i) % 1.0
-                        _s = 1.0
-                        _v = 0.8
-                        _c = Color()
-                        _c.hsv = _h, _s, _v
-                        material.diffuse_color = _c[:] + (1.0,)
-                        mesh.materials.append(material)
-
-
-                    for i in range(num_meshlets):
-                        tri_counts = data['meshlets'][i][2]
-                        tri_offset = data['meshlets'][i][3]
-                        for j in range(tri_offset, tri_offset + tri_counts):
-                            mesh.polygons[j].material_index = i
-
-                    if options.culldata_debug:
-                        
-                        for i in range(num_meshlets):
-                            center = data['culldata'][i][:3]
-                            radius = data['culldata'][i][3]
-                            normal = data['culldata'][i][4:7]
-                            marker = data['culldata'][i][7]
-                            apex = data['culldata'][i][8]
-
-                            bpy.ops.mesh.primitive_uv_sphere_add(radius=radius, location=center)
-                            bpy.context.object.display_type = 'BOUNDS'
-                            bpy.context.object.display_bounds_type = 'SPHERE'
-                            bpy.context.object.show_bounds = True
-                            bpy.context.object.name = f"Meshlet_{i}"
-
-                        
-                            normal_float = [(_i/255.0)*2 - 1 for _i in normal]
-                            is_degenerate = (marker == 255)
-                            angle = np.arccos(-marker/255.0) - (3.1415926 / 2)
-                            depth = radius / np.tan(angle)
-                            cone_center = [_i + _j * depth * 0.5 for _i,_j in zip(center, normal_float)]
-
-                            if not is_degenerate:
-                                bpy.ops.mesh.primitive_cone_add(vertices=32, radius1 = radius, depth = depth, location=cone_center)
-                                # Calculate the rotation matrix to align the up direction with the normal vector
-                                up_vector = mathutils.Vector((0, 0, 1)) 
-                                rotation_matrix = up_vector.rotation_difference(mathutils.Vector(normal_float)).to_matrix()
-
-                                # Apply the rotation to the cone
-                                bpy.context.object.rotation_euler = rotation_matrix.to_euler()
-
-                                bpy.context.object.display_type = 'BOUNDS'
-                                bpy.context.object.display_bounds_type = 'CONE'
-                                bpy.context.object.show_bounds = True
-                                bpy.context.object.name = f"CullCone_{i}"
-                                pass
-                            else:
-
-                                pass
-
-
-                if options.tangents_debug and len(data['tangents']) > 0:
-                    num_tangents = len(data['tangents'])
-                    if num_tangents != len(bm.verts):
-                        operator.report({'WARNING'}, f"Tangent data mismatched.")
-                    else:
-                        mesh = bpy.data.meshes.new("Tangents")  # add a new mesh
-                        obj = bpy.data.objects.new("Tangents", mesh)  # add a new object using the mesh
-
-                        bpy.context.collection.objects.link(obj)
-                        scale = 0.02
-                        verts = [v.co for v in bm.verts] + [(t[0] * scale + v.co[0], t[1] * scale + v.co[1], t[2] * scale + v.co[2]) for t, v in zip(data['tangents'], bm.verts)]
-                        edges = [[i,i + len(bm.verts)] for i in range(len(bm.verts))]
-                        mesh.from_pydata(verts, edges, [])
-                        for v_ix, l_ixs in vertex_map.items():
-                            for l_ix in l_ixs:
-                                w = data['tangents'][v_ix][3] / 3.0
-                                col.data[l_ix].color = (w, w, w, w)
-                
-                if options.import_as_read_only:
-                    obj.name = read_only_marker + obj.name
+                            w = data['tangents'][v_ix][3] / 3.0
+                            col.data[l_ix].color = (w, w, w, w)
+            
+            if options.import_as_read_only:
+                obj.name = read_only_marker + obj.name
 
             bm.free()
+            SetActiveObject(obj)
             return {'FINISHED'}
         else:
             operator.report({'WARNING'}, f"Unknown error. Contact the author for assistance.")
             return {'CANCELLED'}
 
     else:
-        operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+        operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
         return {'CANCELLED'}
 
 def ImportMorph(options, context, operator):
     #import_path = os.path.join(os.path.dirname(options.filepath),'morph.dat')
     import_path = options.filepath
     utils_path, temp_path = update_path(os.path.dirname(__file__))
-    data_path = os.path.join(temp_path, "morph_data_import.json")
+    #data_path = os.path.join(temp_path, "morph_data_import.json")
 
-    log_file_path = os.path.join(utils_path, "console_import_morph.log")
-    with open(log_file_path, "w") as log_file:
-        result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
-                            '-bm',
-                            import_path,
-                            data_path,
-                            ],stdout=log_file)
-        
-    if result.returncode != 0:
-        operator.report({'INFO'}, f"Execution failed with return code {result.returncode}. Contact the author for assistance.")
+    #log_file_path = os.path.join(utils_path, "console_import_morph.log")
+    #with open(log_file_path, "w") as log_file:
+    #    result = subprocess.run([os.path.join(utils_path, 'MeshConverter.exe'),
+    #                        '-bm',
+    #                        import_path,
+    #                        data_path,
+    #                        ],stdout=log_file)
+    
+    #returncode = result.returncode
+    rtn = _dll_import_morph(import_path.encode('utf-8')).decode('utf-8')
+
+    if rtn == "":
+        returncode = -1 
+    else:
+        returncode = 0
+
+    if returncode != 0:
+        operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
         return {"CANCELLED"}
     
 
-    with open(data_path, 'r') as json_file:
-        if json_file == None:
-            operator.report({'WARNING'}, f"Unable to open json file.")
+    #with open(data_path, 'r') as json_file:
+    #    if json_file == None:
+    #        operator.report({'WARNING'}, f"Unable to open json file.")
+    #        return {"CANCELLED"}
+        
+    #    jsondata = json.load(json_file)
+
+    jsondata = json.loads(rtn)
+
+    vert_count = jsondata["numVertices"]
+    shape_keys = list(jsondata["shapeKeys"])
+    morph_data = jsondata["morphData"]
+
+    target_obj = bpy.context.active_object
+
+
+    if target_obj == None or len(target_obj.data.vertices) != vert_count:
+        target_obj = None
+        for _obj in bpy.data.objects:
+            if _obj.type == 'MESH' and read_only_marker not in _obj.name and len(_obj.data.vertices) == vert_count:
+                target_obj = _obj
+                break
+    
+    if target_obj == None:
+        operator.report({'WARNING'}, f"No matching mesh found for the morph.")
+        return {"CANCELLED"}
+    else:
+        if read_only_marker in target_obj.name and target_obj.data.shape_keys != None and len(target_obj.data.shape_keys.key_blocks) != 0:
+            operator.report({'WARNING'}, f"Target mesh is Read Only! Remove {read_only_marker} in the name before continue.")
             return {"CANCELLED"}
+    
+    verts = target_obj.data.vertices
+
+    target_obj.shape_key_clear()
+    sk_basis = target_obj.shape_key_add(name = 'Basis', from_mix=False)
+    sk_basis.interpolation = 'KEY_LINEAR'
+    target_obj.data.shape_keys.use_relative = True
+
+    if options.debug_delta_normal:
+        normals, tangents, signs = GetNormalTangents(target_obj.data, True)
         
-        jsondata = json.load(json_file)
+    padding = 0
 
-        vert_count = jsondata["numVertices"]
-        shape_keys = list(jsondata["shapeKeys"])
-        morph_data = jsondata["morphData"]
-
-        target_obj = bpy.context.active_object
-
-
-        if target_obj == None or len(target_obj.data.vertices) != vert_count:
-            target_obj = None
-            for _obj in bpy.data.objects:
-                if _obj.type == 'MESH' and read_only_marker not in _obj.name and len(_obj.data.vertices) == vert_count:
-                    target_obj = _obj
-                    break
-        
-        if target_obj == None:
-            operator.report({'WARNING'}, f"No matching mesh found for the morph.")
-            return {"CANCELLED"}
-        else:
-            if read_only_marker in target_obj.name and target_obj.data.shape_keys != None and len(target_obj.data.shape_keys.key_blocks) != 0:
-                operator.report({'WARNING'}, f"Target mesh is Read Only! Remove {read_only_marker} in the name before continue.")
-                return {"CANCELLED"}
-        
-        verts = target_obj.data.vertices
-
-        target_obj.shape_key_clear()
-        sk_basis = target_obj.shape_key_add(name = 'Basis', from_mix=False)
-        sk_basis.interpolation = 'KEY_LINEAR'
-        target_obj.data.shape_keys.use_relative = True
-
+    for n, key_name in enumerate(shape_keys):
         if options.debug_delta_normal:
-            normals, tangents, signs = GetNormalTangents(target_obj.data, True)
-            
-        padding = 0
+            delta_normals = [[] for i in range(len(verts))]
+            delta_tangents = [[] for i in range(len(verts))]
+            offsets = [[] for i in range(len(verts))]
 
-        for n, key_name in enumerate(shape_keys):
+        print(key_name)
+        # Create new shape key
+        sk = target_obj.shape_key_add(name = key_name, from_mix=False)
+        sk.interpolation = 'KEY_LINEAR'
+        sk.relative_key = sk_basis
+        sk.slider_min = 0
+        sk.slider_max = 1
+        # position each vert
+        for i in range(len(verts)):
+            sk.data[i].co.x += morph_data[n][i][0]
+            sk.data[i].co.y += morph_data[n][i][1]
+            sk.data[i].co.z += morph_data[n][i][2]
             if options.debug_delta_normal:
-                delta_normals = [[] for i in range(len(verts))]
-                delta_tangents = [[] for i in range(len(verts))]
-                offsets = [[] for i in range(len(verts))]
+                offsets[i] = [morph_data[n][i][0],morph_data[n][i][1],morph_data[n][i][2]]
+                delta_normals[i] = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
+                delta_tangents[i] = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
+        
+        if options.debug_delta_normal:
+            #col = target_obj.data.vertex_colors.active
+            #for face in target_obj.data.polygons:
+            #    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+            #        w = delta_tangents[vert_idx][3] / 3.0
+            #        color = [0,0,0,1]
+            #        if w != 0:
+            #            color[n] = w
+            #            col.data[loop_idx].color = tuple(color)
 
-            print(key_name)
-            # Create new shape key
-            sk = target_obj.shape_key_add(name = key_name, from_mix=False)
-            sk.interpolation = 'KEY_LINEAR'
-            sk.relative_key = sk_basis
-            sk.slider_min = 0
-            sk.slider_max = 1
-            # position each vert
-            for i in range(len(verts)):
-                sk.data[i].co.x += morph_data[n][i][0]
-                sk.data[i].co.y += morph_data[n][i][1]
-                sk.data[i].co.z += morph_data[n][i][2]
-                if options.debug_delta_normal:
-                    offsets[i] = [morph_data[n][i][0],morph_data[n][i][1],morph_data[n][i][2]]
-                    delta_normals[i] = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
-                    delta_tangents[i] = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
-            
-            if options.debug_delta_normal:
-                #col = target_obj.data.vertex_colors.active
-                #for face in target_obj.data.polygons:
-                #    for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-                #        w = delta_tangents[vert_idx][3] / 3.0
-                #        color = [0,0,0,1]
-                #        if w != 0:
-                #            color[n] = w
-                #            col.data[loop_idx].color = tuple(color)
+            VisualizeVectors(target_obj.data, offsets, [[n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]] for n, dn in zip(normals, delta_normals)], key_name)
+            VisualizeVectors(target_obj.data, offsets, [[n[0] + s * dn[0], n[1] + s * dn[1], n[2] + s * dn[2]] for n, dn, s in zip(tangents, delta_tangents, signs)], key_name)
 
-                VisualizeVectors(target_obj.data, offsets, [[n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]] for n, dn in zip(normals, delta_normals)], key_name)
-                VisualizeVectors(target_obj.data, offsets, [[n[0] + s * dn[0], n[1] + s * dn[1], n[2] + s * dn[2]] for n, dn, s in zip(tangents, delta_tangents, signs)], key_name)
-
-        operator.report({'INFO'}, f"Import Morph Successful.")
-        return {'FINISHED'}
+    operator.report({'INFO'}, f"Import Morph Successful.")
+    return {'FINISHED'}
     
 def ExportMorph(options, context, export_file_path, operator):
     export_path = export_file_path
@@ -907,27 +1133,27 @@ def ExportMorph(options, context, export_file_path, operator):
 
     if target_obj == None:
         operator.report({'WARNING'}, f"Must select an object to export.")
-        return {"FINISHED"}
+        return {"CANCELLED"}
 
     if target_obj.data.shape_keys == None or target_obj.data.shape_keys.key_blocks == None:
         operator.report({'WARNING'}, f"Object has no shape keys.")
-        return {"FINISHED"}
+        return {"CANCELLED"}
 
     num_shape_keys = len(target_obj.data.shape_keys.key_blocks)
     print(list(target_obj.data.shape_keys.key_blocks))
     key_blocks = target_obj.data.shape_keys.key_blocks
     if num_shape_keys < 2:
         operator.report({'WARNING'}, f"No enough shape keys to export.")
-        return {"FINISHED"}
+        return {"CANCELLED"}
     
     if key_blocks[0].name != 'Basis':
         operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
-        return {"FINISHED"}
+        return {"CANCELLED"}
     
     if ref_obj != None:
         if ref_obj.data.shape_keys == None or ref_obj.data.shape_keys.key_blocks == None:
             operator.report({'WARNING'}, f"Reference object has no shape keys.")
-            return {"FINISHED"}
+            return {"CANCELLED"}
 
         ref_num_shape_keys = len(ref_obj.data.shape_keys.key_blocks)
         print(list(ref_obj.data.shape_keys.key_blocks))
@@ -935,7 +1161,7 @@ def ExportMorph(options, context, export_file_path, operator):
         
         if ref_num_shape_keys < num_shape_keys:
             operator.report({'WARNING'}, f"Reference objects don't have enough keys.")
-            return {"FINISHED"}
+            return {"CANCELLED"}
         else:
             key_mapping = [-1 for i in range(num_shape_keys)]
             for _key in key_blocks:
@@ -943,13 +1169,14 @@ def ExportMorph(options, context, export_file_path, operator):
                 ref_key_index = ref_key_blocks.keys().index(_key.name)
                 if ref_key_index == -1:
                     operator.report({'WARNING'}, f"Reference objects don't have some keys: {_key.name}")
-                    return {"FINISHED"}
+                    return {"CANCELLED"}
                 key_mapping[_key_index] = ref_key_index
 
             for ref_key in ref_key_blocks:
                 ref_key.value = 0
 
     target_obj, proxy_obj = PreprocessAndProxy(target_obj, options.use_world_origin, False)
+
     verts_count = len(proxy_obj.data.vertices)
     key_blocks = proxy_obj.data.shape_keys.key_blocks
 
@@ -962,7 +1189,6 @@ def ExportMorph(options, context, export_file_path, operator):
         "numVertices": 0,
         "shapeKeys": [],
         "morphData": [],
-        "delta_normals":[]
     }
 
     jsondata["numVertices"] = verts_count
@@ -1198,6 +1424,50 @@ class ImportCustomMesh(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+class ImportCustomNif(bpy.types.Operator):
+    bl_idname = "import.custom_nif"
+    bl_label = "Import Custom Nif"
+    
+    filepath: bpy.props.StringProperty(subtype="FILE_PATH")
+    filename: bpy.props.StringProperty(default='untitled.nif')
+    
+    filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
+
+    assets_folder: bpy.props.StringProperty(subtype="FILE_PATH")
+    import_as_read_only: bpy.props.BoolProperty(
+        name="As Read Only",
+        description="The object will be marked as read only. You can import morph once, however, as long as there's morph data in this object, any attempt to import a new morph will be prohibited.",
+        default=False
+    )
+    max_lod: bpy.props.IntProperty(
+        name="Max Lod",
+        description="Maximum Loaded LoD, 0 for loading all LoDs.",
+        default=1,
+    )
+    meshlets_debug: bpy.props.BoolProperty(
+        name="Debug Meshlets",
+        description="Debug option. DO NOT USE.",
+        default=False
+    )
+    culldata_debug: bpy.props.BoolProperty(
+        name="Debug CullData",
+        description="Debug option. DO NOT USE.",
+        default=False
+    )
+    tangents_debug: bpy.props.BoolProperty(
+        name="Debug Tangent Vectors",
+        description="Debug option. DO NOT USE.",
+        default=False
+    )
+
+    def execute(self, context):
+        return ImportNif(self, context, self)
+
+    def invoke(self, context, event):
+        self.assets_folder = context.scene.assets_folder
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
 class ImportCustomMorph(bpy.types.Operator):
     bl_idname = "import.custom_morph"
     bl_label = "Import Custom Morph"
@@ -1283,6 +1553,8 @@ class ExportSFMeshPanel(bpy.types.Panel):
         # Folder path input
         layout.label(text="Export Folder:")
         layout.prop(context.scene, "export_mesh_folder_path", text="")
+        layout.label(text="Assets Folder:")
+        layout.prop(context.scene, "assets_folder", text="")
 
         # Export settings
         layout.label(text="Export Settings:")
@@ -1331,13 +1603,47 @@ def menu_func_export_morph(self, context):
         text="Starfield Morph File (.dat)",
     )
 
+def menu_func_import_nif(self, context):
+    self.layout.operator(
+        ImportCustomNif.bl_idname,
+        text="Starfield Nif File (.nif)",
+    )
+
+def update_func(self, context):
+    global export_mesh_folder_path
+    global assets_folder
+    export_mesh_folder_path = context.scene.export_mesh_folder_path
+    assets_folder = context.scene.assets_folder
+
+    save("cached_paths", 'export_mesh_folder_path', 'assets_folder')
+
+    del export_mesh_folder_path
+    del assets_folder
+
 # Register the operators and menu entries
 def register():
+    load("cached_paths")
+
+    global export_mesh_folder_path
+    global assets_folder
+
+    if export_mesh_folder_path == None:
+        export_mesh_folder_path = os.path.join(os.path.dirname(__file__),'Result')
+    
+    if assets_folder == None:
+        assets_folder = default_assets_folder
 
     bpy.types.Scene.export_mesh_folder_path = bpy.props.StringProperty(
         name="Export Folder",
         subtype='DIR_PATH',
-        default=os.path.join(os.path.dirname(__file__),'Result'),
+        default= export_mesh_folder_path,
+        update = update_func
+    )
+    bpy.types.Scene.assets_folder = bpy.props.StringProperty(
+        name="Assets Folder",
+        subtype='DIR_PATH',
+        default= assets_folder,
+        update = update_func
     )
     bpy.types.Scene.mesh_scale = bpy.props.FloatProperty(
         name="Scale",
@@ -1396,6 +1702,7 @@ def register():
 
     bpy.utils.register_class(ExportCustomMesh)
     bpy.utils.register_class(ImportCustomMesh)
+    bpy.utils.register_class(ImportCustomNif)
     bpy.utils.register_class(ImportCustomMorph)
     bpy.utils.register_class(ExportCustomMorph)
     bpy.utils.register_class(ExportSFMeshOperator)
@@ -1403,6 +1710,7 @@ def register():
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import_morph)
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_import_nif)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export_morph)
 
 def unregister():
@@ -1410,13 +1718,16 @@ def unregister():
     bpy.utils.unregister_class(ExportSFMeshPanel)
     bpy.utils.unregister_class(ExportCustomMesh)
     bpy.utils.unregister_class(ImportCustomMesh)
+    bpy.utils.unregister_class(ImportCustomNif)
     bpy.utils.unregister_class(ImportCustomMorph)
     bpy.utils.unregister_class(ExportCustomMorph)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_nif)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_morph)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_morph)
     del bpy.types.Scene.export_mesh_folder_path
+    del bpy.types.Scene.assets_folder
     del bpy.types.Scene.mesh_scale
     del bpy.types.Scene.max_border
     del bpy.types.Scene.use_world_origin

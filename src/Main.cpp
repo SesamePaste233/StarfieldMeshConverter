@@ -234,17 +234,21 @@ void amain() {
 	// Create a MeshIO object
 	nif::NifIO reader;
 
-	// Load the mesh from the input mesh file
-	if (!reader.Deserialize("C:\\repo\\MeshConverter\\naked_m.nif")) {
-		std::cerr << "Failed to load mesh from " << "C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).nif" << std::endl;
-		return; // Return an error code
-	}
+	reader.Deserialize("C:\\repo\\MeshConverter\\skeleton.nif");
 
-	// Serialize the mesh to the output file
-	if (!reader.Serialize("C:\\repo\\MeshConverter\\naked_m1.nif")) {
-		std::cerr << "Failed to serialize mesh to " << "C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).nif" << std::endl;
-		return; // Return an error code
-	}
+	auto armature = dynamic_cast<nif::ni_template::NiArmatureTemplate*>(reader.ToTemplate<nif::ni_template::NiArmatureTemplate>());
+
+	armature->skeleton_mode = true;
+	auto json_data = armature->Serialize();
+
+	nif::ni_template::NiArmatureTemplate* armature2 = new nif::ni_template::NiArmatureTemplate();
+
+	armature2->Deserialize(json_data);
+
+	nif::NifIO writer;
+	writer.FromTemplate(armature2);
+
+	writer.Serialize("C:\\repo\\MeshConverter\\skeleton2.nif");
 
 	return;
 }
@@ -259,7 +263,7 @@ void main() {
 		return;
 	}
 
-	auto t_ptr = nif.ToTemplate<nif::ni_template::NiSingleSkinInstanceTemplate>();
+	auto t_ptr = nif.ToTemplate<nif::ni_template::NiSkinInstanceTemplate>();
 
 	if (t_ptr == nullptr) {
 		std::cerr << "Failed to convert nif to template" << std::endl;
@@ -275,14 +279,14 @@ void main() {
 	std::ofstream out("C:\\repo\\MeshConverter\\naked_m.json");
 	out << jsondata.dump(4);
 
-	auto t_ptr2 = new nif::ni_template::NiSingleSkinInstanceTemplate();
+	auto t_ptr2 = new nif::ni_template::NiSkinInstanceTemplate();
 
-	t_ptr2->Deserialize(jsondata);
+	auto rtti = t_ptr2->Deserialize(jsondata);
 
-	auto jsondata2 = t_ptr2->Serialize();
+	nif::NifIO nif2;
+	nif2.FromTemplate(nif::ni_template::slice_cast(t_ptr2, rtti));;
 
-	std::ofstream out2("C:\\repo\\MeshConverter\\naked_m2.json");
-	out2 << jsondata2.dump(4);
+	nif2.Serialize("C:\\repo\\MeshConverter\\naked_m1.nif");
 }
 
 void _main() {

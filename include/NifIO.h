@@ -7,23 +7,22 @@ namespace nif {
 	class NifIO;
 	namespace ni_template {
 		class NiTemplateBase;
-		class NiRootSceneTemplate;
-		class NiSingleGeometryTemplate;
-		class NiSingleSkinInstanceTemplate;
+		class NiArmatureTemplate;
+		class NiSimpleGeometryTemplate;
+		class NiSkinInstanceTemplate;
 
 		enum class RTTI {
 			None = 0,
-			NiRootScene,
-			NiSingleGeometry,
-			NiSingleSkinInstance,
+			NiArmature,
+			NiSimpleGeometry,
+			NiSkinInstance,
 		};
 
-		template<class _template_type>
-		NiTemplateBase* slice_cast(NiTemplateBase*& ptr) {
-			NiTemplateBase* _ptr = new _template_type;
-			auto n_ptr = dynamic_cast<_template_type*>(ptr);
+		template<class _to_type, class _from_type>
+		NiTemplateBase* slice_cast(_from_type*& ptr) {
+			_to_type* _ptr = new _to_type;
+			auto n_ptr = dynamic_cast<_to_type*>(ptr);
 			if (n_ptr == nullptr) {
-				delete _ptr;
 				return nullptr;
 			}
 			*_ptr = *n_ptr;
@@ -32,7 +31,23 @@ namespace nif {
 			return _ptr;
 		};
 
-		NiTemplateBase* slice_cast(NiTemplateBase*& ptr, const RTTI& rtti);
+		template<class _from_type>
+		NiTemplateBase* slice_cast(_from_type*& ptr, const RTTI& rtti) {
+			if (dynamic_cast<NiTemplateBase*>(ptr) == nullptr) {
+				return nullptr;
+			}
+
+			switch (rtti) {
+			case nif::ni_template::RTTI::NiArmature:
+				return nif::ni_template::slice_cast<nif::ni_template::NiArmatureTemplate>(ptr);
+			case nif::ni_template::RTTI::NiSimpleGeometry:
+				return nif::ni_template::slice_cast<nif::ni_template::NiSimpleGeometryTemplate>(ptr);
+			case nif::ni_template::RTTI::NiSkinInstance:
+				return nif::ni_template::slice_cast<nif::ni_template::NiSkinInstanceTemplate>(ptr);
+			}
+
+			return nullptr;
+		};
 	};
 
 	class NifIO
@@ -162,6 +177,8 @@ namespace nif {
 
 		std::vector<NiNodeBase*> GetRTTIBlocks(const NiRTTI& RTTI, const bool use_name = false, const std::string& name = "") const;
 
+		NiNode* GetRootNode() const;
+
 		bool FromTemplate(ni_template::NiTemplateBase* template_ptr);
 
 		template<class _template_type>
@@ -193,35 +210,343 @@ namespace nif {
 
 		class NiTemplateBase {
 		public:
-			virtual RTTI GetRTTI() const = 0;
-			virtual bool ToNif(NifIO& source) = 0;
-			virtual RTTI FromNif(const NifIO& source) = 0;
-			virtual nlohmann::json Serialize() const = 0;
-			virtual bool Deserialize(nlohmann::json data) = 0;
+			virtual RTTI GetRTTI() const { return RTTI::None; };
+			virtual bool ToNif(NifIO& source) { return false; };
+			virtual RTTI FromNif(const NifIO& source) {
+				return RTTI::None;
+			}
+			virtual nlohmann::json Serialize() const {
+				return nlohmann::json();
+			};
+			virtual RTTI Deserialize(nlohmann::json data) {
+				return RTTI::None;
+			};
 		};
 
-		class NiRootSceneTemplate :public NiTemplateBase {
+		class NiArmatureTemplate : public NiTemplateBase {
 		public:
-			NiRootSceneTemplate() = default;
-			~NiRootSceneTemplate() = default;
+			typedef struct NodeInfo {
+				NodeInfo() = default;
+				~NodeInfo() = default;
 
-			float root_rotation_matrix[3][3] = { 1,0,0,0,1,0,0,0,1 };
-			float root_translation[3] = { 0,0,0 };
-			float root_scale = 1;
-			uint32_t root_flags = 0x2000000E;
-			std::string root_name = "ExportScene";
+				// copy constructor
+				NodeInfo(const NodeInfo& other) {
+					name = other.name;
+					std::memcpy(rotation, other.rotation, sizeof(float) * 9);
+					std::memcpy(translation, other.translation, sizeof(float) * 3);
+					scale = other.scale;
+					flags = other.flags;
+					ni_node = other.ni_node;
+					geometry_index = other.geometry_index;
+					parent = other.parent;
+					children = other.children;
+				};
+
+				std::string name = "";
+				float rotation[3][3] = { 1,0,0,0,1,0,0,0,1 };
+				float translation[3] = { 0,0,0 };
+				float scale = 1.f;
+				uint32_t flags = 14;
+
+				uint32_t ni_node = -1;
+				uint32_t geometry_index = -1;
+				uint32_t parent = -1;
+				std::vector<uint32_t> children;
+
+				bool FromNiObject(const NiObject* node, const nif::NifIO& nif) {
+					if (node == nullptr) return false;
+
+					name = nif.string_manager.GetString(node->name_index);
+					if (name == "") return false;
+
+					std::memcpy(rotation, node->rotation, sizeof(float) * 9);
+					std::memcpy(translation, node->translation, sizeof(float) * 3);
+					scale = node->scale;
+					ni_node = nif.block_manager.FindBlock(node);
+					return true;
+				};
+			};
+
+			NiArmatureTemplate() { bones.push_back(NodeInfo()); };
+			~NiArmatureTemplate() = default;
+
+			// copy constructor
+			NiArmatureTemplate(const NiArmatureTemplate& other) {
+				bones = other.bones;
+				skeleton_mode = other.skeleton_mode;
+			};
+			
+			NiArmatureTemplate& operator=(const NiArmatureTemplate& other) {
+				bones = other.bones;
+				skeleton_mode = other.skeleton_mode;
+				return *this;
+			};
+
+			const NodeInfo& root_read_only() const {
+				return bones[0];
+			};
+
+			NodeInfo& root() {
+				return bones[0];
+			};
+
+			std::vector<NodeInfo> bones;
+
+			bool skeleton_mode = false;
 
 			RTTI GetRTTI() const override {
-				return RTTI::NiRootScene;
+				return RTTI::NiArmature;
 			};
-			bool ToNif(NifIO& source) override;
-			RTTI FromNif(const NifIO& source) override;
-			nlohmann::json Serialize() const override;
-			bool Deserialize(nlohmann::json data) override;
 
+			bool ToNif(NifIO& source) override;
+
+			RTTI FromNif(const NifIO& source) override;
+
+			nlohmann::json Serialize() const override {
+				if (IsRootEmtpy()) {
+					return nlohmann::json();
+				}
+
+				Eigen::Matrix4f root_axis = Eigen::Matrix4f::Identity();
+				auto json_data = SerializeGlobalImpl(0, root_axis);
+
+				json_data["skeleton_mode"] = skeleton_mode;
+
+				return json_data;
+			};
+
+			RTTI Deserialize(nlohmann::json data) override {
+				this->bones.clear();
+				this->bones.push_back(NodeInfo());
+				if (data.is_null()) {
+					return RTTI::None;
+				}
+
+				skeleton_mode = data["skeleton_mode"];
+
+				Eigen::Matrix4f root_axis = Eigen::Matrix4f::Identity();
+
+				bool success = DeserializeGlobalImpl(0, data, root_axis);
+				if (!success) {
+					return RTTI::None;
+				}
+				return RTTI::NiArmature;
+			};
+
+			nlohmann::json SerializeGlobalImpl(const uint32_t current_index, Eigen::Matrix4f& cur_axis) const {
+				if (current_index == -1) {
+					return nullptr;
+				}
+
+				auto current = &bones[current_index];
+
+				nlohmann::json serialized;
+
+				Eigen::Matrix4f T = xf::createTransformationMatrix(current->rotation, current->translation);
+
+				Eigen::Matrix4f new_axis = cur_axis * T;
+				auto rtn = xf::toAxis(new_axis, 0.07);
+
+				serialized["name"] = current->name;
+				serialized["head"].push_back(rtn.first.x());
+				serialized["head"].push_back(rtn.first.y());
+				serialized["head"].push_back(rtn.first.z());
+				serialized["tail"].push_back(rtn.second.x());
+				serialized["tail"].push_back(rtn.second.y());
+				serialized["tail"].push_back(rtn.second.z());
+				for (int i = 0; i < 4; ++i) {
+					serialized["matrix"].push_back(nlohmann::json::array());
+					for (int j = 0; j < 4; ++j) {
+						serialized["matrix"][i].push_back(new_axis(i, j));
+					}
+				}
+				serialized["scale"] = current->scale;
+
+				serialized["geometry_index"] = current->geometry_index;
+
+				serialized["children"] = nlohmann::json::array();
+				for (uint32_t child : bones[current_index].children) {
+					if (skeleton_mode && skeleton_bones.find(bones[child].name) == skeleton_bones.end()) {
+						continue;
+					}
+					serialized["children"].push_back(SerializeGlobalImpl(child, new_axis));
+				}
+
+
+				return serialized;
+			}
+
+			bool DeserializeGlobalImpl(uint32_t current_index, nlohmann::json& data, Eigen::Matrix4f& cur_axis) {
+				if (current_index == -1) {
+					return false;
+				}
+
+				auto current = &bones[current_index];
+
+				current->name = data["name"];
+				current->scale = data["scale"];
+
+				Eigen::Matrix4f new_axis = Eigen::Matrix4f::Identity();
+				for (int i = 0; i < 4; ++i) {
+					for (int j = 0; j < 4; ++j) {
+						new_axis(i, j) = data["matrix"][i][j];
+					}
+				}
+				Eigen::Matrix4f T = xf::quickInverse(cur_axis) * new_axis;
+				Eigen::Matrix4f R, t;
+				xf::decomposeTransformation(T, R, t);
+
+				current->rotation[0][0] = R(0, 0);
+				current->rotation[0][1] = R(0, 1);
+				current->rotation[0][2] = R(0, 2);
+				current->rotation[1][0] = R(1, 0);
+				current->rotation[1][1] = R(1, 1);
+				current->rotation[1][2] = R(1, 2);
+				current->rotation[2][0] = R(2, 0);
+				current->rotation[2][1] = R(2, 1);
+				current->rotation[2][2] = R(2, 2);
+
+				current->translation[0] = t(0, 3);
+				current->translation[1] = t(1, 3);
+				current->translation[2] = t(2, 3);
+
+				current->geometry_index = data["geometry_index"];
+
+				for (auto& child : data["children"]) {
+					NodeInfo new_child;
+					new_child.parent = current_index;
+					bones[current_index].children.push_back(this->bones.size());
+					uint32_t new_index = this->bones.size();
+					this->bones.push_back(new_child);
+					DeserializeGlobalImpl(new_index, child, new_axis);
+				}
+
+				return true;
+			};
+
+			const std::unordered_set<std::string> skeleton_bones = {
+				"Root",
+				"COM",
+				"C_Spine",
+				"C_Hips",
+				"R_Butt",
+				"L_Butt",
+				"L_Thigh",
+				"R_Thigh",
+				"R_Thigh_Twist1",
+				"R_Thigh_Twist",
+				"R_Knee",
+				"R_Calf",
+				"R_CalfMass",
+				"R_Foot",
+				"R_Toe",
+				"L_Thigh_Twist1",
+				"L_Thigh_Twist",
+				"L_Knee",
+				"L_Calf",
+				"L_CalfMass",
+				"L_Foot",
+				"L_Toe",
+				"C_Spine1",
+				"C_Spine2",
+				"C_Chest",
+				"DirectAt",
+				"WeaponLeft",
+				"WEAPON",
+				"R_Clavicle",
+				"C_BackPack",
+				"L_Clavicle",
+				"C_Neck",
+				"C_Neck_Twist",
+				"C_Neck1",
+				"C_Head",
+				"Eye_Target",
+				"R_Eye",
+				"L_Eye",
+				"L_Biceps",
+				"L_Biceps_Twist1",
+				"L_Biceps_Twist",
+				"L_Elbow",
+				"L_Forearm",
+				"L_Wrist_Twist2",
+				"L_Wrist_Twist1",
+				"L_Wrist_Twist",
+				"L_Arm",
+				"L_Wrist",
+				"L_AnimObject3",
+				"L_AnimObject2",
+				"L_AnimObject1",
+				"L_Index",
+				"L_Middle",
+				"L_Ring",
+				"L_Cup",
+				"L_Thumb",
+				"L_Thumb1",
+				"L_Thumb2",
+				"L_Pinky",
+				"L_Pinky1",
+				"L_Pinky2",
+				"L_Ring1",
+				"L_Ring2",
+				"L_Middle1",
+				"L_Middle2",
+				"L_Index1",
+				"L_Index2",
+				"L_Deltoid",
+				"L_ArmMass",
+				"C_BackPackHose",
+				"R_Biceps",
+				"R_Biceps_Twist1",
+				"R_Biceps_Twist",
+				"R_Elbow",
+				"R_Forearm",
+				"R_Wrist_Twist2",
+				"R_Wrist_Twist1",
+				"R_Wrist_Twist",
+				"R_Arm",
+				"R_Wrist",
+				"R_AnimObject3",
+				"R_AnimObject2",
+				"R_AnimObject1",
+				"R_Index",
+				"R_Middle",
+				"R_Ring",
+				"R_Cup",
+				"R_Thumb",
+				"R_Thumb1",
+				"R_Thumb2",
+				"R_Pinky",
+				"R_Pinky1",
+				"R_Pinky2",
+				"R_Ring1",
+				"R_Ring2",
+				"R_Middle1",
+				"R_Middle2",
+				"R_Index1",
+				"R_Index2",
+				"R_Deltoid",
+				"R_ArmMass",
+				"L_HandIk",
+				"R_HandIk",
+			};
+
+			const std::unordered_set<std::string> skeleton_bones_exclude = {
+
+			};
+
+			void Traverse(uint32_t cur_node_index, std::function<void(NodeInfo&)> func) {
+				func(bones[cur_node_index]);
+				for (auto child : bones[cur_node_index].children) {
+					Traverse(child, func);
+				}
+			};
+
+			bool IsRootEmtpy() const {
+				return bones.size() == 0 || root_read_only().name == "";
+			};
 		};
-		
-		class NiSingleGeometryTemplate :public NiRootSceneTemplate {
+
+		class NiSimpleGeometryTemplate :public NiArmatureTemplate {
 		public:
 			typedef struct MeshInfo {
 				bool has_mesh = false;
@@ -230,273 +555,76 @@ namespace nif {
 				std::string factory_path = "";
 			};
 
-			NiSingleGeometryTemplate() = default;
-			~NiSingleGeometryTemplate() = default;
+			NiSimpleGeometryTemplate() = default;
+			~NiSimpleGeometryTemplate() = default;
+
+			// copy constructor
+			NiSimpleGeometryTemplate(const NiSimpleGeometryTemplate& other) {
+				bsx_flags = other.bsx_flags;
+				geo_infos = other.geo_infos;
+			};
+
+			NiSimpleGeometryTemplate& operator=(const NiSimpleGeometryTemplate& other) {
+				this->NiArmatureTemplate::operator=(other);
+				bsx_flags = other.bsx_flags;
+				geo_infos = other.geo_infos;
+				return *this;
+			};
+
+			typedef struct GeoInfo {
+				MeshInfo geo_mesh_lod[4];
+
+				uint32_t mat_id = 0;
+				std::string mat_path = "";
+			};
 
 			uint32_t bsx_flags = 65536;
-
-			float geo_rotation_matrix[3][3] = { 1,0,0,0,1,0,0,0,1 };
-			float geo_translation[3] = { 0,0,0 };
-			float geo_scale = 1;
-			uint32_t geo_flags = 0x0000000E;
-			std::string geo_name = "";
-
-			MeshInfo geo_mesh_lod[4];
-
-			uint32_t mat_id = 0;
-			std::string mat_path = "";
+			std::vector<GeoInfo> geo_infos;
 
 			RTTI GetRTTI() const override {
-				return RTTI::NiSingleGeometry;
+				return RTTI::NiSimpleGeometry;
 			};
 			bool ToNif(NifIO& source) override;
 			RTTI FromNif(const NifIO& source) override;
 			nlohmann::json Serialize() const override;
-			bool Deserialize(nlohmann::json data) override;
+			RTTI Deserialize(nlohmann::json data) override;
 		};
 
-		class NiSingleSkinInstanceTemplate :public NiSingleGeometryTemplate {
+		class NiSkinInstanceTemplate :public NiSimpleGeometryTemplate {
 		public:
 			typedef nif::BSSkin::BoneData::BoneInfo BoneInfo;
 
-			NiSingleSkinInstanceTemplate() = default;
-			~NiSingleSkinInstanceTemplate() = default;
+			typedef struct SkinInfo {
+				bool has_skin = false;
+				std::vector<std::string> bone_names;
+				std::vector<std::string> bone_refs;
+				std::vector<BoneInfo> bone_infos;
+			};
 
-			std::vector<std::string> bone_names;
-			std::vector<std::string> bone_refs;
-			std::vector<BoneInfo> bone_infos;
+			NiSkinInstanceTemplate() = default;
+			~NiSkinInstanceTemplate() = default;
+
+			// copy constructor
+			NiSkinInstanceTemplate(const NiSkinInstanceTemplate& other) {
+				skin_infos = other.skin_infos;
+			};
+
+			NiSkinInstanceTemplate& operator=(const NiSkinInstanceTemplate& other) {
+				this->NiSimpleGeometryTemplate::operator=(other);
+				skin_infos = other.skin_infos;
+				return *this;
+			};
+
+			std::vector<SkinInfo> skin_infos;
 
 			RTTI GetRTTI() const override {
-				return RTTI::NiSingleSkinInstance;
+				return RTTI::NiSkinInstance;
 			};
 			bool ToNif(NifIO& source) override;
 			RTTI FromNif(const NifIO& source) override;
 			nlohmann::json Serialize() const override;
-			bool Deserialize(nlohmann::json data) override;
-		};
-	};
-
-	class Armature {
-	public:
-		typedef struct Bone {
-			~Bone() {
-				for (Bone* child : children) {
-					delete child;
-				}
-			};
-
-			std::string name = "";
-			float rotation[3][3] = { 1,0,0,0,1,0,0,0,1 };
-			float translation[3] = { 0,0,0 };
-			float scale = 1.f;
-			Bone* parent = nullptr;
-			std::vector<Bone*> children;
-
-			void SetParent(Bone* parent) {
-				this->parent = parent;
-				parent->children.push_back(this);
-			};
-
-			bool FromNiNode(const NiNode* node, const nif::NifIO& nif) {
-				if (node == nullptr) return false;
-
-				name = nif.string_manager.GetString(node->name_index);
-				if (name == "") return false;
-
-				std::memcpy(rotation, node->rotation, sizeof(float) * 9);
-				std::memcpy(translation, node->translation, sizeof(float) * 3);
-				scale = node->scale;
-				return true;
-			};
+			RTTI Deserialize(nlohmann::json data) override;
 		};
 
-		Armature() = default;
-		~Armature() = default;
-
-		Bone* root = nullptr;
-
-		bool FromNif(const NifIO& source, const bool skeleton_mode = true);
-
-		bool ToJson(const std::string& file, bool global_heads_tails = false);
-
-		nlohmann::json Serialize(Bone* current, bool global_heads_tails = false) {
-			if (!current) {
-				return nullptr;
-			}
-
-			if (global_heads_tails) {
-				Eigen::Matrix4f root_axis = Eigen::Matrix4f::Identity();
-				return SerializeGlobalImpl(current, root_axis);
-			}
-			else {
-				return SerializeImpl(current);
-			}
-		}
-
-		nlohmann::json SerializeImpl(Bone* current) {
-			if (!current) {
-				return nullptr;
-			}
-
-			nlohmann::json serialized;
-			serialized["name"] = current->name;
-			serialized["rotation"] = nlohmann::json::array();
-			for (int i = 0; i < 3; i++) {
-				serialized["rotation"].push_back(nlohmann::json::array());
-				for (int j = 0; j < 3; j++) {
-					serialized["rotation"][i].push_back(current->rotation[i][j]);
-				}
-			}
-			serialized["translation"] = nlohmann::json::array();
-			for (int i = 0; i < 3; i++) {
-				serialized["translation"].push_back(current->translation[i]);
-			}
-			serialized["scale"] = current->scale;
-
-			serialized["children"] = nlohmann::json::array();
-			for (Bone* child : current->children) {
-				serialized["children"].push_back(Serialize(child));
-			}
-
-			return serialized;
-		}
-
-		nlohmann::json SerializeGlobalImpl(Bone* current, Eigen::Matrix4f& cur_axis) {
-			if (!current) {
-				return nullptr;
-			}
-
-			nlohmann::json serialized;
-
-			Eigen::Matrix4f T = xf::createTransformationMatrix(current->rotation, current->translation, current->scale);
-
-			Eigen::Matrix4f new_axis = cur_axis * T;
-			auto rtn = xf::toAxis(new_axis, 0.07);
-
-			serialized["name"] = current->name;
-			serialized["head"].push_back(rtn.first.x());
-			serialized["head"].push_back(rtn.first.y());
-			serialized["head"].push_back(rtn.first.z());
-			serialized["tail"].push_back(rtn.second.x());
-			serialized["tail"].push_back(rtn.second.y());
-			serialized["tail"].push_back(rtn.second.z());
-			serialized["scale"] = current->scale;
-
-			serialized["children"] = nlohmann::json::array();
-			for (Bone* child : current->children) {
-				serialized["children"].push_back(SerializeGlobalImpl(child, new_axis));
-			}
-
-			return serialized;
-		}
-
-		const std::unordered_set<std::string> skeleton_bones = {
-			"COM",
-			"C_Spine",
-			"C_Hips",
-			"R_Butt",
-			"L_Butt",
-			"L_Thigh",
-			"R_Thigh",
-			"R_Thigh_Twist1",
-			"R_Thigh_Twist",
-			"R_Knee",
-			"R_Calf",
-			"R_CalfMass",
-			"R_Foot",
-			"R_Toe",
-			"L_Thigh_Twist1",
-			"L_Thigh_Twist",
-			"L_Knee",
-			"L_Calf",
-			"L_CalfMass",
-			"L_Foot",
-			"L_Toe",
-			"C_Spine1",
-			"C_Spine2",
-			"C_Chest",
-			"DirectAt",
-			"WeaponLeft",
-			"WEAPON",
-			"R_Clavicle",
-			"C_BackPack",
-			"L_Clavicle",
-			"C_Neck",
-			"C_Neck_Twist",
-			"C_Neck1",
-			"C_Head",
-			"Eye_Target",
-			"R_Eye",
-			"L_Eye",
-			"L_Biceps",
-			"L_Biceps_Twist1",
-			"L_Biceps_Twist",
-			"L_Elbow",
-			"L_Forearm",
-			"L_Wrist_Twist2",
-			"L_Wrist_Twist1",
-			"L_Wrist_Twist",
-			"L_Arm",
-			"L_Wrist",
-			"L_AnimObject3",
-			"L_AnimObject2",
-			"L_AnimObject1",
-			"L_Index",
-			"L_Middle",
-			"L_Ring",
-			"L_Cup",
-			"L_Thumb",
-			"L_Thumb1",
-			"L_Thumb2",
-			"L_Pinky",
-			"L_Pinky1",
-			"L_Pinky2",
-			"L_Ring1",
-			"L_Ring2",
-			"L_Middle1",
-			"L_Middle2",
-			"L_Index1",
-			"L_Index2",
-			"L_Deltoid",
-			"L_ArmMass",
-			"C_BackPackHose",
-			"R_Biceps",
-			"R_Biceps_Twist1",
-			"R_Biceps_Twist",
-			"R_Elbow",
-			"R_Forearm",
-			"R_Wrist_Twist2",
-			"R_Wrist_Twist1",
-			"R_Wrist_Twist",
-			"R_Arm",
-			"R_Wrist",
-			"R_AnimObject3",
-			"R_AnimObject2",
-			"R_AnimObject1",
-			"R_Index",
-			"R_Middle",
-			"R_Ring",
-			"R_Cup",
-			"R_Thumb",
-			"R_Thumb1",
-			"R_Thumb2",
-			"R_Pinky",
-			"R_Pinky1",
-			"R_Pinky2",
-			"R_Ring1",
-			"R_Ring2",
-			"R_Middle1",
-			"R_Middle2",
-			"R_Index1",
-			"R_Index2",
-			"R_Deltoid",
-			"R_ArmMass",
-			"L_HandIk",
-			"R_HandIk",
-		};
-
-		const std::unordered_set<std::string> skeleton_bones_exclude = {
-			
-		};
-	};
+	};	
 }

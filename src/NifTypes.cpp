@@ -153,6 +153,7 @@ void nif::BSGeometry::Serialize(std::ostream& file)
 			Util::writeAsHex(file, this->meshes[i].num_indices);
 			Util::writeAsHex(file, this->meshes[i].num_vertices);
 			Util::writeAsHex(file, this->meshes[i].flags);
+			this->meshes[i].path_length = this->meshes[i].mesh_path.length();
 			Util::writeAsHex(file, this->meshes[i].path_length);
 			Util::writeString(file, this->meshes[i].mesh_path);
 		}

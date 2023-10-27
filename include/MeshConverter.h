@@ -12,21 +12,21 @@
 #define DLL
 #endif
 extern "C" {
-	uint32_t DLL ExportMesh(const char* json_data,
+	DLL uint32_t ExportMesh(const char* json_data,
 		const char* output_file,
 		float max_border,
 		bool smooth_edge_normal,
 		bool normalize_weights,
 		bool do_optimization);
 
-	uint32_t DLL ExportMorph(const char* json_data,
+	DLL uint32_t ExportMorph(const char* json_data,
 		const char* output_file);
 
-	const char * DLL ImportMesh(const char* input_file, const char* output_name);
+	DLL const char * ImportMesh(const char* input_file, const char* output_name);
 
-	const char* DLL ImportMorph(const char* input_file);
+	DLL const char* ImportMorph(const char* input_file);
 
-	uint32_t DLL CreateNif(const char* json_data, const char* output_file);
+	DLL uint32_t CreateNif(const char* json_data, const char* output_file);
 
-	const char* DLL ImportNif(const char* input_file);
+	DLL const char* ImportNif(const char* input_file);
 }

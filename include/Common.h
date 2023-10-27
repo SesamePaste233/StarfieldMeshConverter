@@ -654,7 +654,7 @@ public:
 		return T_4x4;
 	};
 
-	static Eigen::Matrix4f createTransformationMatrix(const float R[3][3], const float t[3], float s) {
+	static Eigen::Matrix4f createTransformationMatrix(const float R[3][3], const float t[3]) {
 		Eigen::Matrix4f T_4x4 = Eigen::Matrix4f::Identity();
 
 		// Fill in the upper-left 3x3 submatrix with the rotation matrix
@@ -667,11 +667,6 @@ public:
 		T_4x4(0, 3) = t[0];
 		T_4x4(1, 3) = t[1];
 		T_4x4(2, 3) = t[2];
-
-		// Apply scaling in the diagonal elements
-		T_4x4(0, 0) *= s;
-		T_4x4(1, 1) *= s;
-		T_4x4(2, 2) *= s;
 
 		return T_4x4;
 	};
@@ -739,6 +734,14 @@ public:
 		t_4x4.setIdentity();
 		t_4x4.block(0, 3, 3, 1) = T_4x4.block(0, 3, 3, 1);
 
+	}
+
+	static Eigen::Matrix4f quickInverse(const Eigen::Matrix4f& T) {
+		Eigen::Matrix4f T_inv = Eigen::Matrix4f::Identity();
+		T_inv.block(0,0,3,3) = T.block(0,0,3,3).transpose();
+		T_inv.block(0,3,3,1) = -T_inv.block(0,0,3,3) * T.block(0,3,3,1);
+		T_inv(3,3) = 1;
+		return T_inv;
 	}
 };
 
