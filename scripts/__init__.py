@@ -391,10 +391,10 @@ def move_object_to_collection(objs, coll):
     for obj in objs:
         if obj != None:
             old_colls = [c for c in obj.users_collection]
-            coll.objects.link(obj)
             for c in old_colls:
                 if c != None:
                     c.objects.unlink(obj)
+            coll.objects.link(obj)
 
 def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, base_obj = None):
     if active_obj in selected_obj_list:
@@ -491,12 +491,12 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
                 break
 
             factory_path = mesh_info['factory_path']
-            options.filepath = os.path.join(assets_folder, 'geometries', factory_path + '.mesh')
+            options.filepath = os.path.join(options.assets_folder, 'geometries', factory_path + '.mesh')
             rtn = ImportMesh(options, context, operator, factory_path)
-            _objects.append(GetActiveObject())
-            _objects[-1].name = geo_name + f'_LOD:{lod}'
             lod += 1
             if 'FINISHED' in rtn:
+                _objects.append(GetActiveObject())
+                _objects[-1].name = geo_name + f'_LOD:{lod}'
                 loaded = True
             else:
                 operator.report({'WARNING'}, f'{factory_path}.mesh cannot be loaded.')
@@ -1286,7 +1286,7 @@ def ExportMorph(options, context, export_file_path, operator):
 
 # Export operator
 class ExportCustomMesh(bpy.types.Operator):
-    bl_idname = "export.custom_mesh"
+    bl_idname = "export_scene.custom_mesh"
     bl_label = "Export Custom Mesh"
     
     filepath: bpy.props.StringProperty(options={'HIDDEN'})
@@ -1389,7 +1389,7 @@ class ExportCustomMesh(bpy.types.Operator):
 
 # Import operator
 class ImportCustomMesh(bpy.types.Operator):
-    bl_idname = "import.custom_mesh"
+    bl_idname = "import_scene.custom_mesh"
     bl_label = "Import Custom Mesh"
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
@@ -1426,7 +1426,7 @@ class ImportCustomMesh(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 class ImportCustomNif(bpy.types.Operator):
-    bl_idname = "import.custom_nif"
+    bl_idname = "import_scene.custom_nif"
     bl_label = "Import Custom Nif"
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
@@ -1470,7 +1470,7 @@ class ImportCustomNif(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 class ImportCustomMorph(bpy.types.Operator):
-    bl_idname = "import.custom_morph"
+    bl_idname = "import_scene.custom_morph"
     bl_label = "Import Custom Morph"
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
@@ -1489,7 +1489,7 @@ class ImportCustomMorph(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 class ExportCustomMorph(bpy.types.Operator):
-    bl_idname = "export.custom_morph"
+    bl_idname = "export_scene.custom_morph"
     bl_label = "Export Custom Morph"
     
     filepath: bpy.props.StringProperty(subtype="FILE_PATH")
@@ -1513,7 +1513,7 @@ class ExportCustomMorph(bpy.types.Operator):
 
 class ExportSFMeshOperator(bpy.types.Operator):
     """Export the active object"""
-    bl_idname = "export.sfmesh"
+    bl_idname = "export_scene.sfmesh"
     bl_label = "Export Active Mesh"
     
     folder_path: bpy.props.StringProperty(subtype="DIR_PATH", default="")
@@ -1576,7 +1576,7 @@ class ExportSFMeshPanel(bpy.types.Panel):
         layout.prop(context.scene, "export_sf_mesh_open_folder", text="Open export folder")
         layout.prop(context.scene, "export_sf_mesh_hash_result", text="Hash file name")
         # Button to export the selected skeleton
-        layout.operator("export.sfmesh", text="Export .mesh")
+        layout.operator("export_scene.sfmesh", text="Export .mesh")
 
 
 # Add custom menu entries in the File menu
