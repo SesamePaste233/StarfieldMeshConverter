@@ -256,7 +256,7 @@ void amain() {
 void main() {
 	nif::NifIO nif;
 
-	std::string input_file = "C:\\repo\\MeshConverter\\naked_m.nif";
+	std::string input_file = "C:\\repo\\MeshConverter\\tombstone.nif";
 
 	if (!nif.Deserialize(input_file)) {
 		std::cerr << "Failed to load nif from " << input_file << std::endl;
@@ -276,7 +276,7 @@ void main() {
 	auto jsondata = t_ptr->Serialize();
 
 
-	std::ofstream out("C:\\repo\\MeshConverter\\naked_m.json");
+	std::ofstream out("C:\\repo\\MeshConverter\\tombstone.json");
 	out << jsondata.dump(4);
 
 	auto t_ptr2 = new nif::ni_template::NiSkinInstanceTemplate();
@@ -286,7 +286,7 @@ void main() {
 	nif::NifIO nif2;
 	nif2.FromTemplate(nif::ni_template::slice_cast(t_ptr2, rtti));;
 
-	nif2.Serialize("C:\\repo\\MeshConverter\\naked_m1.nif");
+	nif2.Serialize("C:\\repo\\MeshConverter\\tombstone1.nif");
 }
 
 void _main() {

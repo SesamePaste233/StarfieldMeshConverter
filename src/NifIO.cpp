@@ -29,12 +29,25 @@ bool nif::NifIO::Deserialize(const std::string filename)
 
 	auto _num_blocks = this->header.num_blocks;
 
+	uint32_t cur_pos = file.tellg();
 	for (int i = 0; i < _num_blocks; i++) {
 		auto type_id = this->header.block_type_indices[i];
-		auto type = this->header.block_types[type_id];
+		auto& type = this->header.block_types[type_id];
 		auto bytes = this->header.block_sizes[i];
 		auto block = CreateBlock(type, type_id, bytes);
+
+		file.seekg(cur_pos, std::ios::beg);
 		block->Deserialize(file);
+
+		cur_pos += bytes;
+
+		if (file.tellg() != cur_pos) {
+			std::cout << "Warning: Potential data mismatch in block: " + std::to_string(i) + " in file: " + filename << std::endl;
+			std::cout << " Block type: " + type << std::endl;
+			std::cout << " Block size: " + std::to_string(bytes) << std::endl;
+			std::cout << " Block offset: " + std::to_string(cur_pos) << std::endl;
+			std::cout << " Block name: " + this->string_manager.GetString(block->name_index) << std::endl;
+		}
 
 		this->blocks.push_back(block);
 
@@ -760,8 +773,6 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::FromNif(const
 nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 {
 	nlohmann::json _result = NiArmatureTemplate::Serialize();
-
-	std::cout << _result.dump() << std::endl;
 
 	_result["geometries"] = nlohmann::json::array();
 
