@@ -26,7 +26,7 @@ extern "C" {
 
 	DLL const char* ImportMorph(const char* input_file);
 
-	DLL uint32_t CreateNif(const char* json_data, const char* output_file);
+	DLL uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder);
 
 	DLL const char* ImportNif(const char* input_file);
 }

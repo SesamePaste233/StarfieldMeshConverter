@@ -18,6 +18,13 @@ namespace nif {
 			NiSkinInstance,
 		};
 
+		enum SubTemplate {
+			None = 1 << 0,
+			PureSkeleton = 1 << 1,
+			Weapon = 1 << 2,
+			GeneralScene = 1 << 3,
+		};
+
 		template<class _to_type, class _from_type>
 		NiTemplateBase* slice_cast(_from_type*& ptr) {
 			_to_type* _ptr = new _to_type;
@@ -179,6 +186,8 @@ namespace nif {
 
 		NiNode* GetRootNode() const;
 
+		BSXFlags* GetBSXFlag() const;
+
 		bool FromTemplate(ni_template::NiTemplateBase* template_ptr);
 
 		template<class _template_type>
@@ -195,14 +204,21 @@ namespace nif {
 
 		void SetAssetsPath(const std::string& path) {
 			// Append "geometries" to the path if it doesn't end with it
-			if (path.substr(path.length() - 11) != "geometries/") {
-				assets_path = path + "geometries/";
+			if (path.substr(path.length() - 11) != "/geometries/") {
+				assets_path = path + "/geometries/";
 			}
 			else
 				assets_path = path;
 		};
 
 		mesh::MeshIO* GetMesh(const std::string& mesh_factory_path) const;
+
+		mesh::MeshIO* GetMesh(const nif::BSGeometry* geometry_node) const {
+			if (geometry_node->meshes.empty()) {
+				return nullptr;
+			}
+			return GetMesh(geometry_node->meshes[0].mesh_path);
+		};
 	};
 
 
@@ -240,6 +256,7 @@ namespace nif {
 					geometry_index = other.geometry_index;
 					parent = other.parent;
 					children = other.children;
+					prevent_optimization = other.prevent_optimization;
 				};
 
 				std::string name = "";
@@ -252,6 +269,8 @@ namespace nif {
 				uint32_t geometry_index = -1;
 				uint32_t parent = -1;
 				std::vector<uint32_t> children;
+
+				bool prevent_optimization = false;
 
 				bool FromNiObject(const NiObject* node, const nif::NifIO& nif) {
 					if (node == nullptr) return false;
@@ -294,6 +313,10 @@ namespace nif {
 
 			bool skeleton_mode = false;
 
+			SubTemplate sub_template = SubTemplate::None;
+
+			uint32_t bsx_flags = 65536;
+
 			RTTI GetRTTI() const override {
 				return RTTI::NiArmature;
 			};
@@ -322,7 +345,40 @@ namespace nif {
 					return RTTI::None;
 				}
 
-				skeleton_mode = data["skeleton_mode"];
+				if (data.find("skeleton_mode") != data.end())
+					skeleton_mode = data["skeleton_mode"];
+
+				if (data.find("auto_detect") != data.end() && int(data["auto_detect"])) {
+					std::string root_name = data["name"];
+					if (root_name == "WEAPON") {
+						sub_template = SubTemplate::Weapon;
+					}
+					else if (root_name == "ExportScene") {
+						sub_template = SubTemplate::GeneralScene;
+					}
+					else if (!root_name.empty()) {
+						for (auto& child : data["children"]) {
+							if (child['name'] == "Root") {
+								sub_template = SubTemplate::PureSkeleton;
+								break;
+							}
+						}
+					}
+				}
+
+				if (data.find("sub_template") != data.end()) {
+					sub_template = SubTemplate(uint32_t(data["sub_template"]));
+				}
+
+				if (data.find("BSX") != data.end()) {
+					this->bsx_flags = data["BSX"];
+				}
+				else if (sub_template & (SubTemplate::Weapon|SubTemplate::PureSkeleton)) {
+					this->bsx_flags = 74;
+				}
+				else if (sub_template & SubTemplate::GeneralScene) {
+					this->bsx_flags = 10;
+				}
 
 				Eigen::Matrix4f root_axis = Eigen::Matrix4f::Identity();
 
@@ -364,6 +420,8 @@ namespace nif {
 
 				serialized["geometry_index"] = current->geometry_index;
 
+				serialized["sgo_keep"] = int(current->prevent_optimization);
+
 				serialized["children"] = nlohmann::json::array();
 				for (uint32_t child : bones[current_index].children) {
 					if (skeleton_mode && skeleton_bones.find(bones[child].name) == skeleton_bones.end()) {
@@ -371,7 +429,6 @@ namespace nif {
 					}
 					serialized["children"].push_back(SerializeGlobalImpl(child, new_axis));
 				}
-
 
 				return serialized;
 			}
@@ -385,6 +442,10 @@ namespace nif {
 
 				current->name = data["name"];
 				current->scale = data["scale"];
+
+				current->geometry_index = data["geometry_index"];
+
+				current->prevent_optimization = int(data["sgo_keep"]);
 
 				Eigen::Matrix4f new_axis = Eigen::Matrix4f::Identity();
 				for (int i = 0; i < 4; ++i) {
@@ -410,7 +471,6 @@ namespace nif {
 				current->translation[1] = t(1, 3);
 				current->translation[2] = t(2, 3);
 
-				current->geometry_index = data["geometry_index"];
 
 				for (auto& child : data["children"]) {
 					NodeInfo new_child;
@@ -578,7 +638,6 @@ namespace nif {
 				std::string mat_path = "";
 			};
 
-			uint32_t bsx_flags = 65536;
 			std::vector<GeoInfo> geo_infos;
 
 			RTTI GetRTTI() const override {
@@ -596,6 +655,7 @@ namespace nif {
 
 			typedef struct SkinInfo {
 				bool has_skin = false;
+				bool request_recalc_bounding_sphere = false;
 				std::vector<std::string> bone_names;
 				std::vector<std::string> bone_refs;
 				std::vector<BoneInfo> bone_infos;
@@ -624,6 +684,7 @@ namespace nif {
 			RTTI FromNif(const NifIO& source) override;
 			nlohmann::json Serialize() const override;
 			RTTI Deserialize(nlohmann::json data) override;
+
 		};
 
 	};	

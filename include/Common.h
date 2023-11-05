@@ -707,6 +707,18 @@ public:
 		return T_4x4;
 	};
 
+	static Eigen::Vector4f fromTransform(const float t[3]) {
+		Eigen::Vector4f T_4x4 = Eigen::Vector4f::Zero();
+
+		// Fill in the rightmost column with the translation vector and scaling
+		T_4x4(0) = t[0];
+		T_4x4(1) = t[1];
+		T_4x4(2) = t[2];
+		T_4x4(3) = 1;
+
+		return T_4x4;
+	};
+
 	static std::pair<Eigen::Vector3f, Eigen::Vector3f> toAxis(Eigen::Matrix4f& Trans, float length = 1) {
 		Eigen::Vector4f start_point_homogeneous(0, 0, 0, 1);
 		Eigen::Vector4f end_point_homogeneous(0, 0, length, 1);

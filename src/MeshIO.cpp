@@ -1,4 +1,5 @@
 #include "MeshIO.h"
+#include "Seb.h"
 
 using namespace DirectX;
 using namespace mesh;
@@ -111,8 +112,9 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	this->num_weights = Util::readUInt32(file)[0];
 	auto num_shape_keys = 0;
-	if (this->num_weights !=0 )
+	if (this->num_weights != 0) {
 		num_shape_keys = this->num_vertices;
+	}
 
 	for (int i = 0; i < num_shape_keys; i++) {
 		vertex_weight vw = new bone_binding[num_weightsPerVertex];
@@ -121,6 +123,13 @@ bool MeshIO::Deserialize(const std::string filename)
 			auto pair = Util::readUInt16(file, 2);
 			vw[j].bone = pair[0];
 			vw[j].weight = pair[1];
+			if (pair[1] > 2) {
+				if (pair[0] >= this->weight_indices.size())
+				{
+					this->weight_indices.resize(pair[0] + 1);
+				}
+				this->weight_indices[pair[0]].emplace_back(i);
+			}
 		}
 
 		this->weights.emplace_back(vw);
@@ -537,7 +546,7 @@ bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_facto
 
 bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const uint32_t options) {
 	this->Clear();
-
+	
 	std::ifstream file(jsonBlenderFile);
 	if (!file.is_open()) {
 		std::cout << "Error: Failed to open JSON file." << std::endl;
@@ -647,15 +656,23 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 			return false;
 		}
 
+		size_t num_bones = 0;
 		for (const auto& vw : weightData) {
 			if (vw.is_array()) {
 				if (vw.size() > this->num_weightsPerVertex) {
 					this->num_weightsPerVertex = vw.size();
 				}
+				for (auto& elem : vw) {
+					if (elem[0] > num_bones) {
+						num_bones = elem[0];
+					}
+				}
 			}
 		}
+		num_bones += 1;
 
 		this->num_weights = weightData.size() * this->num_weightsPerVertex;
+		this->weight_indices.resize(num_bones);
 
 		for (const auto& vw : weightData) {
 			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
@@ -684,6 +701,8 @@ bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, c
 			for (auto& bb_per_vert_per_bone_raw : bb_raw) {
 				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
 				uint16_t weight = 0;
+
+				this->weight_indices[bone_id].push_back(_i);
 
 				uint16_t _Max = uint16_t(-1);
 				if (options & Options::NormalizeWeight) {
@@ -844,15 +863,23 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 			return false;
 		}
 
+		size_t num_bones = 0;
 		for (const auto& vw : weightData) {
 			if (vw.is_array()) {
 				if (vw.size() > this->num_weightsPerVertex) {
 					this->num_weightsPerVertex = vw.size();
 				}
+				for (auto& elem : vw) {
+					if (elem[0] > num_bones) {
+						num_bones = elem[0];
+					}
+				}
 			}
 		}
+		num_bones += 1;
 
 		this->num_weights = weightData.size() * this->num_weightsPerVertex;
+		this->weight_indices.resize(num_bones);
 
 		for (const auto& vw : weightData) {
 			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
@@ -871,6 +898,7 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 					bb_per_vert_per_bone_raw.push_back(_e);
 				}
 
+
 				sum_weight += bb_per_vert_per_bone_raw[1];
 				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
 
@@ -881,6 +909,8 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 			for (auto& bb_per_vert_per_bone_raw : bb_raw) {
 				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
 				uint16_t weight = 0;
+
+				this->weight_indices[bone_id].push_back(_i);
 
 				uint16_t _Max = uint16_t(-1);
 				if (options & Options::NormalizeWeight) {
@@ -1119,6 +1149,8 @@ void MeshIO::Clear()
 	this->normals.clear();
 	this->tangents.clear();
 	this->weights.clear();
+	this->weight_indices.clear();
+	this->bone_bounding.clear();
 	this->meshlets.clear();
 	this->culldata.clear();
 	this->smooth_group.clear();
@@ -1255,6 +1287,37 @@ void MeshIO::Optimize(std::vector<uint16_t>&	a_indices,
 		ThrowIfFailed(DirectX::FinalizeVB(a_vertColors.data(), sizeof(vertex_color), m_vertexCount, m_dupVerts.data(), m_dupVerts.size(), m_vertexRemap.data(), m_vertColorsReorder.data()));
 
 		std::swap(a_vertColors, m_vertColorsReorder);
+	}
+}
+
+void mesh::MeshIO::CalculateBoneBounding()
+{
+	typedef double FT;
+	typedef Seb::Point<FT> Point;
+	typedef std::vector<Point> PointVector;
+	typedef Seb::Smallest_enclosing_ball<FT> Miniball;
+
+	this->bone_bounding.clear();
+	for (auto& indices : this->weight_indices) {
+		PointVector point_set;
+
+		std::vector<double> coords(3);
+		for (auto& index : indices) {
+			coords[0] = this->positions[index * 3];
+			coords[1] = this->positions[index * 3 + 1];
+			coords[2] = this->positions[index * 3 + 2];
+			point_set.push_back(Point(3, coords.begin()));
+		}
+
+		Miniball mb(3, point_set);
+
+		BoneBoundingSphere bbs;
+		bbs.center[0] = mb.center_begin()[0];
+		bbs.center[1] = mb.center_begin()[1];
+		bbs.center[2] = mb.center_begin()[2];
+		bbs.radius = mb.radius();
+
+		this->bone_bounding.emplace_back(bbs);
 	}
 }
 

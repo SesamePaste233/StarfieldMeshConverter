@@ -27,6 +27,10 @@ namespace mesh {
 			SmoothEdgeNormal = 1 << 3,
 			FlipTangent = 1 << 4,
 		};
+		typedef struct BoneBoundingSphere {
+			float center[3] = { 0,0,0 };
+			float radius = 0;
+		};
 
 		MeshIO() {
 			Clear();
@@ -65,6 +69,8 @@ namespace mesh {
 
 		float max_border;
 
+		void CalculateBoneBounding();
+
 		uint32_t num_weightsPerVertex;
 
 		uint32_t indices_size;
@@ -86,6 +92,8 @@ namespace mesh {
 
 		uint32_t num_weights;
 		std::vector<vertex_weight> weights;
+		std::vector<std::vector<uint32_t>> weight_indices;
+		std::vector<BoneBoundingSphere> bone_bounding;
 
 		uint32_t num_vert_colors;
 		std::vector<vertex_color> vert_colors;

@@ -27,7 +27,6 @@
     <ClInclude Include="include\NifIO.h" />
     <ClInclude Include="include\NifTypes.h" />
     <ClInclude Include="include\WavefrontWriter.h" />
-    <ClInclude Include="lib\json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Common.cpp" />
@@ -138,7 +137,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>;C:\repo\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>;C:\repo\eigen-3.4.0;C:\repo\MeshConverter\lib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,7 +159,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_DLLEXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\repo\DirectXMesh-main\DirectXMesh;C:\repo\DirectXMesh-main\Utilities;%(AdditionalIncludeDirectories);C:\repo\eigen-3.4.0</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\repo\DirectXMesh-main\DirectXMesh;C:\repo\DirectXMesh-main\Utilities;%(AdditionalIncludeDirectories);C:\repo\eigen-3.4.0;C:\repo\MeshConverter\lib</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

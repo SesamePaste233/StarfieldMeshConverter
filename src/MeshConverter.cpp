@@ -102,9 +102,10 @@ const char* ImportMorph(const char* input_file)
 	return Util::make_copy(JsonData);
 }
 
-uint32_t CreateNif(const char* json_data, const char* output_file)
+uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder)
 {
 	nif::NifIO nif;
+	nif.SetAssetsPath(assets_folder);
 
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 

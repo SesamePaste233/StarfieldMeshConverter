@@ -253,40 +253,36 @@ void amain() {
 	return;
 }
 
-void main() {
+int main() {
 	nif::NifIO nif;
+	nif.SetAssetsPath("C:\\repo\\MeshConverter");
+	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::string input_file = "C:\\repo\\MeshConverter\\tombstone.nif";
+	std::ifstream file("C:\\repo\\MeshConverter\\WEAPON.nif.json");
+	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-	if (!nif.Deserialize(input_file)) {
-		std::cerr << "Failed to load nif from " << input_file << std::endl;
-		return;
-	}
+	std::cout << json_data << std::endl;
 
-	auto t_ptr = nif.ToTemplate<nif::ni_template::NiSkinInstanceTemplate>();
+	nlohmann::json jsonData = nlohmann::json::parse(json_data);
 
-	if (t_ptr == nullptr) {
-		std::cerr << "Failed to convert nif to template" << std::endl;
-		return;
+	auto rtti = temp->Deserialize(jsonData);
+
+	if (rtti == nif::ni_template::RTTI::None) {
+		std::cerr << "Failed to deserialize json to template" << std::endl;
+		return 10; // Return an error code
 	}
 	else {
-		std::cout << "Nif converted to template RTTI: " << (uint32_t)t_ptr->GetRTTI() << std::endl;
+		std::cout << "Template deserialized to template RTTI: " << (uint32_t)rtti << std::endl;
 	}
 
-	auto jsondata = t_ptr->Serialize();
+	if (!nif.FromTemplate(nif::ni_template::slice_cast(temp, rtti))) {
+		std::cerr << "Failed to convert template to nif" << std::endl;
+		return 11; // Return an error code
+	}
 
+	nif.Serialize("C:\\repo\\MeshConverter\\ExportScene.nif");
 
-	std::ofstream out("C:\\repo\\MeshConverter\\tombstone.json");
-	out << jsondata.dump(4);
-
-	auto t_ptr2 = new nif::ni_template::NiSkinInstanceTemplate();
-
-	auto rtti = t_ptr2->Deserialize(jsondata);
-
-	nif::NifIO nif2;
-	nif2.FromTemplate(nif::ni_template::slice_cast(t_ptr2, rtti));;
-
-	nif2.Serialize("C:\\repo\\MeshConverter\\tombstone1.nif");
+	return 0;
 }
 
 void _main() {

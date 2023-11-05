@@ -45,7 +45,7 @@ bool nif::NifIO::Deserialize(const std::string filename)
 			std::cout << "Warning: Potential data mismatch in block: " + std::to_string(i) + " in file: " + filename << std::endl;
 			std::cout << " Block type: " + type << std::endl;
 			std::cout << " Block size: " + std::to_string(bytes) << std::endl;
-			std::cout << " Block offset: " + std::to_string(cur_pos) << std::endl;
+			std::cout << " Block offset: " + std::to_string(cur_pos - bytes) << std::endl;
 			std::cout << " Block name: " + this->string_manager.GetString(block->name_index) << std::endl;
 		}
 
@@ -358,6 +358,23 @@ nif::NiNode* nif::NifIO::GetRootNode() const
 	return root_node;
 }
 
+nif::BSXFlags* nif::NifIO::GetBSXFlag() const
+{
+	auto root = GetRootNode();
+
+	if (!root)
+		return nullptr;
+
+	auto bsx_flags = GetReferencedBlocks(root, nif::NiRTTI::BSXFlags);
+
+	if (bsx_flags.empty())
+		return nullptr;
+
+	auto bsx_flag = dynamic_cast<nif::BSXFlags*>(bsx_flags[0]);
+
+	return bsx_flag;
+}
+
 bool nif::NifIO::FromTemplate(ni_template::NiTemplateBase* template_ptr)
 {
 	if (!template_ptr)
@@ -632,14 +649,6 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 	if(!NiArmatureTemplate::ToNif(nif))
 		return false;
 
-	auto root_node = dynamic_cast<nif::NiNode*>(nif.GetRTTIBlocks(nif::NiRTTI::NiNode)[0]);
-
-	auto bsxflags = dynamic_cast<nif::BSXFlags*>(nif.AddBlock(nif::NiRTTI::BSXFlags, "BSX"));
-
-	root_node->AddExtraData(nif.block_manager.FindBlock(bsxflags));
-
-	bsxflags->flags = this->bsx_flags;
-
 	for (auto& bone : this->bones) {
 		auto ni_node = nif.block_manager.GetBlock(bone.ni_node);
 		if(ni_node->GetRTTI() != nif::NiRTTI::BSGeometry)
@@ -676,6 +685,8 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 			mesh_data.num_vertices = mesh_info.num_vertices;
 
 			mesh_data.num_indices = mesh_info.num_indices;
+
+			mesh_data.path_length = mesh_info.factory_path.length();
 
 			bsgeo->meshes.push_back(mesh_data);
 		}
@@ -813,6 +824,7 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 	if (_data.find("geometries") == _data.end())
 		return rtti;
 
+
 	this->geo_infos.clear();
 	for (auto& data : _data["geometries"]) {
 		GeoInfo geo_info;
@@ -871,8 +883,29 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 
 		auto skin_bonedata = dynamic_cast<nif::BSSkin::BoneData*>(nif.AddBlock(nif::NiRTTI::BSSkinBoneData));
 
-		skin_bonedata->bone_infos = skin_info.bone_infos;
 		skin_bonedata->num_bone_infos = num_bones;
+
+		if (skin_info.request_recalc_bounding_sphere) {
+			auto mesh = nif.GetMesh(bsgeometry);
+			if (mesh == nullptr) {
+				std::cout << "Warning: Failed to load mesh for geometry. " << std::endl;
+				return false;
+			}
+			mesh->CalculateBoneBounding();
+			auto Obj = xf::createTransformationMatrix(bsgeometry->rotation);
+			for (int j = 0; j < num_bones; ++j) {
+				auto& bone_info = skin_info.bone_infos[j];
+
+				auto B_inv = xf::createTransformationMatrix(bone_info.rotation, bone_info.translation);
+				Eigen::Vector3f center = (B_inv * Obj * xf::fromTransform(mesh->bone_bounding[j].center)).hnormalized();
+
+				std::memcpy(bone_info.center, center.data(), sizeof(float) * 3);
+				bone_info.radius = mesh->bone_bounding[j].radius;
+			}
+			delete mesh;
+		}
+
+		skin_bonedata->bone_infos = skin_info.bone_infos;
 
 		skin_instance->skeleton_root = root().ni_node;
 		skin_instance->bone_data = nif.block_manager.FindBlock(skin_bonedata);
@@ -899,6 +932,12 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 
 	nif.UpdateBlockReferences();
 	nif.UpdateStringReferences();
+
+	auto bsx_flag = nif.GetBSXFlag();
+
+	if (bsx_flag) {
+		bsx_flag->flags = 65536;
+	}
 
 	return true;
 }
@@ -1020,14 +1059,13 @@ nlohmann::json nif::ni_template::NiSkinInstanceTemplate::Serialize() const
 			}
 			bone_info["radius"] = skin_info.bone_infos[i].radius;
 
-			for (int j = 0; j < 3; ++j) {
-				bone_info["rotation"][j][0] = skin_info.bone_infos[i].rotation[j][0];
-				bone_info["rotation"][j][1] = skin_info.bone_infos[i].rotation[j][1];
-				bone_info["rotation"][j][2] = skin_info.bone_infos[i].rotation[j][2];
-			}
+			auto matrix = xf::createTransformationMatrix(skin_info.bone_infos[i].rotation, skin_info.bone_infos[i].translation);
 
-			for (int j = 0; j < 3; ++j) {
-				bone_info["translation"][j] = skin_info.bone_infos[i].translation[j];
+			for (int k = 0; k < 4; ++k) {
+				bone_info["matrix"].push_back(nlohmann::json::array());
+				for (int j = 0; j < 4; ++j) {
+					bone_info["matrix"][k].push_back(matrix(k, j));
+				}
 			}
 
 			result["bone_infos"].push_back(bone_info);
@@ -1054,6 +1092,7 @@ nif::ni_template::RTTI nif::ni_template::NiSkinInstanceTemplate::Deserialize(nlo
 		}
 
 		SkinInfo skin_info;
+		skin_info.has_skin = true;
 		if (data.find("bone_names") != data.end()) {
 			for (int i = 0; i < data["bone_names"].size(); i++) {
 				skin_info.bone_names.push_back(data["bone_names"][i]);
@@ -1072,17 +1111,34 @@ nif::ni_template::RTTI nif::ni_template::NiSkinInstanceTemplate::Deserialize(nlo
 			for (int i = 0; i < data["bone_infos"].size(); i++) {
 				const nlohmann::json& bone_info = data["bone_infos"][i];
 				BoneInfo info;
-				info.center[0] = bone_info["center"][0];
-				info.center[1] = bone_info["center"][1];
-				info.center[2] = bone_info["center"][2];
-				info.radius = bone_info["radius"];
-				for (int i = 0; i < 3; ++i) {
-					info.rotation[i][0] = bone_info["rotation"][i][0];
-					info.rotation[i][1] = bone_info["rotation"][i][1];
-					info.rotation[i][2] = bone_info["rotation"][i][2];
+				if (bone_info.find("center") != bone_info.end() && bone_info.find("radius") != bone_info.end()) {
+					info.center[0] = bone_info["center"][0];
+					info.center[1] = bone_info["center"][1];
+					info.center[2] = bone_info["center"][2];
+					info.radius = bone_info["radius"];
 				}
-				for (int i = 0; i < 3; ++i) {
-					info.translation[i] = bone_info["translation"][i];
+				else {
+					skin_info.request_recalc_bounding_sphere = true;
+				}
+
+				Eigen::Matrix4f matrix = Eigen::Matrix4f::Identity();
+				for (int i = 0; i < 4; ++i) {
+					for (int j = 0; j < 4; ++j) {
+						matrix(i, j) = bone_info["matrix"][i][j];
+					}
+				}
+
+				Eigen::Matrix3f rotation = matrix.block<3, 3>(0, 0);
+				Eigen::Vector3f translation = matrix.block<3, 1>(0, 3);
+
+				for (int j = 0; j < 3; ++j) {
+					info.rotation[j][0] = rotation(j, 0);
+					info.rotation[j][1] = rotation(j, 1);
+					info.rotation[j][2] = rotation(j, 2);
+				}
+
+				for (int j = 0; j < 3; ++j) {
+					info.translation[j] = translation(j);
 				}
 
 
@@ -1105,6 +1161,7 @@ nif::ni_template::RTTI nif::ni_template::NiSkinInstanceTemplate::Deserialize(nlo
 bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 {
 	nif.Clear();
+
 	if (IsRootEmtpy())
 		return false;
 
@@ -1115,6 +1172,12 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 		}
 		else {
 			cur_ni_node = dynamic_cast<nif::NiObject*>(nif.AddBlock("NiNode", cur_node.name));
+			if (sub_template & (SubTemplate::PureSkeleton|SubTemplate::Weapon) && cur_node.prevent_optimization) {
+				auto extra_data = dynamic_cast<nif::NiStringExtraData*>(nif.AddBlock(nif::NiRTTI::NiStringExtraData, "sgoKeep"));
+				auto extra_data_id = nif.block_manager.FindBlock(extra_data);
+				extra_data->string_index = nif.string_manager.AddString("sgoKeep", extra_data_id);
+				cur_ni_node->AddExtraData(extra_data_id);
+			}
 		}
 
 		cur_ni_node->flags = cur_node.flags;
@@ -1139,6 +1202,19 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 
 	nif.UpdateBlockReferences();
 	nif.UpdateStringReferences();
+
+	auto root_node = nif.GetRootNode();
+
+	if (root_node == nullptr)
+		return false;
+
+	auto bsxflags = dynamic_cast<nif::BSXFlags*>(nif.AddBlock(nif::NiRTTI::BSXFlags, "BSX"));
+	
+	root_node->AddExtraData(nif.block_manager.FindBlock(bsxflags));
+
+	bsxflags->flags = this->bsx_flags;
+
+	nif.UpdateBlockReference(root_node);
 
 	return true;
 }
@@ -1176,6 +1252,24 @@ nif::ni_template::RTTI nif::ni_template::NiArmatureTemplate::FromNif(const NifIO
 
 		if (!current)
 			continue;
+
+		for (auto extra_data_id : current->extra_data) {
+			auto extra_data = nif.block_manager.GetBlock(extra_data_id);
+			if (extra_data->GetRTTI() != nif::NiRTTI::NiStringExtraData)
+				continue;
+
+			auto name = nif.string_manager.GetString(extra_data->name_index);
+			if (name != "sgoKeep")
+				continue;
+			
+			auto extra_string_data = dynamic_cast<nif::NiStringExtraData*>(extra_data);
+
+			auto string_data = nif.string_manager.GetString(extra_string_data->string_index);
+
+			if (string_data == "sgoKeep") {
+				bones[current_index].prevent_optimization = true;
+			}
+		}
 
 		for (int i = 0; i < current->children.size(); ++i) {
 			auto _child = manager.GetBlock(current->children[i]);
