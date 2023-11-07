@@ -370,3 +370,4 @@ FodyWeavers.xsd
 /morph_analysis.py
 *.csv
 *.nif
+/lib
