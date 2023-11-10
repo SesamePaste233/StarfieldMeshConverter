@@ -371,3 +371,4 @@ FodyWeavers.xsd
 *.csv
 *.nif
 /lib
+/scripts/MakePackage.py
