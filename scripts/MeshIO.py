@@ -9,7 +9,7 @@ from mathutils import Color
 
 from utils_blender import SetActiveObject, GetSelectedObjs
 
-from utils_blender import update_path, open_folder, read_only_marker
+from utils_blender import open_folder, read_only_marker, TempFolderPath
 
 from utils_blender import PreprocessAndProxy, SmoothPerimeterNormal
 
@@ -22,7 +22,6 @@ from MeshConverter import _dll_export_mesh, _dll_import_mesh
 def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 	export_mesh_file_path = filepath
 	export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
-	utils_path, temp_path = update_path(os.path.dirname(__file__))
 	
 	# Initialize dictionaries to store data
 	data = {
@@ -34,14 +33,10 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 		"normals": [],
 		"uv_coords": [],
 		"vertex_color": [],
-		"bone_list":[],
 		"vertex_weights": [],
 		"smooth_group": [],
 		"tangents": [],
 	}
-
-	if not os.path.isdir(temp_path):
-		os.makedirs(temp_path)
 
 	old_obj = bpy.context.active_object
 	if old_obj and old_obj.type == 'MESH':
@@ -165,20 +160,31 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 			# Extract vertex weights and bones
 			if options.WEIGHTS:
 				vertex_groups = selected_obj.vertex_groups
-				vgrp_names = [vg.name for vg in vertex_groups]
-				data["bone_list"] = vgrp_names
-				
+				vgrp_markers = [[vg.name, -1] for vg in vertex_groups]
+				new_id = 0
+
 				bm.verts.layers.deform.verify()
 
 				deform = bm.verts.layers.deform.active
 				
+				data["vertex_weights"]=[]
+				_min_weight = 1 / 65534
 				for v in bm.verts:
 					g = v[deform]
 					
-					if len(g.items()) > 0 :
-						data["vertex_weights"].append(g.items())
-					elif len(data["bone_list"])>0:
-						data["vertex_weights"].append([[0, 0]])
+					data["vertex_weights"].append([])
+					for bone_id, weight in g.items():
+						if weight > _min_weight:
+							if vgrp_markers[bone_id][1] == -1:
+								vgrp_markers[bone_id][1] = new_id
+								new_id += 1
+							data["vertex_weights"][-1].append([vgrp_markers[bone_id][1], weight])
+							
+					
+					if len(data["vertex_weights"][-1]) == 0:
+						data["vertex_weights"][-1].append([0, 0])
+
+				vgrp_names = [vg[0] for vg in vgrp_markers if vg[1] is not -1]
 
 		except IndexError:
 			operator.report({'WARNING'}, "The mesh may have loose vertices, try to Clean Up the mesh or contact the author.")
@@ -211,6 +217,9 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 		
 		json_data = json.dumps(data)
 
+		#with open(result_file_path + '.json', 'w') as json_file:
+		#	json_file.write(json_data)
+
 		returncode = _dll_export_mesh(json_data.encode('utf-8'), result_file_path.encode('utf-8'), options.mesh_scale, False, options.normalize_weights, False)
 
 		if returncode == 0:
@@ -227,9 +236,9 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 		
 	return {'CANCELLED'}, 0,0, None
 
-def ImportMesh(options, context, operator, mesh_name_override = None):
-	import_path = options.filepath
-	utils_path, temp_path = update_path(os.path.dirname(__file__))
+def ImportMesh(file_path, options, context, operator, mesh_name_override = None):
+	import_path = file_path
+	temp_path = TempFolderPath()
 
 	rtn = _dll_import_mesh(import_path.encode('utf-8'), os.path.join(temp_path, "mesh_data_import").encode('utf-8')).decode('utf-8')
 

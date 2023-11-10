@@ -5,7 +5,7 @@ import json
 
 from utils_blender import GetActiveObject, SetActiveObject, GetSelectedObjs, SetSelectObjects
 
-from utils_blender import update_path, read_only_marker
+from utils_blender import read_only_marker
 
 from utils_blender import PreprocessAndProxy, SmoothPerimeterNormal, GetNormalTangents, VisualizeVectors
 
@@ -13,7 +13,6 @@ from MeshConverter import _dll_export_morph, _dll_import_morph
 
 def ImportMorph(options, context, operator):
 	import_path = options.filepath
-	utils_path, temp_path = update_path(os.path.dirname(__file__))
 	
 	rtn = _dll_import_morph(import_path.encode('utf-8')).decode('utf-8')
 
@@ -94,8 +93,6 @@ def ImportMorph(options, context, operator):
 	
 def ExportMorph(options, context, export_file_path, operator):
 	export_path = export_file_path
-	utils_path, temp_path = update_path(os.path.dirname(__file__))
-	data_path = os.path.join(temp_path, "morph_data_export.json")
 
 	target_obj = GetActiveObject()
 	s_objs = GetSelectedObjs(True)

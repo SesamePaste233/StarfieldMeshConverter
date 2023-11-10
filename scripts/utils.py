@@ -3,6 +3,7 @@ import os
 import hashlib
 import datetime
 import shutil
+import re
 
 default_assets_folder = 'YOUR_LOOSE_DATA_FOLDER'
 export_mesh_folder_path = None
@@ -11,7 +12,6 @@ assets_folder = None
 def save(filename, *args):
 	# Get global dictionary
 	glob = globals()
-	print(glob)
 	d = {}
 	for v in args:
 		# Copy over desired values
@@ -23,7 +23,6 @@ def save(filename, *args):
 def load(filename):
 	# Get global dictionary
 	glob = globals()
-	print(glob)
 	try:
 		with open(os.path.join(os.path.dirname(__file__), filename), 'rb') as f:
 			for k, v in pickle.load(f).items():
@@ -132,3 +131,50 @@ def flatten(lst):
 		else:
 			result.append(item)
 	return result
+
+def edit_distance_similarity(word1, word2):
+    m, n = len(word1), len(word2)
+    
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(m + 1):
+        dp[i][0] = i
+    for j in range(n + 1):
+        dp[0][j] = j
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if word1[i - 1] == word2[j - 1]:
+                cost = 0
+            else:
+                cost = 1
+            dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
+
+    return 1 - pow(dp[m][n] / max(len(word1), len(word2)), 0.5)
+
+def _tag(name:str):
+	tags = re.findall(r'\w+', name)
+	final_tags = []
+	for combined_tag in tags:
+		sub_tags = combined_tag.lower().split('_')
+		for tag in sub_tags:
+			if tag == 'f':
+				tag = 'female'
+			elif tag == 'm':
+				tag = 'male'
+			final_tags.append(tag)
+    
+	return list(set(final_tags))
+
+def _match_tags(tags_a:list, tags_b:list, normalized = False):
+	final_score = 0
+	for tag_a in tags_a:
+		tag_score = 0
+		for tag_b in tags_b:
+			tag_score += edit_distance_similarity(tag_a, tag_b)
+		final_score += tag_score
+	
+	if normalized:
+		final_score /= len(tags_a) * len(tags_b)
+
+	return final_score

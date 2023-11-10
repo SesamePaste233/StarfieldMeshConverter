@@ -36,6 +36,17 @@ public:
 		return cstr;
 	}
 
+	// Credit goes to fo76utils. Original code: https://pastebin.com/e3TL3Q2m
+	static uint32_t encodeCRC32(const std::string& str) {
+		uint32_t crc = 0U;
+		for (unsigned char c : str)
+		{
+			for (int k = 0; k < 8; k++, c = c >> 1)
+				crc = (crc >> 1) ^ ((0U - ((crc ^ c) & 1U)) & 0xEDB88320U);
+		}
+		return crc;
+	}
+
 	static std::vector<float> decodeDEC3N_CHECK(uint32_t n, uint8_t _check_w) {
 		if (n == 0)
 			return { 0,0,0 };

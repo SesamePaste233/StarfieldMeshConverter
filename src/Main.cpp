@@ -253,12 +253,31 @@ void amain() {
 	return;
 }
 
-int main() {
+void smain() {
+	morph::MorphIO reader;
+	reader.Deserialize("C:\\repo\\MeshConverter\\performance_teeth.dat");
+
+	return;
+}
+
+void main() {
+	mesh::MeshIO reader;
+	reader.Load("C:\\repo\\MeshConverter\\Hood.mesh.json", 1.f, mesh::MeshIO::Options::NormalizeWeight | mesh::MeshIO::Options::GenerateTangentIfNA /*| mesh::MeshIO::Options::SmoothEdgeNormal | mesh::MeshIO::Options::DoOptimize*/);
+
+	reader.Serialize("C:\\repo\\MeshConverter\\Hood.mesh");
+
+	mesh::MeshIO reader2;
+
+	reader2.Deserialize("C:\\repo\\MeshConverter\\Hood.mesh");
+
+}
+
+int retmain() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\repo\\MeshConverter");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\WEAPON.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\ExportScene.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

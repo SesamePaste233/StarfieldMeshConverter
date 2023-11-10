@@ -842,11 +842,27 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 			}
 		}
 
-		if (data.find("mat_id") != data.end())
-			geo_info.mat_id = data["mat_id"];
+		if (data.find("mat_path") != data.end()) {
+			std::string path = data["mat_path"];
+			std::transform(path.begin(), path.end(), path.begin(),
+				[](unsigned char c) -> unsigned char {
+					if (c == '/')
+						return '\\';
+					return c;
+				});
+			geo_info.mat_path = path;
+		}
 
-		if (data.find("mat_path") != data.end())
-			geo_info.mat_path = data["mat_path"];
+		if (data.find("mat_id") != data.end()) {
+			geo_info.mat_id = data["mat_id"];
+		}
+		else {
+			std::string encoding_string = geo_info.mat_path;
+
+			std::transform(encoding_string.begin(), encoding_string.end(), encoding_string.begin(), ::tolower);
+
+			geo_info.mat_id = Util::encodeCRC32(encoding_string);
+		}
 
 		this->geo_infos.push_back(geo_info);
 	}
@@ -892,12 +908,11 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 				return false;
 			}
 			mesh->CalculateBoneBounding();
-			auto Obj = xf::createTransformationMatrix(bsgeometry->rotation);
 			for (int j = 0; j < num_bones; ++j) {
 				auto& bone_info = skin_info.bone_infos[j];
 
 				auto B_inv = xf::createTransformationMatrix(bone_info.rotation, bone_info.translation);
-				Eigen::Vector3f center = (B_inv * Obj * xf::fromTransform(mesh->bone_bounding[j].center)).hnormalized();
+				Eigen::Vector3f center = (B_inv * xf::fromTransform(mesh->bone_bounding[j].center)).hnormalized();
 
 				std::memcpy(bone_info.center, center.data(), sizeof(float) * 3);
 				bone_info.radius = mesh->bone_bounding[j].radius;

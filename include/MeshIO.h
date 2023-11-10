@@ -29,7 +29,7 @@ namespace mesh {
 		};
 		typedef struct BoneBoundingSphere {
 			float center[3] = { 0,0,0 };
-			float radius = 0;
+			float radius = 0.1;
 		};
 
 		MeshIO() {

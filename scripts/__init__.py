@@ -6,20 +6,30 @@ dir = os.path.dirname(os.path.realpath(__file__))
 if dir not in sys.path:
 	sys.path.append(dir)
 
-from utils_blender import GetActiveObject, SetActiveObject, GetSelectedObjs, SetSelectObjects
+import utils_blender
 
 import utils
-from utils import sanitize_filename, load, save
 
-from MeshIO import ImportMesh, ExportMesh
+import MeshIO
 
-from MorphIO import ImportMorph, ExportMorph
+import MorphIO
 
-from NifIO import ImportNif, ExportNif
+import NifIO
+
+import nif_armature
+
+import imp
+imp.reload(utils_blender)
+imp.reload(utils)
+imp.reload(MeshIO)
+imp.reload(MorphIO)
+imp.reload(NifIO)
+imp.reload(nif_armature)
+
 
 bl_info = {
 	"name": "Starfield Mesh Exporter",
-	"version": (0, 11, 0),
+	"version": (0, 12, 2),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",
@@ -31,7 +41,6 @@ bl_info = {
 export_items = [
 	("GEO", "Geometry", "Export geometry data (positions and indices)."),
 	("NORM", "Normals", "Export normals data."),
-	("UV", "UV", "Export texture coordinates data."),
 	("VERTCOLOR", "Vertex Color", "Export vertex color data."),
 	("WEIGHTS", "Weights", "Export vertex groups data."),
 ]
@@ -76,12 +85,12 @@ class ExportCustomMesh(bpy.types.Operator):
 	)
 	VERTCOLOR: bpy.props.BoolProperty(
 		name="Vertex Color",
-		description=export_items[3][2],
+		description=export_items[2][2],
 		default=True
 	)
 	WEIGHTS: bpy.props.BoolProperty(
 		name="Weights",
-		description=export_items[4][2],
+		description=export_items[3][2],
 		default=True
 	)
 	export_morph: bpy.props.BoolProperty(
@@ -101,15 +110,15 @@ class ExportCustomMesh(bpy.types.Operator):
 	)
 
 	def execute(self,context):
-		original_active = GetActiveObject()
-		original_selected = GetSelectedObjs(True)
-		mesh_success, _, _, _ = ExportMesh(self,context,self.filepath,self)
+		original_active = utils_blender.GetActiveObject()
+		original_selected = utils_blender.GetSelectedObjs(True)
+		mesh_success, _, _, _ = MeshIO.ExportMesh(self,context,self.filepath,self)
 
 		if 'FINISHED' in mesh_success and self.export_morph:
-			SetSelectObjects(original_selected)
-			SetActiveObject(original_active)
+			utils_blender.SetSelectObjects(original_selected)
+			utils_blender.SetActiveObject(original_active)
 			_file_name, _ =os.path.splitext(self.filepath)
-			morph_success = ExportMorph(self,context, _file_name + ".dat", self)
+			morph_success = MorphIO.ExportMorph(self,context, _file_name + ".dat", self)
 			if 'FINISHED' in morph_success:
 				self.report({'INFO'}, "Operation successful.")
 
@@ -171,7 +180,7 @@ class ImportCustomMesh(bpy.types.Operator):
 	)
 
 	def execute(self, context):
-		return ImportMesh(self, context, self)
+		return MeshIO.ImportMesh(self.filepath, self, context, self)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
@@ -180,9 +189,6 @@ class ImportCustomMesh(bpy.types.Operator):
 class ImportCustomNif(bpy.types.Operator):
 	bl_idname = "import_scene.custom_nif"
 	bl_label = "Import Custom Nif"
-	
-	filepath: bpy.props.StringProperty(subtype="FILE_PATH")
-	filename: bpy.props.StringProperty(default='untitled.nif')
 	
 	filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
 
@@ -222,12 +228,40 @@ class ImportCustomNif(bpy.types.Operator):
 		description="Debug option. DO NOT USE.",
 		default=False
 	)
+	skeleton_register_name: bpy.props.StringProperty(
+		name="Register Skeleton As",
+		description="Debug option. DO NOT USE.",
+		default="",
+	)
+
+	files: bpy.props.CollectionProperty(
+        type=bpy.types.OperatorFileListElement,
+        options={'HIDDEN', 'SKIP_SAVE'},
+    )
+
+	directory: bpy.props.StringProperty(
+        subtype='DIR_PATH',
+    )
 
 	def execute(self, context):
-		return ImportNif(self, context, self)
+		skeleton_obj_dict = {}
+		for current_file in self.files:
+			filepath = os.path.join(self.directory, current_file.name)
+			rtn, skel, objs = NifIO.ImportNif(filepath, self, context, self)
+			if 'CANCELLED' in rtn:
+				self.report({'WARNING'}, f'{current_file} failed to import.')
+			elif skel != None and objs != None:
+				skeleton_obj_dict[skel] = objs
+		
+		for skel, objs in skeleton_obj_dict.items():
+			prev_coll = bpy.data.collections.new(skel)
+			bpy.context.scene.collection.children.link(prev_coll)
+			nif_armature.ImportArmatureFromJson(skel, prev_coll, objs, skel)
+		return {'FINISHED'}
 
 	def invoke(self, context, event):
 		self.assets_folder = context.scene.assets_folder
+		self.skeleton_register_name = ""
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 	
@@ -274,12 +308,12 @@ class ExportCustomNif(bpy.types.Operator):
 	)
 	VERTCOLOR: bpy.props.BoolProperty(
 		name="Vertex Color",
-		description=export_items[3][2],
+		description=export_items[2][2],
 		default=True
 	)
 	WEIGHTS: bpy.props.BoolProperty(
 		name="Weights",
-		description=export_items[4][2],
+		description=export_items[3][2],
 		default=True
 	)
 	export_morph: bpy.props.BoolProperty(
@@ -301,7 +335,7 @@ class ExportCustomNif(bpy.types.Operator):
 	use_world_origin = False
 
 	def execute(self, context):
-		return ExportNif(self, context, self)
+		return NifIO.ExportNif(self, context, self)
 
 	def invoke(self, context, event):
 		_obj = context.active_object
@@ -326,7 +360,7 @@ class ImportCustomMorph(bpy.types.Operator):
 		default=False
 	)
 	def execute(self, context):
-		return ImportMorph(self, context, self)
+		return MorphIO.ImportMorph(self, context, self)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
@@ -347,7 +381,7 @@ class ExportCustomMorph(bpy.types.Operator):
 	)
 
 	def execute(self, context):
-		return ExportMorph(self, context, self.filepath, self)
+		return MorphIO.ExportMorph(self, context, self.filepath, self)
 
 	def invoke(self, context, event):
 		self.filename = "morph.dat"
@@ -365,15 +399,15 @@ class ExportSFMeshOperator(bpy.types.Operator):
 	def execute(self, context):
 		_obj = bpy.context.active_object
 		if _obj and _obj.type == 'MESH':
-			original_active = GetActiveObject()
-			original_selected = GetSelectedObjs(True)
+			original_active = utils_blender.GetActiveObject()
+			original_selected = utils_blender.GetSelectedObjs(True)
 			active_object_name = bpy.context.active_object.name
-			success,_,_,_ = ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.mesh'), self)
+			success,_,_,_ = MeshIO.ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.mesh'), self)
 
 			if 'FINISHED' in success and context.scene.export_morph:
-				SetSelectObjects(original_selected)
-				SetActiveObject(original_active)
-				morph_success = ExportMorph(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, sanitize_filename(active_object_name) + '.dat'), self)
+				utils_blender.SetSelectObjects(original_selected)
+				utils_blender.SetActiveObject(original_active)
+				morph_success = MorphIO.ExportMorph(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.dat'), self)
 				
 				if 'FINISHED' in morph_success:
 					self.report({'INFO'}, "Operation successful.")
@@ -464,12 +498,11 @@ def update_func(self, context):
 	utils.export_mesh_folder_path = context.scene.export_mesh_folder_path
 	utils.assets_folder = context.scene.assets_folder
 
-	save("cached_paths", 'export_mesh_folder_path', 'assets_folder')
-	print(globals())
+	utils.save("cached_paths", 'export_mesh_folder_path', 'assets_folder')
 
 # Register the operators and menu entries
 def register():
-	load("cached_paths")
+	utils.load("cached_paths")
 
 	bpy.types.Scene.export_mesh_folder_path = bpy.props.StringProperty(
 		name="Export Folder",
@@ -514,12 +547,12 @@ def register():
 	)
 	bpy.types.Scene.VERTCOLOR = bpy.props.BoolProperty(
 		name="Vertex Color",
-		description=export_items[3][2],
+		description=export_items[2][2],
 		default=True
 	)
 	bpy.types.Scene.WEIGHTS = bpy.props.BoolProperty(
 		name="Weights",
-		description=export_items[4][2],
+		description=export_items[3][2],
 		default=True
 	)
 	bpy.types.Scene.export_morph = bpy.props.BoolProperty(

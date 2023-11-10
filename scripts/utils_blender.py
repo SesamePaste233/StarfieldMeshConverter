@@ -8,6 +8,32 @@ from utils_math import Normalize, GramSchmidtOrthogonalize
 read_only_marker = '[READONLY]'
 mix_normal = False
 
+def UtilsFolderPath():
+	utils_path = _update_path(os.path.dirname(__file__))
+	return utils_path
+
+def PluginAssetsFolderPath():
+	utils_path = UtilsFolderPath()
+	return os.path.join(utils_path, 'Assets')
+
+def DefaultResultFolderPath():
+	utils_path = UtilsFolderPath()
+	result_path = os.path.join(utils_path, 'Results')
+	
+	if not os.path.isdir(result_path):
+		os.makedirs(result_path)
+    
+	return result_path
+
+def TempFolderPath():
+	utils_path = UtilsFolderPath()
+	temp_path = os.path.join(utils_path, 'Temp')
+	
+	if not os.path.isdir(temp_path):
+		os.makedirs(temp_path)
+		
+	return temp_path
+
 def open_folder(initial_directory):
 
 	# Set the window manager to the current context
@@ -16,11 +42,9 @@ def open_folder(initial_directory):
 	# Call the file browser operator
 	bpy.ops.wm.path_open(filepath=initial_directory)
 						 
-def update_path(utils_p):
+def _update_path(utils_p):
 	utils_path = bpy.path.abspath(utils_p)
-	temp_path = os.path.join(utils_path, 'Temp')
-	
-	return utils_path,temp_path
+	return utils_path
 
 def SetSelectObjects(objs):
 	original_selected = bpy.context.selected_objects

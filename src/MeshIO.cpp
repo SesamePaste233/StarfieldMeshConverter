@@ -123,7 +123,7 @@ bool MeshIO::Deserialize(const std::string filename)
 			auto pair = Util::readUInt16(file, 2);
 			vw[j].bone = pair[0];
 			vw[j].weight = pair[1];
-			if (pair[1] > 2) {
+			if (pair[1] > 0) {
 				if (pair[0] >= this->weight_indices.size())
 				{
 					this->weight_indices.resize(pair[0] + 1);
@@ -1299,6 +1299,12 @@ void mesh::MeshIO::CalculateBoneBounding()
 
 	this->bone_bounding.clear();
 	for (auto& indices : this->weight_indices) {
+		if (indices.size() <= 1) {
+			bone_bounding.emplace_back(BoneBoundingSphere());
+			std::cout << "Warning: Bone has less than one vertex." << std::endl;
+			continue;
+		}
+
 		PointVector point_set;
 
 		std::vector<double> coords(3);

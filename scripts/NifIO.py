@@ -2,13 +2,13 @@ import os
 import json
 import bpy
 import mathutils
+import math
 
 from MeshIO import ImportMesh, ExportMesh
 
-from utils_blender import GetActiveObject, SetActiveObject, SetSelectObjects, SetWeightKeys, move_object_to_collection
+from utils_blender import GetActiveObject, SetActiveObject, SetSelectObjects, SetWeightKeys, move_object_to_collection, PluginAssetsFolderPath
 
-import nif_armature
-from nif_armature import MatchSkeleton, ImportArmatureFromJson, LoadAllSkeletonLookup, CreateArmature
+from nif_armature import MatchSkeletonAdvanced, ImportArmatureFromJson, LoadAllSkeletonLookup, CreateArmature, SkeletonLookup, BoneAxisCorrectionRevert, GetPivotInfo, RegisterSkeleton
 
 from nif_template import RootNodeTemplate, SingleClothTemplate
 
@@ -16,7 +16,15 @@ from utils import hash_string, sanitize_filename, default_assets_folder
 
 from MeshConverter import _dll_export_nif, _dll_import_nif
 
-def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict, options, additional_assets_folder, context, operator):
+skeleton_obj_dict = {}
+
+def ResetSkeletonObjDict():
+	skeleton_obj_dict.clear()
+
+def GetSkeletonObjDict():
+	return skeleton_obj_dict
+
+def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict, options, additional_assets_folder, context, operator, nif_name = ''):
 	_objects = []
 	is_node = False
 	is_rigged = False
@@ -32,16 +40,16 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 
 			factory_path = mesh_info['factory_path']
 
-			options.filepath = os.path.join(options.assets_folder, 'geometries', factory_path + '.mesh')
-			if os.path.isfile(options.filepath) == False:
+			mesh_filepath = os.path.join(options.assets_folder, 'geometries', factory_path + '.mesh')
+			if os.path.isfile(mesh_filepath) == False:
 				for additional_folder in additional_assets_folder:
-					options.filepath = os.path.join(additional_folder, 'geometries', factory_path + '.mesh')
-					if os.path.isfile(options.filepath):
+					mesh_filepath = os.path.join(additional_folder, 'geometries', factory_path + '.mesh')
+					if os.path.isfile(mesh_filepath):
 						break
 			
 			lod += 1
-			if os.path.isfile(options.filepath):
-				rtn = ImportMesh(options, context, operator, factory_path)
+			if os.path.isfile(mesh_filepath):
+				rtn = ImportMesh(mesh_filepath, options, context, operator, factory_path)
 				
 				if 'FINISHED' in rtn:
 					_objects.append(GetActiveObject())
@@ -50,7 +58,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 				else:
 					operator.report({'WARNING'}, f'{factory_path}.mesh cannot be loaded.')
 			else:
-				operator.report({'WARNING'}, f'{options.filepath}.mesh doesn\'t exist. Please make sure you have the geometry files as loose files.')
+				operator.report({'WARNING'}, f'{mesh_filepath}.mesh doesn\'t exist. Please make sure you have the geometry files as loose files.')
 
 		if loaded == False:
 			operator.report({'WARNING'}, f'No mesh was loaded for {geo_name}.')
@@ -60,11 +68,12 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			for obj in _objects:
 				SetWeightKeys(obj, data['bone_names'])
 
-			skeleton, matched_bones = MatchSkeleton(data['bone_names'])
+			skeleton, matched_bones = MatchSkeletonAdvanced(data['bone_names'], geo_name +' '+ nif_name)
 			if skeleton == None:
 				operator.report({'WARNING'},f'Unable to find a matched skeleton for {geo_name}. Skipping...')
 			
 			else:
+				operator.report({'INFO'},f'{geo_name} matched with skeleton {skeleton}')
 				if options.boneinfo_debug:
 					debug_capsule = {}
 					for bonename, boneinfo in zip(data['bone_names'], data['bone_infos']):
@@ -80,7 +89,10 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 						bpy.context.object.name = f"Capsule_{bonename}"
 
 				else:
-					ImportArmatureFromJson(skeleton, collection, _objects, geo_name)
+					if skeleton in skeleton_obj_dict.keys():
+						skeleton_obj_dict[skeleton].extend(_objects)
+					else:
+						skeleton_obj_dict[skeleton] = _objects
 
 	else:
 		is_node = True
@@ -104,9 +116,11 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		obj.scale = tuple([scale,scale,scale])
 	
 	if options.correct_rotation and is_node == False and is_rigged and skeleton != None:
-		skeleton_info = nif_armature.skeleton_lookup[skeleton]
-		
+		skeleton_info = SkeletonLookup(skeleton)
+
 		for mesh_obj in _objects:
+			
+			correction = None
 
 			for _bonename, _boneinfo in zip(data['bone_names'], data['bone_infos']):
 				if _bonename in matched_bones:
@@ -123,47 +137,72 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 					correction = B @ B_inv
 					break
 			
-			mesh_obj.matrix_world = mesh_obj.matrix_world @ correction
-			for i in range(3):
-				mesh_obj.matrix_world[i][3] = correction[i][3]
-
-	print(armature_dict['name'])
-
+			if correction == None:
+				operator.report({'WARNING'}, f'Failed to correct mesh for {geo_name}')
+			else:
+				mesh_obj.matrix_world = correction
+			#axis, angle = correction.to_quaternion().to_axis_angle()
+			#angle_integer = angle * 2 / math.pi
+			#corrected = mathutils.Quaternion([round(axis[0]), round(axis[1]), round(axis[2])], round(angle_integer) * math.pi * 0.5).to_matrix()
+			
+			#mesh_obj.matrix_world = mathutils.Matrix.Identity(4)
+			#for j in range(3):
+			#	for k in range(3):
+			#		mesh_obj.matrix_world[j][k] = corrected[j][k]
+			
+			#for j in range(3):
+			#	mesh_obj.matrix_world[j][3] = pivot['matrix'][j][3]
 
 	for child_dict in armature_dict['children']:
-		TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, additional_assets_folder, context, operator)
+		TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, additional_assets_folder, context, operator, nif_name)
 
 
-def ImportNif(options, context, operator):
+def ImportNif(file_path, options, context, operator):
 	LoadAllSkeletonLookup()
+	ResetSkeletonObjDict()
 	assets_folder = options.assets_folder
-	nifname = os.path.basename(options.filepath)
-	additional_assets_folder = os.path.dirname(options.filepath)
+	nifname = os.path.basename(file_path)
+	additional_assets_folder = os.path.dirname(file_path)
 	
 	if assets_folder == default_assets_folder:
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')
-		return {'CANCELLED'} 
+		return {'CANCELLED'}, None, None
 	
-	json_str = _dll_import_nif(options.filepath.encode('utf-8')).decode('utf-8')
+	json_str = _dll_import_nif(file_path.encode('utf-8')).decode('utf-8')
 	
-	if json_str == "":
+	if len(json_str) == 0:
 		operator.report({'WARNING'}, f'Nif failed to load.')
-		return {'CANCELLED'}
-
+		return {'CANCELLED'}, None, None
+	
 	_data = json.loads(json_str)
 
 	prev_coll = bpy.data.collections.new(nifname)
 	bpy.context.scene.collection.children.link(prev_coll)
 
 	if "geometries" not in _data.keys():
+		
+		if options.skeleton_register_name != "":
+			RegisterSkeleton(options.skeleton_register_name, _data)
+
 		CreateArmature(_data, None, prev_coll, "Armature")
-		operator.report({'WARNING'}, f'Nif failed to load.')
-		return {'FINISHED'}
+		operator.report({'INFO'}, f'Nif has no geometry. Loaded as Armature.')
+		return {'FINISHED'}, None, None
 	else:
-		TraverseNodeRecursive(_data, None, prev_coll, _data, options, [additional_assets_folder], context, operator)
+		TraverseNodeRecursive(_data, None, prev_coll, _data, options, [additional_assets_folder], context, operator, nifname)
 
 	operator.report({'INFO'}, f'Meshes loaded for {nifname}.')
-	return {'FINISHED'}
+	
+	# Majority vote
+	best_skel = "skeleton_female"
+	obj_list = []
+	max_obj = 0
+	for skel, objs in skeleton_obj_dict.items():
+		obj_list.extend(objs)
+		if len(objs) > max_obj:
+			max_obj = len(objs)
+			best_skel = skel
+
+	return {'FINISHED'}, best_skel, obj_list
 
 def ExportNif(options, context, operator):
 	LoadAllSkeletonLookup()
@@ -209,9 +248,9 @@ def ExportNif(options, context, operator):
 				armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
 
 				if len(armatures) == 0:
-					armature_name, bone_list_filter = MatchSkeleton(vgrp_names)
+					armature_name, bone_list_filter = MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
 					if armature_name != None:
-						skeleton_info = nif_armature.skeleton_lookup[armature_name]
+						skeleton_info = SkeletonLookup(armature_name)
 				else:
 					skeleton_info = {}
 					armature = armatures[0]
@@ -220,7 +259,7 @@ def ExportNif(options, context, operator):
 					bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 					for bone in armature.data.edit_bones:
 						info = {}
-						info['matrix'] = bone.matrix @ nif_armature.bone_axis_correction_inv
+						info['matrix'] = BoneAxisCorrectionRevert(bone.matrix)
 						info['scale'] = 1
 						skeleton_info[bone.name] = info
 					
@@ -256,7 +295,6 @@ def ExportNif(options, context, operator):
 
 			mesh_data['geo_mesh_lod'].append(mesh_lod_info)
 
-			mesh_data['mat_id'] = 0
 			mesh_data['mat_path'] = "MATERIAL_PATH"
 
 			if bone_list != None and len(bone_list) > 0 and skeleton_info != None:
@@ -264,16 +302,15 @@ def ExportNif(options, context, operator):
 				mesh_data['bone_names'] = bone_list
 				mesh_data['bone_infos'] = []
 
-				# Beth has lost their mind
-				pivot = mathutils.Matrix.Identity(4)
-				for j in range(3):
-					pivot[j][3] = mesh_obj.matrix_local[j][3] # Makes no sense TODO
+				#pivot = mathutils.Matrix.Identity(4)
+				#for j in range(3):
+				#	pivot[j][3] = mesh_obj.matrix_local[j][3]
 
 				for bone_name in bone_list:
 					bone_info = {}
 					B_inv = skeleton_info[bone_name]['matrix'].inverted()
 
-					V = B_inv @ pivot # Why?
+					V = B_inv @ mesh_obj.matrix_local # Or 'matrix_world' idk
 
 					bone_info['matrix'] = [[V[i][j] for j in range(4)]for i in range(4)]
 					bone_info['scale'] = 1 / skeleton_info[bone_name]['scale']
