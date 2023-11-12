@@ -133,6 +133,9 @@ class ExportCustomMesh(bpy.types.Operator):
 		else:
 			self.filename = 'untitled.mesh'
 
+		if os.path.isdir(os.path.dirname(self.filepath)):
+			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)
+
 		self.mesh_scale = context.scene.mesh_scale
 		self.max_border = context.scene.max_border
 		self.use_world_origin = context.scene.use_world_origin
@@ -363,6 +366,9 @@ class ExportCustomNif(bpy.types.Operator):
 		else:
 			self.filename = 'untitled.nif'
 
+		if os.path.isdir(os.path.dirname(self.filepath)):
+			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)
+
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 
@@ -404,6 +410,10 @@ class ExportCustomMorph(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		self.filename = "morph.dat"
+
+		if os.path.isdir(os.path.dirname(self.filepath)):
+			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)
+			
 		self.use_world_origin = context.scene.use_world_origin
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}

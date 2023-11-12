@@ -63,7 +63,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 				else:
 					operator.report({'WARNING'}, f'{factory_path}.mesh cannot be loaded.')
 			else:
-				operator.report({'WARNING'}, f'{mesh_filepath}.mesh doesn\'t exist. Please make sure you have the geometry files as loose files.')
+				operator.report({'WARNING'}, f'{mesh_filepath} doesn\'t exist. Please make sure you have the geometry files as loose files.')
 		
 		if options.geo_bounding_debug:
 			bound_sphere = data["geo_bounding_sphere"]
