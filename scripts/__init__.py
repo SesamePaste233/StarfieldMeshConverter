@@ -29,7 +29,7 @@ imp.reload(nif_armature)
 
 bl_info = {
 	"name": "Starfield Mesh Exporter",
-	"version": (0, 12, 2),
+	"version": (0, 12, 4),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",
@@ -190,6 +190,14 @@ class ImportCustomNif(bpy.types.Operator):
 	bl_idname = "import_scene.custom_nif"
 	bl_label = "Import Custom Nif"
 	
+	def get_skeleton_names(self, context):
+		nif_armature.LoadAllSkeletonLookup()
+		skel_names = nif_armature.GetAvailableSkeletonNames()
+		items = [(' ', 'CHOOSE YOUR SKELETON', 'Auto match skeleton.')]
+		for name in skel_names:
+			items.append((name, name, name))
+		return tuple(items)
+
 	filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
 
 	assets_folder: bpy.props.StringProperty(subtype="FILE_PATH")
@@ -207,6 +215,12 @@ class ImportCustomNif(bpy.types.Operator):
 		name="Max Lod",
 		description="Maximum Loaded LoD, 0 for loading all LoDs.",
 		default=1,
+	)
+	skeleton_name: bpy.props.EnumProperty(
+		name="Skeleton Template",
+		description="",
+		items=get_skeleton_names,
+		default=0,
 	)
 	boneinfo_debug: bpy.props.BoolProperty(
 		name="Debug BoneInfo",
@@ -233,6 +247,11 @@ class ImportCustomNif(bpy.types.Operator):
 		description="Debug option. DO NOT USE.",
 		default="",
 	)
+	geo_bounding_debug: bpy.props.BoolProperty(
+		name="Debug Min Max Bounding",
+		description="Debug option. DO NOT USE.",
+		default=False
+	)
 
 	files: bpy.props.CollectionProperty(
         type=bpy.types.OperatorFileListElement,
@@ -250,7 +269,7 @@ class ImportCustomNif(bpy.types.Operator):
 			rtn, skel, objs = NifIO.ImportNif(filepath, self, context, self)
 			if 'CANCELLED' in rtn:
 				self.report({'WARNING'}, f'{current_file} failed to import.')
-			elif skel != None and objs != None:
+			elif skel != None and objs != None and len(objs) > 0:
 				skeleton_obj_dict[skel] = objs
 		
 		for skel, objs in skeleton_obj_dict.items():
@@ -340,7 +359,7 @@ class ExportCustomNif(bpy.types.Operator):
 	def invoke(self, context, event):
 		_obj = context.active_object
 		if _obj:
-			self.filename = _obj.name + '.nif'
+			self.filename = utils.sanitize_filename(_obj.name) + '.nif'
 		else:
 			self.filename = 'untitled.nif'
 

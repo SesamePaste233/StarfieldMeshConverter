@@ -634,6 +634,10 @@ namespace nif {
 			typedef struct GeoInfo {
 				MeshInfo geo_mesh_lod[4];
 
+				float bounding_sphere[4] = { 0,0,0,0 };
+				float bounding_center[3] = { FLT_MAX,FLT_MAX,FLT_MAX };
+				float bounding_expand[3] = { FLT_MAX,FLT_MAX,FLT_MAX };
+
 				uint32_t mat_id = 0;
 				std::string mat_path = "";
 			};

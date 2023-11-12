@@ -49,6 +49,24 @@ uint32_t ExportMorph(const char* json_data, const char* output_file)
 	return 0;
 }
 
+uint32_t ExportEmptyMorph(uint32_t n_verts, const char* output_file)
+{
+	// Equivalent to blenderToMorph
+	morph::MorphIO morphReader;
+
+	morphReader.FakeEmpty(n_verts);
+
+	if (!morphReader.Serialize(output_file)) {
+		std::cerr << "Failed to save morph to file." << std::endl;
+		return 9; // Return an error code
+	}
+
+	std::cout << "Faked empty morph and serialized to " << output_file << std::endl;
+
+	return 0;
+}
+
+
 const char* ImportMesh(const char* input_file, const char* output_name)
 {
 	std::string inputMesh(input_file);

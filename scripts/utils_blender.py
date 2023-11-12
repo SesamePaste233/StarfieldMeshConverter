@@ -57,9 +57,10 @@ def SetSelectObjects(objs):
 def GetActiveObject():
 	return bpy.context.active_object
 
-def SetActiveObject(obj):
+def SetActiveObject(obj, deselect_all = False):
 	original_active = GetActiveObject()
-	#bpy.ops.object.select_all(action='DESELECT')
+	if deselect_all:
+		bpy.ops.object.select_all(action='DESELECT')
 	if obj != None:
 		obj.select_set(True)
 	bpy.context.view_layer.objects.active = obj
@@ -97,7 +98,7 @@ def GetSharpGroups(selected_obj):
 
 	return sharp_edge_vertices
 
-def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
+def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = True):
 	if old_obj and old_obj.type == 'MESH':
 		
 		if old_obj.data.shape_keys != None and old_obj.data.shape_keys.key_blocks != None:
@@ -107,14 +108,35 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
 				shape_key_index = keys.index('Basis')
 				old_obj.active_shape_key_index = shape_key_index
 		
+		SetActiveObject(old_obj, True)
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+		bpy.ops.mesh.select_all(action='DESELECT')
+		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=False, use_multi_face = True,use_non_contiguous = False, use_verts = False)
+		has_double_faces = False
+		__obj = bpy.context.edit_object
+		__me = __obj.data
+
+		__bm = bmesh.from_edit_mesh(__me)
+		for __e in __bm.edges:
+			if __e.select:
+				has_double_faces = True
+				break
+		if has_double_faces:
+			operator.report({'ERROR'}, f"There are double faces in your model! They are highlighted in selection mode.")
+			return None, None
+		
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+		__bm.free()
+
 		new_obj = old_obj.copy()
 		new_obj.data = old_obj.data.copy()
 		new_obj.animation_data_clear()
 		bpy.context.collection.objects.link(new_obj)
 		bpy.context.view_layer.objects.active = new_obj
 
-		bpy.ops.object.select_all(action='DESELECT')
-		new_obj.select_set(True)
+		SetActiveObject(new_obj, True)
 		if convert_to_mesh:
 			bpy.ops.object.convert(target='MESH')
 
@@ -138,6 +160,36 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
 		
 		bpy.ops.uv.seams_from_islands()
 		
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+		base_obj = new_obj.copy()
+		base_obj.data = new_obj.data.copy()
+		base_obj.animation_data_clear()
+		bpy.context.collection.objects.link(base_obj)
+		bpy.context.view_layer.objects.active = base_obj
+
+		SetActiveObject(base_obj, True)
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+		bpy.ops.mesh.select_all(action='DESELECT')
+		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
+		bpy.ops.mesh.remove_doubles()
+		bpy.ops.object.mode_set(mode='OBJECT')
+
+		bpy.ops.object.shade_smooth(use_auto_smooth=True)
+
+		modifier1 = base_obj.modifiers.new(name = base_obj.name, type='DATA_TRANSFER')
+		modifier1.object = old_obj
+		modifier1.use_loop_data = True
+		modifier1.data_types_loops = {'CUSTOM_NORMAL'}
+		modifier1.use_max_distance = True
+		modifier1.max_distance = 0.001
+		modifier1.loop_mapping = "TOPOLOGY"
+
+		bpy.ops.object.modifier_apply(modifier=modifier1.name)
+
+		SetActiveObject(new_obj, True)
+		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
 		bpy.ops.mesh.select_all(action='DESELECT')
 		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
@@ -150,14 +202,17 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
 			if __e.select:
 				__e.smooth = False
 
+
 		bmesh.update_edit_mesh(__me)
+		
+		__bm.free()
 
 		bpy.ops.mesh.edge_split(type='EDGE')
 		
 		bpy.ops.mesh.select_all(action='DESELECT')
 		
 		bpy.ops.object.mode_set(mode='OBJECT')
-		
+
 		if use_world_origin:
 			bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 		
@@ -168,10 +223,10 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
 		bm.from_mesh(selected_obj.data)
 		
 		seams = [e for e in bm.edges if e.seam or not e.smooth]
+
 		# split on seams
 		bmesh.ops.split_edges(bm, edges=seams)
-		
-		# Triangulate the mesh
+
 		bmesh.ops.triangulate(bm, faces=bm.faces)
 
 		bm.to_mesh(selected_obj.data)
@@ -182,20 +237,22 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True):
 
 		bpy.ops.object.shade_smooth(use_auto_smooth=True)
 
-		modifier = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
-		modifier.object = old_obj
-		modifier.use_loop_data = True
-		modifier.data_types_loops = {'CUSTOM_NORMAL'}
-		modifier.use_max_distance = True
-		modifier.max_distance = 0.001
-		modifier.loop_mapping = "TOPOLOGY"
-
-		bpy.ops.object.modifier_apply(modifier=modifier.name)
+		modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
+		modifier2.object = base_obj
+		modifier2.use_loop_data = True
+		modifier2.data_types_loops = {'CUSTOM_NORMAL'}
+		modifier2.use_max_distance = True
+		modifier2.max_distance = 0.001
+		modifier2.loop_mapping = "NEAREST_POLYNOR"
+		
+		bpy.ops.object.modifier_apply(modifier=modifier2.name)
+		
+		bpy.data.meshes.remove(base_obj.data)
 
 		return old_obj, selected_obj
 	else:
 		print("No valid object is selected.")
-		return old_obj, None
+		return None, None
 	
 def IsReadOnly(obj):
 	return read_only_marker in obj.name
@@ -308,3 +365,46 @@ def SetWeightKeys(obj, weight_keys:list):
 		vg.name = name
 
 	return True
+
+def BoxFromMinMax(name: str, min_position: list, max_position: list):
+	mesh = bpy.data.meshes.new(name)  # add a new mesh
+	obj = bpy.data.objects.new(name, mesh)  # add a new object using the mesh
+	bpy.context.collection.objects.link(obj)
+	minx = min_position[0]
+	miny = min_position[1]
+	minz = min_position[2]
+	maxx = max_position[0]
+	maxy = max_position[1]
+	maxz = max_position[2]
+	verts = [(minx, miny, minz),(minx, miny, maxz),(maxx, miny, minz),(maxx, miny, maxz),(minx, maxy, minz),(minx, maxy, maxz),(maxx, maxy, minz),(maxx, maxy, maxz)]
+	faces = [[0,1,3,2], [4,5,7,6], [0,1,5,4], [2,3,7,6], [0,2,6,4], [1,3,7,5]]
+	mesh.from_pydata(verts, [], faces)
+	return obj
+
+def BoxFromCenterExpand(name: str, center: list, expand: list):
+	min_position = [c - e for c, e in zip(center, expand)]
+	max_position = [c + e for c, e in zip(center, expand)]
+
+	return BoxFromMinMax(name, min_position, max_position)
+
+def SphereFromCenterRadius(name: str, center: list, radius):
+	obj = BoxFromCenterExpand(name, center, [radius, radius, radius])
+	obj.display_type = 'BOUNDS'
+	obj.display_bounds_type = 'SPHERE'
+
+	return obj
+
+def GetObjBBoxMinMax(obj):
+	bbox = obj.bound_box
+	xs = [i[0] for i in bbox]
+	ys = [i[1] for i in bbox]
+	zs = [i[2] for i in bbox]
+	mins = [min(xs), min(ys), min(zs)]
+	maxs = [max(xs), max(ys), max(zs)]
+	return mins, maxs
+
+def GetObjBBoxCenterExpand(obj):
+	mins, maxs = GetObjBBoxMinMax(obj)
+	center = [(ma + mi) * 0.5 for mi, ma in zip(mins, maxs)]
+	expand = [ma - ce for ma, ce in zip(maxs, center)]
+	return center, expand

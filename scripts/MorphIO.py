@@ -9,7 +9,7 @@ from utils_blender import read_only_marker
 
 from utils_blender import PreprocessAndProxy, SmoothPerimeterNormal, GetNormalTangents, VisualizeVectors
 
-from MeshConverter import _dll_export_morph, _dll_import_morph
+from MeshConverter import _dll_export_morph, _dll_import_morph, _dll_export_empty_morph
 
 def ImportMorph(options, context, operator):
 	import_path = options.filepath
@@ -97,35 +97,80 @@ def ExportMorph(options, context, export_file_path, operator):
 	target_obj = GetActiveObject()
 	s_objs = GetSelectedObjs(True)
 	ref_obj = None
-	if len(s_objs) > 0:
-		n_objs = []
-		for s_obj in s_objs:
-			s_obj, n_obj = PreprocessAndProxy(s_obj, False, False)
-			n_objs.append(n_obj)
-
-		SetSelectObjects(n_objs)
-		bpy.ops.object.join()
-		ref_obj = GetActiveObject()
-		bpy.ops.object.shade_smooth(use_auto_smooth=True)
 
 	if target_obj == None:
 		operator.report({'WARNING'}, f"Must select an object to export.")
 		return {"CANCELLED"}
 
 	if target_obj.data.shape_keys == None or target_obj.data.shape_keys.key_blocks == None:
-		operator.report({'WARNING'}, f"Object has no shape keys.")
-		return {"CANCELLED"}
+		operator.report({'INFO'}, f"No enough shape keys to export. Exporting empty morph file.")
+		target_obj, proxy_obj = PreprocessAndProxy(target_obj, options.use_world_origin, operator, False)
+		if target_obj == None:
+			return {"CANCELLED"}
 
+		verts_count = len(proxy_obj.data.vertices)
+		
+		returncode = _dll_export_empty_morph(verts_count, export_path.encode())
+
+		if returncode != 0:
+			bpy.data.meshes.remove(proxy_obj.data)
+			
+			SetActiveObject(target_obj)
+
+			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+			return {"CANCELLED"}
+
+		bpy.data.meshes.remove(proxy_obj.data)
+		
+		SetActiveObject(target_obj)
+
+		operator.report({'INFO'}, f"Export morph successful.")
+		return {"FINISHED"}
+	
 	num_shape_keys = len(target_obj.data.shape_keys.key_blocks)
 	print(list(target_obj.data.shape_keys.key_blocks))
 	key_blocks = target_obj.data.shape_keys.key_blocks
 	if num_shape_keys < 2:
-		operator.report({'WARNING'}, f"No enough shape keys to export.")
-		return {"CANCELLED"}
+		operator.report({'INFO'}, f"No enough shape keys to export. Exporting empty morph file.")
+		target_obj, proxy_obj = PreprocessAndProxy(target_obj, options.use_world_origin, operator, False)
+		if target_obj == None:
+			return {"CANCELLED"}
+		
+		verts_count = len(proxy_obj.data.vertices)
+
+		returncode = _dll_export_empty_morph(verts_count, export_path.encode())
+
+		if returncode != 0:
+			bpy.data.meshes.remove(proxy_obj.data)
+			
+			SetActiveObject(target_obj)
+
+			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+			return {"CANCELLED"}
+
+		bpy.data.meshes.remove(proxy_obj.data)
+		
+		SetActiveObject(target_obj)
+
+		operator.report({'INFO'}, f"Export morph successful.")
+		return {"FINISHED"}
 	
 	if key_blocks[0].name != 'Basis':
 		operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
 		return {"CANCELLED"}
+	
+	if len(s_objs) > 0:
+		n_objs = []
+		for s_obj in s_objs:
+			s_obj, n_obj = PreprocessAndProxy(s_obj, False, operator, False)
+			if s_obj == None:
+				return {"CANCELLED"}
+			n_objs.append(n_obj)
+
+		SetSelectObjects(n_objs)
+		bpy.ops.object.join()
+		ref_obj = GetActiveObject()
+		bpy.ops.object.shade_smooth(use_auto_smooth=True)
 	
 	if ref_obj != None:
 		if ref_obj.data.shape_keys == None or ref_obj.data.shape_keys.key_blocks == None:
@@ -152,7 +197,9 @@ def ExportMorph(options, context, export_file_path, operator):
 			for ref_key in ref_key_blocks:
 				ref_key.value = 0
 
-	target_obj, proxy_obj = PreprocessAndProxy(target_obj, options.use_world_origin, False)
+	target_obj, proxy_obj = PreprocessAndProxy(target_obj, options.use_world_origin, operator, False)
+	if target_obj == None:
+		return {"CANCELLED"}
 
 	verts_count = len(proxy_obj.data.vertices)
 	key_blocks = proxy_obj.data.shape_keys.key_blocks
@@ -220,7 +267,7 @@ def ExportMorph(options, context, export_file_path, operator):
 		bpy.ops.object.shade_smooth(use_auto_smooth=True)
 
 		SmoothPerimeterNormal(me_obj, [ref_obj], True, target_obj)
-
+		
 		normals, tangents, _ = GetNormalTangents(me, True)
 
 		for i in range(verts_count):

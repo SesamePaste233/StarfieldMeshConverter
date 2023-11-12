@@ -19,7 +19,7 @@ from utils_math import Normalize, GramSchmidtOrthogonalize
 
 from MeshConverter import _dll_export_mesh, _dll_import_mesh
 
-def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
+def ExportMesh(options, context, filepath, operator, bone_list_filter = None, prune_empty_vertex_groups = False):
 	export_mesh_file_path = filepath
 	export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
 	
@@ -43,18 +43,20 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 		active_object_name = bpy.context.active_object.name
 	else:
 		operator.report({'WARNING'},"Selected object is not a mesh.")
-		return {'CANCELLED'}, 0,0, None
+		return {'CANCELLED'}, 0, 0, None
 	
 	s_objs = GetSelectedObjs(True)
 
-	old_obj, selected_obj = PreprocessAndProxy(old_obj, options.use_world_origin)
+	old_obj, selected_obj = PreprocessAndProxy(old_obj, options.use_world_origin, operator)
+	if old_obj == None:
+		return {"CANCELLED"}, 0, 0, None
 	
 	SmoothPerimeterNormal(selected_obj, s_objs)
 	bpy.ops.object.convert(target='MESH')
 
 	# Check if the selected object is a mesh
 	if selected_obj and selected_obj.type == 'MESH':
-		
+
 		if "SMOOTH_GROUP" in selected_obj.vertex_groups:
 			smooth_group = selected_obj.vertex_groups["SMOOTH_GROUP"]
 			selected_obj.vertex_groups.remove(smooth_group)
@@ -160,7 +162,10 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 			# Extract vertex weights and bones
 			if options.WEIGHTS:
 				vertex_groups = selected_obj.vertex_groups
-				vgrp_markers = [[vg.name, -1] for vg in vertex_groups]
+				if prune_empty_vertex_groups:
+					vgrp_markers = [[vg.name, -1] for vg in vertex_groups]
+				else:
+					vgrp_markers = [[vg.name, i] for vg, i in zip(vertex_groups, range(len(vertex_groups)))]
 				new_id = 0
 
 				bm.verts.layers.deform.verify()
@@ -184,6 +189,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None):
 					if len(data["vertex_weights"][-1]) == 0:
 						data["vertex_weights"][-1].append([0, 0])
 
+				vgrp_markers = sorted(vgrp_markers, key=lambda x: x[1])
 				vgrp_names = [vg[0] for vg in vgrp_markers if vg[1] is not -1]
 
 		except IndexError:

@@ -672,6 +672,14 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 
 		material_property->data = geo_info.mat_id;
 
+		std::memcpy(bsgeo->center, geo_info.bounding_sphere, 3 * sizeof(float));
+
+		bsgeo->radius = geo_info.bounding_sphere[3];
+
+		std::memcpy(bsgeo->bbox_center_expand, geo_info.bounding_center, 3 * sizeof(float));
+
+		std::memcpy(bsgeo->bbox_center_expand + 3, geo_info.bounding_expand, 3 * sizeof(float));
+
 		for (int i = 0; i < 4; ++i) {
 			MeshInfo& mesh_info = geo_info.geo_mesh_lod[i];
 
@@ -743,6 +751,14 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::FromNif(const
 			return rtti;
 		}
 
+		std::memcpy(geo_info.bounding_sphere, bs_geo->center, 3 * sizeof(float));
+
+		geo_info.bounding_sphere[3] = bs_geo->radius;
+
+		std::memcpy(geo_info.bounding_center, bs_geo->bbox_center_expand, 3 * sizeof(float));
+
+		std::memcpy(geo_info.bounding_expand, bs_geo->bbox_center_expand + 3, 3 * sizeof(float));
+
 		auto shader_property = dynamic_cast<BSLightingShaderProperty*>(shader_properties[0]);
 
 		auto material_property = dynamic_cast<NiIntegerExtraData*>(material_properties[0]);
@@ -788,9 +804,9 @@ nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 	_result["geometries"] = nlohmann::json::array();
 
 	for (auto& geo_info : this->geo_infos) {
-		nlohmann::json result;
+		nlohmann::json bsgeometry_result;
 
-		result["geo_mesh_lod"] = nlohmann::json::array();
+		bsgeometry_result["geo_mesh_lod"] = nlohmann::json::array();
 
 		for (int i = 0; i < 4; ++i) {
 			const MeshInfo& mesh = geo_info.geo_mesh_lod[i];
@@ -803,13 +819,28 @@ nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 			mesh_info["num_indices"] = mesh.num_indices;
 			mesh_info["num_vertices"] = mesh.num_vertices;
 
-			result["geo_mesh_lod"].push_back(mesh_info);
+			bsgeometry_result["geo_mesh_lod"].push_back(mesh_info);
 		}
 
-		result["mat_id"] = geo_info.mat_id;
-		result["mat_path"] = geo_info.mat_path;
+		bsgeometry_result["geo_bounding_sphere"] = nlohmann::json::array();
+		for (int i = 0; i < 4; ++i) {
+			bsgeometry_result["geo_bounding_sphere"].push_back(geo_info.bounding_sphere[i] < FLT_MAX ? geo_info.bounding_sphere[i] : 0);
+		}
 
-		_result["geometries"].push_back(result);
+		bsgeometry_result["geo_bounding_center"] = nlohmann::json::array();
+		for (int i = 0; i < 3; ++i) {
+			bsgeometry_result["geo_bounding_center"].push_back(geo_info.bounding_center[i] < FLT_MAX ? geo_info.bounding_center[i] : 0);
+		}
+
+		bsgeometry_result["geo_bounding_expand"] = nlohmann::json::array();
+		for (int i = 0; i < 3; ++i) {
+			bsgeometry_result["geo_bounding_expand"].push_back(geo_info.bounding_expand[i] < FLT_MAX ? geo_info.bounding_expand[i] : 0);
+		}
+
+		bsgeometry_result["mat_id"] = geo_info.mat_id;
+		bsgeometry_result["mat_path"] = geo_info.mat_path;
+
+		_result["geometries"].push_back(bsgeometry_result);
 	}
 
 	return _result;
@@ -841,6 +872,43 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 				geo_info.geo_mesh_lod[i].has_mesh = true;
 			}
 		}
+
+		bool no_culling = true;
+
+		if (data.find("geo_bounding_center") != data.end()) {
+			for (int j = 0; j < 3; ++j) {
+				geo_info.bounding_center[j] = data["geo_bounding_center"][j];
+				if (geo_info.bounding_center[j] != 0)
+					no_culling = false;
+			}
+		}
+
+		if (data.find("geo_bounding_expand") != data.end()) {
+			for (int j = 0; j < 3; ++j) {
+				geo_info.bounding_expand[j] = data["geo_bounding_expand"][j];
+				if (geo_info.bounding_expand[j] != 0)
+					no_culling = false;
+			}
+		}
+
+		if (no_culling) {
+			std::memset(geo_info.bounding_center, FLT_MAX, sizeof(float) * 3);
+			std::memset(geo_info.bounding_expand, FLT_MAX, sizeof(float) * 3);
+		}
+
+		if (data.find("geo_bounding_sphere") != data.end()) {
+			for (int j = 0; j < 4; ++j) {
+				geo_info.bounding_sphere[j] = data["geo_bounding_sphere"][j];
+			}
+		}
+		else if (!no_culling) {
+			std::memcpy(geo_info.bounding_sphere, geo_info.bounding_center, 3 * sizeof(float));
+			geo_info.bounding_sphere[3] = Util::_vector_norm(geo_info.bounding_expand, 3);
+		}
+		else {
+			std::memset(geo_info.bounding_sphere, 0, sizeof(float) * 4);
+		}
+
 
 		if (data.find("mat_path") != data.end()) {
 			std::string path = data["mat_path"];
@@ -894,6 +962,11 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 		skin_attach->num_bone_names = num_bones;
 
 		bsgeometry->AddExtraData(nif.block_manager.FindBlock(skin_attach));
+
+		std::memset(bsgeometry->center, 0, sizeof(float) * 3);
+		bsgeometry->radius = 0;
+
+		std::memset(bsgeometry->bbox_center_expand, FLT_MAX, sizeof(float) * 6);
 
 		auto skin_instance = dynamic_cast<nif::BSSkin::Instance*>(nif.AddBlock(nif::NiRTTI::BSSkinInstance));
 

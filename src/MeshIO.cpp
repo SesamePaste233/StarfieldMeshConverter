@@ -991,7 +991,6 @@ bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
 
 bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name)
 {
-	//remove the suffix of the filename
 	std::string new_filename = filename;
 
 	WavefrontWriter wfw;

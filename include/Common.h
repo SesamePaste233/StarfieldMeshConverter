@@ -431,6 +431,15 @@ public:
 	}
 
 	template<class T>
+	static T _vector_norm(T* a, size_t length) {
+		T sum = 0;
+		for (int i = 0; i < length; i++) {
+			sum += a[i] * a[i];
+		}
+		return sqrt(sum);
+	}
+
+	template<class T>
 	static T* _vector_normalize(T* a, size_t length) {
 		T* result = new T[length];
 		T sum = 0;

@@ -11,6 +11,9 @@ _dll_export_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, c
 _dll_export_morph = _dll.ExportMorph
 _dll_export_morph.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
 
+_dll_export_empty_morph = _dll.ExportEmptyMorph
+_dll_export_empty_morph.argtypes = [ctypes.c_uint32, ctypes.c_char_p]
+
 _dll_export_nif = _dll.CreateNif
 _dll_export_nif.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
 

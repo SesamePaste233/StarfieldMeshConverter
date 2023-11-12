@@ -105,7 +105,7 @@ void nif::BSGeometry::Deserialize(std::istream& file)
 
 	this->radius = Util::readFloat(file)[0];
 
-	std::memcpy(this->minmax, Util::readFloat(file, 6).data(), 6 * sizeof(float));
+	std::memcpy(this->bbox_center_expand, Util::readFloat(file, 6).data(), 6 * sizeof(float));
 
 	this->skin_instance = Util::readUInt32(file)[0];
 	this->shader_property = Util::readUInt32(file)[0];
@@ -135,12 +135,12 @@ void nif::BSGeometry::Serialize(std::ostream& file)
 
 	Util::writeAsHex(file, this->radius);
 
-	Util::writeAsHex(file, this->minmax[0]);
-	Util::writeAsHex(file, this->minmax[1]);
-	Util::writeAsHex(file, this->minmax[2]);
-	Util::writeAsHex(file, this->minmax[3]);
-	Util::writeAsHex(file, this->minmax[4]);
-	Util::writeAsHex(file, this->minmax[5]);
+	Util::writeAsHex(file, this->bbox_center_expand[0]);
+	Util::writeAsHex(file, this->bbox_center_expand[1]);
+	Util::writeAsHex(file, this->bbox_center_expand[2]);
+	Util::writeAsHex(file, this->bbox_center_expand[3]);
+	Util::writeAsHex(file, this->bbox_center_expand[4]);
+	Util::writeAsHex(file, this->bbox_center_expand[5]);
 
 	Util::writeAsHex(file, this->skin_instance);
 	Util::writeAsHex(file, this->shader_property);

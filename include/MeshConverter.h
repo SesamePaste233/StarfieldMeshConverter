@@ -22,6 +22,8 @@ extern "C" {
 	DLL uint32_t ExportMorph(const char* json_data,
 		const char* output_file);
 
+	DLL uint32_t ExportEmptyMorph(uint32_t n_verts, const char* output_file);
+
 	DLL const char * ImportMesh(const char* input_file, const char* output_name);
 
 	DLL const char* ImportMorph(const char* input_file);

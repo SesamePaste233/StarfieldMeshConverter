@@ -21,6 +21,9 @@ _possible_pivots = ['C_Head', 'COM', 'Root']
 def GetPivotInfo(skeleton_name):
 	return skeleton_lookup[skeleton_name][skeleton_pivots[skeleton_name]]
 
+def GetAvailableSkeletonNames():
+	return skeleton_names
+
 def BoneAxisCorrection(T):
 	return T @ bone_axis_correction
 
@@ -153,12 +156,39 @@ def MatchSkeleton(bone_list):
 
 	return matched_name, bones
 
-def MatchSkeletonAdvanced(bone_list:list, obj_name:str):
+def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 	global skeleton_lookup
 	bone_set = set(bone_list)
 	max_count = -1
 	matched_names = []
 	bone_lists = []
+
+	if name_first:
+		if obj_name in skeleton_lookup.keys():
+			skele_name = obj_name
+			skele = skeleton_lookup[skele_name]
+			skele_bone_set = set(skele.keys())
+			common_elements = skele_bone_set & bone_set
+			return skele_name, list(common_elements)
+		else:
+			best_id = -1
+			tags_a = _tag(obj_name)
+			highest_score = 0
+			for i in range(len(skeleton_names)):
+				tags_b = _tag(skeleton_names[i])
+				score = _match_tags(tags_a, tags_b)
+				print(obj_name, skeleton_names[i], score)
+				if score > highest_score:
+					best_id = i
+					highest_score = score
+			if best_id != -1:
+				skele_name = skeleton_names[best_id]
+				skele = skeleton_lookup[skele_name]
+				skele_bone_set = set(skele.keys())
+				common_elements = skele_bone_set & bone_set
+				return skele_name, list(common_elements)
+			else:
+				return None, None
 
 	for name, skele in skeleton_lookup.items():
 		skele_bone_set = set(skele.keys())

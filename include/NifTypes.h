@@ -178,7 +178,7 @@ namespace nif {
 		float center[3] = { 0,0,0 };
 		float radius = 0.f;
 
-		float minmax[6] = { FLT_MAX,
+		float bbox_center_expand[6] = { FLT_MAX,
 			FLT_MAX,
 			FLT_MAX,
 			FLT_MAX,
