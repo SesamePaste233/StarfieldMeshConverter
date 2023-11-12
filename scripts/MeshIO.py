@@ -57,6 +57,12 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 	# Check if the selected object is a mesh
 	if selected_obj and selected_obj.type == 'MESH':
 
+		if 'DOUBLE_FACES_VERTS' in selected_obj.vertex_groups:
+			double_faces_vg = selected_obj.vertex_groups['DOUBLE_FACES_VERTS']
+			selected_obj.vertex_groups.remove(double_faces_vg)
+			double_faces_vg_old = old_obj.vertex_groups['DOUBLE_FACES_VERTS']
+			old_obj.vertex_groups.remove(double_faces_vg_old)
+
 		if "SMOOTH_GROUP" in selected_obj.vertex_groups:
 			smooth_group = selected_obj.vertex_groups["SMOOTH_GROUP"]
 			selected_obj.vertex_groups.remove(smooth_group)

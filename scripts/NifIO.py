@@ -85,7 +85,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			for obj in _objects:
 				SetWeightKeys(obj, data['bone_names'])
 
-			if options.skeleton_name != ' ':
+			if options.skeleton_name == ' ':
 				skeleton, matched_bones = MatchSkeletonAdvanced(data['bone_names'], geo_name +' '+ nif_name)
 			else:
 				skeleton, matched_bones = MatchSkeletonAdvanced(data['bone_names'], options.skeleton_name, True)
@@ -223,7 +223,7 @@ def ImportNif(file_path, options, context, operator):
 		if len(objs) > max_obj:
 			max_obj = len(objs)
 			best_skel = skel
-
+	print(best_skel, obj_list)
 	return {'FINISHED'}, best_skel, obj_list
 
 def ExportNif(options, context, operator):

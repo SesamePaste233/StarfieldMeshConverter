@@ -117,16 +117,23 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		__obj = bpy.context.edit_object
 		__me = __obj.data
 
+		double_faces_verts = []
+
 		__bm = bmesh.from_edit_mesh(__me)
 		for __e in __bm.edges:
 			if __e.select:
 				has_double_faces = True
+				double_faces_verts.append(__e.verts[0].index)
+				double_faces_verts.append(__e.verts[1].index)
 				break
 		if has_double_faces:
 			operator.report({'ERROR'}, f"There are double faces in your model! They are highlighted in selection mode.")
 			return None, None
 		
 		bpy.ops.object.mode_set(mode='OBJECT')
+
+		double_faces_vg = old_obj.vertex_groups.new(name='DOUBLE_FACES_VERTS')
+		double_faces_vg.add(double_faces_verts, 1,'REPLACE')
 
 		__bm.free()
 
@@ -177,10 +184,12 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		bpy.ops.object.mode_set(mode='OBJECT')
 
 		bpy.ops.object.shade_smooth(use_auto_smooth=True)
-
+		
 		modifier1 = base_obj.modifiers.new(name = base_obj.name, type='DATA_TRANSFER')
 		modifier1.object = old_obj
+		modifier1.vertex_group = double_faces_vg.name
 		modifier1.use_loop_data = True
+		modifier1.invert_vertex_group = True
 		modifier1.data_types_loops = {'CUSTOM_NORMAL'}
 		modifier1.use_max_distance = True
 		modifier1.max_distance = 0.001
@@ -239,6 +248,8 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 
 		modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
 		modifier2.object = base_obj
+		modifier2.vertex_group = double_faces_vg.name
+		modifier2.invert_vertex_group = True
 		modifier2.use_loop_data = True
 		modifier2.data_types_loops = {'CUSTOM_NORMAL'}
 		modifier2.use_max_distance = True
@@ -286,6 +297,9 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
 	if base_obj:
 		modifier = active_obj.modifiers.new(name = base_obj.name, type='DATA_TRANSFER')
 		modifier.object = base_obj
+		if 'DOUBLE_FACES_VERTS' in active_obj.vertex_groups:
+			modifier.vertex_group = 'DOUBLE_FACES_VERTS'
+			modifier.invert_vertex_group = True
 		modifier.use_loop_data = True
 		modifier.data_types_loops = {'CUSTOM_NORMAL'}
 		modifier.use_max_distance = True
@@ -298,6 +312,9 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
 		if target_obj is not None:
 			modifier = active_obj.modifiers.new(name = target_obj.name, type='DATA_TRANSFER')
 			modifier.object = target_obj
+			if 'DOUBLE_FACES_VERTS' in active_obj.vertex_groups:
+				modifier.vertex_group = 'DOUBLE_FACES_VERTS'
+				modifier.invert_vertex_group = True
 			modifier.use_loop_data = True
 			modifier.data_types_loops = {'CUSTOM_NORMAL'}
 			modifier.use_max_distance = True
