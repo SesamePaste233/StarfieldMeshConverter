@@ -108,34 +108,34 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 				shape_key_index = keys.index('Basis')
 				old_obj.active_shape_key_index = shape_key_index
 		
-		SetActiveObject(old_obj, True)
-		bpy.ops.object.mode_set(mode='EDIT')
-		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-		bpy.ops.mesh.select_all(action='DESELECT')
-		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=False, use_multi_face = True,use_non_contiguous = False, use_verts = False)
-		has_double_faces = False
-		__obj = bpy.context.edit_object
-		__me = __obj.data
+		#SetActiveObject(old_obj, True)
+		#bpy.ops.object.mode_set(mode='EDIT')
+		#bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+		#bpy.ops.mesh.select_all(action='DESELECT')
+		#bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=False, use_multi_face = True,use_non_contiguous = True, use_verts = False)
+		#has_double_faces = False
+		#__obj = bpy.context.edit_object
+		#__me = __obj.data
 
-		double_faces_verts = []
+		#double_faces_verts = []
 
-		__bm = bmesh.from_edit_mesh(__me)
-		for __e in __bm.edges:
-			if __e.select:
-				has_double_faces = True
-				double_faces_verts.append(__e.verts[0].index)
-				double_faces_verts.append(__e.verts[1].index)
-				break
-		if has_double_faces:
-			operator.report({'ERROR'}, f"There are double faces in your model! They are highlighted in selection mode.")
-			return None, None
+		#__bm = bmesh.from_edit_mesh(__me)
+		#for __e in __bm.edges:
+		#	if __e.select:
+		#		has_double_faces = True
+		#		double_faces_verts.append(__e.verts[0].index)
+		#		double_faces_verts.append(__e.verts[1].index)
+		#		break
+		#if has_double_faces:
+		#	operator.report({'ERROR'}, f"There are double faces in your model! They are highlighted in selection mode.")
+		#	return None, None
 		
-		bpy.ops.object.mode_set(mode='OBJECT')
+		#bpy.ops.object.mode_set(mode='OBJECT')
 
-		double_faces_vg = old_obj.vertex_groups.new(name='DOUBLE_FACES_VERTS')
-		double_faces_vg.add(double_faces_verts, 1,'REPLACE')
+		#double_faces_vg = old_obj.vertex_groups.new(name='DOUBLE_FACES_VERTS')
+		#double_faces_vg.add(double_faces_verts, 1,'REPLACE')
 
-		__bm.free()
+		#__bm.free()
 
 		new_obj = old_obj.copy()
 		new_obj.data = old_obj.data.copy()
@@ -183,19 +183,19 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		bpy.ops.mesh.remove_doubles()
 		bpy.ops.object.mode_set(mode='OBJECT')
 
-		bpy.ops.object.shade_smooth(use_auto_smooth=True)
+		#bpy.ops.object.shade_smooth(use_auto_smooth=True)
 		
-		modifier1 = base_obj.modifiers.new(name = base_obj.name, type='DATA_TRANSFER')
-		modifier1.object = old_obj
-		modifier1.vertex_group = double_faces_vg.name
-		modifier1.use_loop_data = True
-		modifier1.invert_vertex_group = True
-		modifier1.data_types_loops = {'CUSTOM_NORMAL'}
-		modifier1.use_max_distance = True
-		modifier1.max_distance = 0.001
-		modifier1.loop_mapping = "TOPOLOGY"
+		#modifier1 = base_obj.modifiers.new(name = base_obj.name, type='DATA_TRANSFER')
+		#modifier1.object = old_obj
+		#modifier1.vertex_group = double_faces_vg.name
+		#modifier1.use_loop_data = True
+		#modifier1.invert_vertex_group = True
+		#modifier1.data_types_loops = {'CUSTOM_NORMAL'}
+		#modifier1.use_max_distance = True
+		#modifier1.max_distance = 0.001
+		#modifier1.loop_mapping = "TOPOLOGY"
 
-		bpy.ops.object.modifier_apply(modifier=modifier1.name)
+		#bpy.ops.object.modifier_apply(modifier=modifier1.name)
 
 		SetActiveObject(new_obj, True)
 		bpy.ops.object.mode_set(mode='EDIT')
@@ -248,8 +248,8 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 
 		modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
 		modifier2.object = base_obj
-		modifier2.vertex_group = double_faces_vg.name
-		modifier2.invert_vertex_group = True
+		#modifier2.vertex_group = double_faces_vg.name
+		#modifier2.invert_vertex_group = True
 		modifier2.use_loop_data = True
 		modifier2.data_types_loops = {'CUSTOM_NORMAL'}
 		modifier2.use_max_distance = True
@@ -259,7 +259,7 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		bpy.ops.object.modifier_apply(modifier=modifier2.name)
 		
 		bpy.data.meshes.remove(base_obj.data)
-
+		raise
 		return old_obj, selected_obj
 	else:
 		print("No valid object is selected.")
