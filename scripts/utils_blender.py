@@ -147,6 +147,8 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		if convert_to_mesh:
 			bpy.ops.object.convert(target='MESH')
 
+		new_obj.data.validate()
+
 		# Mesh clean up
 		if new_obj.mode != 'EDIT':
 			bpy.ops.object.mode_set(mode='EDIT')
@@ -259,7 +261,7 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		bpy.ops.object.modifier_apply(modifier=modifier2.name)
 		
 		bpy.data.meshes.remove(base_obj.data)
-		raise
+		
 		return old_obj, selected_obj
 	else:
 		print("No valid object is selected.")
