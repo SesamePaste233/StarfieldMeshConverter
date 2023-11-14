@@ -5,9 +5,8 @@ import json
 import os
 import glob
 
-from utils_blender import GetActiveObject, SetActiveObject, GetSelectedObjs, SetSelectObjects, UtilsFolderPath, PluginAssetsFolderPath
-
-from utils import _tag, _match_tags
+import utils
+import utils_blender
 
 bone_axis_correction = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')
 bone_axis_correction_inv = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Z')
@@ -41,7 +40,7 @@ def RegisterSkeleton(skeleton_name:str, skeleton_data:dict):
 	if SkeletonRegistered(skeleton_name):
 		return False
 	
-	with open(os.path.join(PluginAssetsFolderPath(), skeleton_name + '.json'), 'w') as file:
+	with open(os.path.join(utils_blender.PluginAssetsFolderPath(), skeleton_name + '.json'), 'w') as file:
 		file.write(json.dumps(skeleton_data))
 
 	skeleton_names.append(skeleton_name)
@@ -57,7 +56,7 @@ def RegisterSkeleton(skeleton_name:str, skeleton_data:dict):
 	skeleton_dict['skeleton_names'] = skeleton_names
 	skeleton_dict['skeleton_pivot'] = skeleton_pivots
 
-	skeleton_folder = PluginAssetsFolderPath()
+	skeleton_folder = utils_blender.PluginAssetsFolderPath()
 	with open(os.path.join(skeleton_folder, "_skeleton_list_.meta"), 'w') as file:
 		file.write(json.dumps(skeleton_dict, indent = 4))
 
@@ -84,7 +83,7 @@ def LoadSkeletonLookup(skeleton_name):
 		return
 	
 	skeleton_lookup[skeleton_name] = {}
-	utils_path = UtilsFolderPath()
+	utils_path = utils_blender.UtilsFolderPath()
 	skeleton_path = os.path.join(utils_path, "Assets", f"{skeleton_name}.json")
 
 	with open(skeleton_path, 'r') as json_file:
@@ -96,7 +95,7 @@ def LoadAllSkeletonLookup():
 	global skeleton_names
 	global skeleton_pivots
 
-	skeleton_meta_data = os.path.join(PluginAssetsFolderPath(), "_skeleton_list_.meta")
+	skeleton_meta_data = os.path.join(utils_blender.PluginAssetsFolderPath(), "_skeleton_list_.meta")
 
 	if os.path.isfile(skeleton_meta_data):
 		with open(skeleton_meta_data, 'r') as file:
@@ -108,7 +107,7 @@ def LoadAllSkeletonLookup():
 		skeleton_names = []
 		skeleton_pivots = {}
 		for i in range(len(_skeleton_names)):
-			skeleton_path = os.path.join(PluginAssetsFolderPath(), f"{_skeleton_names[i]}.json")
+			skeleton_path = os.path.join(utils_blender.PluginAssetsFolderPath(), f"{_skeleton_names[i]}.json")
 			if os.path.isfile(skeleton_path):
 				skeleton_names.append(_skeleton_names[i])
 				skeleton_pivots[_skeleton_names[i]] = _skeleton_pivots[_skeleton_names[i]]
@@ -117,7 +116,7 @@ def LoadAllSkeletonLookup():
 			LoadSkeletonLookup(skel)
 	else:
 		print(f"Skeleton Metadata cannot be found. Using default settings.")
-		json_files = glob.glob(os.path.join(PluginAssetsFolderPath(), '*.json'))
+		json_files = glob.glob(os.path.join(utils_blender.PluginAssetsFolderPath(), '*.json'))
 
 		skeleton_names.clear()
 
@@ -134,7 +133,7 @@ def LoadAllSkeletonLookup():
 		skeleton_dict['skeleton_names'] = skeleton_names
 		skeleton_dict['skeleton_pivot'] = skeleton_pivots
 
-		skeleton_folder = PluginAssetsFolderPath()
+		skeleton_folder = utils_blender.PluginAssetsFolderPath()
 		with open(os.path.join(skeleton_folder, "_skeleton_list_.meta"), 'w') as file:
 			file.write(json.dumps(skeleton_dict, indent=4))
 
@@ -172,11 +171,11 @@ def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 			return skele_name, list(common_elements)
 		else:
 			best_id = -1
-			tags_a = _tag(obj_name)
+			tags_a = utils._tag(obj_name)
 			highest_score = 0
 			for i in range(len(skeleton_names)):
-				tags_b = _tag(skeleton_names[i])
-				score = _match_tags(tags_a, tags_b)
+				tags_b = utils._tag(skeleton_names[i])
+				score = utils._match_tags(tags_a, tags_b)
 				print(obj_name, skeleton_names[i], score)
 				if score > highest_score:
 					best_id = i
@@ -210,11 +209,11 @@ def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 		return None, None
 	
 	best_id = -1
-	tags_a = _tag(obj_name)
+	tags_a = utils._tag(obj_name)
 	highest_score = 0
 	for i in range(len(best_matches)):
-		tags_b = _tag(best_matches[i])
-		score = _match_tags(tags_a, tags_b)
+		tags_b = utils._tag(best_matches[i])
+		score = utils._match_tags(tags_a, tags_b)
 		print(obj_name, best_matches[i], score)
 		if score > highest_score:
 			best_id = i
@@ -258,14 +257,14 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 		CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule)
 
 def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name = None, debug_capsule = None):
-	old_active = GetActiveObject()
-	old_selected = GetSelectedObjs(True)
+	old_active = utils_blender.GetActiveObject()
+	old_selected = utils_blender.GetSelectedObjs(True)
 
 	armature = bpy.data.armatures.new('skeleton')
 	
 	arm_obj = bpy.data.objects.new('skeleton', armature)
 	collection.objects.link(arm_obj)
-	SetActiveObject(arm_obj)
+	utils_blender.SetActiveObject(arm_obj)
 	bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 	edit_bones = arm_obj.data.edit_bones
 
@@ -285,12 +284,12 @@ def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name 
 				else:
 					arm_obj.name = armature_name
 
-	SetSelectObjects(old_selected)
-	SetActiveObject(old_active)
+	utils_blender.SetSelectObjects(old_selected)
+	utils_blender.SetActiveObject(old_active)
 	return arm_obj
 
 def ImportArmatureFromJson(skeleton_name, collection, skin_objs, armature_name = None, debug_capsule = None):
-	utils_path = UtilsFolderPath()
+	utils_path = utils_blender.UtilsFolderPath()
 	skeleton_path = os.path.join(utils_path, "Assets", f"{skeleton_name}.json")
 	
 	with open(skeleton_path, 'r') as json_file:

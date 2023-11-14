@@ -3,7 +3,7 @@ import bmesh
 import os
 import numpy as np
 
-from utils_math import Normalize, GramSchmidtOrthogonalize
+import utils_math
 
 read_only_marker = '[READONLY]'
 mix_normal = False
@@ -273,7 +273,7 @@ def IsReadOnly(obj):
 def IsMesh(obj):
 	return obj.type == 'MESH'
 
-def GetSelectedObjs(exclude_active):
+def GetSelectedObjs(exclude_active = True):
 	l = []
 	for obj in bpy.context.selected_objects:
 		if not exclude_active or obj != bpy.context.active_object:
@@ -288,6 +288,12 @@ def move_object_to_collection(objs, coll):
 				if c != None:
 					c.objects.unlink(obj)
 			coll.objects.link(obj)
+	
+def move_object_to_parent(objs, parent):
+	for obj in objs:
+		if obj != None and parent != None:
+			obj.parent = parent
+
 
 def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, base_obj = None):
 	if active_obj in selected_obj_list:
@@ -346,15 +352,15 @@ def GetNormalTangents(mesh, with_tangent = True):
 				Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
 				Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
 
-	_Normals = [Normalize(n) for n in Normals]
+	_Normals = [utils_math.Normalize(n) for n in Normals]
 
 	if with_tangent:
-		_Tangents = [GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
+		_Tangents = [utils_math.GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
 	else:
 		_Tangents = None
 		Bitangent_sign = None
 
-	return _Normals, _Tangents, Bitangent_sign
+	return np.array(_Normals), np.array(_Tangents), Bitangent_sign
 
 def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
 	bm = bmesh.new()
@@ -427,3 +433,37 @@ def GetObjBBoxCenterExpand(obj):
 	center = [(ma + mi) * 0.5 for mi, ma in zip(mins, maxs)]
 	expand = [ma - ce for ma, ce in zip(maxs, center)]
 	return center, expand
+
+def ApplyAllModifiers(obj):
+	selected = GetSelectedObjs(True)
+	active = SetActiveObject(obj)
+
+	for modifier in obj.modifiers:
+		bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+	SetSelectObjects(selected)
+	SetActiveObject(active)
+
+def GetVertColorPerVert(obj):
+	col = obj.data.vertex_colors.active
+	if col == None:
+		col = obj.data.vertex_colors[0]
+	vert_number = len(obj.data.vertices)
+	v_colors = [[] for i in range(vert_number)]
+	for poly in obj.data.polygons:
+		for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
+			v_colors[v_ix] = col.data[l_ix].color
+
+	return v_colors
+
+def SetVertColorPerVert(obj, v_colors):
+	col = obj.data.vertex_colors.active
+	for poly in obj.data.polygons:
+		for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
+			col.data[l_ix].color = v_colors[v_ix]
+
+def ColorToLightness(color):
+	rgb = list(color)[:-1]
+	_max = max(rgb)
+	_min = min(rgb)
+	return 0.5 * (_max + _min)

@@ -216,8 +216,8 @@ void __main() {
 		for (int k = 0; k < reader.num_vertices; k++) {
 			int16_t padding = 0;
 			for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
-				if (reader.per_vert_morph_data[k][j]._padding != padding) {
-					padding = reader.per_vert_morph_data[k][j]._padding;
+				if (reader.per_vert_morph_data[k][j].target_vert_color != padding) {
+					padding = reader.per_vert_morph_data[k][j].target_vert_color;
 					log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
 				}
 			}
@@ -253,22 +253,18 @@ void amain() {
 	return;
 }
 
-void smain() {
+void main() {
 	morph::MorphIO reader;
 	reader.Deserialize("C:\\repo\\MeshConverter\\performance_teeth.dat");
 
 	return;
 }
 
-void main() {
-	mesh::MeshIO reader;
-	reader.Load("C:\\repo\\MeshConverter\\Hood.mesh.json", 1.f, mesh::MeshIO::Options::NormalizeWeight | mesh::MeshIO::Options::GenerateTangentIfNA /*| mesh::MeshIO::Options::SmoothEdgeNormal | mesh::MeshIO::Options::DoOptimize*/);
+void smain() {
+	nif::NifIO nif;
+	nif.Deserialize("C:\\repo\\MeshConverter\\impactdriver04.nif");
 
-	reader.Serialize("C:\\repo\\MeshConverter\\Hood.mesh");
-
-	mesh::MeshIO reader2;
-
-	reader2.Deserialize("C:\\repo\\MeshConverter\\Hood.mesh");
+	nif.DumpUnkBinary("C:\\repo\\MeshConverter\\UnkBlocks");
 
 }
 
@@ -347,10 +343,10 @@ void __main() {
 			int16_t padding = 0;
 			_ASSERT(reader.per_vert_morph_key_indices[k].size());
 			for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
-				if (reader.per_vert_morph_data[k][j]._padding != padding) {
+				/*if (reader.per_vert_morph_data[k][j]._padding != padding) {
 					padding = reader.per_vert_morph_data[k][j]._padding;
 					log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
-				}
+				}*/
 			}
 		}
 

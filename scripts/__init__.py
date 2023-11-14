@@ -379,8 +379,23 @@ class ImportCustomMorph(bpy.types.Operator):
 	filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 	filename: bpy.props.StringProperty(default='morph.dat')
 	filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
+	as_multiple: bpy.props.BoolProperty(
+		name="As Multiple Objs",
+		description="Import Morph as multiple objects, allows greater freedom in morph editing.",
+		default=False
+	)
 	debug_delta_normal: bpy.props.BoolProperty(
 		name="Debug Delta Normals",
+		description="Debug option. DO NOT USE.",
+		default=False
+	)
+	debug_delta_tangent: bpy.props.BoolProperty(
+		name="Debug Delta Tangents",
+		description="Debug option. DO NOT USE.",
+		default=False
+	)
+	debug_padding: bpy.props.BoolProperty(
+		name="Debug Padding",
 		description="Debug option. DO NOT USE.",
 		default=False
 	)
@@ -413,7 +428,7 @@ class ExportCustomMorph(bpy.types.Operator):
 
 		if os.path.isdir(os.path.dirname(self.filepath)):
 			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)
-			
+
 		self.use_world_origin = context.scene.use_world_origin
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
@@ -422,8 +437,6 @@ class ExportSFMeshOperator(bpy.types.Operator):
 	"""Export the active object"""
 	bl_idname = "export_scene.sfmesh"
 	bl_label = "Export Active Mesh"
-	
-	folder_path: bpy.props.StringProperty(subtype="DIR_PATH", default="")
 
 	def execute(self, context):
 		_obj = bpy.context.active_object
@@ -447,6 +460,22 @@ class ExportSFMeshOperator(bpy.types.Operator):
 		
 		self.report({'WARNING'}, "You didn't choose a object with geometry!")
 		return {'CANCELLED'}
+
+class CreateAdvancedMorphEditOperator(bpy.types.Operator):
+	bl_idname = "object.advanced_morph_edit_create"
+	bl_label = "Advanced Morph Edit"
+
+	def execute(self, context):
+		active_obj = utils_blender.GetActiveObject()
+		ref_objs = utils_blender.GetSelectedObjs(True)
+		if active_obj == None or active_obj.type != 'MESH':
+			return {'CANCELLED'}
+		
+		target_objs = []
+
+		rtn = MorphIO.CreateMorphObjSet(context.scene, context, active_obj, ref_objs, target_objs, self)
+		
+		return rtn
 
 class ExportSFMeshPanel(bpy.types.Panel):
 	"""Panel for the Export Starfield Mesh functionality"""
@@ -483,7 +512,8 @@ class ExportSFMeshPanel(bpy.types.Panel):
 		layout.prop(context.scene, "export_sf_mesh_open_folder", text="Open export folder")
 		layout.prop(context.scene, "export_sf_mesh_hash_result", text="Hash file name")
 		# Button to export the selected skeleton
-		layout.operator("export_scene.sfmesh", text="Export .mesh")
+		layout.operator("object.advanced_morph_edit_create", text = "Advanced Morph Edit")
+		layout.operator("export_scene.sfmesh", text = "Export .mesh")
 
 
 # Add custom menu entries in the File menu
@@ -606,6 +636,7 @@ def register():
 	bpy.utils.register_class(ImportCustomMorph)
 	bpy.utils.register_class(ExportCustomMorph)
 	bpy.utils.register_class(ExportSFMeshOperator)
+	bpy.utils.register_class(CreateAdvancedMorphEditOperator)
 	bpy.utils.register_class(ExportSFMeshPanel)
 	bpy.utils.register_class(ExportCustomNif)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
@@ -616,6 +647,7 @@ def register():
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_nif)
 
 def unregister():
+	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
 	bpy.utils.unregister_class(ExportSFMeshOperator)
 	bpy.utils.unregister_class(ExportSFMeshPanel)
 	bpy.utils.unregister_class(ExportCustomMesh)

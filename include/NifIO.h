@@ -219,6 +219,29 @@ namespace nif {
 			}
 			return GetMesh(geometry_node->meshes[0].mesh_path);
 		};
+
+		void DumpUnkBinary(const std::string& folder_path) const {
+			auto unknown_blocks = this->GetRTTIBlocks(NiRTTI::UnkBinaryBlock);
+			for (auto& block : unknown_blocks) {
+				auto unk_block = dynamic_cast<UnkBinaryBlock*>(block);
+				if (unk_block == nullptr) continue;
+
+				auto name = std::to_string(block_manager.FindBlock(block)) + string_manager.GetString(block->name_index);
+
+				std::filesystem::create_directories(folder_path + "/" + unk_block->RTTI);
+
+				std::ofstream file(folder_path + "/" + unk_block->RTTI + "/" + name + ".bin", std::ios::binary);
+
+				if (!file.is_open()) {
+					std::cerr << "Failed to open file " << folder_path + "/" + unk_block->RTTI + "/" + name + ".bin" << std::endl;
+					continue;
+				}
+
+				unk_block->Dump(file);
+
+				file.close();
+			}
+		}
 	};
 
 

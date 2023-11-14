@@ -69,7 +69,7 @@ bool MorphIO::Deserialize(const std::string filename)
 		_morph_data_hf._offset[1] = Util::halfToFloat(reinterpret_cast<uint16_t*>(_morph_data._offset)[1]);
 		_morph_data_hf._offset[2] = Util::halfToFloat(reinterpret_cast<uint16_t*>(_morph_data._offset)[2]);
 
-		_morph_data_hf._padding = _morph_data._padding;
+		_morph_data_hf.target_vert_color = _morph_data.target_vert_color / float(uint16_t(-1));
 		
 #ifdef _DEBUG
 		auto n = Util::decodeDEC3N_CHECK(_morph_data.x,1);
@@ -258,9 +258,9 @@ bool MorphIO::Load(const std::string jsonMorphFile, const uint32_t options)
 				_data._offset[0] = Util::floatToHalf(morphData[0]);
 				_data._offset[1] = Util::floatToHalf(morphData[1]);
 				_data._offset[2] = Util::floatToHalf(morphData[2]);
-				_data._padding = 0; // I don't know what this is yet
-				_data.x = Util::encodeDEC3N({ float(morphData[3][0]),float(morphData[3][1]) ,float(morphData[3][2]) }, 1);
-				_data.y = Util::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
+				_data.target_vert_color = uint16_t(float(morphData[3]) * uint16_t(-1));
+				_data.x = Util::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
+				_data.y = Util::encodeDEC3N({ float(morphData[5][0]),float(morphData[5][1]) ,float(morphData[5][2]) }, 1);
 				_morph_data.push_back(_data);
 				this->morph_data_raw.push_back(_data);
 				this->num_morph_data++;
@@ -322,9 +322,9 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 				_data._offset[0] = Util::floatToHalf(morphData[0]);
 				_data._offset[1] = Util::floatToHalf(morphData[1]);
 				_data._offset[2] = Util::floatToHalf(morphData[2]);
-				_data._padding = 0; // I don't know what this is yet
-				_data.x = Util::encodeDEC3N({ float(morphData[3][0]),float(morphData[3][1]) ,float(morphData[3][2]) }, 1);
-				_data.y = Util::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
+				_data.target_vert_color = uint16_t(float(morphData[3]) * uint16_t(-1)); 
+				_data.x = Util::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
+				_data.y = Util::encodeDEC3N({ float(morphData[5][0]),float(morphData[5][1]) ,float(morphData[5][2]) }, 1);
 				_morph_data.push_back(_data);
 				this->morph_data_raw.push_back(_data);
 				this->num_morph_data++;
@@ -408,7 +408,7 @@ bool morph::MorphIO::SerializeToJson(std::string& json_data)
 			jsonData["morphData"][id][i][0] = Util::halfToFloat(data._offset[0]);
 			jsonData["morphData"][id][i][1] = Util::halfToFloat(data._offset[1]);
 			jsonData["morphData"][id][i][2] = Util::halfToFloat(data._offset[2]);
-			jsonData["morphData"][id][i][3] = data._padding;
+			jsonData["morphData"][id][i][3] = data.target_vert_color / float(uint16_t(-1));
 
 			auto delta_norm = Util::decodeDEC3N(data.x);
 			jsonData["morphData"][id][i][4] = delta_norm[0];

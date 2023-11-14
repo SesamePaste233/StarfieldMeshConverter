@@ -7,17 +7,10 @@ import mathutils
 import numpy as np
 from mathutils import Color
 
-from utils_blender import SetActiveObject, GetSelectedObjs
-
-from utils_blender import open_folder, read_only_marker, TempFolderPath
-
-from utils_blender import PreprocessAndProxy, SmoothPerimeterNormal
-
-from utils import hash_string, sanitize_filename, flatten
-
-from utils_math import Normalize, GramSchmidtOrthogonalize
-
-from MeshConverter import _dll_export_mesh, _dll_import_mesh
+import utils_blender
+import utils
+import utils_math
+import MeshConverter
 
 def ExportMesh(options, context, filepath, operator, bone_list_filter = None, prune_empty_vertex_groups = False):
 	export_mesh_file_path = filepath
@@ -45,13 +38,13 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 		operator.report({'WARNING'},"Selected object is not a mesh.")
 		return {'CANCELLED'}, 0, 0, None
 	
-	s_objs = GetSelectedObjs(True)
+	s_objs = utils_blender.GetSelectedObjs(True)
 
-	old_obj, selected_obj = PreprocessAndProxy(old_obj, options.use_world_origin, operator)
+	old_obj, selected_obj = utils_blender.PreprocessAndProxy(old_obj, options.use_world_origin, operator)
 	if old_obj == None:
 		return {"CANCELLED"}, 0, 0, None
 	
-	SmoothPerimeterNormal(selected_obj, s_objs)
+	utils_blender.SmoothPerimeterNormal(selected_obj, s_objs)
 	bpy.ops.object.convert(target='MESH')
 
 	# Check if the selected object is a mesh
@@ -90,7 +83,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 
 		if options.GEO:
 			positions = [list(vert.co) for vert in selected_obj.data.vertices.values()] 
-			data["positions_raw"] = flatten(positions)
+			data["positions_raw"] = utils.flatten(positions)
 
 		for v in bm.verts:
 			verts_count += 1
@@ -150,8 +143,8 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 					Tangents[vert_idx] = Tangents[vert_idx] + np.array(selected_obj.data.loops[loop_idx].tangent)
 					Normals[vert_idx] = Normals[vert_idx] + np.array(selected_obj.data.loops[loop_idx].normal)
 
-			data["normals"] = [list(Normalize(n)) for n in Normals]
-			data["tangents"] = [list(GramSchmidtOrthogonalize(t, np.array(n))) + [3 if f < 0 else 0] for t, n, f in zip(Tangents, data["normals"], Bitangent_sign)]
+			data["normals"] = [list(utils_math.Normalize(n)) for n in Normals]
+			data["tangents"] = [list(utils_math.GramSchmidtOrthogonalize(t, np.array(n))) + [3 if f < 0 else 0] for t, n, f in zip(Tangents, data["normals"], Bitangent_sign)]
 
 			for _l in data["uv_coords"]:
 				if len(_l) == 0:
@@ -219,8 +212,8 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 			return {'CANCELLED'}, 0,0, None
 
 		if options.export_sf_mesh_hash_result:
-			hash_folder, hash_name = hash_string(active_object_name)
-			object_folder_name = sanitize_filename(active_object_name)
+			hash_folder, hash_name = utils.hash_string(active_object_name)
+			object_folder_name = utils.sanitize_filename(active_object_name)
 			result_file_folder = os.path.join(os.path.dirname(export_mesh_file_path), object_folder_name, hash_folder)
 			os.makedirs(result_file_folder, exist_ok = True)
 			result_file_path = os.path.join(result_file_folder, hash_name + ".mesh")
@@ -232,13 +225,13 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 		#with open(result_file_path + '.json', 'w') as json_file:
 		#	json_file.write(json_data)
 
-		returncode = _dll_export_mesh(json_data.encode('utf-8'), result_file_path.encode('utf-8'), options.mesh_scale, False, options.normalize_weights, False)
+		returncode = MeshConverter._dll_export_mesh(json_data.encode('utf-8'), result_file_path.encode('utf-8'), options.mesh_scale, False, options.normalize_weights, False)
 
 		if returncode == 0:
 			operator.report({'INFO'}, "Starfield .mesh exported successfully")
 
 			if options.export_sf_mesh_open_folder == True:
-				open_folder(bpy.path.abspath(export_mesh_folder_path))
+				utils_blender.open_folder(bpy.path.abspath(export_mesh_folder_path))
 
 			return {'FINISHED'}, verts_count, indices_count, vgrp_names
 			
@@ -250,9 +243,9 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 
 def ImportMesh(file_path, options, context, operator, mesh_name_override = None):
 	import_path = file_path
-	temp_path = TempFolderPath()
+	temp_path = utils_blender.TempFolderPath()
 
-	rtn = _dll_import_mesh(import_path.encode('utf-8'), os.path.join(temp_path, "mesh_data_import").encode('utf-8')).decode('utf-8')
+	rtn = MeshConverter._dll_import_mesh(import_path.encode('utf-8'), os.path.join(temp_path, "mesh_data_import").encode('utf-8')).decode('utf-8')
 
 	if rtn == "":
 		returncode = -1 
@@ -403,10 +396,10 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 							col.data[l_ix].color = (w, w, w, w)
 			
 			if options.import_as_read_only:
-				obj.name = read_only_marker + obj.name
+				obj.name = utils_blender.read_only_marker + obj.name
 
 			bm.free()
-			SetActiveObject(obj)
+			utils_blender.SetActiveObject(obj)
 			return {'FINISHED'}
 		else:
 			operator.report({'WARNING'}, f"Unknown error. Contact the author for assistance.")

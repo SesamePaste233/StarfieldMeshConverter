@@ -464,6 +464,11 @@ namespace nif {
 		uint32_t binary_bytes = 0;
 		uint8_t* binary_data = nullptr;
 
+		void Dump(std::ostream& file) {
+			Util::writeAsHex(file, binary_bytes);
+			Util::writeStream(file, binary_data, binary_bytes);
+		}
+
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;
 		size_t GetSize() override;
@@ -471,7 +476,7 @@ namespace nif {
 			NiNodeBase::UpdateStrings(old_id, new_id);
 		};
 		NiRTTI GetRTTI() const override {
-			return NiRTTI::NiNodeBase;
+			return NiRTTI::UnkBinaryBlock;
 		};
 		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();

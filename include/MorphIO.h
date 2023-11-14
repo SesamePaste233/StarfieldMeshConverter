@@ -9,14 +9,14 @@
 namespace morph{
 	typedef struct {
 		uint16_t _offset[3];
-		int16_t _padding;
+		uint16_t target_vert_color;
 		uint32_t x, y;
 	}morph_data;
 
 #ifdef _EXTENDED_MORPH_DATA
 	typedef struct {
 		float _offset[3]; // Vertex offset/displacement as half-floats.
-		int16_t _padding; // Unknown. Always zero or 0xFFFF or always divisible by 0x20.
+		float target_vert_color; // Target vertex color.
 		float nx, ny, nz; // Delta normal, in DEC3N format.
 		float tx, ty, tz; // Delta tangent, in DEC3N format.
 	}morph_data_hf; // 16 bytes

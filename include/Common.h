@@ -17,8 +17,6 @@
 // Eigen library
 #include <Eigen/Dense>
 
-namespace fs = std::filesystem;
-
 class Util {
 public:
 	static const wchar_t* charToWchar(const char* c)
@@ -28,6 +26,17 @@ public:
 		mbsrtowcs_s(nullptr, wc, cSize, &c, cSize, nullptr);
 
 		return wc;
+	}
+
+	template<class T>
+	inline static T switchEndian(const T& value) {
+		T result = value;
+		char* src = reinterpret_cast<char*>(&const_cast<T&>(value));
+		char* dst = reinterpret_cast<char*>(&result) + sizeof(T) - 1;
+		for (size_t i = 0; i < sizeof(T); ++i) {
+			*dst-- = *src++;
+		}
+		return result;
 	}
 
 	static const char* make_copy(std::string str) {
@@ -183,28 +192,38 @@ public:
 	}
 
 	template<typename T>
-	static void writeAsHex(std::ostream& file, T& value) {
-		file.write(reinterpret_cast<const char*>(&value), sizeof(value));
+	static void writeAsHex(std::ostream& file, T& value, bool big_endian = false) {
+		T _v = value;
+		if (big_endian) {
+			_v = switchEndian(value);
+		}
+		file.write(reinterpret_cast<const char*>(&_v), sizeof(value));
 	}
 
-	static std::vector<float> readHalfAsFull(std::istream& file, int counts = 1) {
+	static std::vector<float> readHalfAsFull(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<float> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
 			uint16_t value;
 			file.read(reinterpret_cast<char*>(&value), sizeof(uint16_t));
+			if (big_endian) {
+				value = switchEndian(value);
+			}
 			result.push_back(halfToFloat(value));
 		}
 		return result;
 	}
 
 	// Equivalent of readDouble in C++
-	static std::vector<double> readDouble(std::istream& file, int counts = 1) {
+	static std::vector<double> readDouble(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<double> result;
 		result.reserve(8 * counts);
 		for (int i = 0; i < 8 * counts; ++i) {
 			double value;
 			file.read(reinterpret_cast<char*>(&value), sizeof(double));
+			if (big_endian) {
+				value = switchEndian(value);
+			}
 			result.push_back(value);
 		}
 		return result;
@@ -253,31 +272,37 @@ public:
 	}
 
 	// Equivalent of readUInt32 in C++
-	static std::vector<uint32_t> readUInt32(std::istream& file, int counts = 1) {
+	static std::vector<uint32_t> readUInt32(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<uint32_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
 			uint32_t value;
 			file.read(reinterpret_cast<char*>(&value), sizeof(uint32_t));
+			if (big_endian) {
+				value = switchEndian(value);
+			}
 			result.push_back(value);
 		}
 		return result;
 	}
 
 	// Equivalent of readFloat in C++
-	static std::vector<float> readFloat(std::istream& file, int counts = 1) {
+	static std::vector<float> readFloat(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<float> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
 			float value;
 			file.read(reinterpret_cast<char*>(&value), sizeof(float));
+			if (big_endian) {
+				value = switchEndian(value);
+			}
 			result.push_back(value);
 		}
 		return result;
 	}
 
 	// Equivalent of readUInt8AsInt in C++
-	static std::vector<uint8_t> readUInt8(std::istream& file, int counts = 1) {
+	static std::vector<uint8_t> readUInt8(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<uint8_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
@@ -289,23 +314,29 @@ public:
 	}
 
 	// Equivalent of readUInt16 in C++
-	static std::vector<uint16_t> readUInt16(std::istream& file, int counts = 1) {
+	static std::vector<uint16_t> readUInt16(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<uint16_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
 			uint16_t value;
 			file.read(reinterpret_cast<char*>(&value), sizeof(uint16_t));
+			if (big_endian) {
+				value = switchEndian(value);
+			}
 			result.push_back(value);
 		}
 		return result;
 	}
 
-	static std::vector<int16_t> readInt16(std::istream& file, int counts = 1) {
+	static std::vector<int16_t> readInt16(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<int16_t> result;
 		result.reserve(counts);
 		for (int i = 0; i < counts; ++i) {
 			int16_t value;
 			file.read(reinterpret_cast<char*>(&value), sizeof(int16_t));
+			if (big_endian) {
+				value = switchEndian(value);
+			}
 			result.push_back(value);
 		}
 		return result;
@@ -378,8 +409,9 @@ public:
 	}
 
 	static size_t getFilePaths(std::string _dir, std::vector<std::string>& _output, std::string extension) {
-		for (const auto& entry : fs::recursive_directory_iterator(_dir)) {
-			if (fs::is_regular_file(entry) && entry.path().extension() == extension) {
+		using namespace std::filesystem;
+		for (const auto& entry : recursive_directory_iterator(_dir)) {
+			if (is_regular_file(entry) && entry.path().extension() == extension) {
 				_output.push_back(entry.path().string());
 			}
 		}

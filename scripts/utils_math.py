@@ -19,7 +19,7 @@ def GramSchmidtOrthogonalize(tangent, normal):
 	return normalized_orthogonal_tangent
 
 def Normalize(vec):
-	n = np.linalg.norm(vec)
+	n = np.linalg.norm(np.array(vec))
 	if n == 0:
 		return vec
-	return vec / n
+	return [v/n for v in vec]

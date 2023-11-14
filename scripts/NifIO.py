@@ -2,21 +2,14 @@ import os
 import json
 import bpy
 import mathutils
-import math
 
-from MeshIO import ImportMesh, ExportMesh
-
-from MorphIO import ExportMorph
-
-from utils_blender import GetActiveObject, SetActiveObject, GetSelectedObjs, SetSelectObjects, SetWeightKeys, move_object_to_collection, BoxFromCenterExpand, SphereFromCenterRadius, GetObjBBoxCenterExpand
-
-from nif_armature import MatchSkeletonAdvanced, ImportArmatureFromJson, LoadAllSkeletonLookup, CreateArmature, SkeletonLookup, BoneAxisCorrectionRevert, RegisterSkeleton
-
-from nif_template import RootNodeTemplate, SingleClothTemplate
-
-from utils import hash_string, sanitize_filename, default_assets_folder
-
-from MeshConverter import _dll_export_nif, _dll_import_nif
+import MeshIO
+import MorphIO
+import utils_blender
+import nif_armature
+import nif_template
+import utils
+import MeshConverter
 
 skeleton_obj_dict = {}
 
@@ -52,10 +45,10 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			
 			lod += 1
 			if os.path.isfile(mesh_filepath):
-				rtn = ImportMesh(mesh_filepath, options, context, operator, factory_path)
+				rtn = MeshIO.ImportMesh(mesh_filepath, options, context, operator, factory_path)
 				
 				if 'FINISHED' in rtn:
-					imported_obj = GetActiveObject()
+					imported_obj = utils_blender.GetActiveObject()
 					_objects.append(imported_obj)
 					_objects[-1].name = geo_name + f'_LOD:{lod}'
 					imported_obj.data.materials.append(material)
@@ -71,8 +64,8 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			bound_expand = data["geo_bounding_expand"]
 			bounding_name = geo_name+'_bounding'
 			
-			box_obj = BoxFromCenterExpand(bounding_name, bound_center, bound_expand)
-			sphere_obj = SphereFromCenterRadius(bounding_name+'_sphere', bound_sphere[:3], bound_sphere[3])
+			box_obj = utils_blender.BoxFromCenterExpand(bounding_name, bound_center, bound_expand)
+			sphere_obj = utils_blender.SphereFromCenterRadius(bounding_name+'_sphere', bound_sphere[:3], bound_sphere[3])
 			box_obj.display_type = 'BOUNDS'
 			_objects.append(box_obj)
 			_objects.append(sphere_obj)
@@ -83,12 +76,12 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		if 'has_skin' in data.keys() and data['has_skin'] == True:
 			is_rigged = True
 			for obj in _objects:
-				SetWeightKeys(obj, data['bone_names'])
+				utils_blender.SetWeightKeys(obj, data['bone_names'])
 
 			if options.skeleton_name == ' ':
-				skeleton, matched_bones = MatchSkeletonAdvanced(data['bone_names'], geo_name +' '+ nif_name)
+				skeleton, matched_bones = nif_armature.MatchSkeletonAdvanced(data['bone_names'], geo_name +' '+ nif_name)
 			else:
-				skeleton, matched_bones = MatchSkeletonAdvanced(data['bone_names'], options.skeleton_name, True)
+				skeleton, matched_bones = nif_armature.MatchSkeletonAdvanced(data['bone_names'], options.skeleton_name, True)
 
 			if skeleton == None:
 				operator.report({'WARNING'},f'Unable to find a matched skeleton for {geo_name}. Skipping...')
@@ -100,7 +93,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 					for bonename, boneinfo in zip(data['bone_names'], data['bone_infos']):
 						debug_capsule[bonename] = boneinfo
 					
-					ImportArmatureFromJson(skeleton, collection, _objects, geo_name, debug_capsule)
+					nif_armature.ImportArmatureFromJson(skeleton, collection, _objects, geo_name, debug_capsule)
 
 					for bonename, boneinfo in debug_capsule.items():
 						bpy.ops.mesh.primitive_uv_sphere_add(radius=boneinfo['radius'], location=boneinfo['world_center'])
@@ -123,7 +116,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		Axis.empty_display_size = 0.015
 		_objects.append(Axis)
 
-	move_object_to_collection(_objects, collection)
+	utils_blender.move_object_to_collection(_objects, collection)
 	for obj in _objects:
 		if parent_node != None:
 			obj.parent = parent_node
@@ -137,7 +130,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		obj.scale = tuple([scale,scale,scale])
 	
 	if options.correct_rotation and is_node == False and is_rigged and skeleton != None:
-		skeleton_info = SkeletonLookup(skeleton)
+		skeleton_info = nif_armature.SkeletonLookup(skeleton)
 
 		for mesh_obj in _objects:
 			
@@ -179,18 +172,18 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 
 
 def ImportNif(file_path, options, context, operator):
-	LoadAllSkeletonLookup()
+	nif_armature.LoadAllSkeletonLookup()
 	ResetSkeletonObjDict()
 	assets_folder = options.assets_folder
 	nifname = os.path.basename(file_path)
 	additional_assets_folder = os.path.dirname(file_path)
 	nif_folder_name = os.path.basename(additional_assets_folder)
 	
-	if assets_folder == default_assets_folder:
+	if assets_folder == utils.default_assets_folder:
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')
 		return {'CANCELLED'}, None, None
 	
-	json_str = _dll_import_nif(file_path.encode('utf-8')).decode('utf-8')
+	json_str = MeshConverter._dll_import_nif(file_path.encode('utf-8')).decode('utf-8')
 	
 	if len(json_str) == 0:
 		operator.report({'WARNING'}, f'Nif failed to load.')
@@ -204,9 +197,9 @@ def ImportNif(file_path, options, context, operator):
 	if "geometries" not in _data.keys():
 		
 		if options.skeleton_register_name != "":
-			RegisterSkeleton(options.skeleton_register_name, _data)
+			nif_armature.RegisterSkeleton(options.skeleton_register_name, _data)
 
-		CreateArmature(_data, None, prev_coll, "Armature")
+		nif_armature.CreateArmature(_data, None, prev_coll, "Armature")
 		operator.report({'INFO'}, f'Nif has no geometry. Loaded as Armature.')
 		return {'FINISHED'}, None, None
 	else:
@@ -227,8 +220,8 @@ def ImportNif(file_path, options, context, operator):
 	return {'FINISHED'}, best_skel, obj_list
 
 def ExportNif(options, context, operator):
-	LoadAllSkeletonLookup()
-	original_selected = GetSelectedObjs(True)
+	nif_armature.LoadAllSkeletonLookup()
+	original_selected = utils_blender.GetSelectedObjs(True)
 	nif_filepath = options.filepath
 	export_folder = os.path.dirname(nif_filepath)
 	hash_filepath = options.export_sf_mesh_hash_result
@@ -236,7 +229,7 @@ def ExportNif(options, context, operator):
 	options.use_world_origin = False
 
 	if options.export_template == 'None':
-		root = GetActiveObject()
+		root = utils_blender.GetActiveObject()
 		if root.type != 'EMPTY':
 			if root.type != 'MESH':
 				operator.report({'WARNING'}, f'Must select an empty object as Root Node or a mesh object as BSGeometry.')
@@ -246,10 +239,10 @@ def ExportNif(options, context, operator):
 		mode = "MULTI_MESH"
 		if root.type == 'EMPTY':
 			mode = "MULTI_MESH"
-			_data = RootNodeTemplate(root, geometries)
+			_data = nif_template.RootNodeTemplate(root, geometries)
 		elif root.type == 'MESH':
 			mode = "SINGLE_MESH"
-			_data = SingleClothTemplate(root, geometries)
+			_data = nif_template.SingleClothTemplate(root, geometries)
 
 		_data['geometries'] = []
 
@@ -267,12 +260,12 @@ def ExportNif(options, context, operator):
 			else:
 				mesh_data['mat_path'] = 'MATERIAL_PATH'
 
-			bbox_center, bbox_expand = GetObjBBoxCenterExpand(mesh_obj)
+			bbox_center, bbox_expand = utils_blender.GetObjBBoxCenterExpand(mesh_obj)
 			mesh_data["geo_bounding_center"] = bbox_center
 			mesh_data["geo_bounding_expand"] = bbox_expand
 
 			mesh_lod_info = {}
-			SetActiveObject(mesh_obj)
+			utils_blender.SetActiveObject(mesh_obj)
 
 			vertex_groups = mesh_obj.vertex_groups
 			vgrp_names = [vg.name for vg in vertex_groups]
@@ -283,18 +276,18 @@ def ExportNif(options, context, operator):
 				armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
 
 				if len(armatures) == 0:
-					armature_name, bone_list_filter = MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
+					armature_name, bone_list_filter = nif_armature.MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
 					if armature_name != None:
-						skeleton_info = SkeletonLookup(armature_name)
+						skeleton_info = nif_armature.SkeletonLookup(armature_name)
 				else:
 					skeleton_info = {}
 					armature = armatures[0]
-					SetSelectObjects([])
-					SetActiveObject(armature)
+					utils_blender.SetSelectObjects([])
+					utils_blender.SetActiveObject(armature)
 					bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 					for bone in armature.data.edit_bones:
 						info = {}
-						info['matrix'] = BoneAxisCorrectionRevert(bone.matrix)
+						info['matrix'] = nif_armature.BoneAxisCorrectionRevert(bone.matrix)
 						info['scale'] = 1
 						skeleton_info[bone.name] = info
 					
@@ -303,10 +296,10 @@ def ExportNif(options, context, operator):
 
 
 			if hash_filepath:
-				mesh_folder, mesh_name = hash_string(mesh_obj.name)
+				mesh_folder, mesh_name = utils.hash_string(mesh_obj.name)
 			else:
-				mesh_folder = sanitize_filename(mesh_obj.name)
-				mesh_name = sanitize_filename(mesh_obj.data.name)
+				mesh_folder = utils.sanitize_filename(mesh_obj.name)
+				mesh_name = utils.sanitize_filename(mesh_obj.data.name)
 
 			result_file_folder = os.path.join(export_folder, 'geometries', mesh_folder)
 			os.makedirs(result_file_folder, exist_ok = True)
@@ -314,12 +307,12 @@ def ExportNif(options, context, operator):
 			factory_name = mesh_folder + '\\' + mesh_name
 
 			if mode == "SINGLE_MESH":
-				SetSelectObjects(original_selected)
-				SetActiveObject(mesh_obj)
+				utils_blender.SetSelectObjects(original_selected)
+				utils_blender.SetActiveObject(mesh_obj)
 			else:
-				SetSelectObjects([])
-				SetActiveObject(mesh_obj)
-			rtn, verts_count, indices_count, bone_list = ExportMesh(options, context, result_file_path, operator, bone_list_filter, True)
+				utils_blender.SetSelectObjects([])
+				utils_blender.SetActiveObject(mesh_obj)
+			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True)
 			
 			if 'FINISHED' not in rtn:
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
@@ -331,10 +324,10 @@ def ExportNif(options, context, operator):
 					os.makedirs(result_morph_folder, exist_ok = True)
 					result_morph_path = os.path.join(result_morph_folder, "morph.dat")
 
-					SetSelectObjects(original_selected)
-					SetActiveObject(mesh_obj)
+					utils_blender.SetSelectObjects(original_selected)
+					utils_blender.SetActiveObject(mesh_obj)
 
-					morph_success = ExportMorph(options, context, result_morph_path, operator)
+					morph_success = MorphIO.ExportMorph(options, context, result_morph_path, operator)
 
 					if 'FINISHED' in morph_success:
 						operator.report({'INFO'}, f"Morph export for {mesh_obj.name} successful.")
@@ -380,7 +373,7 @@ def ExportNif(options, context, operator):
 		#with open(nif_filepath + '.json', 'w') as json_file:
 		#	json_file.write(json_data)
 
-		returncode = _dll_export_nif(json_data.encode('utf-8'), nif_filepath.encode('utf-8'), export_folder.encode('utf-8'))
+		returncode = MeshConverter._dll_export_nif(json_data.encode('utf-8'), nif_filepath.encode('utf-8'), export_folder.encode('utf-8'))
 
 		if returncode != 0:
 			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
