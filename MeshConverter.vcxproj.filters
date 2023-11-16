@@ -39,6 +39,12 @@
     <ClInclude Include="include\BSArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hkPhysics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hkPhysicsChunks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -63,6 +69,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\BSArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hkPhysics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\hkPhysicsChunks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

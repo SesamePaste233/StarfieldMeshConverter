@@ -2,6 +2,7 @@
 #include "MeshIO.h"
 #include "MorphIO.h"
 #include "NifIO.h"
+#include "hkPhysics.h"
 
 #include "MeshConverter.h"
 
@@ -254,8 +255,9 @@ void amain() {
 }
 
 void main() {
-	morph::MorphIO reader;
-	reader.Deserialize("C:\\repo\\MeshConverter\\performance_teeth.dat");
+	hkphysics::hkPhysicsReflectionData data;
+
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.bin");
 
 	return;
 }

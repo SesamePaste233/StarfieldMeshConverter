@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClInclude Include="include\BSArchive.h" />
     <ClInclude Include="include\Common.h" />
+    <ClInclude Include="include\hkPhysics.h" />
+    <ClInclude Include="include\hkPhysicsChunks.h" />
     <ClInclude Include="include\MeshConverter.h" />
     <ClInclude Include="include\MeshIO.h" />
     <ClInclude Include="include\MorphIO.h" />
@@ -30,7 +32,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Common.cpp" />
+    <ClCompile Include="include\hkPhysicsChunks.cpp" />
     <ClCompile Include="src\BSArchive.cpp" />
+    <ClCompile Include="src\hkPhysics.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshConverter.cpp" />
     <ClCompile Include="src\MeshIO.cpp" />

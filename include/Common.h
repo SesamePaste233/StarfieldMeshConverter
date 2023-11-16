@@ -353,6 +353,34 @@ public:
 		return result;
 	}
 
+	static const uint8_t* readBytes(std::istream& file, size_t bytes) {
+		uint8_t* buffer = new uint8_t[bytes];
+		file.read(reinterpret_cast<char*>(buffer), bytes);
+		return buffer;
+	}
+
+	template<class T>
+	static T readFromBuffer(const uint8_t* buffer, size_t& offset, bool big_endian = false) {
+		T value;
+		std::memcpy(&value, buffer + offset, sizeof(T));
+		if (big_endian) {
+			value = switchEndian(value);
+		}
+		offset += sizeof(T);
+		return value;
+	}
+
+	static std::string readStringFromBuffer(const uint8_t* buffer, size_t& offset, size_t length) {
+		std::string value;
+		value.reserve(length);
+		for (int i = 0; i < length; ++i) {
+			char c = buffer[offset + i];
+			value.push_back(c);
+		}
+		offset += length;
+		return value;
+	}
+
 	static void writeString(std::ostream& file, const std::string& value) {
 		file.write(value.c_str(), value.size());
 	}

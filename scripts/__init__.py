@@ -29,7 +29,7 @@ imp.reload(nif_armature)
 
 bl_info = {
 	"name": "Starfield Mesh Exporter",
-	"version": (0, 12, 4),
+	"version": (0, 13, 0),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",
