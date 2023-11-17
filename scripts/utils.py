@@ -162,6 +162,10 @@ def _tag(name:str):
 				tag = 'female'
 			elif tag == 'm':
 				tag = 'male'
+			elif tag == 'r' or tag == 'R' or tag == 'Right':
+				tag = 'right'
+			elif tag == 'l' or tag == 'L' or tag == 'Left':
+				tag = 'left'
 			final_tags.append(tag)
     
 	return list(set(final_tags))
@@ -178,3 +182,8 @@ def _match_tags(tags_a:list, tags_b:list, normalized = False):
 		final_score /= len(tags_a) * len(tags_b)
 
 	return final_score
+
+
+def _remove_suffix(name:str):
+	return name[:name.rfind(".")]
+

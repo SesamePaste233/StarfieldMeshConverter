@@ -239,11 +239,14 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 	basis_positions = [list(vert.co) for vert in basis_obj.data.vertices.values()] 
 	basis_normals, basis_tangents, basis_tangentsigns = utils_blender.GetNormalTangents(basis_obj.data, True)
 
+	no_color_objs_in_group = []
 	for n, sk_obj in enumerate(morph_objs):
 
 		sk_positions = [list(vert.co) for vert in sk_obj.data.vertices.values()] 
 		sk_normals, sk_tangents, _ = utils_blender.GetNormalTangents(sk_obj.data, True)
-		sk_v_colors = utils_blender.GetVertColorPerVert(sk_obj)
+		sk_v_colors, has_color = utils_blender.GetVertColorPerVert(sk_obj)
+		if has_color == False:
+			no_color_objs_in_group.append(sk_obj.name)
 
 		for i in range(verts_count):
 			for j in range(3):
@@ -251,6 +254,9 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 			jsondata["morphData"][n][i][3] = utils_blender.ColorToLightness(sk_v_colors[i])
 			jsondata["morphData"][n][i][4] = list(sk_normals[i] - basis_normals[i])
 			jsondata["morphData"][n][i][5] = list(basis_tangentsigns[i] * (sk_tangents[i] - basis_tangents[i]))
+
+	if len(no_color_objs_in_group) != 0 or len(no_color_objs_in_group) != len(morph_objs):
+		operator.report({'WARNING'}, f'No vertex color found in {len(no_color_objs_in_group)} morph objects: {", ".join(no_color_objs_in_group)}, target vertex colors of corresponding morph keys will be set to 1.')
 
 	json_data = json.dumps(jsondata)
 
@@ -515,6 +521,9 @@ def CreateMorphObjSet(options, context, basis_obj, ref_objs, target_objs: list, 
 		operator.report({'WARNING'}, f"No enough shape keys. Using default preset.")
 		CreateMorphObjSetDefault(options, context, basis_obj, target_objs, operator)
 	
+	num_shape_keys = len(basis_obj.data.shape_keys.key_blocks)
+	original_shape_keys = basis_obj.data.shape_keys.key_blocks
+	
 	if original_shape_keys[0].name != 'Basis':
 		operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
 		return {"CANCELLED"}
@@ -566,7 +575,7 @@ def CreateMorphObjSet(options, context, basis_obj, ref_objs, target_objs: list, 
 	utils_blender.move_object_to_collection([morph_node], prev_coll)
 	utils_blender.move_object_to_parent([morph_node], basis_obj)
 
-	basis_obj, proxy_basis_obj = utils_blender.PreprocessAndProxy(basis_obj, False, operator, False)
+	basis_obj, proxy_basis_obj = utils_blender.PreprocessAndProxy(basis_obj, False, operator, False, False)
 	
 	if basis_obj == None:
 		return {"CANCELLED"}

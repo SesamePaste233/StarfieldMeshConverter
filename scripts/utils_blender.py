@@ -4,6 +4,7 @@ import os
 import numpy as np
 
 import utils_math
+import utils
 
 read_only_marker = '[READONLY]'
 mix_normal = False
@@ -98,7 +99,7 @@ def GetSharpGroups(selected_obj):
 
 	return sharp_edge_vertices
 
-def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = True):
+def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = True, do_triangulation = True):
 	if old_obj and old_obj.type == 'MESH':
 		
 		if old_obj.data.shape_keys != None and old_obj.data.shape_keys.key_blocks != None:
@@ -238,7 +239,8 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		# split on seams
 		bmesh.ops.split_edges(bm, edges=seams)
 
-		bmesh.ops.triangulate(bm, faces=bm.faces)
+		if do_triangulation:
+			bmesh.ops.triangulate(bm, faces=bm.faces)
 
 		bm.to_mesh(selected_obj.data)
 		bm.free()
@@ -257,8 +259,11 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		modifier2.use_max_distance = True
 		modifier2.max_distance = 0.001
 		modifier2.loop_mapping = "NEAREST_POLYNOR"
-		
+
+		#modifier3 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
+
 		bpy.ops.object.modifier_apply(modifier=modifier2.name)
+		#bpy.ops.object.modifier_apply(modifier=modifier3.name)
 		
 		bpy.data.meshes.remove(base_obj.data)
 		
@@ -445,16 +450,18 @@ def ApplyAllModifiers(obj):
 	SetActiveObject(active)
 
 def GetVertColorPerVert(obj):
+	vert_number = len(obj.data.vertices)
+	v_colors = [(1,1,1,1) for i in range(vert_number)]
+	if len(obj.data.vertex_colors) == 0:
+		return v_colors, False
 	col = obj.data.vertex_colors.active
 	if col == None:
 		col = obj.data.vertex_colors[0]
-	vert_number = len(obj.data.vertices)
-	v_colors = [[] for i in range(vert_number)]
 	for poly in obj.data.polygons:
 		for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
 			v_colors[v_ix] = col.data[l_ix].color
 
-	return v_colors
+	return v_colors, True
 
 def SetVertColorPerVert(obj, v_colors):
 	col = obj.data.vertex_colors.active
@@ -467,3 +474,25 @@ def ColorToLightness(color):
 	_max = max(rgb)
 	_min = min(rgb)
 	return 0.5 * (_max + _min)
+
+def RenamingBone(name:str):
+	tags = utils._tag(name)
+	if 'right' in tags:
+		return name + '.R'
+	elif 'left' in tags:
+		return name + '.L'
+	
+	return name
+
+def RenamingBoneList(names:list):
+	return [RenamingBone(name) for name in names]
+
+def RevertRenamingBone(name:str):
+	if name.endswith('.R'):
+		return name[:-2]
+	elif name.endswith('.L'):
+		return name[:-2]
+	return name
+
+def RevertRenamingBoneList(names:list):
+	return [RevertRenamingBone(name) for name in names]

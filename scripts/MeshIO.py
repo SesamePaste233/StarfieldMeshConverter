@@ -97,6 +97,10 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 				loop = v.link_loops[0]
 				data["vertex_color"].append([loop[color_layer][0],loop[color_layer][1],loop[color_layer][2],loop[color_layer][3]])
 
+		if verts_count >= 65535:
+			operator.report({'WARNING'}, f"You model has to many vertices. Try to reduce your vertex count.")
+			return {'CANCELLED'}, 0,0, None
+
 		if has_hanging_verts:
 			operator.report({'WARNING'}, "There are floating verts in your model. Some verts don't belong to any faces.")
 			bpy.context.view_layer.objects.active = old_obj
@@ -127,13 +131,13 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 			return {'CANCELLED'}, 0,0, None
 		
 		try:
-			data["uv_coords"] = [[] for i in range(verts_count)]
-			Tangents = [np.array([0,0,0]) for i in range(verts_count)]
-			Normals = [np.array([0,0,0]) for i in range(verts_count)]
-			Bitangent_sign = [1 for i in range(verts_count)]
+			data["uv_coords"] = [[] for _ in range(verts_count)]
+			Tangents = [np.array([0,0,0]) for _ in range(verts_count)]
+			Normals = [np.array([0,0,0]) for _ in range(verts_count)]
+			Bitangent_sign = [1 for _ in range(verts_count)]
 			selected_obj.data.calc_tangents()
 			selected_obj.data.calc_normals_split()
-
+			
 			for face in selected_obj.data.polygons:
 				for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
 					uv_coords = selected_obj.data.uv_layers.active.data[loop_idx].uv
@@ -189,7 +193,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 						data["vertex_weights"][-1].append([0, 0])
 
 				vgrp_markers = sorted(vgrp_markers, key=lambda x: x[1])
-				vgrp_names = [vg[0] for vg in vgrp_markers if vg[1] is not -1]
+				vgrp_names = [vg[0] for vg in vgrp_markers if vg[1] != -1]
 
 		except IndexError:
 			operator.report({'WARNING'}, "The mesh may have loose vertices, try to Clean Up the mesh or contact the author.")
@@ -205,11 +209,8 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 	if selected_obj:
 		bpy.context.view_layer.objects.active = old_obj
 		old_obj.select_set(True)
+		
 		bpy.data.meshes.remove(selected_obj.data)
-
-		if verts_count >= 65535:
-			operator.report({'WARNING'}, f"You model has to many vertices. Try to reduce your vertex count.")
-			return {'CANCELLED'}, 0,0, None
 
 		if options.export_sf_mesh_hash_result:
 			hash_folder, hash_name = utils.hash_string(active_object_name)

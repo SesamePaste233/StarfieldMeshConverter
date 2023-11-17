@@ -76,7 +76,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		if 'has_skin' in data.keys() and data['has_skin'] == True:
 			is_rigged = True
 			for obj in _objects:
-				utils_blender.SetWeightKeys(obj, data['bone_names'])
+				utils_blender.SetWeightKeys(obj, utils_blender.RenamingBoneList(data['bone_names']))
 
 			if options.skeleton_name == ' ':
 				skeleton, matched_bones = nif_armature.MatchSkeletonAdvanced(data['bone_names'], geo_name +' '+ nif_name)
@@ -344,7 +344,7 @@ def ExportNif(options, context, operator):
 
 			if bone_list != None and len(bone_list) > 0 and skeleton_info != None:
 				mesh_data['has_skin'] = 1
-				mesh_data['bone_names'] = bone_list
+				mesh_data['bone_names'] = utils_blender.RevertRenamingBoneList(bone_list)
 				mesh_data['bone_infos'] = []
 
 				#pivot = mathutils.Matrix.Identity(4)

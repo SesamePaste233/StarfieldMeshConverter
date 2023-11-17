@@ -157,7 +157,7 @@ def MatchSkeleton(bone_list):
 
 def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 	global skeleton_lookup
-	bone_set = set(bone_list)
+	bone_set = set(utils_blender.RevertRenamingBoneList(bone_list))
 	max_count = -1
 	matched_names = []
 	bone_lists = []
@@ -227,7 +227,7 @@ def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 
 
 def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_capsule = None):
-	b = edit_bones.new(armature_dict['name'])
+	b = edit_bones.new(utils_blender.RenamingBone(armature_dict['name']))
 	b.head = tuple(armature_dict['head'])
 	b.tail = tuple(armature_dict['tail'])
 	T = mathutils.Matrix()
