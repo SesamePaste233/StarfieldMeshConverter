@@ -5,7 +5,7 @@ import json
 import os
 import glob
 
-import utils
+import utils_common as utils
 import utils_blender
 
 bone_axis_correction = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')

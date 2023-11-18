@@ -257,7 +257,7 @@ void amain() {
 void main() {
 	hkphysics::hkPhysicsReflectionData data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\spacesuit_explorer_upperbody_01_f-BSClothExtraData_3.bin");
 
 	hkphysics::hkPhysicsReflectionData data1;
 

@@ -15,7 +15,7 @@ namespace hkphysics {
 		TPTR, // Type pointer
 		TST1, // Type names
 		TNA1, // Unknown type info
-		FST1, // Member names
+		FST1, // Field names
 		TBDY, // Type body
 		THSH, // Type hash
 		TPAD, // Type padding
@@ -217,9 +217,7 @@ namespace hkphysics {
 			return ChunkType::TBDY;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData*) override;
 	};
 
 	class hkDataChunkTHSH : public hkDataChunkTAG0 {

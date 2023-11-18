@@ -8,7 +8,7 @@ if dir not in sys.path:
 
 import utils_blender
 
-import utils
+import utils_common as utils
 
 import MeshIO
 
@@ -18,13 +18,13 @@ import NifIO
 
 import nif_armature
 
-import imp
-imp.reload(utils_blender)
-imp.reload(utils)
-imp.reload(MeshIO)
-imp.reload(MorphIO)
-imp.reload(NifIO)
-imp.reload(nif_armature)
+#import imp
+#imp.reload(utils_blender)
+#imp.reload(utils)
+#imp.reload(MeshIO)
+#imp.reload(MorphIO)
+#imp.reload(NifIO)
+#imp.reload(nif_armature)
 
 
 bl_info = {

@@ -202,7 +202,7 @@ bool hkphysics::hkDataChunkFST1::Decode(hkPhysicsReflectionData* data)
 	while (cur_pos < GetBufferSize())
 	{
 		if (_buffer[cur_pos] == 0x00) {
-			data->member_names.push_back(member_name);
+			data->field_names.push_back(member_name);
 			member_name.clear();
 		}
 		else {
@@ -259,31 +259,37 @@ bool hkphysics::hkDataChunkTNA1::Decode(hkPhysicsReflectionData* data)
 				hk_class->template_args.push_back(arg);
 			}
 			else if (param_type[0] == 't') {
-				if (param_type == "tT" || param_type == "tTYPE") {
+				if (param_type == "tT" || param_type == "tTYPE") { // Type
 					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
 					arg->template_arg_name = param_type;
 					arg->type = data->classes[param_value];
 					hk_class->template_args.push_back(arg);
 				}
-				else if (param_type == "tAllocator") {
+				else if (param_type == "tFT") { // Float type
 					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
 					arg->template_arg_name = param_type;
 					arg->type = data->classes[param_value];
 					hk_class->template_args.push_back(arg);
 				}
-				else if (param_type == "tENUM") {
+				else if (param_type == "tAllocator") { // Allocator
 					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
 					arg->template_arg_name = param_type;
 					arg->type = data->classes[param_value];
 					hk_class->template_args.push_back(arg);
 				}
-				else if (param_type == "tBITS") {
+				else if (param_type == "tENUM") { // Enum type
 					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
 					arg->template_arg_name = param_type;
 					arg->type = data->classes[param_value];
 					hk_class->template_args.push_back(arg);
 				}
-				else if (param_type == "tSTORAGE" || param_type == "tStorage") {
+				else if (param_type == "tBITS") { // Bits type
+					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
+					arg->template_arg_name = param_type;
+					arg->type = data->classes[param_value];
+					hk_class->template_args.push_back(arg);
+				}
+				else if (param_type == "tSTORAGE" || param_type == "tStorage") { // Storage type
 					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
 					arg->template_arg_name = param_type;
 					arg->type = data->classes[param_value];
@@ -303,6 +309,74 @@ bool hkphysics::hkDataChunkTNA1::Decode(hkPhysicsReflectionData* data)
 
 	for (auto& type : data->classes) {
 		std::cout << type->to_literal() << std::endl;
+	}
+
+	return true;
+}
+
+bool hkphysics::hkDataChunkTBDY::Decode(hkPhysicsReflectionData* data)
+{
+	size_t cur_pos = 8;
+
+	while (cur_pos < GetBufferSize()) {
+		auto cur_type_id = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		auto& hk_class = data->classes[cur_type_id];
+
+		auto parent_type_id = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		if (parent_type_id > 0) {
+			hk_class->parent_class = data->classes[parent_type_id];
+		}
+
+		hkreflection::Optional optional = (hkreflection::Optional)utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		hk_class->optionals = optional;
+		if (optional & hkreflection::Optional::Format) { // 0b00000001
+			hk_class->format = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		}
+		if (optional & hkreflection::Optional::SubType) { // 0b00000010
+			hk_class->sub_type = data->classes[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
+		}
+		if (optional & hkreflection::Optional::Version) { // 0b00000100
+			hk_class->version = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		}
+		if (optional & hkreflection::Optional::SizeAlign) { // 0b00001000
+			hk_class->size = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+			hk_class->alignment = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		}
+		if (optional & hkreflection::Optional::Flags) { // 0b00010000
+			hk_class->type_flags = (hkreflection::TypeFlags)utils::hk::readHavokVarUInt(_buffer, cur_pos);
+		}
+		if (optional & hkreflection::Optional::Members) { // 0b00100000
+			uint8_t num_members = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+			uint8_t num_fields = num_members & 0x0000FFFF;
+			uint8_t num_properties = num_members & 0xFFFF0000;
+
+			hk_class->fields.clear();
+
+			for (int i = 0; i < num_fields; i++) {
+				hkreflection::hkFieldBase* field = new hkreflection::hkFieldBase;
+				field->name = data->field_names[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
+				field->flags = (hkreflection::hkFieldBase::FieldFlags)utils::hk::readHavokVarUInt(_buffer, cur_pos);
+				field->offset = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+				field->type = data->classes[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
+
+				hk_class->fields.push_back(field);
+			}
+		}
+		if (optional & hkreflection::Optional::Interfaces) { // 0b01000000
+			auto num_interfaces = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+			for (int i = 0; i < num_interfaces; i++) {
+				hkreflection::hkInterfaceBase* interface = new hkreflection::hkInterfaceBase;
+				interface->type = data->classes[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
+				interface->offset = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+				hk_class->interfaces.push_back(interface);
+			}
+		}
+		if (optional & hkreflection::Optional::Attributes) { // 0b10000000
+			throw std::exception("Not implemented");
+		}
 	}
 
 	return true;

@@ -8,7 +8,7 @@ import numpy as np
 from mathutils import Color
 
 import utils_blender
-import utils
+import utils_common as utils
 import utils_math
 import MeshConverter
 

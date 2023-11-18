@@ -17,6 +17,29 @@
 #include "Utils.h"
 #include "xfUtils.h"
 
+template <typename T>
+concept IsFlagEnum = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, uint8_t>;
+
+template <IsFlagEnum T>
+uint8_t operator&(T lhs, T rhs) {
+	using U = std::underlying_type_t<T>;
+	return static_cast<U>(static_cast<U>(lhs) & static_cast<U>(rhs));
+};
+
+template <IsFlagEnum T>
+uint8_t operator|(T lhs, T rhs) {
+	using U = std::underlying_type_t<T>;
+	return static_cast<U>(static_cast<U>(lhs) | static_cast<U>(rhs));
+};
+
+template <IsFlagEnum T>
+uint8_t operator~(T rhs) {
+	using U = std::underlying_type_t<T>;
+	return ~static_cast<U>(rhs);
+};
+
+
+
 namespace array_ops {
 	struct FloatArray {
 		float values[3];

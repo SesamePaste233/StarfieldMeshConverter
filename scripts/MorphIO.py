@@ -523,7 +523,7 @@ def CreateMorphObjSet(options, context, basis_obj, ref_objs, target_objs: list, 
 	
 	num_shape_keys = len(basis_obj.data.shape_keys.key_blocks)
 	original_shape_keys = basis_obj.data.shape_keys.key_blocks
-	
+
 	if original_shape_keys[0].name != 'Basis':
 		operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
 		return {"CANCELLED"}
@@ -593,6 +593,9 @@ def CreateMorphObjSet(options, context, basis_obj, ref_objs, target_objs: list, 
 	
 	target_objs.clear()
 	for n, cur_key in enumerate(original_shape_keys):
+		if cur_key.mute:
+			continue
+		
 		shape_key_index = key_blocks.keys().index(cur_key.name)
 
 		bpy.ops.object.mode_set(mode='EDIT')

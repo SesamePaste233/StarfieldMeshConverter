@@ -23,7 +23,7 @@ namespace hkphysics {
 		std::unordered_map<ChunkType, hkDataChunkBase*> data_chunks;
 
 		std::vector<std::string> type_names;
-		std::vector<std::string> member_names;
+		std::vector<std::string> field_names;
 		std::vector<hkreflection::hkClassBase*> classes;
 
 		const bool BigEndian = true;
@@ -39,7 +39,7 @@ namespace hkphysics {
 			}
 			data_chunks.clear();
 			type_names.clear();
-			member_names.clear();
+			field_names.clear();
 			classes.clear();
 		}
 
