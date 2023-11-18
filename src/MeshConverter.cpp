@@ -94,7 +94,7 @@ const char* ImportMesh(const char* input_file, const char* output_name)
 
 	std::cout << "Mesh loaded from " << inputMesh << std::endl;
 	
-	return Util::make_copy(JsonData);
+	return utils::make_copy(JsonData);
 }
 
 const char* ImportMorph(const char* input_file)
@@ -117,7 +117,7 @@ const char* ImportMorph(const char* input_file)
 		return "";
 	}
 
-	return Util::make_copy(JsonData);
+	return utils::make_copy(JsonData);
 }
 
 uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder)
@@ -184,5 +184,5 @@ const char* ImportNif(const char* input_file)
 	std::cout << "Nif serialized to json" << std::endl;
 
 	
-	return Util::make_copy(jsondata.dump());
+	return utils::make_copy(jsondata.dump());
 }

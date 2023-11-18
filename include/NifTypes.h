@@ -465,8 +465,8 @@ namespace nif {
 		uint8_t* binary_data = nullptr;
 
 		void Dump(std::ostream& file) {
-			Util::writeAsHex(file, binary_bytes);
-			Util::writeStream(file, binary_data, binary_bytes);
+			utils::writeAsHex(file, binary_bytes);
+			utils::writeStream(file, binary_data, binary_bytes);
 		}
 
 		void Deserialize(std::istream& file) override;

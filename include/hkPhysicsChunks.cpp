@@ -121,22 +121,22 @@ hkphysics::hkDataChunkBase* hkphysics::AllocateChunk(ChunkType type)
 	}
 }
 
-bool hkphysics::hkDataChunkTAG0::DistributeAndDecode(uint32_t indent) {
+bool hkphysics::hkDataChunkTAG0::DistributeAndDecode(hkPhysicsReflectionData* physics_data, uint32_t indent) {
 	if (!_buffer)
 		return false;
 	size_t cur_pos = 0;
-	this->chunk_decorator = Util::readFromBuffer<uint16_t>(_buffer, cur_pos, true); // Decorator
-	this->data_size = Util::readFromBuffer<uint16_t>(_buffer, cur_pos, true); // Data size
+	this->chunk_decorator = utils::readFromBuffer<uint16_t>(_buffer, cur_pos, true); // Decorator
+	this->data_size = utils::readFromBuffer<uint16_t>(_buffer, cur_pos, true); // Data size
 
-	std::string type_name = Util::readStringFromBuffer(_buffer, cur_pos, 4); // Type name
+	std::string type_name = utils::readStringFromBuffer(_buffer, cur_pos, 4); // Type name
 	std::memcpy(this->type_name, type_name.c_str(), 4);
 
 	while (cur_pos + 8 <= this->data_size) {
 		auto child_pos = cur_pos;
-		uint16_t child_decorator = Util::readFromBuffer<uint16_t>(_buffer, child_pos, true); // Decorator
-		uint16_t child_data_size = Util::readFromBuffer<uint16_t>(_buffer, child_pos, true); // Data size
+		uint16_t child_decorator = utils::readFromBuffer<uint16_t>(_buffer, child_pos, true); // Decorator
+		uint16_t child_data_size = utils::readFromBuffer<uint16_t>(_buffer, child_pos, true); // Data size
 
-		std::string child_type_name = Util::readStringFromBuffer(_buffer, child_pos, 4); // Type name
+		std::string child_type_name = utils::readStringFromBuffer(_buffer, child_pos, 4); // Type name
 
 		const uint8_t* child_buffer = _buffer + cur_pos;
 
@@ -155,15 +155,154 @@ bool hkphysics::hkDataChunkTAG0::DistributeAndDecode(uint32_t indent) {
 		chunk->SetBuffer((uint8_t*)child_buffer, child_data_size);
 
 		if (child_decorator & chunk->_leaf_decorator) {
-			chunk->Decode();
+			chunk->Decode(physics_data);
 		}
 		else {
-			chunk->DistributeAndDecode(indent + 1);
+			chunk->DistributeAndDecode(physics_data, indent + 1);
 		}
 
 		this->children.push_back(chunk);
 
 		cur_pos += child_data_size;
+	}
+
+	return true;
+}
+
+bool hkphysics::hkDataChunkSDKV::Decode(hkPhysicsReflectionData* data) {
+	size_t cur_pos = 8;
+	data->sdk_version = utils::readStringFromBuffer(_buffer, cur_pos, this->GetActualDataSize());
+	return true;
+}
+
+bool hkphysics::hkDataChunkTST1::Decode(hkPhysicsReflectionData* data)
+{
+	size_t cur_pos = 8;
+	std::string type_name;
+	while (cur_pos < GetBufferSize())
+	{
+		if (_buffer[cur_pos] == 0x00) {
+			data->type_names.push_back(type_name);
+			std::cout << type_name << std::endl;
+			type_name.clear();
+		}
+		else {
+			type_name.push_back(_buffer[cur_pos]);
+		}
+		cur_pos++;
+	}
+
+	return true;
+}
+
+bool hkphysics::hkDataChunkFST1::Decode(hkPhysicsReflectionData* data)
+{
+	size_t cur_pos = 8;
+	std::string member_name;
+	while (cur_pos < GetBufferSize())
+	{
+		if (_buffer[cur_pos] == 0x00) {
+			data->member_names.push_back(member_name);
+			member_name.clear();
+		}
+		else {
+			member_name.push_back(_buffer[cur_pos]);
+		}
+		cur_pos++;
+	}
+
+	return true;
+}
+
+bool hkphysics::hkDataChunkTNA1::Decode(hkPhysicsReflectionData* data)
+{
+	size_t cur_pos = 8;
+
+	auto num_types = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+	if (num_types > 500) {
+		num_types = 500;
+	}
+
+	for (size_t i = 0; i < num_types; i++) {
+		data->classes.push_back(new hkreflection::hkClassBase);
+	}
+
+	for (size_t i = 1; i < num_types; i++) {
+		auto& hk_class = data->classes[i];
+		hk_class->type_name = data->type_names[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
+
+		auto template_arg_number = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+		if (cur_pos >= GetBufferSize()) {
+			std::cout << "Error: cur_pos >= GetBufferSize()" << std::endl;
+			return false;
+		}
+
+		for (size_t j = 0; j < template_arg_number; j++) {
+			auto& param_type = data->type_names[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
+			auto param_value = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+			if (param_value >= 500) {
+				std::cout << "Unknown template type: " << param_type << std::endl;
+				hkreflection::hkTemplateArgumentUnk* arg = new hkreflection::hkTemplateArgumentUnk;
+				arg->template_arg_name = param_type;
+				arg->unk = param_value;
+				hk_class->template_args.push_back(arg);
+				continue;
+			}
+
+			if (param_type[0] == 'v') {
+				hkreflection::hkTemplateArgumentValue* arg = new hkreflection::hkTemplateArgumentValue;
+				arg->template_arg_name = param_type;
+				arg->value = param_value;
+				hk_class->template_args.push_back(arg);
+			}
+			else if (param_type[0] == 't') {
+				if (param_type == "tT" || param_type == "tTYPE") {
+					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
+					arg->template_arg_name = param_type;
+					arg->type = data->classes[param_value];
+					hk_class->template_args.push_back(arg);
+				}
+				else if (param_type == "tAllocator") {
+					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
+					arg->template_arg_name = param_type;
+					arg->type = data->classes[param_value];
+					hk_class->template_args.push_back(arg);
+				}
+				else if (param_type == "tENUM") {
+					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
+					arg->template_arg_name = param_type;
+					arg->type = data->classes[param_value];
+					hk_class->template_args.push_back(arg);
+				}
+				else if (param_type == "tBITS") {
+					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
+					arg->template_arg_name = param_type;
+					arg->type = data->classes[param_value];
+					hk_class->template_args.push_back(arg);
+				}
+				else if (param_type == "tSTORAGE" || param_type == "tStorage") {
+					hkreflection::hkTemplateArgumentType* arg = new hkreflection::hkTemplateArgumentType;
+					arg->template_arg_name = param_type;
+					arg->type = data->classes[param_value];
+					hk_class->template_args.push_back(arg);
+				}
+				else {
+					std::cout << "Unknown template type: " << param_type << std::endl;
+					hkreflection::hkTemplateArgumentUnk* arg = new hkreflection::hkTemplateArgumentUnk;
+					arg->template_arg_name = param_type;
+					arg->unk = param_value;
+					hk_class->template_args.push_back(arg);
+				}
+			}
+		}
+
+	}
+
+	for (auto& type : data->classes) {
+		std::cout << type->to_literal() << std::endl;
 	}
 
 	return true;

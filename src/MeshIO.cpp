@@ -23,94 +23,94 @@ bool MeshIO::Deserialize(const std::string filename)
 	}
 
 	// Load the mesh from the file
-	uint32_t magic = Util::readUInt32(file)[0];
+	uint32_t magic = utils::read<uint32_t>(file)[0];
 	if (magic != 1) {
 		return false;
 	}
 
 	std::cout << "Offset of Indices: " << std::hex << file.tellg() << std::endl;
 
-	this->indices_size = Util::readUInt32(file)[0];
+	this->indices_size = utils::read<uint32_t>(file)[0];
 
 	this->num_triangles = indices_size / 3;
 
 	for (int i = 0; i < indices_size; i++) {
-		auto index = Util::readUInt16(file)[0];
+		auto index = utils::read<uint16_t>(file)[0];
 
 		this->indices.emplace_back(index);
 	}
 
-	this->max_border = Util::readFloat(file)[0];
+	this->max_border = utils::read<float>(file)[0];
 
-	this->num_weightsPerVertex = Util::readUInt32(file)[0];
+	this->num_weightsPerVertex = utils::read<uint32_t>(file)[0];
 
 
 	std::cout << "Offset of Positions: " << std::hex << file.tellg() << std::endl;
 
-	this->num_vertices = Util::readUInt32(file)[0];
+	this->num_vertices = utils::read<uint32_t>(file)[0];
 
 	this->num_positions = num_vertices * 3;
 
 	for (int i = 0; i < num_positions; i++) {
-		auto pos = Util::readInt16(file)[0];
-		auto d = Util::snorm_to_double(pos, max_border);
+		auto pos = utils::read<int16_t>(file)[0];
+		auto d = utils::snorm_to_double(pos, max_border);
 
 		this->positions.emplace_back(d);
 	}
 
 	std::cout << "Offset of UV1: " << std::hex << file.tellg() << std::endl;
 
-	this->num_uv1 = Util::readUInt32(file)[0];
+	this->num_uv1 = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_uv1; i++) {
-		auto uv1 = Util::readHalfAsFull(file, 2);
+		auto uv1 = utils::readHalfAsFull(file, 2);
 		this->UV_list1.emplace_back(uv1);
 	}
 
 	// Offset of UV2
 	std::cout << "Offset of UV2: " << std::hex << file.tellg() << std::endl;
 
-	this->num_uv2 = Util::readUInt32(file)[0];
+	this->num_uv2 = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_uv2; i++) {
-		auto uv2 = Util::readHalfAsFull(file, 2);
+		auto uv2 = utils::readHalfAsFull(file, 2);
 		this->UV_list2.emplace_back(uv2);
 	}
 
 	std::cout << "Offset of Vertex Colors: " << std::hex << file.tellg() << std::endl;
 
-	this->num_vert_colors = Util::readUInt32(file)[0];
+	this->num_vert_colors = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_vert_colors; i++) {
-		auto color = Util::readUInt8(file, 4);
+		auto color = utils::read<uint8_t>(file, 4);
 		this->vert_colors.push_back({ color[0],color[1],color[2],color[3] });
 	}
 
 	std::cout << "Offset of Normals: " << std::hex << file.tellg() << std::endl;
 
-	this->num_normals = Util::readUInt32(file)[0];
+	this->num_normals = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_normals; i++) {
-		auto n = Util::readUInt32(file)[0];
-		auto normal = Util::decodeDEC3N(n);
+		auto n = utils::read<uint32_t>(file)[0];
+		auto normal = utils::decodeDEC3N(n);
 		this->normals.emplace_back(normal);
 	}
 
 	std::cout << "Offset of Tangents: " << std::hex << file.tellg() << std::endl;
 
-	this->num_tangents = Util::readUInt32(file)[0];
+	this->num_tangents = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_tangents; i++) {
-		auto t = Util::readUInt32(file)[0];
+		auto t = utils::read<uint32_t>(file)[0];
 		float w = 0;
-		auto tangent = Util::decodeDEC3N_w(t,w);
+		auto tangent = utils::decodeDEC3N_w(t,w);
 		this->tangents.emplace_back(tangent);
 		this->tangent_signs.emplace_back(w);
 	}
 
 	std::cout << "Offset of Weights: " << std::hex << file.tellg() << std::endl;
 
-	this->num_weights = Util::readUInt32(file)[0];
+	this->num_weights = utils::read<uint32_t>(file)[0];
 	auto num_shape_keys = 0;
 	if (this->num_weights != 0) {
 		num_shape_keys = this->num_vertices;
@@ -120,7 +120,7 @@ bool MeshIO::Deserialize(const std::string filename)
 		vertex_weight vw = new bone_binding[num_weightsPerVertex];
 
 		for (int j = 0; j < num_weightsPerVertex; j++) {
-			auto pair = Util::readUInt16(file, 2);
+			auto pair = utils::read<uint16_t>(file, 2);
 			vw[j].bone = pair[0];
 			vw[j].weight = pair[1];
 			if (pair[1] > 0) {
@@ -137,13 +137,13 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	std::cout << "Offset of LoDs: " << std::hex << file.tellg() << std::endl;
 
-	this->num_lods = Util::readUInt32(file)[0];
+	this->num_lods = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_lods; i++) {
-		auto num_lod = Util::readUInt32(file)[0];
+		auto num_lod = utils::read<uint32_t>(file)[0];
 		std::vector<uint16_t> lod;
 		for (int j = 0; j < num_lod; j++) {
-			auto index = Util::readUInt16(file)[0];
+			auto index = utils::read<uint16_t>(file)[0];
 			lod.emplace_back(index);
 		}
 		this->lods.emplace_back(lod);
@@ -151,11 +151,11 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	std::cout << "Offset of Meshlets: " << std::hex << file.tellg() << std::endl;
 
-	this->num_meshlets = Util::readUInt32(file)[0];
+	this->num_meshlets = utils::read<uint32_t>(file)[0];
 
 	for (int i = 0; i < num_meshlets; i++) {
 		Meshlet ml;
-		auto data = Util::readUInt32(file, 4);
+		auto data = utils::read<uint32_t>(file, 4);
 
 		ml.VertCount = data[0];
 		ml.VertOffset = data[1];
@@ -167,17 +167,17 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	std::cout << "Offset of Culldata: " << std::hex << file.tellg() << std::endl;
 
-	this->num_culldata = Util::readUInt32(file)[0];
+	this->num_culldata = utils::read<uint32_t>(file)[0];
 	for (int i = 0; i < num_meshlets; i++) {
 		CullData cd;
-		auto data = Util::readFloat(file, 4);
+		auto data = utils::read<float>(file, 4);
 		cd.BoundingSphere.Center = XMFLOAT3(data[0], data[1], data[2]);
 		cd.BoundingSphere.Radius = data[3];
 
-		auto data2 = Util::readUInt32(file)[0];
+		auto data2 = utils::read<uint32_t>(file)[0];
 		cd.NormalCone.v = data2;
 
-		auto data3 = Util::readFloat(file)[0];
+		auto data3 = utils::read<float>(file)[0];
 		cd.ApexOffset = data3;
 
 		this->culldata.emplace_back(cd);
@@ -222,7 +222,7 @@ bool MeshIO::Serialize(const std::string filename)
 	}
 
 	uint32_t magic = 1;
-	Util::writeAsHex(file, magic);
+	utils::writeAsHex(file, magic);
 
 	uint32_t dummy = 0;
 
@@ -246,154 +246,154 @@ bool MeshIO::Serialize(const std::string filename)
 
 	if (export_geometry) {
 		this->indices_size = this->indices.size();
-		Util::writeAsHex(file, this->indices_size);
+		utils::writeAsHex(file, this->indices_size);
 		for (auto index : this->indices) {
-			Util::writeAsHex(file, index);
+			utils::writeAsHex(file, index);
 		}
 
-		Util::writeAsHex(file, this->max_border);
+		utils::writeAsHex(file, this->max_border);
 
 		if (export_weights) {
-			Util::writeAsHex(file, this->num_weightsPerVertex);
+			utils::writeAsHex(file, this->num_weightsPerVertex);
 		}
 		else {
-			Util::writeAsHex(file, dummy);
+			utils::writeAsHex(file, dummy);
 		}
 
 		this->num_vertices = this->positions.size() / 3;
-		Util::writeAsHex(file, this->num_vertices);
+		utils::writeAsHex(file, this->num_vertices);
 
 		for (auto pos : this->positions) {
-			auto p = Util::double_to_snorm(pos, this->max_border);
-			Util::writeAsHex(file, p);
+			auto p = utils::double_to_snorm(pos, this->max_border);
+			utils::writeAsHex(file, p);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
-		Util::writeAsHex(file, this->max_border);
+		utils::writeAsHex(file, dummy);
+		utils::writeAsHex(file, this->max_border);
 		if (export_weights) {
-			Util::writeAsHex(file, this->num_weightsPerVertex);
+			utils::writeAsHex(file, this->num_weightsPerVertex);
 		}
 		else {
-			Util::writeAsHex(file, dummy);
+			utils::writeAsHex(file, dummy);
 		}
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 	
 	if (export_uvs) {
 		this->num_uv1 = this->UV_list1.size();
-		Util::writeAsHex(file, this->num_uv1);
+		utils::writeAsHex(file, this->num_uv1);
 
 		for (auto uv1 : this->UV_list1) {
-			auto u = Util::floatToHalf(uv1[0]);
-			auto v = Util::floatToHalf(uv1[1]);
-			Util::writeAsHex(file, u);
-			Util::writeAsHex(file, v);
+			auto u = utils::floatToHalf(uv1[0]);
+			auto v = utils::floatToHalf(uv1[1]);
+			utils::writeAsHex(file, u);
+			utils::writeAsHex(file, v);
 		}
 
 		this->num_uv2 = this->UV_list2.size();
-		Util::writeAsHex(file, this->num_uv2);
+		utils::writeAsHex(file, this->num_uv2);
 
 		for (auto uv2 : this->UV_list2) {
-			auto u = Util::floatToHalf(uv2[0]);
-			auto _offset = Util::floatToHalf(uv2[1]);
-			Util::writeAsHex(file, u);
-			Util::writeAsHex(file, _offset);
+			auto u = utils::floatToHalf(uv2[0]);
+			auto _offset = utils::floatToHalf(uv2[1]);
+			utils::writeAsHex(file, u);
+			utils::writeAsHex(file, _offset);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 	
 	if (export_vert_colors) {
 		this->num_vert_colors = this->vert_colors.size();
-		Util::writeAsHex(file, this->num_vert_colors);
+		utils::writeAsHex(file, this->num_vert_colors);
 
 		for (auto color : this->vert_colors) {
-			Util::writeAsHex(file, color.r);
-			Util::writeAsHex(file, color.g);
-			Util::writeAsHex(file, color.b);
-			Util::writeAsHex(file, color.a);
+			utils::writeAsHex(file, color.r);
+			utils::writeAsHex(file, color.g);
+			utils::writeAsHex(file, color.b);
+			utils::writeAsHex(file, color.a);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 	
 	if (export_normals) {
 		this->num_normals = this->normals.size();
-		Util::writeAsHex(file, this->num_normals);
+		utils::writeAsHex(file, this->num_normals);
 
 		for (auto normal : this->normals) {
-			auto n = Util::encodeDEC3N(normal, 1);
-			Util::writeAsHex(file, n);
+			auto n = utils::encodeDEC3N(normal, 1);
+			utils::writeAsHex(file, n);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 	
 	if(export_tangents){
 		this->num_tangents = this->tangents.size();
-		Util::writeAsHex(file, this->num_tangents);
+		utils::writeAsHex(file, this->num_tangents);
 
 		for (int i = 0; i < this->num_vertices;++i) {
-			auto t = Util::encodeDEC3N(this->tangents[i], this->tangent_signs[i]);
-			Util::writeAsHex(file, t);
+			auto t = utils::encodeDEC3N(this->tangents[i], this->tangent_signs[i]);
+			utils::writeAsHex(file, t);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 
 	if (export_weights) {
 		this->num_weights = this->weights.size() * this->num_weightsPerVertex;
-		Util::writeAsHex(file, this->num_weights);
+		utils::writeAsHex(file, this->num_weights);
 
 		for (auto vw : this->weights) {
 			for (int j = 0; j < this->num_weightsPerVertex; j++) {
-				Util::writeAsHex(file, vw[j].bone);
-				Util::writeAsHex(file, vw[j].weight);
+				utils::writeAsHex(file, vw[j].bone);
+				utils::writeAsHex(file, vw[j].weight);
 			}
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 
-	Util::writeAsHex(file, this->num_lods);
+	utils::writeAsHex(file, this->num_lods);
 
 	if (export_meshlets) {
 		this->num_meshlets = this->meshlets.size();
-		Util::writeAsHex(file, this->num_meshlets);
+		utils::writeAsHex(file, this->num_meshlets);
 
 		for (auto meshlet : this->meshlets) {
-			Util::writeAsHex(file, meshlet.VertCount);
-			Util::writeAsHex(file, meshlet.VertOffset);
-			Util::writeAsHex(file, meshlet.PrimCount);
-			Util::writeAsHex(file, meshlet.PrimOffset);
+			utils::writeAsHex(file, meshlet.VertCount);
+			utils::writeAsHex(file, meshlet.VertOffset);
+			utils::writeAsHex(file, meshlet.PrimCount);
+			utils::writeAsHex(file, meshlet.PrimOffset);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 
 	if (export_culldata) {
 		this->num_culldata = this->culldata.size();
-		Util::writeAsHex(file, this->num_culldata);
+		utils::writeAsHex(file, this->num_culldata);
 
 		for (auto culldata : this->culldata) {
-			Util::writeAsHex(file, culldata.BoundingSphere.Center.x);
-			Util::writeAsHex(file, culldata.BoundingSphere.Center.y);
-			Util::writeAsHex(file, culldata.BoundingSphere.Center.z);
-			Util::writeAsHex(file, culldata.BoundingSphere.Radius);
-			Util::writeAsHex(file, culldata.NormalCone.v);
-			Util::writeAsHex(file, culldata.ApexOffset);
+			utils::writeAsHex(file, culldata.BoundingSphere.Center.x);
+			utils::writeAsHex(file, culldata.BoundingSphere.Center.y);
+			utils::writeAsHex(file, culldata.BoundingSphere.Center.z);
+			utils::writeAsHex(file, culldata.BoundingSphere.Radius);
+			utils::writeAsHex(file, culldata.NormalCone.v);
+			utils::writeAsHex(file, culldata.ApexOffset);
 		}
 	}
 	else {
-		Util::writeAsHex(file, dummy);
+		utils::writeAsHex(file, dummy);
 	}
 
 	return true;
@@ -509,7 +509,7 @@ bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_facto
 {
 	WaveFrontReader<uint16_t> wfr;
 
-	if (wfr.Load(Util::charToWchar(filename.c_str())) != S_OK) {
+	if (wfr.Load(utils::charToWchar(filename.c_str())) != S_OK) {
 		return false;
 	}
 
@@ -1394,7 +1394,7 @@ bool MeshIO::GenerateTangents(const uint32_t& options) {
 		return false;
 	}*/
 
-	Util::ComputeTangentFrameImpl(this->num_vertices,this->num_triangles, this->indices.data(),
+	utils::ComputeTangentFrameImpl(this->num_vertices,this->num_triangles, this->indices.data(),
 		reinterpret_cast<float*>(DX_positions.data()),
 		reinterpret_cast<float*>(DX_uvs.data()),
 		reinterpret_cast<float*>(DX_normals.data()),
@@ -1493,9 +1493,9 @@ size_t mesh::MeshIO::NaiveEdgeSmooth()
 
 	if (this->num_smooth_group != 0) {
 		for (size_t i: this->smooth_group) {
-			positions_f[i * 3] = float(Util::double_to_snorm(this->positions[i * 3], this->max_border));
-			positions_f[i * 3 + 1] = float(Util::double_to_snorm(this->positions[i * 3 + 1], this->max_border));
-			positions_f[i * 3 + 2] = float(Util::double_to_snorm(this->positions[i * 3 + 2], this->max_border));
+			positions_f[i * 3] = float(utils::double_to_snorm(this->positions[i * 3], this->max_border));
+			positions_f[i * 3 + 1] = float(utils::double_to_snorm(this->positions[i * 3 + 1], this->max_border));
+			positions_f[i * 3 + 2] = float(utils::double_to_snorm(this->positions[i * 3 + 2], this->max_border));
 		}
 		for (size_t i: this->smooth_group) {
 			normals_f[i * 3] = this->normals[i][0];
@@ -1505,9 +1505,9 @@ size_t mesh::MeshIO::NaiveEdgeSmooth()
 	}
 	else {
 		for (size_t i = 0; i < this->num_vertices; ++i) {
-			positions_f[i * 3] = float(Util::double_to_snorm(this->positions[i * 3], this->max_border));
-			positions_f[i * 3 + 1] = float(Util::double_to_snorm(this->positions[i * 3 + 1], this->max_border));
-			positions_f[i * 3 + 2] = float(Util::double_to_snorm(this->positions[i * 3 + 2], this->max_border));
+			positions_f[i * 3] = float(utils::double_to_snorm(this->positions[i * 3], this->max_border));
+			positions_f[i * 3 + 1] = float(utils::double_to_snorm(this->positions[i * 3 + 1], this->max_border));
+			positions_f[i * 3 + 2] = float(utils::double_to_snorm(this->positions[i * 3 + 2], this->max_border));
 		}
 		for (size_t i = 0; i < this->normals.size(); ++i) {
 			normals_f[i * 3] = this->normals[i][0];

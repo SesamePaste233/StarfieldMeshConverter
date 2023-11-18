@@ -198,7 +198,7 @@ int main(int argc, char* argv[]) {
 void __main() {
 	// Recursively get all filepaths with .dat extension from the directory
 	std::vector<std::string> filepaths;
-	Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
+	utils::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
 
 	// Test read in MorphIO
 	std::vector<std::pair<std::string, MorphIO>> database;
@@ -259,6 +259,9 @@ void main() {
 
 	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.bin");
 
+	hkphysics::hkPhysicsReflectionData data1;
+
+	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_hub.bin");
 	return;
 }
 
@@ -325,7 +328,7 @@ void _main() {
 void __main() {
 	// Recursively get all filepaths with .dat extension from the directory
 	std::vector<std::string> filepaths;
-	Util::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
+	utils::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
 
 	// Test read in MorphIO
 	std::vector<std::pair<std::string, MorphIO>> database;

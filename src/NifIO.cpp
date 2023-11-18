@@ -94,53 +94,53 @@ bool nif::NifIO::Serialize(const std::string filename)
 bool nif::NifIO::ReadHeader(std::istream& file)
 {
 	try {
-		auto _header = Util::readString(file, 38);
+		auto _header = utils::readString(file, 38);
 
 		if (_header != this->header.header) {
 			std::cout << "Invalid header" << std::endl;
 			return false;
 		}
 
-		this->header.version = Util::readUInt8(file, 5);
-		this->header.endian = Util::readUInt8(file)[0];
-		this->header.user_version = Util::readUInt32(file)[0];
-		this->header.num_blocks = Util::readUInt32(file)[0];
-		this->header.BS_version = Util::readUInt32(file)[0];
-		auto length = Util::readUInt8(file)[0];
-		this->header.author = Util::readString(file, length);
-		this->header.unk1 = Util::readUInt32(file)[0];
-		length = Util::readUInt8(file)[0];
-		this->header.process_script = Util::readString(file, length);
-		length = Util::readUInt8(file)[0];
-		this->header.unk2 = Util::readString(file, length);
-		this->header.num_types = Util::readUInt16(file)[0];
+		this->header.version = utils::read<uint8_t>(file, 5);
+		this->header.endian = utils::read<uint8_t>(file)[0];
+		this->header.user_version = utils::read<uint32_t>(file)[0];
+		this->header.num_blocks = utils::read<uint32_t>(file)[0];
+		this->header.BS_version = utils::read<uint32_t>(file)[0];
+		auto length = utils::read<uint8_t>(file)[0];
+		this->header.author = utils::readString(file, length);
+		this->header.unk1 = utils::read<uint32_t>(file)[0];
+		length = utils::read<uint8_t>(file)[0];
+		this->header.process_script = utils::readString(file, length);
+		length = utils::read<uint8_t>(file)[0];
+		this->header.unk2 = utils::readString(file, length);
+		this->header.num_types = utils::read<uint16_t>(file)[0];
 
 		// Read the block types
 		for (int i = 0; i < this->header.num_types; i++) {
-			auto _l = Util::readUInt32(file)[0];
-			this->header.block_types.push_back(Util::readString(file, _l));
+			auto _l = utils::read<uint32_t>(file)[0];
+			this->header.block_types.push_back(utils::readString(file, _l));
 		}
 
 		// Read the block type indices
 		for (int i = 0; i < this->header.num_blocks; i++) {
-			this->header.block_type_indices.push_back(Util::readUInt16(file)[0]);
+			this->header.block_type_indices.push_back(utils::read<uint16_t>(file)[0]);
 		}
 
 		// Read the block sizes
 		for (int i = 0; i < this->header.num_blocks; i++) {
-			this->header.block_sizes.push_back(Util::readUInt32(file)[0]);
+			this->header.block_sizes.push_back(utils::read<uint32_t>(file)[0]);
 		}
 
 		// Read the strings
-		this->header.num_strings = Util::readUInt32(file)[0];
-		this->header.max_string_length = Util::readUInt32(file)[0];
+		this->header.num_strings = utils::read<uint32_t>(file)[0];
+		this->header.max_string_length = utils::read<uint32_t>(file)[0];
 		for (int i = 0; i < this->header.num_strings; i++) {
-			auto _l = Util::readUInt32(file)[0];
-			this->header.strings.push_back(Util::readString(file, _l));
+			auto _l = utils::read<uint32_t>(file)[0];
+			this->header.strings.push_back(utils::readString(file, _l));
 		}
 
 		// Read the groups
-		this->header.num_groups = Util::readUInt32(file)[0];
+		this->header.num_groups = utils::read<uint32_t>(file)[0];
 		for (int i = 0; i < this->header.num_groups; i++) {
 			throw std::exception("Not implemented");
 		}
@@ -156,62 +156,62 @@ bool nif::NifIO::ReadHeader(std::istream& file)
 bool nif::NifIO::WriteHeader(std::ostream& file)
 {
 	try {
-		Util::writeString(file, this->header.header);
+		utils::writeString(file, this->header.header);
 
 		for (int i = 0; i < this->header.version.size(); i++) {
-			Util::writeAsHex(file, this->header.version[i]);
+			utils::writeAsHex(file, this->header.version[i]);
 		}
 
-		Util::writeAsHex(file, this->header.endian);
-		Util::writeAsHex(file, this->header.user_version);
-		Util::writeAsHex(file, this->header.num_blocks);
-		Util::writeAsHex(file, this->header.BS_version);
+		utils::writeAsHex(file, this->header.endian);
+		utils::writeAsHex(file, this->header.user_version);
+		utils::writeAsHex(file, this->header.num_blocks);
+		utils::writeAsHex(file, this->header.BS_version);
 
 		uint8_t length = this->header.author.length();
-		Util::writeAsHex(file, length);
-		Util::writeString(file, this->header.author);
+		utils::writeAsHex(file, length);
+		utils::writeString(file, this->header.author);
 
-		Util::writeAsHex(file, this->header.unk1);
+		utils::writeAsHex(file, this->header.unk1);
 
 		length = this->header.process_script.length();
-		Util::writeAsHex(file, length);
-		Util::writeString(file, this->header.process_script);
+		utils::writeAsHex(file, length);
+		utils::writeString(file, this->header.process_script);
 
 		length = this->header.unk2.length();
-		Util::writeAsHex(file, length);
-		Util::writeString(file, this->header.unk2);
+		utils::writeAsHex(file, length);
+		utils::writeString(file, this->header.unk2);
 
-		Util::writeAsHex(file, this->header.num_types);
+		utils::writeAsHex(file, this->header.num_types);
 
 		// Write the block types
 		for (int i = 0; i < this->header.num_types; i++) {
 			uint32_t _l = this->header.block_types[i].length();
-			Util::writeAsHex(file, _l);
-			Util::writeString(file, this->header.block_types[i]);
+			utils::writeAsHex(file, _l);
+			utils::writeString(file, this->header.block_types[i]);
 		}
 
 		// Write the block type indices
 		for (int i = 0; i < this->header.num_blocks; i++) {
-			Util::writeAsHex(file, this->header.block_type_indices[i]);
+			utils::writeAsHex(file, this->header.block_type_indices[i]);
 		}
 
 		// Write the block sizes
 		for (int i = 0; i < this->header.num_blocks; i++) {
-			Util::writeAsHex(file, this->header.block_sizes[i]);
+			utils::writeAsHex(file, this->header.block_sizes[i]);
 		}
 
 		// Write the strings
-		Util::writeAsHex(file, this->header.num_strings);
-		Util::writeAsHex(file, this->header.max_string_length);
+		utils::writeAsHex(file, this->header.num_strings);
+		utils::writeAsHex(file, this->header.max_string_length);
 
 		for (int i = 0; i < this->header.num_strings; i++) {
 			uint32_t _l = this->header.strings[i].length();
-			Util::writeAsHex(file, _l);
-			Util::writeString(file, this->header.strings[i]);
+			utils::writeAsHex(file, _l);
+			utils::writeString(file, this->header.strings[i]);
 		}
 
 		// Write the groups
-		Util::writeAsHex(file, this->header.num_groups);
+		utils::writeAsHex(file, this->header.num_groups);
 		for (int i = 0; i < this->header.num_groups; i++) {
 			throw std::exception("Not implemented");
 		}
@@ -903,7 +903,7 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 		}
 		else if (!no_culling) {
 			std::memcpy(geo_info.bounding_sphere, geo_info.bounding_center, 3 * sizeof(float));
-			geo_info.bounding_sphere[3] = Util::_vector_norm(geo_info.bounding_expand, 3);
+			geo_info.bounding_sphere[3] = utils::_vector_norm(geo_info.bounding_expand, 3);
 		}
 		else {
 			std::memset(geo_info.bounding_sphere, 0, sizeof(float) * 4);
@@ -929,7 +929,7 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 
 			std::transform(encoding_string.begin(), encoding_string.end(), encoding_string.begin(), ::tolower);
 
-			geo_info.mat_id = Util::encodeCRC32(encoding_string);
+			geo_info.mat_id = utils::encodeCRC32(encoding_string);
 		}
 
 		this->geo_infos.push_back(geo_info);
@@ -984,8 +984,8 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 			for (int j = 0; j < num_bones; ++j) {
 				auto& bone_info = skin_info.bone_infos[j];
 
-				auto B_inv = xf::createTransformationMatrix(bone_info.rotation, bone_info.translation);
-				Eigen::Vector3f center = (B_inv * xf::fromTransform(mesh->bone_bounding[j].center)).hnormalized();
+				auto B_inv = utils::xf::createTransformationMatrix(bone_info.rotation, bone_info.translation);
+				Eigen::Vector3f center = (B_inv * utils::xf::fromTransform(mesh->bone_bounding[j].center)).hnormalized();
 
 				std::memcpy(bone_info.center, center.data(), sizeof(float) * 3);
 				bone_info.radius = mesh->bone_bounding[j].radius;
@@ -1147,7 +1147,7 @@ nlohmann::json nif::ni_template::NiSkinInstanceTemplate::Serialize() const
 			}
 			bone_info["radius"] = skin_info.bone_infos[i].radius;
 
-			auto matrix = xf::createTransformationMatrix(skin_info.bone_infos[i].rotation, skin_info.bone_infos[i].translation);
+			auto matrix = utils::xf::createTransformationMatrix(skin_info.bone_infos[i].rotation, skin_info.bone_infos[i].translation);
 
 			for (int k = 0; k < 4; ++k) {
 				bone_info["matrix"].push_back(nlohmann::json::array());

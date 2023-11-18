@@ -421,10 +421,10 @@ namespace nif {
 
 				nlohmann::json serialized;
 
-				Eigen::Matrix4f T = xf::createTransformationMatrix(current->rotation, current->translation);
+				Eigen::Matrix4f T = utils::xf::createTransformationMatrix(current->rotation, current->translation);
 
 				Eigen::Matrix4f new_axis = cur_axis * T;
-				auto rtn = xf::toAxis(new_axis, 0.07);
+				auto rtn = utils::xf::toAxis(new_axis, 0.07);
 
 				serialized["name"] = current->name;
 				serialized["head"].push_back(rtn.first.x());
@@ -476,9 +476,9 @@ namespace nif {
 						new_axis(i, j) = data["matrix"][i][j];
 					}
 				}
-				Eigen::Matrix4f T = xf::quickInverse(cur_axis) * new_axis;
+				Eigen::Matrix4f T = utils::xf::quickInverse(cur_axis) * new_axis;
 				Eigen::Matrix4f R, t;
-				xf::decomposeTransformation(T, R, t);
+				utils::xf::decomposeTransformation(T, R, t);
 
 				current->rotation[0][0] = R(0, 0);
 				current->rotation[0][1] = R(0, 1);

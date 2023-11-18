@@ -1,17 +1,21 @@
 #pragma once
 #include "Common.h"
+#include "hkReflection.h"
+#include "hkPhysics.h"
 
 namespace hkphysics {
+	class hkPhysicsReflectionData;
+
 	enum class ChunkType {
 		Unknown = -1,
 		TAG0, // Major data chunk
 		SDKV, // SDK version
 		DATA, // Data
-		TYPE, // Type info
+		TYPE, // Types
 		TPTR, // Type pointer
-		TST1, // Type struct
+		TST1, // Type names
 		TNA1, // Unknown type info
-		FST1, // Function struct
+		FST1, // Member names
 		TBDY, // Type body
 		THSH, // Type hash
 		TPAD, // Type padding
@@ -38,7 +42,7 @@ namespace hkphysics {
 		std::vector<hkDataChunkBase*> children;
 
 		virtual ChunkType GetType() = 0;
-		virtual bool Decode() = 0;
+		virtual bool Decode(hkPhysicsReflectionData*) = 0;
 
 		void Traverse(std::function<void(hkDataChunkBase*)> pre_order_function = [](hkDataChunkBase*) {}, std::function<void(hkDataChunkBase*)> post_order_function = [](hkDataChunkBase*) {}) {
 			pre_order_function(this);
@@ -62,7 +66,7 @@ namespace hkphysics {
 			return ChunkType::TAG0;
 		}
 
-		bool Decode() override{
+		bool Decode(hkPhysicsReflectionData*) override{
 			return true;
 		}
 
@@ -83,7 +87,7 @@ namespace hkphysics {
 			_buffer_size = buffer_size;
 		}
 
-		bool DistributeAndDecode(uint32_t indent = 0);
+		bool DistributeAndDecode(hkPhysicsReflectionData* physics_data, uint32_t indent = 0);
 
 		void ReleaseBuffer() {
 			if (_buffer) {
@@ -105,17 +109,11 @@ namespace hkphysics {
 		~hkDataChunkSDKV() {
 		}
 
-		std::string sdk_version;
-
 		ChunkType GetType() override {
 			return ChunkType::SDKV;
 		}
 
-		bool Decode() override {
-			size_t cur_pos = 8;
-			sdk_version = Util::readStringFromBuffer(_buffer, cur_pos, this->GetActualDataSize());
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData* data) override;
 	};
 
 	class hkDataChunkDATA : public hkDataChunkTAG0 {
@@ -129,7 +127,7 @@ namespace hkphysics {
 			return ChunkType::DATA;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -145,7 +143,7 @@ namespace hkphysics {
 			return ChunkType::TYPE;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -161,7 +159,7 @@ namespace hkphysics {
 			return ChunkType::TPTR;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -173,29 +171,11 @@ namespace hkphysics {
 		~hkDataChunkTST1() {
 		}
 
-		std::vector<std::string> type_names;
-
 		ChunkType GetType() override {
 			return ChunkType::TST1;
 		}
 
-		bool Decode() override {
-			size_t cur_pos = 8;
-			std::string type_name;
-			while (cur_pos < GetBufferSize())
-			{
-				if (_buffer[cur_pos] == 0x00) {
-					type_names.push_back(type_name);
-					type_name.clear();
-				}
-				else {
-					type_name.push_back(_buffer[cur_pos]);
-				}
-				cur_pos++;
-			}
-
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData* data) override;
 	};
 
 	class hkDataChunkTNA1 : public hkDataChunkTAG0 {
@@ -209,9 +189,7 @@ namespace hkphysics {
 			return ChunkType::TNA1;
 		}
 
-		bool Decode() override {
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData* data) override;
 	};
 
 	class hkDataChunkFST1 : public hkDataChunkTAG0 {
@@ -225,9 +203,7 @@ namespace hkphysics {
 			return ChunkType::FST1;
 		}
 
-		bool Decode() override {
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData* data) override;
 	};
 
 	class hkDataChunkTBDY : public hkDataChunkTAG0 {
@@ -241,7 +217,7 @@ namespace hkphysics {
 			return ChunkType::TBDY;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -257,7 +233,7 @@ namespace hkphysics {
 			return ChunkType::THSH;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -273,7 +249,7 @@ namespace hkphysics {
 			return ChunkType::TPAD;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -289,7 +265,7 @@ namespace hkphysics {
 			return ChunkType::INDX;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -305,7 +281,7 @@ namespace hkphysics {
 			return ChunkType::ITEM;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};
@@ -321,7 +297,7 @@ namespace hkphysics {
 			return ChunkType::PTCH;
 		}
 
-		bool Decode() override {
+		bool Decode(hkPhysicsReflectionData*) override {
 			return true;
 		}
 	};

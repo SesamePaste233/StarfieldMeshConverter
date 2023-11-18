@@ -23,24 +23,32 @@
     <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\hkPhysics.h" />
     <ClInclude Include="include\hkPhysicsChunks.h" />
+    <ClInclude Include="include\hkReflection.h" />
+    <ClInclude Include="include\hkUtils.h" />
     <ClInclude Include="include\MeshConverter.h" />
     <ClInclude Include="include\MeshIO.h" />
     <ClInclude Include="include\MorphIO.h" />
     <ClInclude Include="include\NifIO.h" />
     <ClInclude Include="include\NifTypes.h" />
+    <ClInclude Include="include\Utils.h" />
     <ClInclude Include="include\WavefrontWriter.h" />
+    <ClInclude Include="include\xfUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Common.cpp" />
     <ClCompile Include="include\hkPhysicsChunks.cpp" />
     <ClCompile Include="src\BSArchive.cpp" />
     <ClCompile Include="src\hkPhysics.cpp" />
+    <ClCompile Include="src\hkReflection.cpp" />
+    <ClCompile Include="src\hkUtils.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshConverter.cpp" />
     <ClCompile Include="src\MeshIO.cpp" />
     <ClCompile Include="src\MorphIO.cpp" />
     <ClCompile Include="src\NifIO.cpp" />
     <ClCompile Include="src\NifTypes.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
+    <ClCompile Include="src\xfUtils.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
