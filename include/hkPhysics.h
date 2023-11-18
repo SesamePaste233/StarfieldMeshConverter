@@ -43,6 +43,17 @@ namespace hkphysics {
 			classes.clear();
 		}
 
+		std::string classes_to_literal(bool show_members = true) {
+			std::string ret = "";
+			int i = 0;
+			for (auto& c : classes) {
+				ret += "// Class No." + std::to_string(i++) + "\n";
+				ret += c->to_literal(show_members, false);
+				ret += "\n\n";
+			}
+			return ret;
+		}
+
 		uint32_t buffer_size = 0;
 		uint32_t data_size = 0;
 

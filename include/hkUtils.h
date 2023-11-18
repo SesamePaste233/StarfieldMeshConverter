@@ -26,7 +26,7 @@ namespace utils {
 			throw std::exception("Invalid prefix");
 		}
 
-		static uint64_t readHavokVarUInt(const uint8_t* buf, size_t& cur_pos, bool big_endian = false) {
+		static uint64_t readHavokVarUInt(const uint8_t* buf, size_t& cur_pos, bool big_endian = true) {
 			uint8_t prefix = buf[cur_pos];
 			int length = GetLength(prefix);
 			if (length == 1) {
@@ -34,11 +34,15 @@ namespace utils {
 				return prefix;
 			}
 
+			/*if (buf[cur_pos + 1] == 0b10100000) {
+				std::cout << "Invalid prefix" << std::endl;
+			}*/
+
 			uint64_t value = 0;
 
 			if (big_endian) {
 				for (int i = 1; i < length; i++) {
-					value |= buf[cur_pos + i] << (8 * (length - i));
+					value |= buf[cur_pos + i] << (8 * (length - i - 1));
 				}
 			}
 			else {

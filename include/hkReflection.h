@@ -44,7 +44,7 @@ namespace hkreflection {
 
 	class hkFieldBase {
 	public:
-		enum FieldFlags :uint8_t {
+		enum FieldFlags :uint16_t {
 			None = 0,
 			NonSerializable = 1,
 			Protected = 1 << 1,
@@ -52,13 +52,15 @@ namespace hkreflection {
 			Hidden = 1 << 3,
 			Property = 1 << 4,
 			Field = 1 << 5,
-			CustomSetter = 1 << 6
+			CustomSetter = 1 << 6,
+			AdditionalUnkValue = 1 << 7,
 		};
 
 		hkClassBase* type;
 		std::string name;
 		uint32_t offset;
 		FieldFlags flags;
+		uint8_t unk_value;
 
 		virtual std::string to_literal();
 	};
@@ -86,7 +88,12 @@ namespace hkreflection {
 		std::vector<hkFieldBase*> fields;
 		std::vector<hkInterfaceBase*> interfaces;
 
-		virtual std::string to_literal(bool show_class_members = false);
+		uint32_t hash;
+
+		bool _declared = false;
+		bool _defined = false;
+
+		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false);
 	};
 
 	class hkTemplateArgumentType : public hkTemplateArgumentBase {
@@ -98,7 +105,7 @@ namespace hkreflection {
 		}
 
 		std::string to_literal() override {
-			return template_arg_name + " = " + type->to_literal();
+			return template_arg_name + "=" + type->to_literal(false, true);
 		}
 	};
 
@@ -111,7 +118,7 @@ namespace hkreflection {
 		}
 
 		std::string to_literal() override {
-			return template_arg_name + " = " + std::to_string(value);
+			return template_arg_name + "=" + std::to_string(value);
 		}
 	};
 
@@ -124,7 +131,7 @@ namespace hkreflection {
 		}
 
 		std::string to_literal() override {
-			return template_arg_name + "[UNK] = " + std::to_string(unk);
+			return template_arg_name + "[UNK]=" + std::to_string(unk);
 		}
 	};
 

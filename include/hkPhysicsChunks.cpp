@@ -183,7 +183,7 @@ bool hkphysics::hkDataChunkTST1::Decode(hkPhysicsReflectionData* data)
 	{
 		if (_buffer[cur_pos] == 0x00) {
 			data->type_names.push_back(type_name);
-			std::cout << type_name << std::endl;
+			//std::cout << type_name << std::endl;
 			type_name.clear();
 		}
 		else {
@@ -305,10 +305,7 @@ bool hkphysics::hkDataChunkTNA1::Decode(hkPhysicsReflectionData* data)
 			}
 		}
 
-	}
-
-	for (auto& type : data->classes) {
-		std::cout << type->to_literal() << std::endl;
+		hk_class->_declared = true;
 	}
 
 	return true;
@@ -318,8 +315,31 @@ bool hkphysics::hkDataChunkTBDY::Decode(hkPhysicsReflectionData* data)
 {
 	size_t cur_pos = 8;
 
+#ifdef _DEBUG
+	std::vector<bool> deserialized_types;
+	for (size_t i = 0; i < data->classes.size(); i++) {
+		deserialized_types.push_back(false);
+	}
+#endif
+
+	int prev_id = 0;
+
 	while (cur_pos < GetBufferSize()) {
 		auto cur_type_id = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+		if (cur_type_id == 0) {
+			std::cout << "Reached end of stream" << std::endl;
+			break;
+		}
+
+#ifdef _DEBUG
+		if (deserialized_types[cur_type_id] == true) {
+			std::cout << "Error: Type already deserialized" << std::endl;
+			throw std::exception("Type already deserialized");
+		}
+		deserialized_types[cur_type_id] = true;
+#endif
+
 		auto& hk_class = data->classes[cur_type_id];
 
 		auto parent_type_id = utils::hk::readHavokVarUInt(_buffer, cur_pos);
@@ -357,6 +377,11 @@ bool hkphysics::hkDataChunkTBDY::Decode(hkPhysicsReflectionData* data)
 				hkreflection::hkFieldBase* field = new hkreflection::hkFieldBase;
 				field->name = data->field_names[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
 				field->flags = (hkreflection::hkFieldBase::FieldFlags)utils::hk::readHavokVarUInt(_buffer, cur_pos);
+				
+				if (field->flags & hkreflection::hkFieldBase::FieldFlags::AdditionalUnkValue) {
+					field->unk_value = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+				}
+
 				field->offset = utils::hk::readHavokVarUInt(_buffer, cur_pos);
 				field->type = data->classes[utils::hk::readHavokVarUInt(_buffer, cur_pos)];
 
@@ -377,6 +402,33 @@ bool hkphysics::hkDataChunkTBDY::Decode(hkPhysicsReflectionData* data)
 		if (optional & hkreflection::Optional::Attributes) { // 0b10000000
 			throw std::exception("Not implemented");
 		}
+
+		prev_id = cur_type_id;
+		hk_class->_defined = true;
+	}
+
+	return true;
+}
+
+bool hkphysics::hkDataChunkTHSH::Decode(hkPhysicsReflectionData* data)
+{
+	size_t cur_pos = 8;
+
+	auto num_hashes = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+	for (int i = 0; i < num_hashes; i++) {
+		auto type_id = utils::hk::readHavokVarUInt(_buffer, cur_pos);
+
+		if (type_id >= data->classes.size()) {
+			std::cout << "Error: type_id >= data->classes.size()" << std::endl;
+			return false;
+		}
+
+		auto& hk_class = data->classes[type_id];
+
+		auto hash = utils::readFromBuffer<uint32_t>(_buffer, cur_pos);
+
+		hk_class->hash = hash;
 	}
 
 	return true;

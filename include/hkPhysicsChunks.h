@@ -231,9 +231,7 @@ namespace hkphysics {
 			return ChunkType::THSH;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData*) override;
 	};
 
 	class hkDataChunkTPAD : public hkDataChunkTAG0 {

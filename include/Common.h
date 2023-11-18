@@ -18,7 +18,7 @@
 #include "xfUtils.h"
 
 template <typename T>
-concept IsFlagEnum = std::is_enum_v<T> && std::is_same_v<std::underlying_type_t<T>, uint8_t>;
+concept IsFlagEnum = std::is_enum_v<T> && (std::is_same_v<std::underlying_type_t<T>, uint8_t> || std::is_same_v<std::underlying_type_t<T>, uint16_t> || std::is_same_v<std::underlying_type_t<T>, uint32_t> || std::is_same_v<std::underlying_type_t<T>, uint64_t>);
 
 template <IsFlagEnum T>
 uint8_t operator&(T lhs, T rhs) {

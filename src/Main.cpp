@@ -257,11 +257,14 @@ void amain() {
 void main() {
 	hkphysics::hkPhysicsReflectionData data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\spacesuit_explorer_upperbody_01_f-BSClothExtraData_3.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.bin");
 
-	hkphysics::hkPhysicsReflectionData data1;
+	auto literals = data.classes_to_literal();
 
-	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_hub.bin");
+	// Save the string into a file
+	std::ofstream file("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.txt");
+	file << literals;
+	file.close();
 	return;
 }
 
