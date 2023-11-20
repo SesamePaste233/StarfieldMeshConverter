@@ -44,6 +44,7 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	this->num_weightsPerVertex = utils::read<uint32_t>(file)[0];
 
+	std::cout << "Num of weights per vert: " << std::to_string(this->num_weightsPerVertex) << std::endl;
 
 	std::cout << "Offset of Positions: " << std::hex << file.tellg() << std::endl;
 
@@ -234,6 +235,9 @@ bool MeshIO::Serialize(const std::string filename)
 
 	// Print vertex color number
 	std::cout << "Vertex color count: " << std::to_string(this->num_vert_colors) << std::endl;
+
+	// Print number of weights per vertex
+	std::cout << "Number of weights per vertex: " << std::to_string(this->num_weightsPerVertex) << std::endl;
 
 	// Print vertex weight number
 	std::cout << "Vertex weight count: " << std::to_string(this->num_weightsPerVertex == 0 ? 0 : this->num_weights / this->num_weightsPerVertex) << std::endl;

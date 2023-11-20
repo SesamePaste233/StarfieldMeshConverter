@@ -8,7 +8,7 @@ import MorphIO
 import utils_blender
 import nif_armature
 import nif_template
-import utils
+import utils_common as utils
 import MeshConverter
 
 skeleton_obj_dict = {}

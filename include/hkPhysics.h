@@ -2,6 +2,12 @@
 #include "Common.h"
 #include "hkPhysicsChunks.h"
 #include "hkReflection.h"
+#include <map>
+
+namespace hkreflex {
+	class hkClassBase;
+	class hkIndexedDataBlock;
+}
 
 namespace hkphysics {
 	enum class ChunkType;
@@ -20,11 +26,12 @@ namespace hkphysics {
 		}
 		std::string sdk_version;
 
-		std::unordered_map<ChunkType, hkDataChunkBase*> data_chunks;
+		std::map<ChunkType, hkDataChunkBase*> data_chunks;
 
 		std::vector<std::string> type_names;
 		std::vector<std::string> field_names;
-		std::vector<hkreflection::hkClassBase*> classes;
+		std::vector<hkreflex::hkClassBase*> classes;
+		std::vector<hkreflex::hkIndexedDataBlock*> indexed_blocks;
 
 		const bool BigEndian = true;
 
@@ -43,16 +50,11 @@ namespace hkphysics {
 			classes.clear();
 		}
 
-		std::string classes_to_literal(bool show_members = true) {
-			std::string ret = "";
-			int i = 0;
-			for (auto& c : classes) {
-				ret += "// Class No." + std::to_string(i++) + "\n";
-				ret += c->to_literal(show_members, false);
-				ret += "\n\n";
-			}
-			return ret;
-		}
+		const uint8_t* GetDataPtr(uint32_t offset = 0);
+
+		std::string classes_to_literal(bool show_members = true, bool use_mapped_ctype = false, bool inverse_order = false);
+
+		std::string dump_instances();
 
 		uint32_t buffer_size = 0;
 		uint32_t data_size = 0;

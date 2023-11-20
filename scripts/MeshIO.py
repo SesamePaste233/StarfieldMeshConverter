@@ -187,7 +187,10 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 								vgrp_markers[bone_id][1] = new_id
 								new_id += 1
 							data["vertex_weights"][-1].append([vgrp_markers[bone_id][1], weight])
-							
+					
+					if len(data["vertex_weights"][-1]) > 8:
+						index_list = sorted(range(len(data["vertex_weights"][-1])), key=lambda k: data["vertex_weights"][-1][k], reverse=True)
+						data["vertex_weights"][-1] = [data["vertex_weights"][-1][i] for i in index_list[:8]]
 					
 					if len(data["vertex_weights"][-1]) == 0:
 						data["vertex_weights"][-1].append([0, 0])

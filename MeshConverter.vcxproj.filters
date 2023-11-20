@@ -57,6 +57,15 @@
     <ClInclude Include="include\hkReflection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hkTypeMapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hkBaseCTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hkGeneratedTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -99,6 +108,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\hkReflection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hkTypeMapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -53,22 +53,6 @@ namespace hkphysics {
 		}
 
 		static const uint16_t _leaf_decorator = 0x4000;
-	};
-
-	class hkDataChunkTAG0 :public hkDataChunkBase {
-	public:
-		hkDataChunkTAG0() {
-		}
-		~hkDataChunkTAG0() {
-		}
-
-		ChunkType GetType() override{
-			return ChunkType::TAG0;
-		}
-
-		bool Decode(hkPhysicsReflectionData*) override{
-			return true;
-		}
 
 		const uint8_t* GetBuffer() {
 			return _buffer;
@@ -87,8 +71,6 @@ namespace hkphysics {
 			_buffer_size = buffer_size;
 		}
 
-		bool DistributeAndDecode(hkPhysicsReflectionData* physics_data, uint32_t indent = 0);
-
 		void ReleaseBuffer() {
 			if (_buffer) {
 				delete[] _buffer;
@@ -96,10 +78,28 @@ namespace hkphysics {
 			}
 			return;
 		}
-
 	protected:
 		const uint8_t* _buffer = nullptr; // Release on decoded.
 		uint32_t _buffer_size = 0;
+	};
+
+	class hkDataChunkTAG0 :public hkDataChunkBase {
+	public:
+		hkDataChunkTAG0() {
+		}
+		~hkDataChunkTAG0() {
+		}
+
+		ChunkType GetType() override{
+			return ChunkType::TAG0;
+		}
+
+		bool Decode(hkPhysicsReflectionData*) override{
+			return true;
+		}
+
+		bool DistributeAndDecode(hkPhysicsReflectionData* physics_data, uint32_t indent = 0);
+
 	};
 
 	class hkDataChunkSDKV : public hkDataChunkTAG0 {
@@ -127,9 +127,17 @@ namespace hkphysics {
 			return ChunkType::DATA;
 		}
 
+		const uint8_t* GetData() {
+			return _data;
+		}
+
 		bool Decode(hkPhysicsReflectionData*) override {
+			_data = new uint8_t[GetActualDataSize()];
+			std::memcpy(const_cast<uint8_t*>(_data), _buffer + 8, GetActualDataSize());
 			return true;
 		}
+	private:
+		const uint8_t* _data = nullptr;
 	};
 
 	class hkDataChunkTYPE : public hkDataChunkTAG0 {
@@ -277,9 +285,7 @@ namespace hkphysics {
 			return ChunkType::ITEM;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
-			return true;
-		}
+		bool Decode(hkPhysicsReflectionData*) override;
 	};
 
 	class hkDataChunkPTCH : public hkDataChunkTAG0 {

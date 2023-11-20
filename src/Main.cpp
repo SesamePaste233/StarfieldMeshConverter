@@ -259,12 +259,18 @@ void main() {
 
 	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.bin");
 
-	auto literals = data.classes_to_literal();
+	auto literals = data.classes_to_literal(true, true, true);
+
+	auto instances = data.dump_instances();
 
 	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.txt");
+	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
 	file << literals;
 	file.close();
+
+	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
+	file1 << instances;
+	file1.close();
 	return;
 }
 
@@ -313,10 +319,10 @@ void _main() {
 	//reader.Load("C:\\repo\\MeshConverter\\mesh_data.json", 1.f, MeshIO::Options::NormalizeWeight | MeshIO::Options::GenerateTangentIfNA /*| MeshIO::Options::SmoothEdgeNormal | MeshIO::Options::DoOptimize*/);
 
 	MeshIO reader1;
-	reader1.Deserialize("C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).mesh.mesh");
+	reader1.Deserialize("C:\\repo\\MeshConverter\\450aec21f08531a6a273 vanilla.mesh");
 
 	MeshIO reader2;
-	reader2.Deserialize("C:\\repo\\MeshConverter\\b9a4813c2649254b121f (1).mesh");
+	reader2.Deserialize("C:\\repo\\MeshConverter\\450aec21f08531a6a273.mesh");
 
 	//for (int i = 0; i < reader1.num_positions; i++) {
 	//	if (abs(reader1.positions[i] - reader2.positions[i]) > 0.02) {

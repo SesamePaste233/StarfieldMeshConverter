@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 import utils_math
-import utils
+import utils_common as utils
 
 read_only_marker = '[READONLY]'
 mix_normal = False

@@ -1,8 +1,14 @@
 #pragma once
 #include "Common.h"
 #include "hkUtils.h"
+#include "hkTypeMapper.h"
+#include "hkPhysics.h"
 
-namespace hkreflection {
+namespace hkphysics {
+	class hkPhysicsReflectionData;
+}
+
+namespace hkreflex {
 	enum class Optional : uint8_t
 	{
 		None = 0,
@@ -39,7 +45,7 @@ namespace hkreflection {
 		std::string template_arg_name;
 
 		virtual ArgumentType GetArgumentType() = 0;
-		virtual std::string to_literal() = 0;
+		virtual std::string to_literal(bool argument_only = true) = 0;
 	};
 
 	class hkFieldBase {
@@ -62,7 +68,7 @@ namespace hkreflection {
 		FieldFlags flags;
 		uint8_t unk_value;
 
-		virtual std::string to_literal();
+		virtual std::string to_literal(bool use_mapped_ctype = false);
 	};
 
 	class hkInterfaceBase {
@@ -71,14 +77,172 @@ namespace hkreflection {
 		uint32_t offset;
 	};
 
+	class hkClassInstance {
+	public:
+		hkClassBase* type;
+		const uint8_t* data;
+
+		hkClassInstance(hkClassBase* type, const uint8_t*& data) : type(type), data(data) {};
+		virtual size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) = 0;
+		virtual std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) = 0;
+	};
+
+	class hkIndexedDataBlock {
+	public:
+		enum Type {
+			None = 0,
+			Pointer = 1,
+			Array = 2,
+		};
+
+		//hkIndexedDataBlock(Type block_type, const uint8_t* data_begin): m_block_type(block_type), m_data(data_begin) {}
+
+		hkClassBase* m_data_type = nullptr;
+		Type m_block_type = Type::None;
+		uint64_t m_offset = 0;
+		uint32_t m_num_instances = 0;
+
+		std::vector<hkClassInstance*> m_instances;
+
+		bool BuildInstances(hkphysics::hkPhysicsReflectionData* ref_data);
+
+		bool _dumped = false;
+		std::string dump_instances(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0, bool use_mapped_ctype = false);
+	};
+
+	class hkClassBoolInstance : public hkClassInstance {
+	public:
+		std::string c_type = "bool";
+		bool value = false;
+
+		hkClassBoolInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
+	class hkClassStringInstance : public hkClassInstance {
+	public:
+		std::string c_type = "std::string";
+		std::string value;
+
+		hkClassStringInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
+	class hkClassIntInstance : public hkClassInstance {
+	public:
+		std::string c_type = "";
+		const uint8_t* bytes = nullptr;
+		bool is_big_endian = false;
+		bool is_signed = false;
+		size_t byte_length = 0;
+
+		uint64_t value = 0;
+		int64_t svalue = 0;
+
+		hkClassIntInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
+	class hkClassFloatInstance : public hkClassInstance {
+	public:
+		std::string c_type = "";
+		const uint8_t* bytes = nullptr;
+		bool is_big_endian = false;
+		size_t byte_length = 0;
+		double value = 0;
+
+		hkClassFloatInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
+	class hkClassPointerInstance : public hkClassInstance {
+	public:
+		std::string c_type = "ptr";
+		uint64_t in_document_ptr = NULL;
+
+		hkClassPointerInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
+	class hkClassRecordInstance : public hkClassInstance {
+	public:
+		struct Record {
+			std::string field_name = "";
+			hkClassInstance* instance = nullptr;
+		};
+
+		std::string c_type = "class";
+
+		std::vector<Record> record_instances;
+
+		hkClassRecordInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
+	class hkClassArrayInstance : public hkClassInstance {
+	public:
+		std::string c_type = "std::vector";
+		std::vector<hkClassInstance*> array_instances;
+		hkIndexedDataBlock* data_block = nullptr;
+		uint64_t in_document_ptr = NULL;
+
+		float float_array[16] = { 0 };
+
+		hkClassArrayInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		};
+
+		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
+
+		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+	};
+
 	class hkClassBase {
 	public:
+		enum TypeKind
+		{
+			Inherited = 0,
+			Opaque,
+			Bool,
+			String,
+			Int,
+			Float,
+			Pointer,
+			Record,
+			Array
+		};
+
 		std::string type_name;
+		std::string ctype_name;
 		std::vector<hkTemplateArgumentBase*> template_args;
 
 		hkClassBase* parent_class;
 		Optional optionals;
 		uint32_t format;
+		TypeKind kind;
 		hkClassBase* sub_type;
 		uint32_t flags;
 		uint32_t version;
@@ -90,10 +254,12 @@ namespace hkreflection {
 
 		uint32_t hash;
 
+		hkIndexedDataBlock* data_block; // None static
+
 		bool _declared = false;
 		bool _defined = false;
 
-		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false);
+		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false, bool use_mapped_ctype = false);
 	};
 
 	class hkTemplateArgumentType : public hkTemplateArgumentBase {
@@ -104,8 +270,11 @@ namespace hkreflection {
 			return ArgumentType::TYPE;
 		}
 
-		std::string to_literal() override {
-			return template_arg_name + "=" + type->to_literal(false, true);
+		std::string to_literal(bool argument_only = true) override {
+			if(argument_only)
+				return type->type_name;
+			else
+				return template_arg_name + "=" + type->to_literal(false, true);
 		}
 	};
 
@@ -117,8 +286,11 @@ namespace hkreflection {
 			return ArgumentType::VALUE;
 		}
 
-		std::string to_literal() override {
-			return template_arg_name + "=" + std::to_string(value);
+		std::string to_literal(bool argument_only = true) override {
+			if (argument_only)
+				return std::to_string(value);
+			else
+				return template_arg_name + "=" + std::to_string(value);
 		}
 	};
 
@@ -130,10 +302,15 @@ namespace hkreflection {
 			return ArgumentType::UNK;
 		}
 
-		std::string to_literal() override {
-			return template_arg_name + "[UNK]=" + std::to_string(unk);
+		std::string to_literal(bool argument_only = true) override {
+			if (argument_only)
+				return std::to_string(unk);
+			else
+				return template_arg_name + "[UNK]=" + std::to_string(unk);
 		}
 	};
 
+
+	hkClassInstance* AllocateInstance(hkClassBase* type, const uint8_t*& data);
 
 }

@@ -21,9 +21,12 @@
   <ItemGroup>
     <ClInclude Include="include\BSArchive.h" />
     <ClInclude Include="include\Common.h" />
+    <ClInclude Include="include\hkBaseCTypes.h" />
+    <ClInclude Include="include\hkGeneratedTypes.h" />
     <ClInclude Include="include\hkPhysics.h" />
     <ClInclude Include="include\hkPhysicsChunks.h" />
     <ClInclude Include="include\hkReflection.h" />
+    <ClInclude Include="include\hkTypeMapper.h" />
     <ClInclude Include="include\hkUtils.h" />
     <ClInclude Include="include\MeshConverter.h" />
     <ClInclude Include="include\MeshIO.h" />
@@ -40,6 +43,7 @@
     <ClCompile Include="src\BSArchive.cpp" />
     <ClCompile Include="src\hkPhysics.cpp" />
     <ClCompile Include="src\hkReflection.cpp" />
+    <ClCompile Include="src\hkTypeMapper.cpp" />
     <ClCompile Include="src\hkUtils.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshConverter.cpp" />
@@ -149,7 +153,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>;C:\repo\eigen-3.4.0;C:\repo\MeshConverter\lib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>;C:\repo\eigen-3.4.0;C:\repo\MeshConverter\lib;C:\repo\MeshConverter\include\Generated</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -171,7 +175,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_DLLEXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <AdditionalIncludeDirectories>C:\repo\DirectXMesh-main\DirectXMesh;C:\repo\DirectXMesh-main\Utilities;%(AdditionalIncludeDirectories);C:\repo\eigen-3.4.0;C:\repo\MeshConverter\lib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\repo\DirectXMesh-main\DirectXMesh;C:\repo\DirectXMesh-main\Utilities;%(AdditionalIncludeDirectories);C:\repo\eigen-3.4.0;C:\repo\MeshConverter\lib;C:\repo\MeshConverter\include\Generated</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>

@@ -14,6 +14,9 @@
 #include <chrono>
 #include <limits>
 
+// Necessary for havok physics
+#include <Eigen/Dense>
+
 #include "Utils.h"
 #include "xfUtils.h"
 

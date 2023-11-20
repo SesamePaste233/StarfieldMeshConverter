@@ -201,6 +201,16 @@ const uint8_t* utils::readBytes(std::istream& file, size_t bytes)
 	return buffer;
 }
 
+float utils::readHalfAsFullFromBuffer(const uint8_t* buffer, size_t& offset, bool big_endian)
+{
+	uint16_t value = *reinterpret_cast<const uint16_t*>(buffer + offset);
+	offset += sizeof(uint16_t);
+	if (big_endian) {
+		value = switchEndian(value);
+	}
+	return halfToFloat(value);
+}
+
 std::string utils::readStringFromBuffer(const uint8_t* buffer, size_t& offset, size_t length)
 {
 	std::string value;

@@ -86,6 +86,8 @@ namespace utils {
 		return value;
 	}
 
+	float readHalfAsFullFromBuffer(const uint8_t* buffer, size_t& offset, bool big_endian = false);
+
 	std::string readStringFromBuffer(const uint8_t* buffer, size_t& offset, size_t length);
 
 	void writeString(std::ostream& file, const std::string& value);
