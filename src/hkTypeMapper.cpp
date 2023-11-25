@@ -24,6 +24,10 @@ std::string hktypes::hkTypeMapper::GetCType(hkreflex::hkClassBase* type)
 		}
 		return ctype_name + ">";
 	}
+	else if (type->type_name == "hkMatrix4Impl") {
+		std::string ret = type->to_literal(false, true);
+		return "Eigen::Matrix4f";
+	}
 	else {
 		std::string ret = type->to_literal(false, true);
 		return GetCType(ret);

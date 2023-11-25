@@ -44,6 +44,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 	if old_obj == None:
 		return {"CANCELLED"}, 0, 0, None
 	
+
 	utils_blender.SmoothPerimeterNormal(selected_obj, s_objs)
 	bpy.ops.object.convert(target='MESH')
 
@@ -144,8 +145,8 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 					data["uv_coords"][vert_idx] = [uv_coords[0],1 - uv_coords[1]]
 
 					Bitangent_sign[vert_idx] = selected_obj.data.loops[loop_idx].bitangent_sign 
-					Tangents[vert_idx] = Tangents[vert_idx] + np.array(selected_obj.data.loops[loop_idx].tangent)
-					Normals[vert_idx] = Normals[vert_idx] + np.array(selected_obj.data.loops[loop_idx].normal)
+					Tangents[vert_idx] = np.array(selected_obj.data.loops[loop_idx].tangent) + Tangents[vert_idx]
+					Normals[vert_idx] = np.array(selected_obj.data.loops[loop_idx].normal) + Normals[vert_idx]
 
 			data["normals"] = [list(utils_math.Normalize(n)) for n in Normals]
 			data["tangents"] = [list(utils_math.GramSchmidtOrthogonalize(t, np.array(n))) + [3 if f < 0 else 0] for t, n, f in zip(Tangents, data["normals"], Bitangent_sign)]
@@ -163,6 +164,9 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 					indices_count += 3
 
 			# Extract vertex weights and bones
+			if len(selected_obj.vertex_groups) == 0:
+				options.WEIGHTS = False
+
 			if options.WEIGHTS:
 				vertex_groups = selected_obj.vertex_groups
 				if prune_empty_vertex_groups:
@@ -210,6 +214,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 		return {'CANCELLED'}, 0,0, None
 
 	if selected_obj:
+		
 		bpy.context.view_layer.objects.active = old_obj
 		old_obj.select_set(True)
 		
@@ -228,7 +233,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 
 		#with open(result_file_path + '.json', 'w') as json_file:
 		#	json_file.write(json_data)
-
+		
 		returncode = MeshConverter._dll_export_mesh(json_data.encode('utf-8'), result_file_path.encode('utf-8'), options.mesh_scale, False, options.normalize_weights, False)
 
 		if returncode == 0:

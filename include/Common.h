@@ -24,16 +24,44 @@ template <typename T>
 concept IsFlagEnum = std::is_enum_v<T> && (std::is_same_v<std::underlying_type_t<T>, uint8_t> || std::is_same_v<std::underlying_type_t<T>, uint16_t> || std::is_same_v<std::underlying_type_t<T>, uint32_t> || std::is_same_v<std::underlying_type_t<T>, uint64_t>);
 
 template <IsFlagEnum T>
-uint8_t operator&(T lhs, T rhs) {
+uint64_t operator&(T lhs, T rhs) {
 	using U = std::underlying_type_t<T>;
-	return static_cast<U>(static_cast<U>(lhs) & static_cast<U>(rhs));
+	return static_cast<uint64_t>(static_cast<U>(lhs) & static_cast<U>(rhs));
+};
+template <IsFlagEnum T, typename U = std::underlying_type_t<T>>
+uint64_t operator&(U lhs, T rhs) {
+	return static_cast<uint64_t>(static_cast<U>(lhs) & static_cast<U>(rhs));
+};
+template <IsFlagEnum T, typename U = std::underlying_type_t<T>>
+uint64_t operator&(T lhs, U rhs) {
+	return static_cast<uint64_t>(static_cast<U>(lhs) & static_cast<U>(rhs));
 };
 
 template <IsFlagEnum T>
-uint8_t operator|(T lhs, T rhs) {
+uint64_t operator|(T lhs, T rhs) {
 	using U = std::underlying_type_t<T>;
-	return static_cast<U>(static_cast<U>(lhs) | static_cast<U>(rhs));
+	return static_cast<uint64_t>(static_cast<U>(lhs) | static_cast<U>(rhs));
 };
+template <IsFlagEnum T, typename U = std::underlying_type_t<T>>
+uint64_t operator|(U lhs, T rhs) {
+	return static_cast<uint64_t>(static_cast<U>(lhs) | static_cast<U>(rhs));
+};
+template <IsFlagEnum T, typename U = std::underlying_type_t<T>>
+uint64_t operator|(T lhs, U rhs) {
+	return static_cast<uint64_t>(static_cast<U>(lhs) | static_cast<U>(rhs));
+};
+
+template <IsFlagEnum T>
+T operator|=(T& lhs, T rhs) {
+	using U = std::underlying_type_t<T>;
+	return lhs = static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs));
+};
+
+template <IsFlagEnum T, typename U = std::underlying_type_t<T>>
+T operator|=(T& lhs, U rhs) {
+	return lhs = static_cast<T>(static_cast<U>(lhs) | static_cast<U>(rhs));
+};
+
 
 template <IsFlagEnum T>
 uint8_t operator~(T rhs) {

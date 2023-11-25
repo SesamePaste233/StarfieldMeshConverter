@@ -77,17 +77,17 @@ namespace hkreflex {
 		uint32_t offset;
 	};
 
-	class hkClassInstance {
+	class hkClassInstance : public utils::SerializableBase {
 	public:
 		hkClassBase* type;
-		const uint8_t* data;
+		utils::DataAccessor data;
 
-		hkClassInstance(hkClassBase* type, const uint8_t*& data) : type(type), data(data) {};
+		hkClassInstance(hkClassBase* type, utils::DataAccessor& data) : type(type), data(data) {};
 		virtual size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) = 0;
 		virtual std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) = 0;
 	};
 
-	class hkIndexedDataBlock {
+	class hkIndexedDataBlock : public utils::SerializableBase {
 	public:
 		enum Type {
 			None = 0,
@@ -95,7 +95,13 @@ namespace hkreflex {
 			Array = 2,
 		};
 
-		//hkIndexedDataBlock(Type block_type, const uint8_t* data_begin): m_block_type(block_type), m_data(data_begin) {}
+		hkIndexedDataBlock(hkphysics::hkPhysicsReflectionData* ref_data) : ref_data(ref_data) {};
+
+		~hkIndexedDataBlock() {
+			for (auto instance : m_instances) {
+				delete instance;
+			}
+		}
 
 		hkClassBase* m_data_type = nullptr;
 		Type m_block_type = Type::None;
@@ -104,10 +110,15 @@ namespace hkreflex {
 
 		std::vector<hkClassInstance*> m_instances;
 
-		bool BuildInstances(hkphysics::hkPhysicsReflectionData* ref_data);
+		hkphysics::hkPhysicsReflectionData* ref_data = nullptr;
+
+		bool _built = false;
+		bool BuildInstances();
 
 		bool _dumped = false;
-		std::string dump_instances(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0, bool use_mapped_ctype = false);
+		std::string dump_instances(int indent = 0, bool use_mapped_ctype = false, bool suppress_comment = true);
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassBoolInstance : public hkClassInstance {
@@ -115,31 +126,35 @@ namespace hkreflex {
 		std::string c_type = "bool";
 		bool value = false;
 
-		hkClassBoolInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassBoolInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassStringInstance : public hkClassInstance {
 	public:
 		std::string c_type = "std::string";
 		std::string value;
+		hkreflex::hkIndexedDataBlock* data_block = nullptr; // optional
 
-		hkClassStringInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassStringInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassIntInstance : public hkClassInstance {
 	public:
 		std::string c_type = "";
-		const uint8_t* bytes = nullptr;
 		bool is_big_endian = false;
 		bool is_signed = false;
 		size_t byte_length = 0;
@@ -147,41 +162,47 @@ namespace hkreflex {
 		uint64_t value = 0;
 		int64_t svalue = 0;
 
-		hkClassIntInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassIntInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassFloatInstance : public hkClassInstance {
 	public:
 		std::string c_type = "";
-		const uint8_t* bytes = nullptr;
 		bool is_big_endian = false;
 		size_t byte_length = 0;
 		double value = 0;
 
-		hkClassFloatInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassFloatInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassPointerInstance : public hkClassInstance {
 	public:
 		std::string c_type = "ptr";
 		uint64_t in_document_ptr = NULL;
+		hkIndexedDataBlock* data_block = nullptr;
 
-		hkClassPointerInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassPointerInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassRecordInstance : public hkClassInstance {
@@ -189,18 +210,21 @@ namespace hkreflex {
 		struct Record {
 			std::string field_name = "";
 			hkClassInstance* instance = nullptr;
+			hkFieldBase* field = nullptr;
 		};
 
 		std::string c_type = "class";
 
 		std::vector<Record> record_instances;
 
-		hkClassRecordInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassRecordInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassArrayInstance : public hkClassInstance {
@@ -209,15 +233,18 @@ namespace hkreflex {
 		std::vector<hkClassInstance*> array_instances;
 		hkIndexedDataBlock* data_block = nullptr;
 		uint64_t in_document_ptr = NULL;
+		uint64_t size_and_flags = 0;
 
 		float float_array[16] = { 0 };
 
-		hkClassArrayInstance(hkClassBase* type, const uint8_t*& data) : hkClassInstance(type, data) {
+		hkClassArrayInstance(hkClassBase* type, utils::DataAccessor& data) : hkClassInstance(type, data) {
 		};
 
 		size_t Build(hkphysics::hkPhysicsReflectionData* ref_data) override;
 
 		std::string dump(hkphysics::hkPhysicsReflectionData* ref_data, int indent = 0) override;
+
+		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 	};
 
 	class hkClassBase {
@@ -234,6 +261,16 @@ namespace hkreflex {
 			Record,
 			Array
 		};
+
+		~hkClassBase()
+		{
+			for (auto template_arg : template_args)
+				delete template_arg;
+			for (auto field : fields)
+				delete field;
+			for (auto _interface : interfaces)
+				delete _interface;
+		}
 
 		std::string type_name;
 		std::string ctype_name;
@@ -311,6 +348,6 @@ namespace hkreflex {
 	};
 
 
-	hkClassInstance* AllocateInstance(hkClassBase* type, const uint8_t*& data);
+	hkClassInstance* AllocateInstance(hkClassBase* type, utils::DataAccessor& data);
 
 }

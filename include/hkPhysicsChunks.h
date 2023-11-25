@@ -3,6 +3,11 @@
 #include "hkReflection.h"
 #include "hkPhysics.h"
 
+namespace hkreflex {
+	class hkClassBase;
+	class hkIndexedDataBlock;
+}
+
 namespace hkphysics {
 	class hkPhysicsReflectionData;
 
@@ -30,11 +35,11 @@ namespace hkphysics {
 
 	class hkDataChunkBase {
 	public:
-		hkDataChunkBase() {
+		hkDataChunkBase(hkPhysicsReflectionData* owner): ref_data(owner) {
 		}
 		~hkDataChunkBase() {
 		}
-
+		hkPhysicsReflectionData* ref_data = nullptr;
 		uint16_t chunk_decorator = -1;
 		uint16_t data_size = 0;
 		char type_name[4] = { 0 };
@@ -42,7 +47,7 @@ namespace hkphysics {
 		std::vector<hkDataChunkBase*> children;
 
 		virtual ChunkType GetType() = 0;
-		virtual bool Decode(hkPhysicsReflectionData*) = 0;
+		virtual bool Decode() = 0;
 
 		void Traverse(std::function<void(hkDataChunkBase*)> pre_order_function = [](hkDataChunkBase*) {}, std::function<void(hkDataChunkBase*)> post_order_function = [](hkDataChunkBase*) {}) {
 			pre_order_function(this);
@@ -51,41 +56,53 @@ namespace hkphysics {
 			}
 			post_order_function(this);
 		}
+		
+		void SetName(const std::string& name) {
+			std::memcpy(this->type_name, name.c_str(), 4);
+		}
 
 		static const uint16_t _leaf_decorator = 0x4000;
 
-		const uint8_t* GetBuffer() {
-			return _buffer;
+		utils::DataAccessor GetBuffer() {
+			return _accessor;
 		}
 
 		uint32_t GetBufferSize() {
-			return _buffer_size;
+			return data_size;
 		}
 
 		uint32_t GetActualDataSize() {
 			return data_size - 8;
 		}
 
-		void SetBuffer(const uint8_t* buffer, uint32_t buffer_size) {
-			_buffer = buffer;
-			_buffer_size = buffer_size;
+		void SetBuffer(utils::DataAccessor accessor) {
+			this->_accessor = accessor;
 		}
 
-		void ReleaseBuffer() {
-			if (_buffer) {
-				delete[] _buffer;
-				_buffer = nullptr;
+		void OwnBuffer() {
+			if (!_accessor.is_valid()) {
+				return;
 			}
-			return;
+			_accessor = _accessor.deep_copy(GetBufferSize());
+			_own_buffer = true;
 		}
+
+		virtual bool Serialize(uint8_t*& out, bool use_cached = false) {
+			if (use_cached && _own_buffer) {
+				std::memcpy(out, _accessor.data, _accessor.size);
+				return true;
+			}
+			return false;
+		}
+
 	protected:
-		const uint8_t* _buffer = nullptr; // Release on decoded.
-		uint32_t _buffer_size = 0;
+		bool _own_buffer = false;
+		utils::DataAccessor _accessor;
 	};
 
 	class hkDataChunkTAG0 :public hkDataChunkBase {
 	public:
-		hkDataChunkTAG0() {
+		hkDataChunkTAG0(hkPhysicsReflectionData* owner) : hkDataChunkBase(owner) {
 		}
 		~hkDataChunkTAG0() {
 		}
@@ -94,17 +111,17 @@ namespace hkphysics {
 			return ChunkType::TAG0;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override{
+		bool Decode() override{
 			return true;
 		}
 
-		bool DistributeAndDecode(hkPhysicsReflectionData* physics_data, uint32_t indent = 0);
+		bool DistributeAndDecode(uint32_t indent = 0);
 
 	};
 
 	class hkDataChunkSDKV : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkSDKV() {
+		hkDataChunkSDKV(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkSDKV() {
 		}
@@ -113,12 +130,12 @@ namespace hkphysics {
 			return ChunkType::SDKV;
 		}
 
-		bool Decode(hkPhysicsReflectionData* data) override;
+		bool Decode() override;
 	};
 
 	class hkDataChunkDATA : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkDATA() {
+		hkDataChunkDATA(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkDATA() {
 		}
@@ -127,22 +144,27 @@ namespace hkphysics {
 			return ChunkType::DATA;
 		}
 
-		const uint8_t* GetData() {
-			return _data;
+		utils::DataAccessor GetData() {
+			return _data_accessor;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
-			_data = new uint8_t[GetActualDataSize()];
-			std::memcpy(const_cast<uint8_t*>(_data), _buffer + 8, GetActualDataSize());
+		utils::DataAccessor GetSerializeData() {
+			return _data_out_accessor;
+		}
+
+		bool Decode() override {
+			_data_accessor = (_accessor + 8).deep_copy(GetActualDataSize());
 			return true;
 		}
+
 	private:
-		const uint8_t* _data = nullptr;
+		utils::DataAccessor _data_accessor;
+		utils::DataAccessor _data_out_accessor;
 	};
 
 	class hkDataChunkTYPE : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTYPE() {
+		hkDataChunkTYPE(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTYPE() {
 		}
@@ -151,14 +173,16 @@ namespace hkphysics {
 			return ChunkType::TYPE;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
+		bool Decode() override {
 			return true;
 		}
+
+		bool Serialize(uint8_t*& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTPTR : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTPTR() {
+		hkDataChunkTPTR(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTPTR() {
 		}
@@ -167,14 +191,14 @@ namespace hkphysics {
 			return ChunkType::TPTR;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
+		bool Decode() override {
 			return true;
 		}
 	};
 
 	class hkDataChunkTST1 : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTST1() {
+		hkDataChunkTST1(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTST1() {
 		}
@@ -183,12 +207,12 @@ namespace hkphysics {
 			return ChunkType::TST1;
 		}
 
-		bool Decode(hkPhysicsReflectionData* data) override;
+		bool Decode() override;
 	};
 
 	class hkDataChunkTNA1 : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTNA1() {
+		hkDataChunkTNA1(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTNA1() {
 		}
@@ -197,12 +221,12 @@ namespace hkphysics {
 			return ChunkType::TNA1;
 		}
 
-		bool Decode(hkPhysicsReflectionData* data) override;
+		bool Decode() override;
 	};
 
 	class hkDataChunkFST1 : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkFST1() {
+		hkDataChunkFST1(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkFST1() {
 		}
@@ -211,12 +235,12 @@ namespace hkphysics {
 			return ChunkType::FST1;
 		}
 
-		bool Decode(hkPhysicsReflectionData* data) override;
+		bool Decode() override;
 	};
 
 	class hkDataChunkTBDY : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTBDY() {
+		hkDataChunkTBDY(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTBDY() {
 		}
@@ -225,12 +249,12 @@ namespace hkphysics {
 			return ChunkType::TBDY;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override;
+		bool Decode() override;
 	};
 
 	class hkDataChunkTHSH : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTHSH() {
+		hkDataChunkTHSH(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTHSH() {
 		}
@@ -239,12 +263,12 @@ namespace hkphysics {
 			return ChunkType::THSH;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override;
+		bool Decode() override;
 	};
 
 	class hkDataChunkTPAD : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTPAD() {
+		hkDataChunkTPAD(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkTPAD() {
 		}
@@ -253,14 +277,14 @@ namespace hkphysics {
 			return ChunkType::TPAD;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
+		bool Decode() override {
 			return true;
 		}
 	};
 
 	class hkDataChunkINDX : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkINDX() {
+		hkDataChunkINDX(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkINDX() {
 		}
@@ -269,28 +293,32 @@ namespace hkphysics {
 			return ChunkType::INDX;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
+		bool Decode() override {
 			return true;
 		}
 	};
 
 	class hkDataChunkITEM : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkITEM() {
+		hkDataChunkITEM(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkITEM() {
 		}
+
+		std::vector<hkreflex::hkIndexedDataBlock*> indexed_blocks; // No ownership
 
 		ChunkType GetType() override {
 			return ChunkType::ITEM;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override;
+		bool Decode() override;
+
+		bool Serialize(uint8_t*& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkPTCH : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkPTCH() {
+		hkDataChunkPTCH(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
 		}
 		~hkDataChunkPTCH() {
 		}
@@ -299,10 +327,10 @@ namespace hkphysics {
 			return ChunkType::PTCH;
 		}
 
-		bool Decode(hkPhysicsReflectionData*) override {
+		bool Decode() override {
 			return true;
 		}
 	};
 
-	hkDataChunkBase* AllocateChunk(ChunkType type);
+	hkDataChunkBase* AllocateChunk(ChunkType type, hkPhysicsReflectionData* ref_data);
 }

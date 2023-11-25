@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\BSArchive.h" />
     <ClInclude Include="include\Common.h" />
+    <ClInclude Include="include\DataAccessor.h" />
     <ClInclude Include="include\hkBaseCTypes.h" />
     <ClInclude Include="include\hkGeneratedTypes.h" />
     <ClInclude Include="include\hkPhysics.h" />
@@ -41,6 +42,7 @@
     <ClCompile Include="include\Common.cpp" />
     <ClCompile Include="include\hkPhysicsChunks.cpp" />
     <ClCompile Include="src\BSArchive.cpp" />
+    <ClCompile Include="src\DataAccessor.cpp" />
     <ClCompile Include="src\hkPhysics.cpp" />
     <ClCompile Include="src\hkReflection.cpp" />
     <ClCompile Include="src\hkTypeMapper.cpp" />

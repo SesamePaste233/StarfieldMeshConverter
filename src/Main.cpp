@@ -7,6 +7,7 @@
 #include "MeshConverter.h"
 
 #include <iostream>
+#include <functional>
 
 using namespace DirectX;
 using namespace mesh;
@@ -254,10 +255,10 @@ void amain() {
 	return;
 }
 
-void main() {
+void pmain() {
 	hkphysics::hkPhysicsReflectionData data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\3_knife.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\clip.bin");
 
 	auto literals = data.classes_to_literal(true, true, true);
 
@@ -274,12 +275,30 @@ void main() {
 	return;
 }
 
-void smain() {
+void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\impactdriver04.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\ar99.nif");
 
-	nif.DumpUnkBinary("C:\\repo\\MeshConverter\\UnkBlocks");
+	int i = 0;
+	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
+		std::ofstream file("C:\\repo\\MeshConverter\\profiler\\" + profiler->GetRTTIName() + "_" + std::to_string(i++) + ".bin");
+		profiler->dump(file);
+	});
 
+	auto data = dynamic_cast<nif::bhkPhysicsSystem*>(nif.GetRTTIBlocks(nif::NiRTTI::bhkPhysicsSystem)[0])->data;
+
+	auto literals = data->classes_to_literal(true, true, true);
+
+	auto instances = data->dump_instances();
+
+	// Save the string into a file
+	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
+	file << literals;
+	file.close();
+
+	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
+	file1 << instances;
+	file1.close();
 }
 
 int retmain() {

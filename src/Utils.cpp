@@ -91,6 +91,24 @@ std::uint32_t utils::encodeDEC3N(const std::vector<float>& values, float w)
 	return n;
 }
 
+std::uint16_t utils::encodeRGB565(uint8_t r, uint8_t g, uint8_t b)
+{
+	uint16_t rgb565 = 0;
+
+	rgb565 |= (r >> 3) << 11;
+	rgb565 |= (g >> 2) << 5;
+	rgb565 |= (b >> 3) << 0;
+
+	return rgb565;
+}
+
+void utils::decodeRGB565(uint16_t rgb565, uint8_t& r, uint8_t& g, uint8_t& b)
+{
+	r = (rgb565 >> 11) << 3;
+	g = ((rgb565 >> 5) & 0x3F) << 2;
+	b = (rgb565 & 0x1F) << 3;
+}
+
 float utils::halfToFloat(uint16_t halfFloat)
 {
 	// Define masks for extracting different parts of the half-precision float.
@@ -166,6 +184,12 @@ uint16_t utils::floatToHalf(float fullFloat)
 	}
 	y = y | (unsigned short)(exponent_f16 << 10) | (unsigned short)mantissa_f16;
 	return *((uint16_t*)&y);
+}
+
+void utils::writeStringToBuffer(uint8_t* buffer, size_t& offset, const std::string& value)
+{
+	std::memcpy(buffer + offset, value.c_str(), value.length());
+	offset += value.length();
 }
 
 std::vector<float> utils::readHalfAsFull(std::istream& file, int counts, bool big_endian) {

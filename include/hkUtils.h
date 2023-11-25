@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <vector>
 #include "Utils.h"
+#include "DataAccessor.h"
 #include <exception>
+#include <queue>
 
 namespace utils {
 	class hk {
@@ -53,6 +55,31 @@ namespace utils {
 
 			cur_pos += length;
 			return value;
+		}
+	};
+
+	class SerializableBase;
+	class DataAccessor;
+
+	class SerializePool {
+	public:
+		SerializePool(uint64_t index_begin): _index_begin(index_begin) {};
+
+		uint64_t _index_begin = 0;
+
+		std::queue<SerializableBase*> pool;
+
+		uint64_t QueueSerialization(SerializableBase* obj);
+	};
+
+	class SerializableBase {
+	public:
+		uint64_t serialized_index = -1;
+
+		virtual uint64_t Serialize(utils::DataAccessor data, SerializePool& serializer) = 0;
+
+		bool Serialized() {
+			return serialized_index != -1;
 		}
 	};
 }

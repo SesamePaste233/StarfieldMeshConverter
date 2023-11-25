@@ -297,10 +297,23 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 	else if (type_name == "NiIntegersExtraData") {
 		block = new NiIntegersExtraData();
 	}
+	else if (type_name == "BSClothExtraData") {
+		_ASSERT(block_bytes != -1);
+		block = new BSClothExtraData(block_bytes);
+		dynamic_cast<BSClothExtraData*>(block)->RTTI = type_name;
+	}
+	else if (type_name == "bhkPhysicsSystem") {
+		_ASSERT(block_bytes != -1);
+		block = new bhkPhysicsSystem(block_bytes);
+		dynamic_cast<bhkPhysicsSystem*>(block)->RTTI = type_name;
+	}
+	else if (type_name == "bhkNPCollisionObject") {
+		block = new bhkNPCollisionObject();
+	}
 	else {
 		_ASSERT(block_bytes != -1);
-		block = new UnkBinaryBlock(block_bytes);
-		dynamic_cast<UnkBinaryBlock*>(block)->RTTI = type_name;
+		block = new BinaryBlock(block_bytes);
+		dynamic_cast<BinaryBlock*>(block)->RTTI = type_name;
 	}
 
 	if (block != nullptr)

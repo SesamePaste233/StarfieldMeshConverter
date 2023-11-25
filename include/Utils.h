@@ -7,11 +7,14 @@
 #include <filesystem>
 
 namespace utils {
+	template<typename T>
+	concept _base_type_t = std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t> || std::is_same_v<T, float> || std::is_same_v<T, double>;
+
 	const wchar_t* charToWchar(const char* c);
 
 	size_t getFilePaths(std::string _dir, std::vector<std::string>& _output, std::string extension);
 
-	template<class T>
+	template<typename T>
 	inline T switchEndian(const T& value) {
 		T result = value;
 		char* src = reinterpret_cast<char*>(&const_cast<T&>(value));
@@ -35,6 +38,10 @@ namespace utils {
 
 	std::uint32_t encodeDEC3N(const std::vector<float>& values, float w);
 
+	std::uint16_t encodeRGB565(uint8_t r, uint8_t g, uint8_t b);
+
+	void decodeRGB565(uint16_t rgb565, uint8_t& r, uint8_t& g, uint8_t& b);
+
 	float halfToFloat(uint16_t halfFloat);
 
 	uint16_t floatToHalf(float fullFloat);
@@ -55,6 +62,18 @@ namespace utils {
 	}
 
 	template<typename T>
+	void writeToBuffer(uint8_t* buffer, size_t& offset, T value, bool big_endian = false) {
+		T _v = value;
+		if (big_endian) {
+			_v = switchEndian(value);
+		}
+		std::memcpy(buffer + offset, &_v, sizeof(value));
+		offset += sizeof(value);
+	}
+
+	void writeStringToBuffer(uint8_t* buffer, size_t& offset, const std::string& value);
+
+	template<_base_type_t T>
 	std::vector<T> read(std::istream& file, int counts = 1, bool big_endian = false) {
 		std::vector<T> result;
 		result.reserve(counts);
@@ -75,7 +94,7 @@ namespace utils {
 
 	const uint8_t* readBytes(std::istream& file, size_t bytes);
 
-	template<class T>
+	template<_base_type_t T>
 	T readFromBuffer(const uint8_t* buffer, size_t& offset, bool big_endian = false) {
 		T value;
 		std::memcpy(&value, buffer + offset, sizeof(T));
@@ -92,7 +111,7 @@ namespace utils {
 
 	void writeString(std::ostream& file, const std::string& value);
 
-	template<class T>
+	template<typename T>
 	void writeStream(std::ostream& file, const T* buffer, const size_t bytes) {
 		file.write(reinterpret_cast<const char*>(buffer), bytes);
 	}

@@ -9,6 +9,8 @@ import utils_common as utils
 read_only_marker = '[READONLY]'
 mix_normal = False
 
+bone_rename_dict = {}
+
 def UtilsFolderPath():
 	utils_path = _update_path(os.path.dirname(__file__))
 	return utils_path
@@ -393,6 +395,9 @@ def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
 
 def SetWeightKeys(obj, weight_keys:list):
 	if len(weight_keys) != len(obj.vertex_groups):
+		min_len = min(len(weight_keys), len(obj.vertex_groups))
+		for vg, name in zip(obj.vertex_groups[:min_len], weight_keys[:min_len]):
+			vg.name = name
 		return False
 
 	for vg, name in zip(obj.vertex_groups, weight_keys):
@@ -454,18 +459,19 @@ def ApplyAllModifiers(obj):
 	SetActiveObject(active)
 
 def GetVertColorPerVert(obj):
-	vert_number = len(obj.data.vertices)
-	v_colors = [(1,1,1,1) for i in range(vert_number)]
-	if len(obj.data.vertex_colors) == 0:
-		return v_colors, False
-	col = obj.data.vertex_colors.active
-	if col == None:
-		col = obj.data.vertex_colors[0]
-	for poly in obj.data.polygons:
-		for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
-			v_colors[v_ix] = col.data[l_ix].color
+    vert_number = len(obj.data.vertices)
+    v_colors = [(1,1,1,1) for i in range(vert_number)]
+    mesh = obj.data
+    try:
+        color_layer = mesh.vertex_colors[0]
+    except:
+        return v_colors, False
+    mesh_loops = {li: loop.vertex_index for li, loop in enumerate(mesh.loops)}
+    vtx_colors = {mesh_loops[li]: data.color for li, data in color_layer.data.items()}
+    for idx, color in vtx_colors.items():
+        v_colors[idx] = color
 
-	return v_colors, True
+    return v_colors, True
 
 def SetVertColorPerVert(obj, v_colors):
 	col = obj.data.vertex_colors.active
@@ -473,18 +479,24 @@ def SetVertColorPerVert(obj, v_colors):
 		for v_ix, l_ix in zip(poly.vertices, poly.loop_indices):
 			col.data[l_ix].color = v_colors[v_ix]
 
-def ColorToLightness(color):
+def ColorToRGB888(color):
 	rgb = list(color)[:-1]
-	_max = max(rgb)
-	_min = min(rgb)
-	return 0.5 * (_max + _min)
+	return [int(v * 255) for v in rgb]
+
+def RGB888ToRGB565(rgb):
+	r = rgb[0] >> 3
+	g = rgb[1] >> 2
+	b = rgb[2] >> 3
+	return (r << 11) | (g << 5) | b
 
 def RenamingBone(name:str):
 	tags = utils._tag(name)
-	if 'right' in tags:
-		return name + '.R'
-	elif 'left' in tags:
-		return name + '.L'
+	if 'right' in tags and name.startswith("R_"):
+		bone_rename_dict[name[2:] + '.R'] = 1
+		return name[2:] + '.R'
+	elif 'left' in tags and name.startswith("L_"):
+		bone_rename_dict[name[2:] + '.L'] = 1
+		return name[2:] + '.L'
 	
 	return name
 
@@ -492,10 +504,21 @@ def RenamingBoneList(names:list):
 	return [RenamingBone(name) for name in names]
 
 def RevertRenamingBone(name:str):
+	#if name in bone_rename_dict and bone_rename_dict[name] > 0:
+	#	bone_rename_dict[name] -= 1
+	#else:
+	#	return name
+
 	if name.endswith('.R'):
-		return name[:-2]
+		if name.startswith('R_'):
+			return name[:-2]
+		else:
+			return 'R_' + name[:-2]
 	elif name.endswith('.L'):
-		return name[:-2]
+		if name.startswith('L_'):
+			return name[:-2]
+		else:
+			return 'L_' + name[:-2]
 	return name
 
 def RevertRenamingBoneList(names:list):

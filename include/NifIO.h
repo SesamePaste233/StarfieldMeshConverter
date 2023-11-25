@@ -223,7 +223,7 @@ namespace nif {
 		void DumpUnkBinary(const std::string& folder_path) const {
 			auto unknown_blocks = this->GetRTTIBlocks(NiRTTI::UnkBinaryBlock);
 			for (auto& block : unknown_blocks) {
-				auto unk_block = dynamic_cast<UnkBinaryBlock*>(block);
+				auto unk_block = dynamic_cast<BinaryBlock*>(block);
 				if (unk_block == nullptr) continue;
 
 				auto name = std::to_string(block_manager.FindBlock(block)) + string_manager.GetString(block->name_index);

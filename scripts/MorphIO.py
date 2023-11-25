@@ -132,7 +132,7 @@ def ImportMorph(options, context, operator, result_objs = []):
 			sk.data[i].co.z += morph_data[n][i][2]
 			if debug_mode or options.as_multiple:
 				offsets[i] = [morph_data[n][i][0],morph_data[n][i][1],morph_data[n][i][2]]
-				target_vert_colors[i] = (morph_data[n][i][3],morph_data[n][i][3],morph_data[n][i][3],1)
+				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
 				delta_normals[i] = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
 				delta_tangents[i] = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
 
@@ -251,11 +251,11 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 		for i in range(verts_count):
 			for j in range(3):
 				jsondata["morphData"][n][i][j] = sk_positions[i][j] - basis_positions[i][j]
-			jsondata["morphData"][n][i][3] = utils_blender.ColorToLightness(sk_v_colors[i])
+			jsondata["morphData"][n][i][3] = utils_blender.ColorToRGB888(sk_v_colors[i])
 			jsondata["morphData"][n][i][4] = list(sk_normals[i] - basis_normals[i])
 			jsondata["morphData"][n][i][5] = list(basis_tangentsigns[i] * (sk_tangents[i] - basis_tangents[i]))
 
-	if len(no_color_objs_in_group) != 0 or len(no_color_objs_in_group) != len(morph_objs):
+	if len(no_color_objs_in_group) != 0 and len(no_color_objs_in_group) != len(morph_objs):
 		operator.report({'WARNING'}, f'No vertex color found in {len(no_color_objs_in_group)} morph objects: {", ".join(no_color_objs_in_group)}, target vertex colors of corresponding morph keys will be set to 1.')
 
 	json_data = json.dumps(jsondata)
@@ -405,7 +405,7 @@ def ExportMorph(options, context, export_file_path, operator):
 	for i in range(num_shape_keys - 1):
 		jsondata["morphData"].append([])
 		for j in range(jsondata["numVertices"]):
-			jsondata["morphData"][i].append([0,0,0,1,[],[]])
+			jsondata["morphData"][i].append([0,0,0,[255,255,255],[],[]])
 	
 	Basis = key_blocks[0]
 	
@@ -452,7 +452,7 @@ def ExportMorph(options, context, export_file_path, operator):
 		normals, tangents, _ = utils_blender.GetNormalTangents(me, True)
 
 		for i in range(verts_count):
-			jsondata["morphData"][n][i][3] = 1 # Target vert color
+			jsondata["morphData"][n][i][3] = [255,255,255] # Target vert color
 			jsondata["morphData"][n][i][4] = list(normals[i] - basis_normals[i])
 			jsondata["morphData"][n][i][5] = list(basis_tangentsigns[i] * (tangents[i] - basis_tangents[i]))
 

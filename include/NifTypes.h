@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "hkPhysics.h"
 
 namespace nif {
 	enum class NiRTTI {
@@ -17,6 +18,9 @@ namespace nif {
 		BSSkinBoneData,
 		BSLightingShaderProperty,
 		BoneTranslations,
+		BSClothExtraData,
+		bhkPhysicsSystem,
+		bhkNPCollisionObject,
 		UnkBinaryBlock,
 	};
 
@@ -455,10 +459,10 @@ namespace nif {
 		};
 	};
 
-	class UnkBinaryBlock : public NiNodeBase {
+	class BinaryBlock : public NiNodeBase {
 	public:
-		UnkBinaryBlock(uint32_t bytes) :binary_bytes(bytes) {};
-		~UnkBinaryBlock() = default;
+		BinaryBlock(uint32_t bytes) :binary_bytes(bytes) {};
+		~BinaryBlock() = default;
 
 		std::string RTTI = "Unknown";
 		uint32_t binary_bytes = 0;
@@ -480,6 +484,76 @@ namespace nif {
 		};
 		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
+		};
+	};
+
+	class BSClothExtraData : public BinaryBlock {
+	public:
+		BSClothExtraData(uint32_t bytes): BinaryBlock(bytes) {};
+		~BSClothExtraData() = default;
+
+		uint64_t data_length = 0;
+		hkphysics::hkPhysicsReflectionData* data = nullptr;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+		};
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BSClothExtraData;
+		};
+		std::vector<uint32_t> GetBlockReference() const override {
+			return std::vector<uint32_t>();
+		};
+	};
+
+	class bhkPhysicsSystem : public BinaryBlock {
+	public:
+		bhkPhysicsSystem(uint32_t bytes) : BinaryBlock(bytes) {};
+		~bhkPhysicsSystem() = default;
+
+		uint64_t data_length = 0;
+		hkphysics::hkPhysicsReflectionData* data = nullptr;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+		};
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::bhkPhysicsSystem;
+		};
+		std::vector<uint32_t> GetBlockReference() const override {
+			return std::vector<uint32_t>();
+		};
+	};
+
+	class bhkNPCollisionObject : public NiNodeBase {
+	public:
+		uint32_t target_ref = NO_REF;
+		uint16_t flags = 128;
+		uint32_t physics_system_ref = NO_REF;
+		uint32_t body_id = 0;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+		void UpdateStrings(const uint32_t old_id, const uint32_t new_id) override {
+			NiNodeBase::UpdateStrings(old_id, new_id);
+		};
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::bhkNPCollisionObject;
+		};
+		std::vector<uint32_t> GetBlockReference() const override {
+			std::vector<uint32_t> refs;
+			if (target_ref != NO_REF) {
+				refs.push_back(target_ref);
+			}
+			if (physics_system_ref != NO_REF) {
+				refs.push_back(physics_system_ref);
+			}
+			return refs;
 		};
 	};
 }

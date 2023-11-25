@@ -166,6 +166,8 @@ def _tag(name:str):
 				tag = 'right'
 			elif tag == 'l' or tag == 'L' or tag == 'Left':
 				tag = 'left'
+			elif tag == 'ss':
+				tag == 'cloth'
 			final_tags.append(tag)
     
 	return list(set(final_tags))
@@ -187,3 +189,20 @@ def _match_tags(tags_a:list, tags_b:list, normalized = False):
 def _remove_suffix(name:str):
 	return name[:name.rfind(".")]
 
+def ParentDirIfExsit(path:str, recurs_depth:int = 1, near_first = True):
+	if os.path.exists(os.path.dirname(path)) and recurs_depth > 0:
+		lst = RecurseDirIfExsit(os.path.dirname(path), recurs_depth)
+		if near_first:
+			return lst
+		else:
+			return lst.reverse()
+		
+	return []
+
+def RecurseDirIfExsit(path:str, recurs_depth:int = 1):
+	lst = [path]
+	if recurs_depth > 0:
+		sub_lst = RecurseDirIfExsit(os.path.dirname(path), recurs_depth - 1)
+		return lst + sub_lst
+	
+	return []

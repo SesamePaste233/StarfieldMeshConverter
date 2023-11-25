@@ -25,6 +25,7 @@ namespace hktypes {
 		hkTypeMapper() = default;
 
 		const std::unordered_map<std::string_view, std::string_view> _map{
+			{ "hkMatrix4Impl<float>", "Eigen::Matrix4f"},
 			{ "hkQuaternion", "Eigen::Quaternionf" },
 			{ "T*<hkbStateMachine::EventPropertyArray>", "hkbStateMachine::EventPropertyArray" },
 			{ "hkEnum<hkbCustomTestGeneratorComplexTypes::CustomEnum, hkUint8>", "hkbCustomTestGeneratorComplexTypes::CustomEnum" },

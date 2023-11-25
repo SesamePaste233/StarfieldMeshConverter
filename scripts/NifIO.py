@@ -76,7 +76,10 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		if 'has_skin' in data.keys() and data['has_skin'] == True:
 			is_rigged = True
 			for obj in _objects:
-				utils_blender.SetWeightKeys(obj, utils_blender.RenamingBoneList(data['bone_names']))
+				suc = utils_blender.SetWeightKeys(obj, utils_blender.RenamingBoneList(data['bone_names']))
+
+				if suc == False:
+					operator.report({'WARNING'}, f'Number of vertex groups in mesh doesn\'t match with bone list in nif.')
 
 			if options.skeleton_name == ' ':
 				skeleton, matched_bones = nif_armature.MatchSkeletonAdvanced(data['bone_names'], geo_name +' '+ nif_name)
@@ -176,8 +179,8 @@ def ImportNif(file_path, options, context, operator):
 	ResetSkeletonObjDict()
 	assets_folder = options.assets_folder
 	nifname = os.path.basename(file_path)
-	additional_assets_folder = os.path.dirname(file_path)
-	nif_folder_name = os.path.basename(additional_assets_folder)
+	additional_assets_folders = utils.ParentDirIfExsit(file_path, 4)
+	nif_folder_name = os.path.basename(os.path.dirname(file_path))
 	
 	if assets_folder == utils.default_assets_folder:
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')
@@ -203,7 +206,7 @@ def ImportNif(file_path, options, context, operator):
 		operator.report({'INFO'}, f'Nif has no geometry. Loaded as Armature.')
 		return {'FINISHED'}, None, None
 	else:
-		TraverseNodeRecursive(_data, None, prev_coll, _data, options, [additional_assets_folder], context, operator, nifname + ' ' + nif_folder_name)
+		TraverseNodeRecursive(_data, None, prev_coll, _data, options, additional_assets_folders, context, operator, nifname + ' ' + nif_folder_name)
 
 	operator.report({'INFO'}, f'Meshes loaded for {nifname}.')
 	
@@ -254,7 +257,7 @@ def ExportNif(options, context, operator):
 			mesh_data = {}
 			mesh_data['geo_mesh_lod'] = []
 
-			if mesh_obj.data.materials and len(mesh_obj.data.materials) > 0:
+			if mesh_obj.data.materials and len(mesh_obj.data.materials) > 0 and mesh_obj.data.materials[0]:
 				mat_path = mesh_obj.data.materials[0].name
 				mesh_data['mat_path'] = mat_path[:mat_path.rfind('.mat') + 4]
 			else:
@@ -275,6 +278,8 @@ def ExportNif(options, context, operator):
 			if len(vgrp_names) > 0 and options.WEIGHTS:
 				armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
 
+				cloth_bones = [vg for vg in vgrp_names if 'cloth' in utils._tag(vg)]
+
 				if len(armatures) == 0:
 					armature_name, bone_list_filter = nif_armature.MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
 					if armature_name != None:
@@ -294,6 +299,7 @@ def ExportNif(options, context, operator):
 					bone_list_filter = list(set(skeleton_info.keys()) & set(vgrp_names))
 					bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
+				#bone_list_filter = list(set(bone_list_filter) | set(cloth_bones))
 
 			if hash_filepath:
 				mesh_folder, mesh_name = utils.hash_string(mesh_obj.name)

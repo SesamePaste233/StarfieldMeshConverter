@@ -345,7 +345,7 @@ size_t nif::BoneTranslations::GetSize()
 	return 8 + count;
 }
 
-void nif::UnkBinaryBlock::Deserialize(std::istream& file)
+void nif::BinaryBlock::Deserialize(std::istream& file)
 {
 	if (this->binary_bytes > 0) {
 		this->binary_data = new uint8_t[this->binary_bytes];
@@ -353,14 +353,14 @@ void nif::UnkBinaryBlock::Deserialize(std::istream& file)
 	}
 }
 
-void nif::UnkBinaryBlock::Serialize(std::ostream& file)
+void nif::BinaryBlock::Serialize(std::ostream& file)
 {
 	if (this->binary_bytes > 0 && this->binary_data) {
 		utils::writeStream(file, this->binary_data, this->binary_bytes);
 	}
 }
 
-size_t nif::UnkBinaryBlock::GetSize()
+size_t nif::BinaryBlock::GetSize()
 {
 	return this->binary_bytes;
 }
@@ -436,6 +436,12 @@ std::string nif::RTTIToString(const NiRTTI& rtti)
 		return "NiIntegersExtraData";
 	case NiRTTI::UnkBinaryBlock:
 		return "UnkBinaryBlock";
+	case NiRTTI::BSClothExtraData:
+		return "BSClothExtraData";
+	case NiRTTI::bhkPhysicsSystem:
+		return "bhkPhysicsSystem";
+	case NiRTTI::bhkNPCollisionObject:
+		return "bhkNPCollisionObject";
 	}
 
 	throw std::runtime_error("Unknown RTTI");
@@ -470,6 +476,67 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 		return NiRTTI::NiStringExtraData;
 	if (rtti == "NiIntegersExtraData")
 		return NiRTTI::NiIntegersExtraData;
+	if (rtti == "BSClothExtraData")
+		return NiRTTI::BSClothExtraData;
+	if (rtti == "bhkPhysicsSystem")
+		return NiRTTI::bhkPhysicsSystem;
+	if (rtti == "bhkNPCollisionObject")
+		return NiRTTI::bhkNPCollisionObject;
 
 	return NiRTTI::UnkBinaryBlock;
+}
+
+void nif::BSClothExtraData::Deserialize(std::istream& file)
+{
+	this->data = new hkphysics::hkPhysicsReflectionData();
+	try {
+		this->data->Deserialize(file);
+	}
+	catch (std::exception& e) {
+		std::cout << "Failed to deserialize BSClothExtraData." << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+}
+
+void nif::BSClothExtraData::Serialize(std::ostream& file)
+{
+	BinaryBlock::Serialize(file);
+}
+
+void nif::bhkPhysicsSystem::Deserialize(std::istream& file)
+{
+	this->data = new hkphysics::hkPhysicsReflectionData();
+	try {
+		this->data->Deserialize(file);
+	}
+	catch (std::exception& e) {
+		std::cout << "Failed to deserialize bhkPhysicsSystem." << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+}
+
+void nif::bhkPhysicsSystem::Serialize(std::ostream& file)
+{
+	BinaryBlock::Serialize(file);
+}
+
+void nif::bhkNPCollisionObject::Deserialize(std::istream& file)
+{
+	this->target_ref = utils::read<uint32_t>(file)[0];
+	this->flags = utils::read<uint16_t>(file)[0];
+	this->physics_system_ref = utils::read<uint32_t>(file)[0];
+	this->body_id = utils::read<uint32_t>(file)[0];
+}
+
+void nif::bhkNPCollisionObject::Serialize(std::ostream& file)
+{
+	utils::writeAsHex(file, this->target_ref);
+	utils::writeAsHex(file, this->flags);
+	utils::writeAsHex(file, this->physics_system_ref);
+	utils::writeAsHex(file, this->body_id);
+}
+
+size_t nif::bhkNPCollisionObject::GetSize()
+{
+	return 14;
 }

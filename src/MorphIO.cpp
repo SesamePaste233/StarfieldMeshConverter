@@ -258,7 +258,7 @@ bool MorphIO::Load(const std::string jsonMorphFile, const uint32_t options)
 				_data._offset[0] = utils::floatToHalf(morphData[0]);
 				_data._offset[1] = utils::floatToHalf(morphData[1]);
 				_data._offset[2] = utils::floatToHalf(morphData[2]);
-				_data.target_vert_color = uint16_t(float(morphData[3]) * uint16_t(-1));
+				_data.target_vert_color = utils::encodeRGB565(morphData[3][0], morphData[3][1], morphData[3][2]);
 				_data.x = utils::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
 				_data.y = utils::encodeDEC3N({ float(morphData[5][0]),float(morphData[5][1]) ,float(morphData[5][2]) }, 1);
 				_morph_data.push_back(_data);
@@ -322,7 +322,7 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 				_data._offset[0] = utils::floatToHalf(morphData[0]);
 				_data._offset[1] = utils::floatToHalf(morphData[1]);
 				_data._offset[2] = utils::floatToHalf(morphData[2]);
-				_data.target_vert_color = uint16_t(float(morphData[3]) * uint16_t(-1)); 
+				_data.target_vert_color = utils::encodeRGB565(morphData[3][0], morphData[3][1], morphData[3][2]);
 				_data.x = utils::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
 				_data.y = utils::encodeDEC3N({ float(morphData[5][0]),float(morphData[5][1]) ,float(morphData[5][2]) }, 1);
 				_morph_data.push_back(_data);
@@ -396,7 +396,7 @@ bool morph::MorphIO::SerializeToJson(std::string& json_data)
 	for (int i = 0; i < this->num_shape_keys; i++) {
 		jsonData["morphData"].push_back(json::array());
 		for (int j = 0; j < this->num_vertices; j++) {
-			jsonData["morphData"][i].push_back(json::array({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }));
+			jsonData["morphData"][i].push_back(json::array({ 0, 0, 0, json::array({255,255,255}), 0, 0, 0, 0, 0, 0}));
 		}
 	}
 
@@ -408,7 +408,11 @@ bool morph::MorphIO::SerializeToJson(std::string& json_data)
 			jsonData["morphData"][id][i][0] = utils::halfToFloat(data._offset[0]);
 			jsonData["morphData"][id][i][1] = utils::halfToFloat(data._offset[1]);
 			jsonData["morphData"][id][i][2] = utils::halfToFloat(data._offset[2]);
-			jsonData["morphData"][id][i][3] = data.target_vert_color / float(uint16_t(-1));
+
+			uint8_t r, g, b;
+			utils::decodeRGB565(data.target_vert_color, r, g, b);
+
+			jsonData["morphData"][id][i][3] = json::array({ r, g, b });
 
 			auto delta_norm = utils::decodeDEC3N(data.x);
 			jsonData["morphData"][id][i][4] = delta_norm[0];

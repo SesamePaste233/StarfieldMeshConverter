@@ -140,7 +140,7 @@ def LoadAllSkeletonLookup():
 
 def MatchSkeleton(bone_list):
 	global skeleton_lookup
-	bone_set = set(bone_list)
+	bone_set = set(utils_blender.RevertRenamingBoneList(bone_list))
 	max_count = 1
 	matched_name = None
 	bones = None

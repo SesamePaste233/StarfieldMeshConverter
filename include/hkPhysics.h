@@ -3,6 +3,7 @@
 #include "hkPhysicsChunks.h"
 #include "hkReflection.h"
 #include <map>
+#include "DataAccessor.h"
 
 namespace hkreflex {
 	class hkClassBase;
@@ -19,7 +20,14 @@ namespace hkphysics {
 			//printf("hkPhysicsData::hkPhysicsData()\n");
 		}
 		~hkPhysicsReflectionData() {
-			// Delete all data chunks
+			for(auto& block:indexed_blocks) {
+				delete block;
+			}
+
+			for (auto& cls : classes) {
+				delete cls;
+			}
+
 			for (auto& chunk : data_chunks) {
 				delete chunk.second;
 			}
@@ -37,7 +45,11 @@ namespace hkphysics {
 
 		bool Deserialize(const std::string filename);
 
-		bool Serialize(const std::string filename);
+		bool Deserialize(std::istream& data_stream);
+
+		bool Deserialize(const uint8_t* data);
+
+		bool SerializeWithTypeUnchanged(std::ostream& data_stream);
 
 		void Clear() {
 			for (auto& chunk : data_chunks) {
@@ -50,14 +62,16 @@ namespace hkphysics {
 			classes.clear();
 		}
 
-		const uint8_t* GetDataPtr(uint32_t offset = 0);
+		utils::DataAccessor GetDataPtr(uint32_t offset = 0);
+
+		utils::DataAccessor GetSerializeDataPtr(uint32_t offset = 0);
 
 		std::string classes_to_literal(bool show_members = true, bool use_mapped_ctype = false, bool inverse_order = false);
 
 		std::string dump_instances();
 
-		uint32_t buffer_size = 0;
 		uint32_t data_size = 0;
 
+		bool _is_type_unchanged = true;
 	};
 }
