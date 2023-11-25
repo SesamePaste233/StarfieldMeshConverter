@@ -77,7 +77,7 @@ namespace utils {
 
 		DataAccessor deep_copy(size_t size = -1) const;
 	protected:
-		DataAccessor(uint8_t* data, size_t size, DataAccessProfiler* i_profiler, DataAccessProfiler* o_profiler) : data(data), size(size), read_profiler(i_profiler), write_profiler(o_profiler) {
+		DataAccessor(uint8_t* data, size_t size, AccessOptions options, DataAccessProfiler* i_profiler, DataAccessProfiler* o_profiler) : data(data), size(size), _options(options), read_profiler(i_profiler), write_profiler(o_profiler) {
 		}
 	};
 

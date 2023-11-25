@@ -71,7 +71,9 @@ namespace utils{
 
 	DataAccessor::DataAccessor(const uint8_t* data, size_t size, uint8_t options) : data(const_cast<uint8_t*>(data)), size(size), _options((AccessOptions)options) {
 #ifdef _DEBUG
-		_options |= AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite;
+		
+#else
+		_options = AccessOptions::None;
 #endif
 		if (_options & AccessOptions::Profiler) {
 			read_profiler = new IDataAccessProfiler(this->data, this->size, this->_options);
@@ -82,11 +84,12 @@ namespace utils{
 	DataAccessor::DataAccessor(const DataAccessor& other) {
 		data = other.data;
 		size = other.size;
+		_options = other._options;
 		read_profiler = other.read_profiler;
 		write_profiler = other.write_profiler;
 	}
 	DataAccessor DataAccessor::operator+(size_t offset) {
-		return DataAccessor(data + offset, size - offset, read_profiler, write_profiler);
+		return DataAccessor(data + offset, size - offset, _options, read_profiler, write_profiler);
 	}
 
 	uint64_t DataAccessor::operator-(const DataAccessor& other) {
@@ -119,7 +122,7 @@ namespace utils{
 		}
 		auto new_buffer = new uint8_t[size];
 		std::memcpy(const_cast<uint8_t*>(new_buffer), this->data, size);
-		return DataAccessor(new_buffer, size);
+		return DataAccessor(new_buffer, size, uint8_t(_options));
 	}
 
 	std::string readStringFromAccessor(DataAccessor& accessor, size_t& offset, size_t length) {
