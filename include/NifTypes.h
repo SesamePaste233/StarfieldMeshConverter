@@ -168,7 +168,7 @@ namespace nif {
 
 	class BSGeometry : public NiObject {
 	public:
-		typedef struct MeshData {
+		struct MeshData {
 			uint32_t num_indices = 0;
 			uint32_t num_vertices = 0;
 			uint32_t flags = 64;
@@ -372,7 +372,7 @@ namespace nif {
 		};
 		class BoneData : public NiNodeBase {
 		public:
-			typedef struct BoneInfo {
+			struct BoneInfo {
 				float center[3] = { 0,0,0 };
 				float radius = 0.f;
 				float rotation[3][3] = { 1,0,0,0,1,0,0,0,1 };
@@ -434,7 +434,7 @@ namespace nif {
 
 	class BoneTranslations : public NiNodeBase {
 	public:
-		typedef struct BoneTranslation {
+		struct BoneTranslation {
 			std::string bone_name;
 			float translation[3] = { 0,0,0 };
 		};

@@ -57,10 +57,21 @@ namespace utils{
 	}
 
 	void DataAccessProfiler::dump(std::ostream& out) {
+		std::sort(markers.begin(), markers.end());
+
+		auto iter = markers.begin();
 		uint8_t* result = new uint8_t[size];
+		auto sig = 0xFF;
 		for (size_t i = 0; i < size; ++i) {
+			while (iter != markers.end() && *iter == i) {
+				sig--;
+				if (sig == 0) {
+					sig = 0xFF;
+				}
+				iter++;
+			}
 			if (has_accessed(i)) {
-				result[i] = 0xFF;
+				result[i] = sig;
 			}
 			else {
 				result[i] = 0x00;
@@ -69,31 +80,112 @@ namespace utils{
 		utils::writeStream(out, result, size);
 	}
 
-	DataAccessor::DataAccessor(const uint8_t* data, size_t size, uint8_t options) : data(const_cast<uint8_t*>(data)), size(size), _options((AccessOptions)options) {
-#ifdef _DEBUG
-		
-#else
-		_options = AccessOptions::None;
-#endif
-		if (_options & AccessOptions::Profiler) {
-			read_profiler = new IDataAccessProfiler(this->data, this->size, this->_options);
-			write_profiler = new ODataAccessProfiler(this->data, this->size, this->_options);
+	void DataAccessProfiler::mark(size_t offset)
+	{
+		markers.push_back(offset);
+	}
+
+//	DataAccessor::DataAccessor(const uint8_t* data, size_t size, uint8_t options) : data(const_cast<uint8_t*>(data)), size(size), _options((AccessOptions)options) {
+//#ifdef _DEBUG
+//		
+//#else
+//		_options = AccessOptions::None;
+//#endif
+//		if (_options & AccessOptions::Profiler) {
+//			read_profiler = new IDataAccessProfiler(this->data, this->size, this->_options);
+//			write_profiler = new ODataAccessProfiler(this->data, this->size, this->_options);
+//		}
+//		_is_owner = true;
+//		//start = this->data;
+//	}
+
+	DataAccessor::~DataAccessor()
+	{
+		Destroy();
+	}
+
+	DataAccessor DataAccessor::Alloc(size_t size, uint8_t options)
+	{
+		DataAccessor result;
+		result.data = new uint8_t[size];
+		std::memset(result.data, 0, size);
+		result.size = size;
+		result._options = (AccessOptions)options;
+		if (result._options & AccessOptions::Profiler) {
+			result.read_profiler = new IDataAccessProfiler(result.data, result.size, result._options);
+			result.write_profiler = new ODataAccessProfiler(result.data, result.size, result._options);
 		}
+		result._is_owner = true;
+		return result;
+	}
+
+	DataAccessor DataAccessor::Create(const uint8_t* data, size_t size, bool is_owner, uint8_t options)
+	{
+		DataAccessor result;
+		result.data = const_cast<uint8_t*>(data);
+		result.size = size;
+		result._options = (AccessOptions)options;
+		if (result._options & AccessOptions::Profiler) {
+			result.read_profiler = new IDataAccessProfiler(result.data, result.size, result._options);
+			result.write_profiler = new ODataAccessProfiler(result.data, result.size, result._options);
+		}
+		result._is_owner = is_owner;
+		return result;
 	}
 
 	DataAccessor::DataAccessor(const DataAccessor& other) {
+		//start = other.start;
 		data = other.data;
 		size = other.size;
 		_options = other._options;
 		read_profiler = other.read_profiler;
 		write_profiler = other.write_profiler;
+		if (other._is_owner) {
+			_is_owner = true;
+			const_cast<DataAccessor*>(&other)->_is_owner = false;
+		}
 	}
+
+	DataAccessor& DataAccessor::operator=(const DataAccessor& other)
+	{
+		if (this != &other){
+			data = other.data;
+			size = other.size;
+			_options = other._options;
+			read_profiler = other.read_profiler;
+			write_profiler = other.write_profiler;
+			if (other._is_owner) {
+				_is_owner = true;
+				const_cast<DataAccessor*>(&other)->_is_owner = false;
+			}
+		}
+
+		return *this;
+	}
+
 	DataAccessor DataAccessor::operator+(size_t offset) {
-		return DataAccessor(data + offset, size - offset, _options, read_profiler, write_profiler);
+		DataAccessor result = *this;
+		result.data += offset;
+		result.size -= offset;
+		return result;
 	}
 
 	uint64_t DataAccessor::operator-(const DataAccessor& other) {
 		return data - other.data;
+	}
+
+	void DataAccessor::mark_read(size_t offset)
+	{
+		if (read_profiler) {
+			read_profiler->mark(this->data + offset - read_profiler->offset);
+		}
+	}
+
+	void DataAccessor::mark_write(size_t offset)
+	{
+		if (write_profiler) {
+			write_profiler->mark(this->data + offset - write_profiler->offset);
+		}
 	}
 
 	uint8_t DataAccessor::operator[](size_t offset) {
@@ -111,6 +203,27 @@ namespace utils{
 		return data != nullptr;
 	}
 
+	DataAccessor DataAccessor::Weld(const utils::DataAccessor& other)
+	{
+		if (!other.is_valid()) {
+			return *this;
+		}
+		if (!this->_is_owner) {
+			throw std::exception("Cannot weld to non-owner");
+		}
+		// Allocate new buffer
+		auto new_buffer = new uint8_t[this->size + other.size];
+		std::memcpy(new_buffer, this->data, this->size);
+		std::memcpy(new_buffer + this->size, other.data, other.size);
+		auto rtn = DataAccessor::Create(new_buffer, this->size + other.size, true, uint8_t(_options));
+		return rtn;
+	}
+
+	/*uint64_t DataAccessor::get_offset() const
+	{
+		return data - start;
+	}*/
+
 	DataAccessor DataAccessor::deep_copy(size_t size) const
 	{
 		if (size == -1) {
@@ -118,11 +231,35 @@ namespace utils{
 		}
 
 		if (!this->is_valid()) {
-			return DataAccessor();
+			throw std::exception("Cannot deep copy invalid accessor");
 		}
 		auto new_buffer = new uint8_t[size];
 		std::memcpy(const_cast<uint8_t*>(new_buffer), this->data, size);
-		return DataAccessor(new_buffer, size, uint8_t(_options));
+		auto rtn = DataAccessor::Create(new_buffer, size, true, uint8_t(_options));
+		return rtn;
+	}
+
+	DataAccessor DataAccessor::make_reference()
+	{
+		if (!this->is_valid()) {
+			throw std::exception("Cannot make reference to invalid accessor");
+		}
+		auto rtn = DataAccessor();
+		rtn.data = this->data;
+		rtn.size = this->size;
+		rtn._options = this->_options;
+		rtn.read_profiler = this->read_profiler;
+		rtn.write_profiler = this->write_profiler;
+		rtn._is_owner = false;
+		return rtn;
+	}
+
+	void DataAccessor::Destroy()
+	{
+		if (_is_owner) {
+			ProfilerGlobalOwner::GetInstance().ReleaseProfiler(read_profiler, true);
+			ProfilerGlobalOwner::GetInstance().ReleaseProfiler(write_profiler);
+		}
 	}
 
 	std::string readStringFromAccessor(DataAccessor& accessor, size_t& offset, size_t length) {
@@ -141,59 +278,52 @@ namespace utils{
 		return true;
 	}
 
-	uint64_t readHavokVarUIntFromAccessor(DataAccessor& accessor, size_t& offset, bool big_endian) {
-		uint8_t prefix = accessor.read<uint8_t>(offset, big_endian);
-		int length = utils::hk::GetLength(prefix);
-		if (length == 1) {
-			return prefix;
-		}
+	uint64_t readHavokVarUIntFromAccessor(DataAccessor& accessor, size_t& offset) {
+		uint8_t prefix = accessor[offset];
 
-		uint64_t value = 0;
-
-		if (big_endian) {
-			for (int i = 1; i < length; i++) {
-				value |= accessor.read<uint8_t>(offset, big_endian) << (8 * (length - i - 1));
-			}
+		auto info = utils::hk::GetHavokVarUIntInfo(prefix);
+		uint64_t value = prefix;
+		value &= ~info.pref_mask;
+		value <<= 8 * (info.byte_count - 1);
+		for (int i = 1; i < info.byte_count; i++) {
+			auto v = (uint64_t)accessor[offset + i];
+			value |= v << (8 * (info.byte_count - i - 1));
 		}
-		else {
-			for (int i = 1; i < length; i++) {
-				value |= accessor.read<uint8_t>(offset, big_endian) << (8 * (i - 1));
-			}
-		}
+		offset += info.byte_count;
 
 		return value;
 	}
 
-	bool writeHavokVarUIntToAccessor(DataAccessor& accessor, size_t& offset, uint64_t value, bool big_endian)
+	bool writeHavokVarUIntToAccessor(DataAccessor& accessor, size_t& offset, uint64_t value)
 	{
-		if (value > 0x80) {
-			uint8_t prefix = 0;
-			int length = 0;
-			for (const utils::hk::HavokVarInfo& varIntInfo : utils::hk::VarUIntTypes) {
-				if (value < (1 << varIntInfo.BitCount)) {
-					prefix = varIntInfo.Prefix;
-					length = varIntInfo.ByteCount;
-					break;
-				}
+		// Get how many bits we need to store
+		int bit_count = 0;
+		for (int i = 63; i >= 0; i--) {
+			if (value & ((uint64_t)1 << i)) {
+				bit_count = i + 1;
+				break;
 			}
-			if (length == 0) {
+		}
+
+		auto info = utils::hk::GetHavokVarUIntAllocInfo(bit_count);
+
+		auto prefix = value >> 8 * (info.byte_count - 1);
+		prefix |= info.hk_prefix;
+
+		auto suc = accessor.write<uint8_t>(offset, prefix, false);
+		if (!suc) {
+			return false;
+		}
+
+		for (int i = 1; i < info.byte_count; i++) {
+			auto v = (uint8_t)(value >> (8 * (info.byte_count - i - 1)));
+			auto suc = accessor.write<uint8_t>(offset, v, false);
+			if (!suc) {
 				return false;
 			}
-			accessor.write<uint8_t>(offset, prefix, big_endian);
-			if (big_endian) {
-				for (int i = 1; i < length; i++) {
-					accessor.write<uint8_t>(offset, value >> (8 * (length - i - 1)), big_endian);
-				}
-			}
-			else {
-				for (int i = 1; i < length; i++) {
-					accessor.write<uint8_t>(offset, value >> (8 * (i - 1)), big_endian);
-				}
-			}
 		}
-		else {
-			accessor.write<uint8_t>(offset, value, big_endian);
-		}
+
+		return true;
 	}
 
 	float readHalfAsFullFromAccessor(DataAccessor& accessor, size_t& offset, bool big_endian) {
@@ -215,14 +345,19 @@ namespace utils{
 	}
 	void ProfilerGlobalOwner::AddProfiler(DataAccessProfiler* profiler)
 	{
+		std::cout << "Registered profiler: " << (uintptr_t)profiler << std::endl;
 		profilers.push_back({ profiler->offset, profiler->size, profiler });
 	}
-	void ProfilerGlobalOwner::ReleaseProfiler(DataAccessProfiler* profiler)
+	void ProfilerGlobalOwner::ReleaseProfiler(DataAccessProfiler* profiler, bool free_memory)
 	{
+		std::cout << "Unregistered profiler: " << (uintptr_t)profiler << std::endl;
 		auto it = std::find_if(profilers.begin(), profilers.end(), [profiler](const Record& record) {
 			return record.profiler == profiler;
 			});
 		if (it != profilers.end()) {
+			if (free_memory) {
+				delete[] profiler->offset;
+			}
 			profilers.erase(it);
 			delete profiler;
 		}

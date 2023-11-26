@@ -40,8 +40,8 @@ namespace hkphysics {
 		~hkDataChunkBase() {
 		}
 		hkPhysicsReflectionData* ref_data = nullptr;
-		uint16_t chunk_decorator = -1;
-		uint16_t data_size = 0;
+		uint8_t chunk_decorator = -1;
+		uint32_t data_size = 0;
 		char type_name[4] = { 0 };
 
 		std::vector<hkDataChunkBase*> children;
@@ -61,10 +61,10 @@ namespace hkphysics {
 			std::memcpy(this->type_name, name.c_str(), 4);
 		}
 
-		static const uint16_t _leaf_decorator = 0x4000;
+		static const uint8_t _leaf_decorator = 0x40;
 
 		utils::DataAccessor GetBuffer() {
-			return _accessor;
+			return _accessor.make_reference();
 		}
 
 		uint32_t GetBufferSize() {
@@ -87,10 +87,10 @@ namespace hkphysics {
 			_own_buffer = true;
 		}
 
-		virtual bool Serialize(uint8_t*& out, bool use_cached = false) {
+		virtual uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) {
 			if (use_cached && _own_buffer) {
-				std::memcpy(out, _accessor.data, _accessor.size);
-				return true;
+				out = _accessor + 8;
+				return _accessor.size - 8;
 			}
 			return false;
 		}
@@ -117,6 +117,8 @@ namespace hkphysics {
 
 		bool DistributeAndDecode(uint32_t indent = 0);
 
+		uint64_t DistributeAndSerialize(utils::DataAccessor& out, bool use_cached = false);
+
 	};
 
 	class hkDataChunkSDKV : public hkDataChunkTAG0 {
@@ -131,6 +133,8 @@ namespace hkphysics {
 		}
 
 		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkDATA : public hkDataChunkTAG0 {
@@ -145,16 +149,23 @@ namespace hkphysics {
 		}
 
 		utils::DataAccessor GetData() {
-			return _data_accessor;
+			return _data_accessor.make_reference();
 		}
 
 		utils::DataAccessor GetSerializeData() {
-			return _data_out_accessor;
+			return _data_out_accessor.make_reference();
 		}
 
 		bool Decode() override {
 			_data_accessor = (_accessor + 8).deep_copy(GetActualDataSize());
 			return true;
+		}
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
+
+		utils::DataAccessor& AllocateSerializeData(size_t out_size) {
+			_data_out_accessor = utils::DataAccessor::Alloc(out_size);
+			return _data_out_accessor;
 		}
 
 	private:
@@ -177,7 +188,7 @@ namespace hkphysics {
 			return true;
 		}
 
-		bool Serialize(uint8_t*& out, bool use_cached = false) override;
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTPTR : public hkDataChunkTAG0 {
@@ -313,7 +324,7 @@ namespace hkphysics {
 
 		bool Decode() override;
 
-		bool Serialize(uint8_t*& out, bool use_cached = false) override;
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkPTCH : public hkDataChunkTAG0 {
@@ -323,13 +334,22 @@ namespace hkphysics {
 		~hkDataChunkPTCH() {
 		}
 
+		struct Patch {
+			hkreflex::hkClassBase* type;
+			std::vector<uint32_t> patch_offsets;
+		};
+
+		std::vector<Patch> patches;
+
+		bool RegisterPatch(hkreflex::hkClassBase* type_index, uint32_t patch_offset);
+
 		ChunkType GetType() override {
 			return ChunkType::PTCH;
 		}
 
-		bool Decode() override {
-			return true;
-		}
+		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	hkDataChunkBase* AllocateChunk(ChunkType type, hkPhysicsReflectionData* ref_data);

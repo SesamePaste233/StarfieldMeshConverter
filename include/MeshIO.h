@@ -27,7 +27,7 @@ namespace mesh {
 			SmoothEdgeNormal = 1 << 3,
 			FlipTangent = 1 << 4,
 		};
-		typedef struct BoneBoundingSphere {
+		struct BoneBoundingSphere {
 			float center[3] = { 0,0,0 };
 			float radius = 0.1;
 		};

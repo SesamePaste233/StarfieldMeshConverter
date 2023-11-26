@@ -220,6 +220,13 @@ std::string utils::readString(std::istream& file, int counts)
 
 const uint8_t* utils::readBytes(std::istream& file, size_t bytes)
 {
+	auto pos = file.tellg();
+	if (pos + std::streampos(bytes) > file.seekg(0, std::ios::end).tellg()) {
+		std::cout << "File read error: out of range" << std::endl;
+		throw std::exception("File read error: out of range");
+	}
+
+	file.seekg(pos);
 	uint8_t* buffer = new uint8_t[bytes];
 	file.read(reinterpret_cast<char*>(buffer), bytes);
 	return buffer;

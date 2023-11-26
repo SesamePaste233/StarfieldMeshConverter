@@ -28,7 +28,7 @@ namespace utils {
 
 		void AddProfiler(DataAccessProfiler* profiler);
 
-		void ReleaseProfiler(DataAccessProfiler* profiler);
+		void ReleaseProfiler(DataAccessProfiler* profiler, bool free_memory = false);
 
 		void ReleaseAll();
 
@@ -48,11 +48,18 @@ namespace utils {
 		};
 
 		DataAccessor() {};
+		~DataAccessor();
 
-		DataAccessor(const uint8_t* data, size_t size, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
+		static DataAccessor Alloc(size_t size, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
+
+		static DataAccessor Create(const uint8_t* data, size_t size, bool is_owner = false, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
+
+		//DataAccessor(const uint8_t* data, size_t size, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
 
 		DataAccessor(const DataAccessor& other);
+		DataAccessor& operator=(const DataAccessor& other);
 
+		//uint8_t* start = nullptr;
 		uint8_t* data = nullptr;
 		size_t size = 0;
 		DataAccessProfiler* read_profiler = nullptr;
@@ -69,16 +76,27 @@ namespace utils {
 		template<_base_type_t T>
 		bool write(size_t& offset, T value, bool big_endian = false);
 
+		void mark_read(size_t offset);
+
+		void mark_write(size_t offset);
+
 		uint8_t operator[](size_t offset);
 
 		DataAccessor operator +=(size_t offset);
 
 		bool is_valid() const;
 
+		DataAccessor Weld(const utils::DataAccessor& other);
+
+		//uint64_t get_offset() const;
+
 		DataAccessor deep_copy(size_t size = -1) const;
+
+		DataAccessor make_reference();
+
+		void Destroy();
 	protected:
-		DataAccessor(uint8_t* data, size_t size, AccessOptions options, DataAccessProfiler* i_profiler, DataAccessProfiler* o_profiler) : data(data), size(size), _options(options), read_profiler(i_profiler), write_profiler(o_profiler) {
-		}
+		bool _is_owner = false;
 	};
 
 	class DataAccessProfiler {
@@ -95,6 +113,8 @@ namespace utils {
 		size_t accessed_record_size;
 		DataAccessor::AccessOptions _options;
 
+		std::vector<uint64_t> markers;
+
 		void Flush();
 
 		virtual std::string GetRTTIName() = 0;
@@ -104,6 +124,8 @@ namespace utils {
 		inline bool has_accessed(size_t offset);
 
 		void dump(std::ostream& out);
+
+		void mark(size_t offset);
 	};
 
 	class IDataAccessProfiler :public DataAccessProfiler {
@@ -144,9 +166,9 @@ namespace utils {
 
 	bool writeStringToAccessor(DataAccessor& accessor, size_t& offset, const std::string& value);
 
-	uint64_t readHavokVarUIntFromAccessor(DataAccessor& accessor, size_t& offset, bool big_endian = true);
+	uint64_t readHavokVarUIntFromAccessor(DataAccessor& accessor, size_t& offset);
 
-	bool writeHavokVarUIntToAccessor(DataAccessor& accessor, size_t& offset, uint64_t value, bool big_endian = true);
+	bool writeHavokVarUIntToAccessor(DataAccessor& accessor, size_t& offset, uint64_t value);
 
 	float readHalfAsFullFromAccessor(DataAccessor& accessor, size_t& offset, bool big_endian = false);
 

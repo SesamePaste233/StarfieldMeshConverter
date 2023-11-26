@@ -255,14 +255,57 @@ void amain() {
 	return;
 }
 
-void pmain() {
+void test_main() {
 	hkphysics::hkPhysicsReflectionData data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\clip.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
 
 	auto literals = data.classes_to_literal(true, true, true);
 
 	auto instances = data.dump_instances();
+
+	/*std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
+	data.SerializeWithTypeUnchanged(file0);
+	file0.close();*/
+
+	int i = 0;
+	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
+		std::ofstream file("C:\\repo\\MeshConverter\\profiler\\" + profiler->GetRTTIName() + "_" + std::to_string(i++) + ".bin", std::ios::binary);
+		profiler->dump(file);
+		});
+
+	// Save the string into a file
+	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
+	file << literals;
+	file.close();
+
+	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
+	file1 << instances;
+	file1.close();
+	return;
+}
+void main() {
+	hkphysics::hkPhysicsReflectionData data;
+
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth.bin");
+
+	auto literals = data.classes_to_literal(true, true, true);
+
+	auto instances = data.dump_instances();
+
+	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
+	data.SerializeWithTypeUnchanged(file0);
+	file0.close();
+
+	hkphysics::hkPhysicsReflectionData data1;
+
+	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
+
+	int i = 0;
+	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
+		std::ofstream file("C:\\repo\\MeshConverter\\profiler\\" + profiler->GetRTTIName() + "_" + std::to_string(i++) + ".bin", std::ios::binary);
+		profiler->dump(file);
+		});
 
 	// Save the string into a file
 	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
@@ -275,7 +318,7 @@ void pmain() {
 	return;
 }
 
-void main() {
+void pmain() {
 	nif::NifIO nif;
 	nif.Deserialize("C:\\repo\\MeshConverter\\ar99.nif");
 
@@ -285,7 +328,7 @@ void main() {
 		profiler->dump(file);
 	});
 
-	auto data = dynamic_cast<nif::bhkPhysicsSystem*>(nif.GetRTTIBlocks(nif::NiRTTI::bhkPhysicsSystem)[0])->data;
+	auto data = dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->data;
 
 	auto literals = data->classes_to_literal(true, true, true);
 

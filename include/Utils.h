@@ -5,10 +5,30 @@
 #include <vector>
 #include <fstream>
 #include <filesystem>
+#include <map>
+#include <functional>
 
 namespace utils {
 	template<typename T>
 	concept _base_type_t = std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t> || std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t> || std::is_same_v<T, float> || std::is_same_v<T, double>;
+
+	template<typename T>
+	concept _signed_integer_t = std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> || std::is_same_v<T, int64_t>;
+
+	template<typename T>
+	concept _unsigned_integer_t = std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t> || std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>;
+
+	template<typename T>
+	concept _is_integer_t = _signed_integer_t<T> || _unsigned_integer_t<T>;
+
+	template<typename T>
+	concept _is_float_t = std::is_same_v<T, float> || std::is_same_v<T, double>;
+
+	template<typename T>
+	concept _is_bool_t = std::is_same_v<T, bool>;
+
+	template<typename T>
+	concept _is_string_t = std::is_same_v<T, std::string>;
 
 	const wchar_t* charToWchar(const char* c);
 
@@ -236,4 +256,19 @@ namespace utils {
 	}
 
 	void ComputeTangentFrameImpl(uint32_t vertex_count, uint32_t tri_count, uint16_t* indices, float* positions, float* UV, float* normals, float* tan, float* bit);
+
+	template<class _elem_T, class _key_T>
+	std::map<_key_T, size_t>count_element(const std::vector<_elem_T>& vec, std::function<_key_T(const _elem_T&)> key_func) {
+		std::map<_key_T, size_t> result;
+		for (const _elem_T& elem : vec) {
+			_key_T key = key_func(elem);
+			if (result.find(key) == result.end()) {
+				result[key] = 1;
+			}
+			else {
+				result[key]++;
+			}
+		}
+		return result;
+	}
 }

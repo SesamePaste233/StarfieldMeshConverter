@@ -60,7 +60,7 @@ namespace nif {
 	class NifIO
 	{
 	public:
-		typedef struct Header {
+		struct Header {
 			std::string header = "Gamebryo File Format, Version 20.2.0.7";
 			std::vector<uint8_t> version = {10,7,0,2,20};
 			uint8_t endian = 1;
@@ -264,7 +264,7 @@ namespace nif {
 
 		class NiArmatureTemplate : public NiTemplateBase {
 		public:
-			typedef struct NodeInfo {
+			struct NodeInfo {
 				NodeInfo() = default;
 				~NodeInfo() = default;
 
@@ -631,7 +631,7 @@ namespace nif {
 
 		class NiSimpleGeometryTemplate :public NiArmatureTemplate {
 		public:
-			typedef struct MeshInfo {
+			struct MeshInfo {
 				bool has_mesh = false;
 				uint32_t num_indices = 0;
 				uint32_t num_vertices = 0;
@@ -654,7 +654,7 @@ namespace nif {
 				return *this;
 			};
 
-			typedef struct GeoInfo {
+			struct GeoInfo {
 				MeshInfo geo_mesh_lod[4];
 
 				float bounding_sphere[4] = { 0,0,0,0 };
@@ -680,7 +680,7 @@ namespace nif {
 		public:
 			typedef nif::BSSkin::BoneData::BoneInfo BoneInfo;
 
-			typedef struct SkinInfo {
+			struct SkinInfo {
 				bool has_skin = false;
 				bool request_recalc_bounding_sphere = false;
 				std::vector<std::string> bone_names;

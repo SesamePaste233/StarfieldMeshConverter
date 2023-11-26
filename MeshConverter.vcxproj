@@ -22,8 +22,7 @@
     <ClInclude Include="include\BSArchive.h" />
     <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\DataAccessor.h" />
-    <ClInclude Include="include\hkBaseCTypes.h" />
-    <ClInclude Include="include\hkGeneratedTypes.h" />
+    <ClInclude Include="include\hkTypes.h" />
     <ClInclude Include="include\hkPhysics.h" />
     <ClInclude Include="include\hkPhysicsChunks.h" />
     <ClInclude Include="include\hkReflection.h" />
@@ -46,6 +45,7 @@
     <ClCompile Include="src\hkPhysics.cpp" />
     <ClCompile Include="src\hkReflection.cpp" />
     <ClCompile Include="src\hkTypeMapper.cpp" />
+    <ClCompile Include="src\hkTypes.cpp" />
     <ClCompile Include="src\hkUtils.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshConverter.cpp" />
