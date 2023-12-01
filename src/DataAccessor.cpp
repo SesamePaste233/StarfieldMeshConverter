@@ -5,9 +5,7 @@ namespace utils{
 	bool IDataAccessProfiler::Access(size_t offset, size_t byte_size)
 	{
 		if (offset + byte_size > size) {
-#ifdef _DEBUG
 			throw std::exception("Access out of range");
-#endif
 			return false;
 		}
 
@@ -24,9 +22,7 @@ namespace utils{
 	bool ODataAccessProfiler::Access(size_t offset, size_t byte_size)
 	{
 		if (offset + byte_size > size) {
-#ifdef _DEBUG
 			throw std::exception("Access out of range");
-#endif
 			return false;
 		}
 
@@ -85,20 +81,6 @@ namespace utils{
 		markers.push_back(offset);
 	}
 
-//	DataAccessor::DataAccessor(const uint8_t* data, size_t size, uint8_t options) : data(const_cast<uint8_t*>(data)), size(size), _options((AccessOptions)options) {
-//#ifdef _DEBUG
-//		
-//#else
-//		_options = AccessOptions::None;
-//#endif
-//		if (_options & AccessOptions::Profiler) {
-//			read_profiler = new IDataAccessProfiler(this->data, this->size, this->_options);
-//			write_profiler = new ODataAccessProfiler(this->data, this->size, this->_options);
-//		}
-//		_is_owner = true;
-//		//start = this->data;
-//	}
-
 	DataAccessor::~DataAccessor()
 	{
 		Destroy();
@@ -108,6 +90,7 @@ namespace utils{
 	{
 		DataAccessor result;
 		result.data = new uint8_t[size];
+		result.start = result.data;
 		std::memset(result.data, 0, size);
 		result.size = size;
 		result._options = (AccessOptions)options;
@@ -116,6 +99,11 @@ namespace utils{
 			result.write_profiler = new ODataAccessProfiler(result.data, result.size, result._options);
 		}
 		result._is_owner = true;
+
+#ifdef _DEBUG
+		std::cout << "DataAccessor Allocated " << std::to_string(size) << " bytes at " << std::hex << (uintptr_t)result.start << std::endl;
+#endif
+
 		return result;
 	}
 
@@ -123,6 +111,7 @@ namespace utils{
 	{
 		DataAccessor result;
 		result.data = const_cast<uint8_t*>(data);
+		result.start = result.data;
 		result.size = size;
 		result._options = (AccessOptions)options;
 		if (result._options & AccessOptions::Profiler) {
@@ -130,11 +119,17 @@ namespace utils{
 			result.write_profiler = new ODataAccessProfiler(result.data, result.size, result._options);
 		}
 		result._is_owner = is_owner;
+
+#ifdef _DEBUG
+		if (is_owner) {
+			std::cout << "DataAccessor Owned " << std::to_string(size) << " bytes at " << std::hex << (uintptr_t)result.start << std::endl;
+		}
+#endif
 		return result;
 	}
 
 	DataAccessor::DataAccessor(const DataAccessor& other) {
-		//start = other.start;
+		start = other.start;
 		data = other.data;
 		size = other.size;
 		_options = other._options;
@@ -149,6 +144,7 @@ namespace utils{
 	DataAccessor& DataAccessor::operator=(const DataAccessor& other)
 	{
 		if (this != &other){
+			start = other.start;
 			data = other.data;
 			size = other.size;
 			_options = other._options;
@@ -219,6 +215,32 @@ namespace utils{
 		return rtn;
 	}
 
+	DataAccessor DataAccessor::WeldAll(const std::vector<utils::DataAccessor>& accessors)
+	{
+		if (accessors.size() == 0) {
+			return DataAccessor();
+		}
+		if (!accessors[0].is_valid()) {
+			return DataAccessor();
+		}
+		if (!accessors[0]._is_owner) {
+			throw std::exception("Cannot weld to non-owner");
+		}
+		// Allocate new buffer
+		size_t total_size = 0;
+		for (auto& accessor : accessors) {
+			total_size += accessor.size;
+		}
+		auto new_buffer = new uint8_t[total_size];
+		size_t offset = 0;
+		for (auto& accessor : accessors) {
+			std::memcpy(new_buffer + offset, accessor.data, accessor.size);
+			offset += accessor.size;
+		}
+		auto rtn = DataAccessor::Create(new_buffer, total_size, true, uint8_t(accessors[0]._options));
+		return rtn;
+	}
+
 	/*uint64_t DataAccessor::get_offset() const
 	{
 		return data - start;
@@ -245,6 +267,7 @@ namespace utils{
 			throw std::exception("Cannot make reference to invalid accessor");
 		}
 		auto rtn = DataAccessor();
+		rtn.start = this->start;
 		rtn.data = this->data;
 		rtn.size = this->size;
 		rtn._options = this->_options;
@@ -257,8 +280,16 @@ namespace utils{
 	void DataAccessor::Destroy()
 	{
 		if (_is_owner) {
-			ProfilerGlobalOwner::GetInstance().ReleaseProfiler(read_profiler, true);
-			ProfilerGlobalOwner::GetInstance().ReleaseProfiler(write_profiler);
+			if (_options & AccessOptions::Profiler) {
+				ProfilerGlobalOwner::GetInstance().ReleaseProfiler(read_profiler);
+				ProfilerGlobalOwner::GetInstance().ReleaseProfiler(write_profiler);
+			}
+			if (start) {
+#ifdef _DEBUG
+				std::cout << "DataAccessor Freed " << std::to_string(data - start + size) << " bytes at " << std::hex << (uintptr_t)start << std::endl;
+#endif
+				delete[] start;
+			}
 		}
 	}
 
@@ -345,19 +376,20 @@ namespace utils{
 	}
 	void ProfilerGlobalOwner::AddProfiler(DataAccessProfiler* profiler)
 	{
+#ifdef _DEBUG
 		std::cout << "Registered profiler: " << (uintptr_t)profiler << std::endl;
+#endif
 		profilers.push_back({ profiler->offset, profiler->size, profiler });
 	}
-	void ProfilerGlobalOwner::ReleaseProfiler(DataAccessProfiler* profiler, bool free_memory)
+	void ProfilerGlobalOwner::ReleaseProfiler(DataAccessProfiler* profiler)
 	{
+#ifdef _DEBUG
 		std::cout << "Unregistered profiler: " << (uintptr_t)profiler << std::endl;
+#endif
 		auto it = std::find_if(profilers.begin(), profilers.end(), [profiler](const Record& record) {
 			return record.profiler == profiler;
 			});
 		if (it != profilers.end()) {
-			if (free_memory) {
-				delete[] profiler->offset;
-			}
 			profilers.erase(it);
 			delete profiler;
 		}

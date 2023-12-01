@@ -194,6 +194,10 @@ def ImportNif(file_path, options, context, operator):
 	
 	_data = json.loads(json_str)
 
+	# DEBUG: Save the JSON data to a file
+	with open(utils.export_mesh_folder_path + '/hkaSkeletonDebug.json', 'w') as json_file:
+		json.dump(_data['havok_skeleton'], json_file, indent = 4)
+
 	prev_coll = bpy.data.collections.new(nifname)
 	bpy.context.scene.collection.children.link(prev_coll)
 
@@ -220,6 +224,16 @@ def ImportNif(file_path, options, context, operator):
 			max_obj = len(objs)
 			best_skel = skel
 	print(best_skel, obj_list)
+
+	# Havok skeleton
+	if 'havok_skeleton' in _data.keys():
+		havok_skel = _data['havok_skeleton']
+		skel_coll = bpy.data.collections.new(skel)
+		bpy.context.scene.collection.children.link(skel_coll)
+		nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, "hkaSkeleton")
+		best_skel = None
+		obj_list = []
+
 	return {'FINISHED'}, best_skel, obj_list
 
 def ExportNif(options, context, operator):

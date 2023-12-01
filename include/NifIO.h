@@ -334,6 +334,8 @@ namespace nif {
 
 			std::vector<NodeInfo> bones;
 
+			hktypes::hkaSkeletonHolder* havok_skeleton = nullptr;
+
 			bool skeleton_mode = false;
 
 			SubTemplate sub_template = SubTemplate::None;
@@ -357,6 +359,12 @@ namespace nif {
 				auto json_data = SerializeGlobalImpl(0, root_axis);
 
 				json_data["skeleton_mode"] = skeleton_mode;
+
+				if (havok_skeleton != nullptr) {
+					nlohmann::json havok_skeleton_json = havok_skeleton->ToJson();
+
+					json_data["havok_skeleton"] = havok_skeleton_json;
+				}
 
 				return json_data;
 			};

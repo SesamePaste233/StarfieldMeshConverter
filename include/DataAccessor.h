@@ -28,7 +28,7 @@ namespace utils {
 
 		void AddProfiler(DataAccessProfiler* profiler);
 
-		void ReleaseProfiler(DataAccessProfiler* profiler, bool free_memory = false);
+		void ReleaseProfiler(DataAccessProfiler* profiler);
 
 		void ReleaseAll();
 
@@ -59,7 +59,7 @@ namespace utils {
 		DataAccessor(const DataAccessor& other);
 		DataAccessor& operator=(const DataAccessor& other);
 
-		//uint8_t* start = nullptr;
+		uint8_t* start = nullptr;
 		uint8_t* data = nullptr;
 		size_t size = 0;
 		DataAccessProfiler* read_profiler = nullptr;
@@ -87,6 +87,8 @@ namespace utils {
 		bool is_valid() const;
 
 		DataAccessor Weld(const utils::DataAccessor& other);
+
+		static DataAccessor WeldAll(const std::vector<utils::DataAccessor>& accessors);
 
 		//uint64_t get_offset() const;
 

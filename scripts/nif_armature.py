@@ -253,8 +253,9 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 
 		debug_capsule[armature_dict['name']]['world_center'] = transformed_start_3d
 
-	for child_dict in armature_dict['children']:
-		CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule)
+	if 'children' in armature_dict.keys():
+		for child_dict in armature_dict['children']:
+			CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule)
 
 def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name = None, debug_capsule = None):
 	old_active = utils_blender.GetActiveObject()

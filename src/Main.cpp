@@ -287,19 +287,19 @@ void test_main() {
 void main() {
 	hkphysics::hkPhysicsReflectionData data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer.bin");
 
 	auto literals = data.classes_to_literal(true, true, true);
 
 	auto instances = data.dump_instances();
 
-	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
+	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer_test.bin", std::ios::binary);
 	data.SerializeWithTypeUnchanged(file0);
 	file0.close();
 
 	hkphysics::hkPhysicsReflectionData data1;
 
-	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
+	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer_test.bin");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -308,11 +308,11 @@ void main() {
 		});
 
 	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
+	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated_Entertainer.h");
 	file << literals;
 	file.close();
 
-	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
+	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances_Entertainer.txt");
 	file1 << instances;
 	file1.close();
 	return;

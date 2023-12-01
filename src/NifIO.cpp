@@ -1326,6 +1326,15 @@ nif::ni_template::RTTI nif::ni_template::NiArmatureTemplate::FromNif(const NifIO
 	this->bones.push_back(NodeInfo());
 	auto& manager = nif.block_manager;
 
+	auto bscloth = nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData);
+
+	if (bscloth.size() == 1) {
+		auto cloth = dynamic_cast<nif::BSClothExtraData*>(bscloth[0]);
+		if (cloth->data) {
+			this->havok_skeleton = cloth->data->skeleton;
+		}
+	}
+
 	auto _root = nif.GetRootNode();
 
 	if (!_root)

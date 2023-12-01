@@ -234,7 +234,7 @@ uint64_t hkphysics::hkDataChunkTAG0::DistributeAndSerialize(utils::DataAccessor&
 	cur_pos = 0;
 	utils::writeToAccessor(indx_header, cur_pos, indx_sizeAndFlags, true);
 	utils::writeStringToAccessor(indx_header, cur_pos, std::string(indx_chunk->type_name));
-	auto indx = indx_header.Weld(item.Weld(ptch));
+	auto indx = utils::DataAccessor::WeldAll({ indx_header, item, ptch });
 
 	// TAG0
 	utils::DataAccessor tag0_header = utils::DataAccessor::Alloc(8);
@@ -243,7 +243,7 @@ uint64_t hkphysics::hkDataChunkTAG0::DistributeAndSerialize(utils::DataAccessor&
 	cur_pos = 0;
 	utils::writeToAccessor(tag0_header, cur_pos, tag0_sizeAndFlags, true);
 	utils::writeStringToAccessor(tag0_header, cur_pos, std::string(this->type_name));
-	auto tag0 = tag0_header.Weld(sdkv.Weld(data.Weld(type.Weld(indx))));
+	auto tag0 = utils::DataAccessor::WeldAll({ tag0_header, sdkv, data, type, indx });
 
 	out = tag0;
 	return uint64_t(tag0_size);
