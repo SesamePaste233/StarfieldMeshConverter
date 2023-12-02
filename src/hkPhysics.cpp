@@ -252,7 +252,7 @@ std::string hkphysics::hkPhysicsReflectionData::classes_to_literal(bool show_mem
 	return ret;
 }
 
-std::string hkphysics::hkPhysicsReflectionData::dump_instances()
+std::string hkphysics::hkPhysicsReflectionData::dump_indexed_blocks()
 {
 	/*for (auto it = indexed_blocks.begin() + 1; it != indexed_blocks.end(); ++it) {
 		(*it)->_dumped = false;
@@ -277,4 +277,12 @@ std::vector<hkreflex::hkClassInstance*> hkphysics::hkPhysicsReflectionData::GetI
 		}
 	}
 	return ret;
+}
+
+std::string hkphysics::hkPhysicsReflectionData::dump_root_instance()
+{
+	if (this->root_level_instance == nullptr)
+		return "";
+
+	return this->root_level_instance->dump(0);
 }

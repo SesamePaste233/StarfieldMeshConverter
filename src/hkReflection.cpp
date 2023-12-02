@@ -534,8 +534,11 @@ std::string hkreflex::hkClassPointerInstance::dump(int indent)
 		if (in_document_ptr > ref_data->indexed_blocks.size()) {
 			ret += indent_str + "\t// Error: Out of bounds\n";
 		}
+		else if(this->ptr_instance) {
+			ret += indent_str + "\t" + this->ptr_instance->dump(indent + 1);
+		}
 		else {
-			ret += ref_data->indexed_blocks[in_document_ptr]->dump_instances(indent + 1);
+			ret += indent_str + "\t// Error: Null pointer\n";
 		}
 	}
 	ret += indent_str + "}";
@@ -836,11 +839,12 @@ bool hkreflex::hkClassRecordInstance::GetBoolByFieldName(const std::string& fiel
 size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 {
 	size_t cur_pos = 0;
-	if (type->ctype_name == "Eigen::Vector4f" || type->ctype_name == "Eigen::Quaternionf" || type->ctype_name == "Eigen::Quaterniond") {
+	auto element_type = type->sub_type;
+	if (type->ctype_name == "Eigen::Vector4f" || type->ctype_name == "Eigen::Quaternionf" || type->ctype_name == "Eigen::Quaterniond") { // Allocation
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 4; ++i) {
-			auto instance = AllocateInstance(type->sub_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_data);
 			if (!instance) {
 				return false;
 			}
@@ -865,11 +869,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 
 		return data_ptr - data;
 	}
-	else if (type->ctype_name == "Eigen::Matrix4f") {
+	else if (type->ctype_name == "Eigen::Matrix4f") { // Allocation
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 16; ++i) {
-			auto instance = AllocateInstance(type->sub_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_data);
 			if (!instance) {
 				return false;
 			}
@@ -894,11 +898,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 
 		return data_ptr - data;
 	}
-	else if (type->ctype_name == "Eigen::Matrix3f") {
+	else if (type->ctype_name == "Eigen::Matrix3f") { // Allocation
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 12; ++i) {
-			auto instance = AllocateInstance(type->sub_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_data);
 			if (!instance) {
 				return false;
 			}
@@ -923,76 +927,73 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 
 		return data_ptr - data;
 	}
-	else {
-		auto element_type = type->sub_type;
+	else if (type->type_name == "hkArray") { // Copy
+		this->in_document_ptr = utils::readFromAccessor<uint64_t>(data, cur_pos);
+		this->size_and_flags = utils::readFromAccessor<uint64_t>(data, cur_pos);
+		//_ASSERT(this->size_and_flags == 0x0000000000000000);
+		if (this->size_and_flags != 0x0000000000000000) {
+			std::cout << "Warning: Unknown sizeAndFlag. SizeAndFlag: " << std::hex << size_and_flags << std::endl;
+			return cur_pos;
+		}
 
-		if (type->type_name == "hkArray") {
-			this->in_document_ptr = utils::readFromAccessor<uint64_t>(data, cur_pos);
-			this->size_and_flags = utils::readFromAccessor<uint64_t>(data, cur_pos);
-			//_ASSERT(this->size_and_flags == 0x0000000000000000);
-			if (this->size_and_flags != 0x0000000000000000) {
-				std::cout << "Warning: Unknown sizeAndFlag. SizeAndFlag: " << std::hex << size_and_flags << std::endl;
+		if (in_document_ptr) {
+			if (in_document_ptr >= ref_data->indexed_blocks.size()) {
+				std::cout << "Warning: Out of bounds. In document ptr: " << in_document_ptr << " Indexed blocks size: " << ref_data->indexed_blocks.size() << std::endl;
 				return cur_pos;
 			}
-
-			if (in_document_ptr) {
-				if (in_document_ptr >= ref_data->indexed_blocks.size()) {
-					std::cout << "Warning: Out of bounds. In document ptr: " << in_document_ptr << " Indexed blocks size: " << ref_data->indexed_blocks.size() << std::endl;
-					return cur_pos;
-				}
-				data_block = ref_data->indexed_blocks[in_document_ptr];
-				if (data_block->m_data_type != element_type) {
-					std::cout << "Warning: Array type mismatch. Data type: " << data_block->m_data_type->type_name << " Expected type: " << element_type->type_name << std::endl;
-					return cur_pos;
-				}
-				data_block->BuildInstances();
-				array_instances = data_block->m_instances;
+			data_block = ref_data->indexed_blocks[in_document_ptr];
+			if (data_block->m_data_type != element_type) {
+				std::cout << "Warning: Array type mismatch. Data type: " << data_block->m_data_type->type_name << " Expected type: " << element_type->type_name << std::endl;
+				return cur_pos;
 			}
-			else {
-				//std::cout << "Warning: In document ptr is null" << std::endl;
-			}
-			return cur_pos;
-		}
-		else if (type->type_name == "hkRelArray") {
-			in_document_ptr = utils::readFromAccessor<uint32_t>(data, cur_pos);
-			if (in_document_ptr) {
-				data_block = ref_data->indexed_blocks[in_document_ptr];
-				_ASSERT(data_block->m_data_type == element_type);
-				data_block->BuildInstances();
-				array_instances = data_block->m_instances;
-			}
-			return cur_pos;
-		}
-		else if (type->type_name == "T[N]") {
-			size_t compile_size = 0;
-
-			for (auto& arg : type->template_args) {
-				if (arg->template_arg_name == "vN") {
-					auto value_arg = dynamic_cast<hkTemplateArgumentValue*>(arg);
-					compile_size = value_arg->value;
-					break;
-				}
-			}
-			utils::DataAccessor data_ptr = data;
-			for (int i = 0; i < compile_size; ++i) {
-				auto instance = AllocateInstance(element_type, ref_data);
-				if (!instance) {
-					return false;
-				}
-
-				auto size = instance->Build(data_ptr);
-				if (size == 0) {
-					return false;
-				}
-
-				this->array_instances.push_back(instance);
-				data_ptr += size;
-			}
-			return data_ptr - data;
+			data_block->BuildInstances();
+				
+			array_instances = data_block->m_instances;
 		}
 		else {
-			throw std::exception("Unknown array type");
+			//std::cout << "Warning: In document ptr is null" << std::endl;
 		}
+		return cur_pos;
+	}
+	else if (type->type_name == "hkRelArray") { // Reference
+		in_document_ptr = utils::readFromAccessor<uint32_t>(data, cur_pos);
+		if (in_document_ptr) {
+			data_block = ref_data->indexed_blocks[in_document_ptr];
+			_ASSERT(data_block->m_data_type == element_type);
+			data_block->BuildInstances();
+			array_instances = data_block->m_instances;
+		}
+		return cur_pos;
+	}
+	else if (type->type_name == "T[N]") { // Allocation
+		size_t compile_size = 0;
+
+		for (auto& arg : type->template_args) {
+			if (arg->template_arg_name == "vN") {
+				auto value_arg = dynamic_cast<hkTemplateArgumentValue*>(arg);
+				compile_size = value_arg->value;
+				break;
+			}
+		}
+		utils::DataAccessor data_ptr = data;
+		for (int i = 0; i < compile_size; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return false;
+			}
+
+			auto size = instance->Build(data_ptr);
+			if (size == 0) {
+				return false;
+			}
+
+			this->array_instances.push_back(instance);
+			data_ptr += size;
+		}
+		return data_ptr - data;
+	}
+	else {
+		throw std::exception("Unknown array type");
 	}
 	return 0;
 }
@@ -1006,8 +1007,11 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 
 	if (c_type == "std::vector" && type->type_name != "T[N]") {
 		std::string ret = "<ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + "[" + std::to_string(array_instances.size()) + "]: [\n";
-		if (in_document_ptr != 0 && this->data_block)
-			ret += this->data_block->dump_instances(indent + 1);
+		if (!this->array_instances.empty()) {
+			for(auto instance : array_instances) {
+				ret += indent_str + "\t" + instance->dump(indent + 1) + ",\n";
+			}
+		}
 		else if (in_document_ptr == 0) {
 			ret += indent_str + "\t// Empty\n";
 		}
@@ -1140,4 +1144,107 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 		}
 	}
 	return cur_pos;
+}
+
+void hkreflex::hkClassArrayInstance::resize(size_t num)
+{
+	auto element_type = type->sub_type;
+	if (type->ctype_name == "Eigen::Vector4f" || type->ctype_name == "Eigen::Quaternionf" || type->ctype_name == "Eigen::Quaterniond") { // Allocation
+		for (int i = this->array_instances.size(); i < 4; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return;
+			}
+
+			this->array_instances.push_back(instance);
+		}
+	}
+	else if (type->ctype_name == "Eigen::Matrix4f") { // Allocation
+		
+		for (int i = this->array_instances.size(); i < 16; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return;
+			}
+
+			this->array_instances.push_back(instance);
+		}
+	}
+	else if (type->ctype_name == "Eigen::Matrix3f") { // Allocation
+		for (int i = this->array_instances.size(); i < 12; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return;
+			}
+
+			this->array_instances.push_back(instance);
+		}
+	}
+	else if (type->type_name == "hkArray") {
+		if (this->array_instances.empty()) {
+			this->in_document_ptr = 0;
+			this->size_and_flags = 0;
+		}
+
+		for (int i = this->array_instances.size(); i > num; --i) {
+			delete this->array_instances.back();
+			this->array_instances.pop_back();
+		}
+
+		for (int i = this->array_instances.size(); i < num; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return;
+			}
+
+			this->array_instances.push_back(instance);
+		}
+	}
+	else if (type->type_name == "hkRelArray") {
+		if (this->array_instances.empty()) {
+			this->in_document_ptr = 0;
+		}
+
+		for (int i = this->array_instances.size(); i > num; --i) {
+			delete this->array_instances.back();
+			this->array_instances.pop_back();
+		}
+
+		for (int i = this->array_instances.size(); i < num; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return;
+			}
+
+			this->array_instances.push_back(instance);
+		}
+	}
+	else if (type->type_name == "T[N]") { // Fill array with fixed number of elements defined by template argument
+		size_t compile_size = 0;
+		for (auto& arg : type->template_args) {
+			if (arg->template_arg_name == "vN") {
+				auto value_arg = dynamic_cast<hkTemplateArgumentValue*>(arg);
+				compile_size = value_arg->value;
+				break;
+			}
+		}
+
+		for (int i = this->array_instances.size(); i > compile_size; --i) {
+			delete this->array_instances.back();
+			this->array_instances.pop_back();
+		}
+
+		for (int i = this->array_instances.size(); i < compile_size; ++i) {
+			auto instance = AllocateInstance(element_type, ref_data);
+			if (!instance) {
+				return;
+			}
+
+			this->array_instances.push_back(instance);
+		}	
+	}
+	else {
+		throw std::exception("Unknown array type");
+	}
+	return;
 }

@@ -91,7 +91,9 @@ namespace hkphysics {
 
 		std::string classes_to_literal(bool show_members = true, bool use_mapped_ctype = false, bool inverse_order = false);
 
-		std::string dump_instances();
+		std::string dump_root_instance();
+
+		std::string dump_indexed_blocks();
 
 		std::vector<hkreflex::hkClassInstance*> GetInstancesByClassName(const std::string& name);
 

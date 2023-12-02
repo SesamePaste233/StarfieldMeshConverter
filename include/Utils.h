@@ -30,6 +30,10 @@ namespace utils {
 	template<typename T>
 	concept _is_string_t = std::is_same_v<T, std::string>;
 
+	template<typename T, typename Elem_T = std::remove_reference_t<T>::value_type>
+	concept _is_vector_t = std::is_same_v<T, std::vector<Elem_T>> && (_is_integer_t<Elem_T> || _is_float_t<Elem_T> || _is_bool_t<Elem_T> || _is_string_t<Elem_T>);
+
+
 	const wchar_t* charToWchar(const char* c);
 
 	size_t getFilePaths(std::string _dir, std::vector<std::string>& _output, std::string extension);

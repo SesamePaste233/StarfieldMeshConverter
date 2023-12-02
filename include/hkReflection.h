@@ -13,6 +13,9 @@ namespace hktypes {
 
 	template<typename T>
 	concept _is_hk_holder_t = std::is_base_of<hkHolderBase, T>::value;
+
+	template<typename T>
+	concept _is_hk_array_holder_t = utils::_is_vector_t<T> && _is_hk_holder_t<typename T::value_type>;
 }
 
 namespace hkreflex {
@@ -92,11 +95,32 @@ namespace hkreflex {
 		hkClassInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : type(type), ref_data(ref_data) {};
 		virtual size_t Build(utils::DataAccessor& data) = 0;
 		virtual std::string dump(int indent = 0) = 0;
+		virtual hkClassInstance* make_copy() = 0;
 
 		template<typename T>
-		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
+		requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
 		bool GetValue(T & container);
 
+		template<typename arithmetic_t>
+		requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
+		bool GetValue(arithmetic_t & container);
+
+		template<typename elem_t>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+		bool GetValue(std::vector<elem_t> & container);
+
+		template<typename T>
+		requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
+		bool SetValue(T & container);
+
+		template<typename arithmetic_t>
+		requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
+		bool SetValue(arithmetic_t & container);
+
+		template<typename elem_t>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+		bool SetValue(std::vector<elem_t> & container);
+	
 	};
 
 	class hkIndexedDataBlock : public utils::SerializableBase {
@@ -110,9 +134,6 @@ namespace hkreflex {
 		hkIndexedDataBlock(hkphysics::hkPhysicsReflectionData* ref_data) : ref_data(ref_data) {};
 
 		~hkIndexedDataBlock() {
-			for (auto instance : m_instances) {
-				delete instance;
-			}
 		}
 
 		hkClassBase* m_data_type = nullptr;
@@ -120,7 +141,7 @@ namespace hkreflex {
 		uint32_t m_offset = 0;
 		uint32_t m_num_instances = 0;
 
-		std::vector<hkClassInstance*> m_instances;
+		std::vector<hkClassInstance*> m_instances; // Reference
 
 		hkphysics::hkPhysicsReflectionData* ref_data = nullptr;
 
@@ -150,6 +171,10 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassBoolInstance(*this);
+		}
 	};
 
 	class hkClassStringInstance : public hkClassInstance {
@@ -166,6 +191,10 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassStringInstance(*this);
+		}
 	};
 
 	class hkClassIntInstance : public hkClassInstance {
@@ -185,6 +214,10 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassIntInstance(*this);
+		}
 	};
 
 	class hkClassFloatInstance : public hkClassInstance {
@@ -202,24 +235,57 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassFloatInstance(*this);
+		}
 	};
 
 	class hkClassPointerInstance : public hkClassInstance {
 	public:
-		std::string c_type = "ptr";
-		uint64_t in_document_ptr = NULL;
-		hkIndexedDataBlock* data_block = nullptr;
-
-		hkClassInstance* ptr_instance = nullptr;
-
 		hkClassPointerInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
 		};
+		// Delete instance in destructor
+		~hkClassPointerInstance() {
+			if (ptr_instance) {
+				delete ptr_instance;
+				ptr_instance = nullptr;
+			}
+		}
+
+		hkClassPointerInstance(const hkClassPointerInstance& other): hkClassInstance(other) {
+			c_type = other.c_type;
+			in_document_ptr = other.in_document_ptr;
+			data_block = other.data_block;
+			ptr_instance = other.ptr_instance->make_copy();
+		}
+
+		hkClassPointerInstance& operator=(const hkClassPointerInstance& other) {
+			if (this == &other)
+				return *this;
+			hkClassInstance::operator=(other);
+			c_type = other.c_type;
+			in_document_ptr = other.in_document_ptr;
+			data_block = other.data_block;
+			ptr_instance = other.ptr_instance->make_copy();
+			return *this;
+		};
+
+		std::string c_type = "ptr";
+		uint64_t in_document_ptr = NULL;
+		hkIndexedDataBlock* data_block = nullptr; // Reference
+
+		hkClassInstance* ptr_instance = nullptr; // With ownership
 
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassPointerInstance(*this);
+		}
 	};
 
 	class hkClassRecordInstance : public hkClassInstance {
@@ -229,19 +295,48 @@ namespace hkreflex {
 			hkClassInstance* instance = nullptr;
 			hkFieldBase* field = nullptr;
 		};
+		hkClassRecordInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		};
+
+		~hkClassRecordInstance() {
+			for (auto& record : record_instances)
+				delete record.instance;
+		}
+
+		hkClassRecordInstance(const hkClassRecordInstance& other) : hkClassInstance(other) {
+			c_type = other.c_type;
+			for(auto& record : other.record_instances) {
+				record_instances.push_back({ record.field_name, record.instance->make_copy(), record.field });
+			}
+		}
+
+		hkClassRecordInstance& operator=(const hkClassRecordInstance& other) {
+			if (this == &other)
+				return *this;
+			hkClassInstance::operator=(other);
+			c_type = other.c_type;
+			for (auto& record : record_instances)
+				delete record.instance;
+			record_instances.clear();
+			for (auto& record : other.record_instances) {
+				record_instances.push_back({ record.field_name, record.instance->make_copy(), record.field });
+			}
+			return *this;
+		};
 
 		std::string c_type = "class";
 
-		std::vector<Record> record_instances;
-
-		hkClassRecordInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
-		};
+		std::vector<Record> record_instances; // With ownership
 
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassRecordInstance(*this);
+		}
 
 		hkClassInstance* GetParentInstance();
 
@@ -264,22 +359,74 @@ namespace hkreflex {
 
 	class hkClassArrayInstance : public hkClassInstance {
 	public:
+		hkClassArrayInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		};
+
+		~hkClassArrayInstance() {
+			for (auto instance : array_instances)
+				delete instance;
+		}
+
+		hkClassArrayInstance(const hkClassArrayInstance& other) : hkClassInstance(other) {
+			c_type = other.c_type;
+			for (auto instance : other.array_instances) {
+				array_instances.push_back(instance->make_copy());
+			}
+			data_block = other.data_block;
+			in_document_ptr = other.in_document_ptr;
+			size_and_flags = other.size_and_flags;
+			std::memcpy(float_array, other.float_array, sizeof(float_array));
+		}
+
+		hkClassArrayInstance& operator=(const hkClassArrayInstance& other) {
+			if (this == &other)
+				return *this;
+			hkClassInstance::operator=(other);
+			c_type = other.c_type;
+			for (auto instance : array_instances)
+				delete instance;
+			array_instances.clear();
+			for (auto instance : other.array_instances) {
+				array_instances.push_back(instance->make_copy());
+			}
+			data_block = other.data_block;
+			in_document_ptr = other.in_document_ptr;
+			size_and_flags = other.size_and_flags;
+			std::memcpy(float_array, other.float_array, sizeof(float_array));
+			return *this;
+		};
+
 		std::string c_type = "std::vector";
-		std::vector<hkClassInstance*> array_instances;
+		std::vector<hkClassInstance*> array_instances; // With ownership
 		hkIndexedDataBlock* data_block = nullptr;
 		uint64_t in_document_ptr = NULL;
 		uint64_t size_and_flags = 0;
 
 		float float_array[16] = { 0 };
 
-		hkClassArrayInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
-		};
-
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		hkClassInstance* make_copy() override {
+			return new hkClassArrayInstance(*this);
+		}
+
+		void resize(size_t num);
+
+		inline void update_view() {
+#ifdef _DEBUG
+			for (int i = 0; i < this->array_instances.size(); i++) {
+				auto float_instance = dynamic_cast<hkClassFloatInstance*>(array_instances[i]);
+				if (float_instance == nullptr)
+					return;
+				float_array[i] = float_instance->value;
+			}
+#endif
+			return;
+		}
 	};
 
 	class hkClassBase {
@@ -397,7 +544,7 @@ namespace hkreflex {
 	hkClassInstance* AllocateInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* data);
 
 	template<typename T>
-	requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
+	requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
 	inline bool hkClassInstance::GetValue(T& container)
 	{
 		if (utils::_is_string_t<T> && type->kind == hkClassBase::TypeKind::String) {
@@ -405,35 +552,144 @@ namespace hkreflex {
 			container = *reinterpret_cast<T*>(&string_type->value);
 			return true;
 		}
-		else if (utils::_is_bool_t<T> && type->kind == hkClassBase::TypeKind::Bool) {
-			auto bool_type = dynamic_cast<hkClassBoolInstance*>(this);
-			container = *reinterpret_cast<T*>(&bool_type->value);
-			return true;
-		}
-		else if (utils::_is_float_t<T> && type->kind == hkClassBase::TypeKind::Float) {
-			auto float_type = dynamic_cast<hkClassFloatInstance*>(this);
-			if (std::is_same_v<T, float>) {
-				float v = float(float_type->value);
-				container = *reinterpret_cast<T*>(&v);
-				return true;
-			}else {
-				container = *reinterpret_cast<T*>(&float_type->value);
-				return true;
-			}
-		}
-		else if (utils::_is_integer_t<T> && type->kind == hkClassBase::TypeKind::Int) {
-			auto int_type = dynamic_cast<hkClassIntInstance*>(this);
-			if (utils::_signed_integer_t<T> && int_type->is_signed) {
-				container = *reinterpret_cast<T*>(&int_type->svalue);
-				return true;
-			}
-			else if (utils::_unsigned_integer_t<T> && !int_type->is_signed) {
-				container = *reinterpret_cast<T*>(&int_type->value);
-				return true;
-			}
-		}
 		else if (hktypes::_is_hk_holder_t<T> && type->kind == hkClassBase::TypeKind::Record) {
 			reinterpret_cast<hktypes::hkHolderBase*>(&container)->FromInstance(this);
+			return true;
+		}
+		
+		return false;
+	}
+
+	template<typename arithmetic_t>
+	requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
+	inline bool hkClassInstance::GetValue(arithmetic_t& container)
+	{
+		if (utils::_is_bool_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Bool) {
+			auto bool_type = dynamic_cast<hkClassBoolInstance*>(this);
+			container = static_cast<arithmetic_t>(bool_type->value);
+			return true;
+		}
+		else if (utils::_is_float_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Float) {
+			auto float_type = dynamic_cast<hkClassFloatInstance*>(this);
+			container = static_cast<arithmetic_t>(float_type->value);
+			return true;
+		}
+		else if (utils::_is_integer_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Int) {
+			auto int_type = dynamic_cast<hkClassIntInstance*>(this);
+			if (int_type->is_signed) {
+				if (!utils::_signed_integer_t<arithmetic_t>) {
+					std::cout << "Warning: Attempting to retrieve an unsigned value from a signed value." << std::endl;
+				}
+				container = static_cast<arithmetic_t>(int_type->svalue);
+				return true;
+			}
+			else if (!int_type->is_signed) {
+				if (!utils::_unsigned_integer_t<arithmetic_t>) {
+					std::cout << "Warning: Attempting to retrieve a signed value from an unsigned value." << std::endl;
+				}
+				container = static_cast<arithmetic_t>(int_type->value);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	template<typename elem_t>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+	inline bool hkClassInstance::GetValue(std::vector<elem_t> & container)
+	{
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+			container.clear();
+			for (auto& instance : array_instance->array_instances) {
+				elem_t elem_container;
+				if (instance->GetValue(elem_container)) {
+					container.push_back(elem_container);
+				}
+			}
+		}
+		return false;
+	}
+
+	template<typename T>
+	requires utils::_is_string_t<T>  || hktypes::_is_hk_holder_t<T>
+	inline bool hkClassInstance::SetValue(T& container)
+	{
+		if (utils::_is_string_t<T> && type->kind == hkClassBase::TypeKind::String) {
+			auto string_type = dynamic_cast<hkClassStringInstance*>(this);
+			string_type->value = *reinterpret_cast<std::string*>(&container);
+			return true;
+		}
+		else if (hktypes::_is_hk_holder_t<T> && type->kind == hkClassBase::TypeKind::Record) {
+			reinterpret_cast<hktypes::hkHolderBase*>(&container)->ToInstance(this);
+			return true;
+		}
+		
+		return false;
+	}
+
+	template<typename arithmetic_t>
+	requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
+	inline bool hkClassInstance::SetValue(arithmetic_t& container)
+	{
+		if (utils::_is_bool_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Bool) {
+			auto bool_type = dynamic_cast<hkClassBoolInstance*>(this);
+			bool_type->value = static_cast<bool>(container);
+			return true;
+		}
+		else if (utils::_is_float_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Float) {
+			auto float_type = dynamic_cast<hkClassFloatInstance*>(this);
+			float_type->value = static_cast<double>(container);
+			return true;
+		}
+		else if (utils::_is_integer_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Int) {
+			auto int_type = dynamic_cast<hkClassIntInstance*>(this);
+			if (int_type->byte_length < sizeof(arithmetic_t)) {
+				std::cout << "Warning: Attempting to set the value of an instance with a value of larger size. Expected size: " << int_type->byte_length << std::endl;
+			}
+
+			if (int_type->is_signed) {
+				if (!utils::_signed_integer_t<arithmetic_t>) {
+					std::cout << "Warning: Attempting to set a signed value from an unsigned value." << std::endl;
+				}
+				int_type->svalue = static_cast<int64_t>(container);
+				return true;
+			}
+			else if (utils::_unsigned_integer_t<arithmetic_t> && !int_type->is_signed) {
+				if (!utils::_unsigned_integer_t<arithmetic_t>) {
+					std::cout << "Warning: Attempting to set an unsigned value from a signed value." << std::endl;
+				}
+				int_type->value = static_cast<uint64_t>(container);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	template<typename elem_t>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+	inline bool hkClassInstance::SetValue(std::vector<elem_t>& container)
+	{
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+
+			auto array_instance_copied = *array_instance;
+			array_instance_copied.resize(container.size());
+
+			for (size_t i = 0; i < container.size(); i++) {
+				elem_t& elem_container = container[i];
+				auto& instance = array_instance_copied.array_instances[i];
+				if (!instance->SetValue(elem_container)) {
+					std::cout << "hkClassInstance::SetValue: Failed to set value of array instance." << std::endl;
+					return false;
+				}
+			}
+
+			array_instance_copied.update_view();
+
+			*array_instance = array_instance_copied;
+
 			return true;
 		}
 		return false;

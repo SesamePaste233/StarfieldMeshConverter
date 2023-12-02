@@ -262,7 +262,7 @@ void test_main() {
 
 	auto literals = data.classes_to_literal(true, true, true);
 
-	auto instances = data.dump_instances();
+	auto instances = data.dump_indexed_blocks();
 
 	/*std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
 	data.SerializeWithTypeUnchanged(file0);
@@ -291,7 +291,7 @@ void main() {
 
 	auto literals = data.classes_to_literal(true, true, true);
 
-	auto instances = data.dump_instances();
+	auto instances = data.dump_root_instance();
 
 	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer_test.bin", std::ios::binary);
 	data.SerializeWithTypeUnchanged(file0);
@@ -332,7 +332,7 @@ void pmain() {
 
 	auto literals = data->classes_to_literal(true, true, true);
 
-	auto instances = data->dump_instances();
+	auto instances = data->dump_indexed_blocks();
 
 	// Save the string into a file
 	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
