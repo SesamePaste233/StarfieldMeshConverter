@@ -4,6 +4,10 @@
 #include "hkReflection.h"
 #include "json.hpp"
 
+#include "hkaSkeleton.h"
+#include "hclSimClothData.h"
+#include "hclClothData.h"
+
 namespace hkphysics {
 	class hkPhysicsReflectionData;
 }
@@ -21,65 +25,42 @@ namespace hktypes {
 		virtual bool ToInstance(hkreflex::hkClassInstance* instance) = 0;
 	};
 
-	class hkQsTransform : public hkHolderBase {
-	public:
-		// From hkQsTransform
-		Eigen::Vector4f translation;
-		Eigen::Quaternionf rotation;
-		Eigen::Vector4f scale;
-
-		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
-		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-
-		Eigen::Matrix4f getMatrix(bool force_M44_1 = false);
-
-		static Eigen::Vector4f getRotatedDir(Eigen::Vector4f& dir, Eigen::Quaternionf& rot);
-		static hkQsTransform fromMultiplied(hkQsTransform& a, hkQsTransform& b);
-		static hkQsTransform fromInverse(hkQsTransform& a);
-		static hkQsTransform fromMatrix(Eigen::Matrix4f& mat, float scale = 1);
+	class hkReferencedObject : public hkHolderBase {
 	};
 
-	class hkaBoneHolder : public hkHolderBase {
+	class hkPackedVector3Holder : public hkHolderBase {
 	public:
-		// From hkaBone
-		std::string name;
-		bool lock_translation = false;
-
-		// From hkaSkeleton
-		hkaBoneHolder* parent = nullptr;
+		int16_t values[4];
 
 		// Extra
-		std::vector<hkaBoneHolder*> children;
 		bool FromInstance(hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 
-		void SetTransform(hkQsTransform& transform, bool update_world_trans = true);
-
-		void SetWorldTransform(hkQsTransform& transform, bool update_local_trans = true);
-
-		hkQsTransform GetTransform();
-
-		hkQsTransform GetWorldTransform();
-
-	protected:
-		hkQsTransform transform;
-		hkQsTransform world_transform;
+		Eigen::Vector3f ToVector3f();
+		static hkPackedVector3Holder FromVector3f(const Eigen::Vector3f vec);
 	};
 
-	class hkaSkeletonHolder : public hkHolderBase {
+	class hkVector4Holder : public hkHolderBase {
 	public:
-		std::string name;
-		hkaBoneHolder* root = nullptr;
+		float values[4];
 
 		// Extra
 		bool FromInstance(hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 
-		void TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func = [](hkaBoneHolder*)->void {});
+		Eigen::Vector4f ToVector4f();
+		static hkVector4Holder FromVector4f(const Eigen::Vector4f vec);
+	};
 
-		nlohmann::json ToJson(hkaBoneHolder* bone = nullptr);
+	class hkMatrix4Holder : public hkHolderBase {
+	public:
+		float values[16];
 
-		void FromJson(nlohmann::json& json, hkaBoneHolder* bone = nullptr);
+		// Extra
+		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+
+		Eigen::Matrix4f ToMatrix4f();
+		static hkMatrix4Holder FromMatrix4f(const Eigen::Matrix4f mat);
 	};
 }

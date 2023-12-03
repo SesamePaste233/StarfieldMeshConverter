@@ -1,328 +1,175 @@
 #include "hkTypes.h"
 
-bool hktypes::hkQsTransform::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkPackedVector3Holder::FromInstance(hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hkQsTransformf") {
-		std::cout << "hkQsTransform::FromInstance: type_name is not hkQsTransformf" << std::endl;
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkPackedVector3") {
+		std::cout << "hkPackedVector3Holder::FromInstance: type_name is not hkPackedVector3" << std::endl;
 		return false;
 	}
 
-	auto t_inst = class_instance->GetArrayByFieldName<double>("translation");
-	auto r_inst = class_instance->GetArrayByFieldName<double>("rotation");
-	auto s_inst = class_instance->GetArrayByFieldName<double>("scale");
+	std::vector<int16_t> _values;
+	array_instance->GetValue(_values);
 
-	this->translation = Eigen::Vector4f(t_inst[0], t_inst[1], t_inst[2], t_inst[3]);
-	this->rotation = Eigen::Quaternionf(r_inst[3], r_inst[0], r_inst[1], r_inst[2]);
-	this->scale = Eigen::Vector4f(s_inst[0], s_inst[1], s_inst[2], s_inst[3]);
+	this->values[0] = _values[0];
+	this->values[1] = _values[1];
+	this->values[2] = _values[2];
+	this->values[3] = _values[3];
 
 	return true;
 }
 
-bool hktypes::hkQsTransform::ToInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkPackedVector3Holder::ToInstance(hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hkQsTransformf") {
-		std::cout << "hkQsTransform::FromInstance: type_name is not hkQsTransformf" << std::endl;
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkPackedVector3") {
+		std::cout << "hkPackedVector3Holder::FromInstance: type_name is not hkPackedVector3" << std::endl;
 		return false;
 	}
 
-	std::vector<double> t_inst = { this->translation.x(), this->translation.y(), this->translation.z(), this->translation.w() };
-	std::vector<double> r_inst = { this->rotation.x(), this->rotation.y(), this->rotation.z(), this->rotation.w() };
-	std::vector<double> s_inst = { this->scale.x(), this->scale.y(), this->scale.z(), this->scale.w() };
-
-	class_instance->GetInstanceByFieldName("translation")->SetValue(t_inst);
-	class_instance->GetInstanceByFieldName("rotation")->SetValue(r_inst);
-	class_instance->GetInstanceByFieldName("scale")->SetValue(s_inst);
-
-	return true;
+	std::vector<int16_t> _values = { this->values[0], this->values[1], this->values[2], this->values[3] };
+	array_instance->SetValue(_values);
 }
 
-Eigen::Matrix4f hktypes::hkQsTransform::getMatrix(bool force_M44_1)
+Eigen::Vector3f hktypes::hkPackedVector3Holder::ToVector3f()
 {
-	Eigen::Matrix4f result;
-	result.setIdentity();
-	result.block<3, 3>(0, 0) = this->rotation.toRotationMatrix();
-	result.block<4, 1>(0, 3) = this->translation.block<4, 1>(0, 0);
+	auto iexp = (int)values[3] << 16;
+	auto fexp = *reinterpret_cast<float*>(&iexp);
+	auto x = fexp * float((int)values[0] << 16);
+	auto y = fexp * float((int)values[1] << 16);
+	auto z = fexp * float((int)values[2] << 16);
+	return Eigen::Vector3f(x, y, z);
+}
 
-	if (force_M44_1) {
-		result(3, 3) = 1.0f;
+hktypes::hkPackedVector3Holder hktypes::hkPackedVector3Holder::FromVector3f(const Eigen::Vector3f vec)
+{
+	hkPackedVector3Holder result;
+	float m = vec.maxCoeff();
+	uint8_t b = 0;
+	int* const exp_ptr = reinterpret_cast<int*>(&m);
+	int x = *exp_ptr;
+	const int log_2 = ((x >> 23) & 255) - 128;
+	x &= ~(255 << 23);
+	x += 127 << 23;
+	*exp_ptr = x;
+	int log2 = (int(m) + 1 + log_2 + 96);
+	if (log2 > b) {
+		b = log2;
 	}
-
+	result.values[3] = b << 7;
+	int iexp = b << 23;
+	float fexp = *reinterpret_cast<float*>(&iexp);
+	result.values[0] = (int32_t)(vec.x() / fexp) >> 16;
+	result.values[1] = (int32_t)(vec.y() / fexp) >> 16;
+	result.values[2] = (int32_t)(vec.z() / fexp) >> 16;
 	return result;
 }
 
-Eigen::Vector4f hktypes::hkQsTransform::getRotatedDir(Eigen::Vector4f& dir, Eigen::Quaternionf& rot)
+bool hktypes::hkMatrix4Holder::FromInstance(hkreflex::hkClassInstance* instance)
 {
-	Eigen::Vector4f result;
-	// Extract the scalar (real) part of the quaternion
-	float qreal = rot.w();
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkMatrix4" || array_instance->type->type_name != "hkMatrix4f" || array_instance->type->type_name != "hkMatrix4d") {
+		std::cout << "hkMatrix4Holder::FromInstance: type_name is not hkMatrix4" << std::endl;
+		return false;
+	}
 
-	// Calculate q^2 - 0.5
-	float q2minus1 = qreal * qreal - 0.5f;
+	std::vector<float> _values;
+	array_instance->GetValue(_values);
+	for (int i = 0; i < 16; i++) {
+		this->values[i] = _values[i];
+	}
 
-	// Calculate the contribution of the imaginary part of the quaternion
-	result = dir * q2minus1;
-
-	// Calculate the dot product of the imaginary part of the quaternion and the direction vector
-	float imagDotDir = rot.vec().dot(dir.head<3>());
-
-	// Add the contribution of the cross product of the imaginary part and the direction vector
-	result.head<3>() += rot.vec() * imagDotDir;
-
-	// Calculate the cross product of the imaginary part and the direction vector
-	Eigen::Vector3f imagCrossDir = rot.vec().cross(dir.head<3>());
-
-	// Add the contribution of the cross product multiplied by the scalar part of the quaternion
-	result.head<3>() += imagCrossDir * qreal;
-
-	// The fourth component remains unchanged
-	return result + result;
+	return true;
 }
 
-hktypes::hkQsTransform hktypes::hkQsTransform::fromMultiplied(hkQsTransform& a, hkQsTransform& b)
+bool hktypes::hkMatrix4Holder::ToInstance(hkreflex::hkClassInstance* instance)
 {
-	hkQsTransform result;
-	result.translation = a.translation + getRotatedDir(b.translation, a.rotation);
-	result.rotation = a.rotation * b.rotation;
-	result.scale = a.scale.cwiseProduct(b.scale);
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkMatrix4" || array_instance->type->type_name != "hkMatrix4f" || array_instance->type->type_name != "hkMatrix4d") {
+		std::cout << "hkMatrix4Holder::FromInstance: type_name is not hkMatrix4" << std::endl;
+		return false;
+	}
+
+	std::vector<float> _values = { this->values[0], this->values[1], this->values[2], this->values[3], this->values[4], this->values[5], this->values[6], this->values[7], this->values[8], this->values[9], this->values[10], this->values[11], this->values[12], this->values[13], this->values[14], this->values[15] };
+	array_instance->SetValue(_values);
+
+	return true;
+}
+
+Eigen::Matrix4f hktypes::hkMatrix4Holder::ToMatrix4f()
+{
+	Eigen::Matrix4f mat;
+	mat << values[0], values[1], values[2], values[3],
+		values[4], values[5], values[6], values[7],
+		values[8], values[9], values[10], values[11],
+		values[12], values[13], values[14], values[15];
+	return mat;
+}
+
+hktypes::hkMatrix4Holder hktypes::hkMatrix4Holder::FromMatrix4f(const Eigen::Matrix4f mat)
+{
+	hkMatrix4Holder result;
+	result.values[0] = mat(0, 0);
+	result.values[1] = mat(0, 1);
+	result.values[2] = mat(0, 2);
+	result.values[3] = mat(0, 3);
+	result.values[4] = mat(1, 0);
+	result.values[5] = mat(1, 1);
+	result.values[6] = mat(1, 2);
+	result.values[7] = mat(1, 3);
+	result.values[8] = mat(2, 0);
+	result.values[9] = mat(2, 1);
+	result.values[10] = mat(2, 2);
+	result.values[11] = mat(2, 3);
+	result.values[12] = mat(3, 0);
+	result.values[13] = mat(3, 1);
+	result.values[14] = mat(3, 2);
+	result.values[15] = mat(3, 3);
 	return result;
 }
 
-hktypes::hkQsTransform hktypes::hkQsTransform::fromInverse(hkQsTransform& a)
+bool hktypes::hkVector4Holder::FromInstance(hkreflex::hkClassInstance* instance)
 {
-	hkQsTransform result;
-	result.rotation = a.rotation.conjugate();
-	Eigen::Vector4f inv_t = -a.translation;
-	result.translation = getRotatedDir(inv_t, result.rotation);
-	result.scale = a.scale.cwiseInverse();
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkVector4" || array_instance->type->type_name != "hkVector4f" || array_instance->type->type_name != "hkVector4d") {
+		std::cout << "hkVector4Holder::FromInstance: type_name is not hkVector4" << std::endl;
+		return false;
+	}
+
+	std::vector<float> _values;
+	array_instance->GetValue(_values);
+	for (int i = 0; i < 4; i++) {
+		this->values[i] = _values[i];
+	}
+
+	return true;
+}
+
+bool hktypes::hkVector4Holder::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkVector4" || array_instance->type->type_name != "hkVector4f" || array_instance->type->type_name != "hkVector4d") {
+		std::cout << "hkVector4Holder::FromInstance: type_name is not hkVector4" << std::endl;
+		return false;
+	}
+
+	std::vector<float> _values = { this->values[0], this->values[1], this->values[2], this->values[3] };
+	array_instance->SetValue(_values);
+
+	return true;
+}
+
+Eigen::Vector4f hktypes::hkVector4Holder::ToVector4f()
+{
+	return Eigen::Vector4f(values[0], values[1], values[2], values[3]);
+}
+
+hktypes::hkVector4Holder hktypes::hkVector4Holder::FromVector4f(const Eigen::Vector4f vec)
+{
+	hkVector4Holder result;
+	result.values[0] = vec.x();
+	result.values[1] = vec.y();
+	result.values[2] = vec.z();
+	result.values[3] = vec.w();
 	return result;
-}
-
-hktypes::hkQsTransform hktypes::hkQsTransform::fromMatrix(Eigen::Matrix4f& mat, float scale)
-{
-	hkQsTransform result;
-	result.translation = mat.block<4, 1>(0, 3);
-	result.rotation = Eigen::Quaternionf(mat.block<3, 3>(0, 0));
-	result.scale = Eigen::Vector4f(scale, scale, scale, 0);
-	return result;
-}
-
-bool hktypes::hkaBoneHolder::FromInstance(hkreflex::hkClassInstance* instance)
-{
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hkaBone") {
-		std::cout << "hkaBoneHolder::FromInstance: type_name is not hkaBone" << std::endl;
-		return false;
-	}
-
-	this->name = class_instance->GetStringByFieldName("name");
-	this->lock_translation = class_instance->GetBoolByFieldName("lockTranslation");
-
-	return true;
-}
-
-bool hktypes::hkaBoneHolder::ToInstance(hkreflex::hkClassInstance* instance)
-{
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hkaBone") {
-		std::cout << "hkaBoneHolder::FromInstance: type_name is not hkaBone" << std::endl;
-		return false;
-	}
-
-	class_instance->GetInstanceByFieldName("name")->SetValue(this->name);
-	class_instance->GetInstanceByFieldName("lockTranslation")->SetValue(this->lock_translation);
-
-	return true;
-}
-
-void hktypes::hkaBoneHolder::SetTransform(hkQsTransform& transform, bool update_world_trans)
-{
-	this->transform = transform;
-	if (update_world_trans) {
-		if (this->parent) {
-			this->world_transform = hktypes::hkQsTransform::fromMultiplied(this->parent->world_transform, this->transform);
-		}
-		else {
-			this->world_transform = this->transform;
-		}
-	}
-}
-
-void hktypes::hkaBoneHolder::SetWorldTransform(hkQsTransform& transform, bool update_local_trans)
-{
-	this->world_transform = transform;
-	if (update_local_trans) {
-		if (this->parent) {
-			auto inv_parent = hktypes::hkQsTransform::fromInverse(this->parent->world_transform);
-			this->transform = hktypes::hkQsTransform::fromMultiplied(inv_parent, this->world_transform);
-		}
-		else {
-			this->transform = this->world_transform;
-		}
-	}
-}
-
-hktypes::hkQsTransform hktypes::hkaBoneHolder::GetTransform()
-{
-	return this->transform;
-}
-
-hktypes::hkQsTransform hktypes::hkaBoneHolder::GetWorldTransform()
-{
-	return this->world_transform;
-}
-
-bool hktypes::hkaSkeletonHolder::FromInstance(hkreflex::hkClassInstance* instance)
-{
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hkaSkeleton") {
-		std::cout << "hkaSkeletonHolder::FromInstance: type_name is not hkaSkeleton" << std::endl;
-		return false;
-	}
-
-	this->name = class_instance->GetStringByFieldName("name");
-
-	auto parent_indices = class_instance->GetArrayByFieldName<int16_t>("parentIndices");
-
-	auto bones_v = class_instance->GetArrayByFieldName<hkaBoneHolder>("bones");
-
-	auto reference_pose = class_instance->GetArrayByFieldName<hkQsTransform>("referencePose");
-
-	std::vector<hkaBoneHolder*> bones;
-
-	for (int i = 0; i < bones_v.size(); i++) {
-		auto b_ptr = new hkaBoneHolder(bones_v[i]);
-		bones.push_back(b_ptr);
-	}
-
-	for (int i = 0; i < bones.size(); ++i) {
-		auto bone = bones[i];
-		auto parent_index = parent_indices[i];
-		if (parent_index == -1) {
-			this->root = bone;
-			root->SetTransform(reference_pose[i]);
-		}
-		else {
-			bone->parent = bones[parent_index];
-			bones[parent_index]->children.push_back(bone);
-			bone->SetTransform(reference_pose[i]);
-		}
-	}
-
-	return true;
-}
-
-bool hktypes::hkaSkeletonHolder::ToInstance(hkreflex::hkClassInstance* instance)
-{
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hkaSkeleton") {
-		std::cout << "hkaSkeletonHolder::FromInstance: type_name is not hkaSkeleton" << std::endl;
-		return false;
-	}
-
-	std::vector<int16_t> parent_indices;
-	std::vector<hkaBoneHolder*> bones_ptr;
-	std::vector<hkQsTransform> reference_pose;
-
-	this->TraverseBones([&](hkaBoneHolder* bone) {
-		if (bone->parent) {
-			parent_indices.push_back(std::distance(bones_ptr.begin(), std::find(bones_ptr.begin(), bones_ptr.end(), bone->parent)));
-		}
-		else {
-			parent_indices.push_back(-1);
-		}
-		bones_ptr.push_back(bone);
-		reference_pose.push_back(bone->GetTransform());
-	});
-
-	std::vector<hkaBoneHolder> bones;
-	for (auto bone : bones_ptr) {
-		bones.push_back(*bone);
-	}
-
-	class_instance->GetInstanceByFieldName("name")->SetValue(this->name);
-	class_instance->GetInstanceByFieldName("parentIndices")->SetValue(parent_indices);
-	class_instance->GetInstanceByFieldName("bones")->SetValue(bones);
-	class_instance->GetInstanceByFieldName("referencePose")->SetValue(reference_pose);
-
-	return true;
-}
-
-void hktypes::hkaSkeletonHolder::TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func)
-{
-	std::function<void(hkaBoneHolder*)> traverse = [&](hkaBoneHolder* bone) {
-		pre_order_func(bone);
-		for (auto child : bone->children) {
-			traverse(child);
-		}
-		post_order_func(bone);
-	};
-
-	traverse(this->root);
-}
-
-nlohmann::json hktypes::hkaSkeletonHolder::ToJson(hkaBoneHolder* cur_bone)
-{
-	if (cur_bone == nullptr) {
-		cur_bone = this->root;
-	}
-	nlohmann::json serialized;
-
-	serialized["name"] = cur_bone->name;
-	serialized["lock_translation"] = cur_bone->lock_translation;
-
-	auto matrix = cur_bone->GetWorldTransform().getMatrix(true);
-
-	auto rtn = utils::xf::toAxis(matrix, 0.07);
-
-	serialized["head"].push_back(rtn.first.x());
-	serialized["head"].push_back(rtn.first.y());
-	serialized["head"].push_back(rtn.first.z());
-	serialized["tail"].push_back(rtn.second.x());
-	serialized["tail"].push_back(rtn.second.y());
-	serialized["tail"].push_back(rtn.second.z());
-	for (int i = 0; i < 4; ++i) {
-		serialized["matrix"].push_back(nlohmann::json::array());
-		for (int j = 0; j < 4; ++j) {
-			serialized["matrix"][i].push_back(matrix(i, j));
-		}
-	}
-
-	for (auto child : cur_bone->children) {
-		if (child == nullptr) {
-			continue;
-		}
-		serialized["children"].push_back(ToJson(child));
-	}
-
-	return serialized;
-}
-
-void hktypes::hkaSkeletonHolder::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
-{
-	if (bone == nullptr) {
-		bone = this->root;
-	}
-
-	bone->name = json["name"];
-	bone->lock_translation = json["lock_translation"];
-
-	Eigen::Matrix4f matrix;
-	matrix.setIdentity();
-	for (int i = 0; i < 4; ++i) {
-		for (int j = 0; j < 4; j++) {
-			matrix(i, j) = json["matrix"][i][j];
-		}
-	}
-
-	auto trans = hkQsTransform::fromMatrix(matrix);
-
-	bone->SetWorldTransform(trans, true);
-
-	for (auto child : json["children"]) {
-		auto child_bone = new hkaBoneHolder();
-		bone->children.push_back(child_bone);
-		this->FromJson(child, child_bone);
-	}
 }

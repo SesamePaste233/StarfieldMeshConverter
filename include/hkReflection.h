@@ -106,7 +106,7 @@ namespace hkreflex {
 		bool GetValue(arithmetic_t & container);
 
 		template<typename elem_t>
-		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool GetValue(std::vector<elem_t> & container);
 
 		template<typename T>
@@ -118,7 +118,7 @@ namespace hkreflex {
 		bool SetValue(arithmetic_t & container);
 
 		template<typename elem_t>
-		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool SetValue(std::vector<elem_t> & container);
 	
 	};
@@ -355,6 +355,10 @@ namespace hkreflex {
 		template<typename T>
 		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
 		std::vector<T> GetArrayByFieldName(const std::string& field_name);
+
+		template<typename T>
+		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
+		std::vector<T*> GetArrayOfPointersByFieldName(const std::string & field_name);
 	};
 
 	class hkClassArrayInstance : public hkClassInstance {
@@ -596,7 +600,7 @@ namespace hkreflex {
 	}
 
 	template<typename elem_t>
-	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 	inline bool hkClassInstance::GetValue(std::vector<elem_t> & container)
 	{
 		if (type->kind == hkClassBase::TypeKind::Array) {
@@ -668,7 +672,7 @@ namespace hkreflex {
 	}
 
 	template<typename elem_t>
-	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 	inline bool hkClassInstance::SetValue(std::vector<elem_t>& container)
 	{
 		if (type->kind == hkClassBase::TypeKind::Array) {
@@ -710,6 +714,29 @@ namespace hkreflex {
 				for (auto& instance : array_instance->array_instances) {
 					T container;
 					if (instance->GetValue(container)) {
+						ret.push_back(container);
+					}
+				}
+			}
+		}
+		return ret;
+	}
+
+	template<typename T>
+	requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
+	inline std::vector<T*> hkClassRecordInstance::GetArrayOfPointersByFieldName(const std::string& field_name)
+	{
+		std::vector<T*> ret;
+		for (auto& record : record_instances) {
+			if (record.field_name == field_name) {
+				auto array_instance = dynamic_cast<hkClassArrayInstance*>(record.instance);
+				if (array_instance == nullptr) {
+					std::cout << "hkClassRecordInstance::GetArrayByFieldName: field_name is not array" << std::endl;
+					return ret;
+				}
+				for (auto& instance : array_instance->array_instances) {
+					T* container = new T;
+					if (instance->GetValue(*container)) {
 						ret.push_back(container);
 					}
 				}

@@ -535,7 +535,7 @@ std::string hkreflex::hkClassPointerInstance::dump(int indent)
 			ret += indent_str + "\t// Error: Out of bounds\n";
 		}
 		else if(this->ptr_instance) {
-			ret += indent_str + "\t" + this->ptr_instance->dump(indent + 1);
+			ret += indent_str + "\t" + this->ptr_instance->dump(indent + 1) + "\n";
 		}
 		else {
 			ret += indent_str + "\t// Error: Null pointer\n";
