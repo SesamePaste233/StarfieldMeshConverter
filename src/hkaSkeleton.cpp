@@ -173,11 +173,11 @@ hktypes::hkQsTransform hktypes::hkaBoneHolder::GetWorldTransform()
 	return this->world_transform;
 }
 
-bool hktypes::hkaSkeletonHolder::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkaSkeleton::FromInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkaSkeleton") {
-		std::cout << "hkaSkeletonHolder::FromInstance: type_name is not hkaSkeleton" << std::endl;
+		std::cout << "hkaSkeleton::FromInstance: type_name is not hkaSkeleton" << std::endl;
 		return false;
 	}
 
@@ -213,11 +213,11 @@ bool hktypes::hkaSkeletonHolder::FromInstance(hkreflex::hkClassInstance* instanc
 	return true;
 }
 
-bool hktypes::hkaSkeletonHolder::ToInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkaSkeleton::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkaSkeleton") {
-		std::cout << "hkaSkeletonHolder::FromInstance: type_name is not hkaSkeleton" << std::endl;
+		std::cout << "hkaSkeleton::FromInstance: type_name is not hkaSkeleton" << std::endl;
 		return false;
 	}
 
@@ -249,7 +249,7 @@ bool hktypes::hkaSkeletonHolder::ToInstance(hkreflex::hkClassInstance* instance)
 	return true;
 }
 
-void hktypes::hkaSkeletonHolder::TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func)
+void hktypes::hkaSkeleton::TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func)
 {
 	std::function<void(hkaBoneHolder*)> traverse = [&](hkaBoneHolder* bone) {
 		pre_order_func(bone);
@@ -262,7 +262,7 @@ void hktypes::hkaSkeletonHolder::TraverseBones(std::function<void(hkaBoneHolder*
 	traverse(this->root);
 }
 
-nlohmann::json hktypes::hkaSkeletonHolder::ToJson(hkaBoneHolder* cur_bone)
+nlohmann::json hktypes::hkaSkeleton::ToJson(hkaBoneHolder* cur_bone)
 {
 	if (cur_bone == nullptr) {
 		cur_bone = this->root;
@@ -299,7 +299,7 @@ nlohmann::json hktypes::hkaSkeletonHolder::ToJson(hkaBoneHolder* cur_bone)
 	return serialized;
 }
 
-void hktypes::hkaSkeletonHolder::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
+void hktypes::hkaSkeleton::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
 {
 	if (bone == nullptr) {
 		bone = this->root;

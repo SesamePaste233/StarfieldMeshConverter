@@ -1,4 +1,5 @@
 #include "hkReflection.h"
+#include "hkPhysics.h"
 
 std::string hkreflex::hkClassBase::to_literal(bool show_class_members, bool as_plain_class, bool use_mapped_ctype)
 {
@@ -529,7 +530,7 @@ std::string hkreflex::hkClassPointerInstance::dump(int indent)
 		indent_str += "\t";
 	}
 
-	std::string ret = "<ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + ": {\n";
+	std::string ret = "<ptr_ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + ": {\n";
 	if (in_document_ptr != 0) {
 		if (in_document_ptr > ref_data->indexed_blocks.size()) {
 			ret += indent_str + "\t// Error: Out of bounds\n";
@@ -1006,7 +1007,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 	}
 
 	if (c_type == "std::vector" && type->type_name != "T[N]") {
-		std::string ret = "<ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + "[" + std::to_string(array_instances.size()) + "]: [\n";
+		std::string ret = "<arr_ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + "[" + std::to_string(array_instances.size()) + "]: [\n";
 		if (!this->array_instances.empty()) {
 			for(auto instance : array_instances) {
 				ret += indent_str + "\t" + instance->dump(indent + 1) + ",\n";

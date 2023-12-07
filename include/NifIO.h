@@ -334,7 +334,7 @@ namespace nif {
 
 			std::vector<NodeInfo> bones;
 
-			hktypes::hkaSkeletonHolder* havok_skeleton = nullptr;
+			hktypes::hkaSkeleton* havok_skeleton = nullptr;
 
 			bool skeleton_mode = false;
 

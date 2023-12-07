@@ -1,5 +1,19 @@
 #include "hkPhysics.h"
 
+hkphysics::hkPhysicsReflectionData::~hkPhysicsReflectionData() {
+	for (auto& block : indexed_blocks) {
+		delete block;
+	}
+
+	for (auto& cls : classes) {
+		delete cls;
+	}
+
+	for (auto& chunk : data_chunks) {
+		delete chunk.second;
+	}
+}
+
 bool hkphysics::hkPhysicsReflectionData::Deserialize(const std::string filename)
 {
 	std::ifstream file(filename, std::ios::binary);
@@ -192,10 +206,20 @@ bool hkphysics::hkPhysicsReflectionData::SerializeWithTypeUnchanged(std::ostream
 
 void hkphysics::hkPhysicsReflectionData::ExtractClasses()
 {
-	auto skele_insts = this->GetInstancesByClassName("hkaSkeleton");
-	if (skele_insts.size() == 1) {
-		this->skeleton = new hktypes::hkaSkeletonHolder();
-		skele_insts[0]->GetValue(*this->skeleton);
+	auto root_ctn_insts = this->GetInstancesByClassName("hkRootLevelContainer");
+	if (root_ctn_insts.size() == 1) {
+		this->root_level_container = new hktypes::hkRootLevelContainer();
+		root_ctn_insts[0]->GetValue(*this->root_level_container);
+
+		this->skeleton = dynamic_cast<hktypes::hkaSkeleton*>(this->root_level_container->GetNamedVariantRef("hkaSkeleton"));
+
+		if (this->skeleton == nullptr) {
+			auto skele_insts = this->GetInstancesByClassName("hkaSkeleton");
+			if (skele_insts.size() == 1) {
+				this->skeleton = new hktypes::hkaSkeleton();
+				skele_insts[0]->GetValue(*this->skeleton);
+			}
+		}
 	}
 }
 

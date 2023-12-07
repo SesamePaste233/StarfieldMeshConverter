@@ -1,9 +1,13 @@
 #pragma once
+#include "hkInclude.h"
 #include "hkTypes.h"
-
+#include <json.hpp>
 // Finished
 
 namespace hktypes {
+	class hkHolderBase;
+	class hkReferencedObject;
+
 	class hkQsTransform : public hkHolderBase {
 	public:
 		// From hkQsTransform
@@ -50,7 +54,7 @@ namespace hktypes {
 		hkQsTransform world_transform;
 	};
 
-	class hkaSkeletonHolder : public hkReferencedObject {
+	class hkaSkeleton : public hkReferencedObject {
 	public:
 		std::string name;
 		hkaBoneHolder* root = nullptr;

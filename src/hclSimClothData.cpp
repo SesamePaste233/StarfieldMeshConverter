@@ -10,7 +10,7 @@ bool hktypes::hclConstraintSet::FromInstance(hkreflex::hkClassInstance* instance
 	}
 
 	this->name = class_instance->GetStringByFieldName("name");
-	this->constraintId = class_instance->GetUIntByFieldName("constraintId");
+	class_instance->GetInstanceByFieldName("constraintId")->GetValue(this->constraintId);
 	this->type = class_instance->GetUIntByFieldName("type");
 
 	return true;
@@ -79,7 +79,8 @@ bool hktypes::hclLocalRangeConstraintSet::FromInstance(hkreflex::hkClassInstance
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("class_parent")->GetValue(*(hclConstraintSet*)this);
+	hclConstraintSet::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
 	this->localConstraints = class_instance->GetArrayByFieldName<LocalConstraint>("localConstraints");
 	this->localStiffnessConstraints = class_instance->GetArrayByFieldName<LocalStiffnessConstraint>("localStiffnessConstraints");
 	this->referenceMeshBufferIdx = class_instance->GetUIntByFieldName("referenceMeshBufferIdx");
@@ -99,7 +100,8 @@ bool hktypes::hclLocalRangeConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("class_parent")->SetValue(*(hclConstraintSet*)this);
+	hclConstraintSet::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
 	class_instance->GetInstanceByFieldName("localConstraints")->SetValue(this->localConstraints);
 	class_instance->GetInstanceByFieldName("localStiffnessConstraints")->SetValue(this->localStiffnessConstraints);
 	class_instance->GetInstanceByFieldName("referenceMeshBufferIdx")->SetValue(this->referenceMeshBufferIdx);
@@ -221,7 +223,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::FromInstance(hkreflex::hkClassInst
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("class_parent")->GetValue(*(hclConstraintSet*)this);
+	hclConstraintSet::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	this->batches = class_instance->GetArrayByFieldName<Batch>("batches");
 	this->singles = class_instance->GetArrayByFieldName<Single>("singles");
 
@@ -237,7 +239,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstan
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("class_parent")->SetValue(*(hclConstraintSet*)this);
+	hclConstraintSet::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("batches")->SetValue(this->batches);
 	class_instance->GetInstanceByFieldName("singles")->SetValue(this->singles);
 
@@ -392,6 +394,7 @@ bool hktypes::hclSimClothData::FromInstance(hkreflex::hkClassInstance* instance)
 	this->maxParticleRadius = class_instance->GetFloatByFieldName("maxParticleRadius");
 	this->staticCollisionMasks = class_instance->GetArrayByFieldName<uint32_t>("staticCollisionMasks");
 	this->totalMass = class_instance->GetFloatByFieldName("totalMass");
+	class_instance->GetInstanceByFieldName("transferMotionData")->GetValue(this->transferMotionData);
 	this->transferMotionEnabled = class_instance->GetBoolByFieldName("transferMotionEnabled");
 	this->landscapeCollisionEnabled = class_instance->GetBoolByFieldName("landscapeCollisionEnabled");
 	this->numLandscapeCollidableParticles = class_instance->GetUIntByFieldName("numLandscapeCollidableParticles");
@@ -449,6 +452,7 @@ bool hktypes::hclSimClothData::ToInstance(hkreflex::hkClassInstance* instance)
 	class_instance->GetInstanceByFieldName("maxParticleRadius")->SetValue(this->maxParticleRadius);
 	class_instance->GetInstanceByFieldName("staticCollisionMasks")->SetValue(this->staticCollisionMasks);
 	class_instance->GetInstanceByFieldName("totalMass")->SetValue(this->totalMass);
+	class_instance->GetInstanceByFieldName("transferMotionData")->SetValue(this->transferMotionData);
 	class_instance->GetInstanceByFieldName("transferMotionEnabled")->SetValue(this->transferMotionEnabled);
 	class_instance->GetInstanceByFieldName("landscapeCollisionEnabled")->SetValue(this->landscapeCollisionEnabled);
 	class_instance->GetInstanceByFieldName("numLandscapeCollidableParticles")->SetValue(this->numLandscapeCollidableParticles);
@@ -499,6 +503,54 @@ bool hktypes::hclCollidable::ToInstance(hkreflex::hkClassInstance* instance)
 	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->SetValue(this->pinchDetectionRadius);
 	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->SetValue(this->pinchDetectionPriority);
 	class_instance->GetInstanceByFieldName("shape")->SetValue(this->shape);
+
+	return true;
+}
+
+bool hktypes::hclSimClothData::TransferMotionData::FromInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->ctype_name != "hclSimClothData::TransferMotionData") {
+		std::cout << "hclSimClothData::TransferMotionData::FromInstance: type_name is not hclSimClothData::TransferMotionData" << std::endl;
+		return false;
+	}
+
+	class_instance->GetInstanceByFieldName("transformSetIndex")->GetValue(this->transformSetIndex);
+	class_instance->GetInstanceByFieldName("transformIndex")->GetValue(this->transformIndex);
+	class_instance->GetInstanceByFieldName("transferTranslationMotion")->GetValue(this->transferTranslationMotion);
+	class_instance->GetInstanceByFieldName("minTranslationSpeed")->GetValue(this->minTranslationSpeed);
+	class_instance->GetInstanceByFieldName("maxTranslationSpeed")->GetValue(this->maxTranslationSpeed);
+	class_instance->GetInstanceByFieldName("minTranslationBlend")->GetValue(this->minTranslationBlend);
+	class_instance->GetInstanceByFieldName("maxTranslationBlend")->GetValue(this->maxTranslationBlend);
+	class_instance->GetInstanceByFieldName("transferRotationMotion")->GetValue(this->transferRotationMotion);
+	class_instance->GetInstanceByFieldName("minRotationSpeed")->GetValue(this->minRotationSpeed);
+	class_instance->GetInstanceByFieldName("maxRotationSpeed")->GetValue(this->maxRotationSpeed);
+	class_instance->GetInstanceByFieldName("minRotationBlend")->GetValue(this->minRotationBlend);
+	class_instance->GetInstanceByFieldName("maxRotationBlend")->GetValue(this->maxRotationBlend);
+
+	return true;
+}
+
+bool hktypes::hclSimClothData::TransferMotionData::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->ctype_name != "hclSimClothData::TransferMotionData") {
+		std::cout << "hclSimClothData::TransferMotionData::FromInstance: type_name is not hclSimClothData::TransferMotionData" << std::endl;
+		return false;
+	}
+
+	class_instance->GetInstanceByFieldName("transformSetIndex")->SetValue(this->transformSetIndex);
+	class_instance->GetInstanceByFieldName("transformIndex")->SetValue(this->transformIndex);
+	class_instance->GetInstanceByFieldName("transferTranslationMotion")->SetValue(this->transferTranslationMotion);
+	class_instance->GetInstanceByFieldName("minTranslationSpeed")->SetValue(this->minTranslationSpeed);
+	class_instance->GetInstanceByFieldName("maxTranslationSpeed")->SetValue(this->maxTranslationSpeed);
+	class_instance->GetInstanceByFieldName("minTranslationBlend")->SetValue(this->minTranslationBlend);
+	class_instance->GetInstanceByFieldName("maxTranslationBlend")->SetValue(this->maxTranslationBlend);
+	class_instance->GetInstanceByFieldName("transferRotationMotion")->SetValue(this->transferRotationMotion);
+	class_instance->GetInstanceByFieldName("minRotationSpeed")->SetValue(this->minRotationSpeed);
+	class_instance->GetInstanceByFieldName("maxRotationSpeed")->SetValue(this->maxRotationSpeed);
+	class_instance->GetInstanceByFieldName("minRotationBlend")->SetValue(this->minRotationBlend);
+	class_instance->GetInstanceByFieldName("maxRotationBlend")->SetValue(this->maxRotationBlend);
 
 	return true;
 }

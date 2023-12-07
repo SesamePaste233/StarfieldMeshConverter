@@ -171,7 +171,7 @@ bool hktypes::hclScratchBufferDefinition::FromInstance(hkreflex::hkClassInstance
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("class_parent")->GetValue(*(hclBufferDefinition*)this);
+	hclBufferDefinition::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 
 	this->triangleIndices = class_instance->GetArrayByFieldName<uint16_t>("triangleIndices");
 	this->storeNormals = class_instance->GetBoolByFieldName("storeNormals");
@@ -189,7 +189,7 @@ bool hktypes::hclScratchBufferDefinition::ToInstance(hkreflex::hkClassInstance* 
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("class_parent")->SetValue(*(hclBufferDefinition*)this);
+	hclBufferDefinition::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 
 	class_instance->GetInstanceByFieldName("triangleIndices")->SetValue(this->triangleIndices);
 	class_instance->GetInstanceByFieldName("storeNormals")->SetValue(this->storeNormals);
@@ -241,6 +241,8 @@ bool hktypes::hclClothData::FromInstance(hkreflex::hkClassInstance* instance)
 	this->simClothDatas = class_instance->GetArrayOfPointersByFieldName<hclSimClothData>("simClothDatas");
 	this->bufferDefinitions = class_instance->GetArrayOfPointersByFieldName<hclBufferDefinition>("bufferDefinitions");
 	this->transformSetDefinitions = class_instance->GetArrayOfPointersByFieldName<hclTransformSetDefinition>("transformSetDefinitions");
+	this->generatedAtRuntime = class_instance->GetBoolByFieldName("generatedAtRuntime");
+	this->targetPlatform = (Platform)class_instance->GetUIntByFieldName("targetPlatform");
 
 	return true;
 }
@@ -272,6 +274,10 @@ bool hktypes::hclClothData::ToInstance(hkreflex::hkClassInstance* instance)
 		_transformSetDefinitions.push_back(*transformSetDefinition);
 	}
 	class_instance->GetInstanceByFieldName("transformSetDefinitions")->SetValue(_transformSetDefinitions);
+	
+	class_instance->GetInstanceByFieldName("generatedAtRuntime")->SetValue(this->generatedAtRuntime);
+	uint32_t _target_platform = (uint32_t)this->targetPlatform;
+	class_instance->GetInstanceByFieldName("targetPlatform")->SetValue(_target_platform);
 
 	return true;
 }

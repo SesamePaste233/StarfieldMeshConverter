@@ -4,7 +4,8 @@
 #include "hkReflection.h"
 #include <map>
 #include "DataAccessor.h"
-#include "hkTypes.h"
+
+#include "hkTypesHeader.h"
 
 namespace hkreflex {
 	class hkClassBase;
@@ -14,7 +15,8 @@ namespace hkreflex {
 }
 
 namespace hktypes {
-	class hkaSkeletonHolder;
+	class hkaSkeleton;
+	class hkRootLevelContainer;
 }
 
 namespace hkphysics {
@@ -27,19 +29,7 @@ namespace hkphysics {
 		hkPhysicsReflectionData() {
 			//printf("hkPhysicsData::hkPhysicsData()\n");
 		}
-		~hkPhysicsReflectionData() {
-			for(auto& block:indexed_blocks) {
-				delete block;
-			}
-
-			for (auto& cls : classes) {
-				delete cls;
-			}
-
-			for (auto& chunk : data_chunks) {
-				delete chunk.second;
-			}
-		}
+		~hkPhysicsReflectionData();
 		const bool BigEndian = true;
 
 		std::map<ChunkType, hkDataChunkBase*> data_chunks;
@@ -56,7 +46,8 @@ namespace hkphysics {
 		std::vector<hkreflex::hkIndexedDataBlock*> indexed_blocks_out;
 		std::unordered_map<std::string, uint64_t> serialize_string_table;
 
-		hktypes::hkaSkeletonHolder* skeleton = nullptr;
+		hktypes::hkaSkeleton* skeleton = nullptr;
+		hktypes::hkRootLevelContainer* root_level_container = nullptr;
 
 		bool Deserialize(const std::string filename);
 

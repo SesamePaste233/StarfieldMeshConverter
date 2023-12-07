@@ -1,12 +1,19 @@
 #pragma once
+#include "hkInclude.h"
 #include "hkTypes.h"
 
 namespace hktypes {
+	class hkMatrix4Holder;
+	class hkVector4Holder;
+
+	template<class tStorage>
+	requires utils::_is_integer_t<tStorage>
+	class hkHandle;
 
 	class hclConstraintSet : public hkReferencedObject {
 	public:
 		std::string name;	// Offset: 24 Unk: 0
-		uint32_t constraintId;	// Offset: 32 Unk: 0
+		hkHandle<uint32_t> constraintId;	// Offset: 32 Unk: 0
 		uint32_t type;	// Offset: 36 Unk: 0
 
 		// Extra
@@ -166,6 +173,26 @@ namespace hktypes {
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 
+		class TransferMotionData : public hkHolderBase {
+		public:
+			uint32_t transformSetIndex;	// Offset: 0 Unk: 0
+			uint32_t transformIndex;	// Offset: 4 Unk: 0
+			bool transferTranslationMotion;	// Offset: 8 Unk: 0
+			float minTranslationSpeed;	// Offset: 12 Unk: 0
+			float maxTranslationSpeed;	// Offset: 16 Unk: 0
+			float minTranslationBlend;	// Offset: 20 Unk: 0
+			float maxTranslationBlend;	// Offset: 24 Unk: 0
+			bool transferRotationMotion;	// Offset: 28 Unk: 0
+			float minRotationSpeed;	// Offset: 32 Unk: 0
+			float maxRotationSpeed;	// Offset: 36 Unk: 0
+			float minRotationBlend;	// Offset: 40 Unk: 0
+			float maxRotationBlend;	// Offset: 44 Unk: 0
+
+			// Extra
+			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		};
+
 		std::string name;	// Offset: 24 Unk: 0
 		OverridableSimulationInfo simulationInfo;	// Offset: 32 Unk: 0
 		std::vector<ParticleData> particleDatas;	// Offset: 64 Unk: 0
@@ -181,7 +208,7 @@ namespace hktypes {
 		std::vector<uint32_t> staticCollisionMasks;	// Offset: 232 Unk: 0
 		//hkArray<T*, hkContainerHeapAllocator> actions;	// Offset: 248 Unk: 0
 		float totalMass;	// Offset: 264 Unk: 0
-		//hclSimClothData::TransferMotionData transferMotionData;	// Offset: 268 Unk: 0
+		TransferMotionData transferMotionData;	// Offset: 268 Unk: 0
 		bool transferMotionEnabled;	// Offset: 316 Unk: 0
 		bool landscapeCollisionEnabled;	// Offset: 317 Unk: 0
 		//hclSimClothData::LandscapeCollisionData landscapeCollisionData;	// Offset: 320 Unk: 0

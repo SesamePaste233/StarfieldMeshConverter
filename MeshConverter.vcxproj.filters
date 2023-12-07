@@ -69,13 +69,22 @@
     <ClInclude Include="include\hkaSkeleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\hclSimClothData.h">
+    <ClInclude Include="include\hclOperator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hclClothState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\hclClothData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\hclOperator.h">
+    <ClInclude Include="include\hclSimClothData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hkInclude.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hkTypesHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -134,13 +143,19 @@
     <ClCompile Include="src\hkaSkeleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\hclSimClothData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\hclClothData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\hclOperator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hclSimClothData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hclClothState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hkInclude.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
