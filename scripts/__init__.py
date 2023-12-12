@@ -256,6 +256,12 @@ class ImportCustomNif(bpy.types.Operator):
 		default=False
 	)
 
+	debug_havok_physics: bpy.props.BoolProperty(
+		name="Debug Havok Physics",
+		description="Debug option. DO NOT USE.",
+		default=False
+	)
+
 	files: bpy.props.CollectionProperty(
         type=bpy.types.OperatorFileListElement,
         options={'HIDDEN', 'SKIP_SAVE'},

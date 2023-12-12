@@ -13,7 +13,7 @@ namespace hktypes {
 			hkBitField written;	// Offset: 48 Unk: 0
 
 			// Extra
-			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 
@@ -21,7 +21,7 @@ namespace hktypes {
 		std::vector<TransformTracker> perComponentTransformTrackers;	// Offset: 8 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -31,7 +31,7 @@ namespace hktypes {
 		bool trianglesRead;	// Offset: 4 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -45,7 +45,7 @@ namespace hktypes {
 			std::vector<int> childBranches;	// Offset: 40 Unk: 0
 
 			// Extra
-			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 
@@ -56,7 +56,7 @@ namespace hktypes {
 		bool multiThreadable;	// Offset: 88 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -68,7 +68,7 @@ namespace hktypes {
 			uint32_t shadowBufferIndex;	// Offset: 12 Unk: 0
 
 			// Extra
-			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 		class TransformSetAccess : public hkHolderBase {
@@ -76,7 +76,7 @@ namespace hktypes {
 			hclTransformSetUsage transformSetUsage;	// Offset: 8 Unk: 0
 
 			// Extra
-			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 
@@ -85,10 +85,10 @@ namespace hktypes {
 		std::vector<hclClothState::BufferAccess> usedBuffers;	// Offset: 48 Unk: 0
 		std::vector<hclClothState::TransformSetAccess> usedTransformSets;	// Offset: 64 Unk: 0
 		std::vector<uint32_t> usedSimCloths;	// Offset: 80 Unk: 0
-		hclStateDependencyGraph dependencyGraph;	// Offset: 96 Unk: 0
+		hclStateDependencyGraph* dependencyGraph;	// Offset: 96 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 }

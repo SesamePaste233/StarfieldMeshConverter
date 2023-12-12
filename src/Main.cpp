@@ -163,38 +163,37 @@ int blenderToMorph(int argc, char* argv[]) {
 	return 0;
 }
 
-#ifndef _DEBUG
-int main(int argc, char* argv[]) {
-	// Check the first command-line argument
-	if (argc < 2) {
-		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
-		return 1; // Return an error code
-	}
-
-	// Check if the user wants to convert from Blender to Mesh
-	if (strcmp(argv[1], "-game") == 0 || strcmp(argv[1], "-g") == 0) {
-		std::cout << "Converting from Blender to Mesh" << std::endl;
-		return blenderToMesh(argc, argv);
-	}
-
-	// Check if the user wants to convert from Mesh to Blender
-	if (strcmp(argv[1], "-blender") == 0 || strcmp(argv[1], "-b") == 0) {
-		std::cout << "Converting from Mesh to Blender" << std::endl;
-		return meshToBlender(argc, argv);
-	}
-
-	if (strcmp(argv[1], "-blender_morph") == 0 || strcmp(argv[1], "-bm") == 0) {
-		std::cout << "Converting from Morph to Blender" << std::endl;
-		return morphToBlender(argc, argv);
-	}
-
-	if (strcmp(argv[1], "-game_morph") == 0 || strcmp(argv[1], "-gm") == 0) {
-		std::cout << "Converting from Blender to Morph" << std::endl;
-		return blenderToMorph(argc, argv);
-	}
-
-	return 0; // Return success
-}
+//int main(int argc, char* argv[]) {
+//	// Check the first command-line argument
+//	if (argc < 2) {
+//		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
+//		return 1; // Return an error code
+//	}
+//
+//	// Check if the user wants to convert from Blender to Mesh
+//	if (strcmp(argv[1], "-game") == 0 || strcmp(argv[1], "-g") == 0) {
+//		std::cout << "Converting from Blender to Mesh" << std::endl;
+//		return blenderToMesh(argc, argv);
+//	}
+//
+//	// Check if the user wants to convert from Mesh to Blender
+//	if (strcmp(argv[1], "-blender") == 0 || strcmp(argv[1], "-b") == 0) {
+//		std::cout << "Converting from Mesh to Blender" << std::endl;
+//		return meshToBlender(argc, argv);
+//	}
+//
+//	if (strcmp(argv[1], "-blender_morph") == 0 || strcmp(argv[1], "-bm") == 0) {
+//		std::cout << "Converting from Morph to Blender" << std::endl;
+//		return morphToBlender(argc, argv);
+//	}
+//
+//	if (strcmp(argv[1], "-game_morph") == 0 || strcmp(argv[1], "-gm") == 0) {
+//		std::cout << "Converting from Blender to Morph" << std::endl;
+//		return blenderToMorph(argc, argv);
+//	}
+//
+//	return 0; // Return success
+//}
 
 void __main() {
 	// Recursively get all filepaths with .dat extension from the directory
@@ -229,9 +228,6 @@ void __main() {
 	}
 }
 
-#endif
-
-#ifdef _DEBUG
 void amain() {
 	// Create a MeshIO object
 	nif::NifIO reader;
@@ -284,22 +280,22 @@ void test_main() {
 	file1.close();
 	return;
 }
-void main() {
+void pmain() {
 	hkphysics::hkPhysicsReflectionData data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth.bin");
 
 	auto literals = data.classes_to_literal(true, true, true);
 
 	auto instances = data.dump_root_instance();
 
-	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer_test.bin", std::ios::binary);
+	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
 	data.SerializeWithTypeUnchanged(file0);
 	file0.close();
 
 	hkphysics::hkPhysicsReflectionData data1;
 
-	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\entertainer_test.bin");
+	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -308,19 +304,19 @@ void main() {
 		});
 
 	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated_Entertainer.h");
+	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated_cloth.h");
 	file << literals;
 	file.close();
 
-	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances_Entertainer.txt");
+	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances_cloth.txt");
 	file1 << instances;
 	file1.close();
 	return;
 }
 
-void pmain() {
+void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\ar99.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_colonist_adventurous_01_poncho_f.nif");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -330,16 +326,81 @@ void pmain() {
 
 	auto data = dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->data;
 
+	for (auto& hk_class : data->classes) {
+		if (hk_class->_defined == false) {
+			// No undeclared classes
+			continue;
+		}
+		if (hk_class->is_nested_class) {
+			// No nested classes
+			continue;
+		}
+		if (hk_class->template_args.size() != 0) {
+			// No template classes
+			continue;
+		}
+		if (hk_class->kind != hkreflex::hkClassBase::TypeKind::Record) {
+			// Record classes only
+			continue;
+		}
+		std::string hk_class_definition = "";
+		std::vector<hkreflex::hkClassBase*> ref_types;
+
+		if (hk_class->type_name == "hkaSkeleton") {
+			std::cout << "hkaSkeleton" << std::endl;
+		}
+
+		auto def_str = hk_class->to_C_class_definition(ref_types, 1);
+		hk_class_definition += "#pragma once\n";
+		hk_class_definition += "#include \"hkInclude.h\"\n\n";
+		for (auto& ref_type : ref_types) {
+			hk_class_definition += "#include \"Generated\\" + ref_type->to_C_identifier() + ".h\"\n";
+		}
+		hk_class_definition += "\nnamespace hktypes{\n";
+		for (auto& ref_type : ref_types) {
+			hk_class_definition += "\tclass " + ref_type->to_C_identifier() + ";\n";
+		}
+		hk_class_definition += "\n" + def_str;
+		hk_class_definition += "}\n";
+		std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\" + hk_class->type_name + ".h");
+		file << hk_class_definition;
+		file.close();
+
+		std::string hk_class_definition_cpp = "";
+		hk_class_definition_cpp += "#include \"Generated\\" + hk_class->type_name + ".h\"\n\n";
+
+		hk_class_definition_cpp += hk_class->to_C_from_instance();
+		hk_class_definition_cpp += hk_class->to_C_to_instance();
+
+		std::ofstream file1("C:\\repo\\MeshConverter\\src\\Generated\\" + hk_class->type_name + ".cpp");
+		file1 << hk_class_definition_cpp;
+		file1.close();
+	}
+
 	auto literals = data->classes_to_literal(true, true, true);
 
-	auto instances = data->dump_indexed_blocks();
+	auto instances = data->dump_root_instance();
+
+	//auto json = nlohmann::json::array();
+	//auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(data->root_level_container->GetNamedVariantRef("hclClothData"));
+	//if (havok_cloth_data != nullptr) {
+	//	auto havok_meshes = havok_cloth_data->GetBufferedMeshes();
+	//	for (auto& mesh : havok_meshes) {
+	//		json.push_back(mesh.ToJson());
+	//	}
+	//}
+
+	//// Save json to file
+	//std::ofstream file2("C:\\repo\\MeshConverter\\test.json");
+	//file2 << json;
+	//file2.close();
 
 	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
+	std::ofstream file("C:\\repo\\MeshConverter\\UnkBlocks\\hkGenerated.h");
 	file << literals;
 	file.close();
 
-	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
+	std::ofstream file1("C:\\repo\\MeshConverter\\UnkBlocks\\Instances.txt");
 	file1 << instances;
 	file1.close();
 }
@@ -395,41 +456,3 @@ void _main() {
 	std::cout << "complete" << std::endl;
 	return;
 }
-
-void __main() {
-	// Recursively get all filepaths with .dat extension from the directory
-	std::vector<std::string> filepaths;
-	utils::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
-
-	// Test read in MorphIO
-	std::vector<std::pair<std::string, MorphIO>> database;
-	database.reserve(filepaths.size());
-
-	// Create a log file
-	std::ofstream log_file;
-	log_file.open("log.txt");
-
-	for (int i = 0; i < filepaths.size(); i++) {
-		log_file << filepaths[i] << std::endl;
-
-		MorphIO reader;
-		reader.Deserialize(filepaths[i]);
-
-		for (int k = 0; k < reader.num_vertices; k++) {
-			int16_t padding = 0;
-			_ASSERT(reader.per_vert_morph_key_indices[k].size());
-			for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
-				/*if (reader.per_vert_morph_data[k][j]._padding != padding) {
-					padding = reader.per_vert_morph_data[k][j]._padding;
-					log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
-				}*/
-			}
-		}
-
-		database.push_back(std::make_pair(filepaths[i], reader));
-	}
-
-
-	return;
-}
-#endif

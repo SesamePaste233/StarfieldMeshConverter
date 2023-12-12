@@ -48,7 +48,7 @@ namespace hktypes {
 			uint8_t slotStart;	// Offset: 3 Unk: 0
 
 			// Extra
-			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 
@@ -58,17 +58,17 @@ namespace hktypes {
 			uint8_t stride;	// Offset: 1 Unk: 0
 
 			// Extra
-			bool FromInstance(hkreflex::hkClassInstance* instance) override;
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		};
 
-		std::array<hclBufferLayout::BufferElement, 4> elementsLayout;	// Offset: 0 Unk: 0
+		std::array<hclBufferLayout::BufferElement, 4> elementsLayout;	// Offset: 0 Unk: 0 Components: Position: 0 Normal: 1 Tangent: 2 Bitangent: 3
 		std::array<hclBufferLayout::Slot, 4> slots;	// Offset: 16 Unk: 0
 		uint8_t numSlots;	// Offset: 24 Unk: 0
 		hclBufferLayout::TriangleFormat triangleFormat;	// Offset: 25 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -83,7 +83,7 @@ namespace hktypes {
 		hclBufferLayout bufferLayout;	// Offset: 56 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -94,7 +94,7 @@ namespace hktypes {
 		bool storeTangentsAndBiTangents;	// Offset: 105 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -105,7 +105,7 @@ namespace hktypes {
 		uint32_t numTransforms;	// Offset: 36 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 	};
 
@@ -148,7 +148,9 @@ namespace hktypes {
 		hclClothData::Platform targetPlatform;	// Offset: 148 Unk: 0
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+
+		std::vector<hclBufferedMeshObj> GetBufferedMeshes();
 	};
 }

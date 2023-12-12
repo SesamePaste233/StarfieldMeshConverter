@@ -1,8 +1,8 @@
 #include "hclClothState.h"
 
-bool hktypes::hclTransformSetUsage::TransformTracker::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclTransformSetUsage::TransformTracker::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclTransformSetUsage::TransformTracker") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclTransformSetUsage::TransformTracker" << std::endl;
 		return false;
@@ -30,9 +30,9 @@ bool hktypes::hclTransformSetUsage::TransformTracker::ToInstance(hkreflex::hkCla
 	return true;
 }
 
-bool hktypes::hclTransformSetUsage::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclTransformSetUsage::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclTransformSetUsage") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclTransformSetUsage" << std::endl;
 		return false;
@@ -69,9 +69,9 @@ bool hktypes::hclTransformSetUsage::ToInstance(hkreflex::hkClassInstance* instan
 	return true;
 }
 
-bool hktypes::hclBufferUsage::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclBufferUsage::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclBufferUsage") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclBufferUsage" << std::endl;
 		return false;
@@ -104,9 +104,9 @@ bool hktypes::hclBufferUsage::ToInstance(hkreflex::hkClassInstance* instance)
 	class_instance->GetInstanceByFieldName("trianglesRead")->SetValue(trianglesRead);
 }
 
-bool hktypes::hclClothState::BufferAccess::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclClothState::BufferAccess::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclClothState::BufferAccess") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclClothState::BufferAccess" << std::endl;
 		return false;
@@ -134,9 +134,9 @@ bool hktypes::hclClothState::BufferAccess::ToInstance(hkreflex::hkClassInstance*
 	return true;
 }
 
-bool hktypes::hclClothState::TransformSetAccess::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclClothState::TransformSetAccess::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclClothState::TransformSetAccess") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclClothState::TransformSetAccess" << std::endl;
 		return false;
@@ -162,9 +162,9 @@ bool hktypes::hclClothState::TransformSetAccess::ToInstance(hkreflex::hkClassIns
 	return true;
 }
 
-bool hktypes::hclClothState::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclClothState::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclClothState") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclClothState" << std::endl;
 		return false;
@@ -198,9 +198,9 @@ bool hktypes::hclClothState::ToInstance(hkreflex::hkClassInstance* instance)
 	return true;
 }
 
-bool hktypes::hclStateDependencyGraph::Branch::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclStateDependencyGraph::Branch::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclStateDependencyGraph::Branch" << std::endl;
 		return false;
@@ -230,9 +230,9 @@ bool hktypes::hclStateDependencyGraph::Branch::ToInstance(hkreflex::hkClassInsta
 	return true;
 }
 
-bool hktypes::hclStateDependencyGraph::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclStateDependencyGraph::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclStateDependencyGraph") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclStateDependencyGraph" << std::endl;
 		return false;
@@ -241,7 +241,7 @@ bool hktypes::hclStateDependencyGraph::FromInstance(hkreflex::hkClassInstance* i
 	class_instance->GetInstanceByFieldName("branches")->GetValue(branches);
 	class_instance->GetInstanceByFieldName("rootBranchIds")->GetValue(rootBranchIds);
 	class_instance->GetInstanceByFieldName("children")->GetValue(children);
-	class_instance->GetInstanceByFieldName("parents")->GetValue(parents);
+	class_instance->GetInstanceByFieldName("connect_points")->GetValue(parents);
 	class_instance->GetInstanceByFieldName("multiThreadable")->GetValue(multiThreadable);
 
 	return true;
@@ -258,7 +258,7 @@ bool hktypes::hclStateDependencyGraph::ToInstance(hkreflex::hkClassInstance* ins
 	class_instance->GetInstanceByFieldName("branches")->SetValue(branches);
 	class_instance->GetInstanceByFieldName("rootBranchIds")->SetValue(rootBranchIds);
 	class_instance->GetInstanceByFieldName("children")->SetValue(children);
-	class_instance->GetInstanceByFieldName("parents")->SetValue(parents);
+	class_instance->GetInstanceByFieldName("connect_points")->SetValue(parents);
 	class_instance->GetInstanceByFieldName("multiThreadable")->SetValue(multiThreadable);
 
 	return true;

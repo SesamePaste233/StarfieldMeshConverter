@@ -333,6 +333,18 @@ bool hkphysics::hkDataChunkTNA1::Decode()
 		auto& hk_class = ref_data->classes[i];
 		hk_class->type_name = ref_data->type_names[utils::readHavokVarUIntFromAccessor(_accessor, cur_pos)];
 
+		auto p = hk_class->type_name.find_last_of("::");
+		if (p != std::string::npos) {
+			hk_class->nested_type_name = hk_class->type_name.substr(p + 1);
+			hk_class->nested_parent_type_name = hk_class->type_name.substr(0, p - 1);
+			hk_class->is_nested_class = true;
+		}
+		else {
+			hk_class->nested_type_name = hk_class->type_name;
+			hk_class->nested_parent_type_name = "";
+			hk_class->is_nested_class = false;
+		}
+
 		auto template_arg_number = utils::readHavokVarUIntFromAccessor(_accessor, cur_pos);
 
 		if (cur_pos >= GetBufferSize()) {
@@ -504,6 +516,19 @@ bool hkphysics::hkDataChunkTBDY::Decode()
 
 		prev_id = cur_type_id;
 		hk_class->_defined = true;
+	}
+
+	for (auto hk_class = ref_data->classes.begin() + 1; hk_class != ref_data->classes.end(); hk_class++) {
+		for (auto hk_class2 = hk_class + 1; hk_class2 != ref_data->classes.end(); hk_class2++) {
+			if ((*hk_class2)->type_name == (*hk_class)->nested_parent_type_name) {
+				(*hk_class)->parent_nested_class = *hk_class2;
+				(*hk_class2)->nested_classes.push_back(*hk_class);
+			}
+			else if ((*hk_class)->type_name == (*hk_class2)->nested_parent_type_name) {
+				(*hk_class2)->parent_nested_class = *hk_class;
+				(*hk_class)->nested_classes.push_back(*hk_class2);
+			}
+		}
 	}
 
 	return true;

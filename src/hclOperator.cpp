@@ -1,9 +1,9 @@
 #include "hclOperator.h"
 
-bool hktypes::hclOperator::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclOperator::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclOperator") {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclOperator" << std::endl;
 		return false;
 	}
@@ -20,7 +20,7 @@ bool hktypes::hclOperator::FromInstance(hkreflex::hkClassInstance* instance)
 bool hktypes::hclOperator::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclOperator") {
+	if (class_instance->type->type_name != "hclOperator") {
 		std::cout << "Mismatching type conversion from hclOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -34,10 +34,10 @@ bool hktypes::hclOperator::ToInstance(hkreflex::hkClassInstance* instance)
 	return true;
 }
 
-bool hktypes::hclObjectSpaceDeformer::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclObjectSpaceDeformer::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclObjectSpaceDeformer") {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclObjectSpaceDeformer") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclObjectSpaceDeformer" << std::endl;
 		return false;
 	}
@@ -63,7 +63,7 @@ bool hktypes::hclObjectSpaceDeformer::FromInstance(hkreflex::hkClassInstance* in
 bool hktypes::hclObjectSpaceDeformer::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclObjectSpaceDeformer") {
+	if (class_instance->type->type_name != "hclObjectSpaceDeformer") {
 		std::cout << "Mismatching type conversion from hclObjectSpaceDeformer to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -86,10 +86,10 @@ bool hktypes::hclObjectSpaceDeformer::ToInstance(hkreflex::hkClassInstance* inst
 	return true;
 }
 
-bool hktypes::hclObjectSpaceSkinOperator::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclObjectSpaceSkinOperator::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclObjectSpaceSkinOperator") {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclObjectSpaceSkinOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclObjectSpaceSkinOperator" << std::endl;
 		return false;
 	}
@@ -114,7 +114,7 @@ bool hktypes::hclObjectSpaceSkinOperator::FromInstance(hkreflex::hkClassInstance
 bool hktypes::hclObjectSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclObjectSpaceSkinOperator") {
+	if (class_instance->type->type_name != "hclObjectSpaceSkinOperator") {
 		std::cout << "Mismatching type conversion from hclObjectSpaceSkinOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -136,9 +136,9 @@ bool hktypes::hclObjectSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* 
 	return true;
 }
 
-bool hktypes::hclObjectSpaceSkinPNOperator::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclObjectSpaceSkinPNOperator") {
+bool hktypes::hclObjectSpaceSkinPNOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclObjectSpaceSkinPNOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclObjectSpaceSkinPNOperator" << std::endl;
 		return false;
 	}
@@ -153,7 +153,7 @@ bool hktypes::hclObjectSpaceSkinPNOperator::FromInstance(hkreflex::hkClassInstan
 
 bool hktypes::hclObjectSpaceSkinPNOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclObjectSpaceSkinPNOperator") {
+	if (class_instance->type->type_name != "hclObjectSpaceSkinPNOperator") {
 		std::cout << "Mismatching type conversion from hclObjectSpaceSkinPNOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -166,8 +166,8 @@ bool hktypes::hclObjectSpaceSkinPNOperator::ToInstance(hkreflex::hkClassInstance
 	return true;
 }
 
-bool hktypes::hclMoveParticlesOperator::VertexParticlePair::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+bool hktypes::hclMoveParticlesOperator::VertexParticlePair::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclMoveParticlesOperator::VertexParticlePair" << std::endl;
 		return false;
@@ -192,9 +192,9 @@ bool hktypes::hclMoveParticlesOperator::VertexParticlePair::ToInstance(hkreflex:
 	return true;
 }
 
-bool hktypes::hclMoveParticlesOperator::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclMoveParticlesOperator") {
+bool hktypes::hclMoveParticlesOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclMoveParticlesOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclMoveParticlesOperator" << std::endl;
 		return false;
 	}
@@ -210,7 +210,7 @@ bool hktypes::hclMoveParticlesOperator::FromInstance(hkreflex::hkClassInstance* 
 
 bool hktypes::hclMoveParticlesOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclMoveParticlesOperator") {
+	if (class_instance->type->type_name != "hclMoveParticlesOperator") {
 		std::cout << "Mismatching type conversion from hclMoveParticlesOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -224,8 +224,8 @@ bool hktypes::hclMoveParticlesOperator::ToInstance(hkreflex::hkClassInstance* in
 	return true;
 }
 
-bool hktypes::hclSimulateOperator::Config::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+bool hktypes::hclSimulateOperator::Config::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclSimulateOperator::Config") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclSimulateOperator::Config" << std::endl;
 		return false;
@@ -260,9 +260,9 @@ bool hktypes::hclSimulateOperator::Config::ToInstance(hkreflex::hkClassInstance*
 	return true;
 }
 
-bool hktypes::hclSimulateOperator::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclSimulateOperator") {
+bool hktypes::hclSimulateOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclSimulateOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclSimulateOperator" << std::endl;
 		return false;
 	}
@@ -277,7 +277,7 @@ bool hktypes::hclSimulateOperator::FromInstance(hkreflex::hkClassInstance* insta
 
 bool hktypes::hclSimulateOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclSimulateOperator") {
+	if (class_instance->type->type_name != "hclSimulateOperator") {
 		std::cout << "Mismatching type conversion from hclSimulateOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -290,8 +290,8 @@ bool hktypes::hclSimulateOperator::ToInstance(hkreflex::hkClassInstance* instanc
 	return true;
 }
 
-bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclSimpleMeshBoneDeformOperator::TriangleBonePair" << std::endl;
 		return false;
@@ -316,9 +316,9 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance(hkre
 	return true;
 }
 
-bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclSimpleMeshBoneDeformOperator") {
+bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclSimpleMeshBoneDeformOperator" << std::endl;
 		return false;
 	}
@@ -335,7 +335,7 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(hkreflex::hkClassIns
 
 bool hktypes::hclSimpleMeshBoneDeformOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclSimpleMeshBoneDeformOperator") {
+	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
 		std::cout << "Mismatching type conversion from hclSimpleMeshBoneDeformOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -350,9 +350,9 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::ToInstance(hkreflex::hkClassInsta
 	return true;
 }
 
-bool hktypes::hclCopyVerticesOperator::FromInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name == "hclCopyVerticesOperator") {
+bool hktypes::hclCopyVerticesOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclCopyVerticesOperator") {
 		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclCopyVerticesOperator" << std::endl;
 		return false;
 	}
@@ -372,7 +372,7 @@ bool hktypes::hclCopyVerticesOperator::FromInstance(hkreflex::hkClassInstance* i
 bool hktypes::hclCopyVerticesOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->type_name == "hclCopyVerticesOperator") {
+	if (class_instance->type->type_name != "hclCopyVerticesOperator") {
 		std::cout << "Mismatching type conversion from hclCopyVerticesOperator to " << class_instance->type->type_name << std::endl;
 		return false;
 	}
@@ -389,12 +389,259 @@ bool hktypes::hclCopyVerticesOperator::ToInstance(hkreflex::hkClassInstance* ins
 	return true;
 }
 
-bool hktypes::hclObjectSpaceDeformer::LocalBlockPN::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclObjectSpaceDeformer::LocalBlockPN::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	return false;
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclObjectSpaceDeformer::LocalBlockPN") {
+		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to LocalBlockPN" << std::endl;
+		return false;
+	}
+
+	std::vector<hkPackedVector3> _localPosition;
+	class_instance->GetInstanceByFieldName("localPosition")->GetValue(_localPosition);
+	if (_localPosition.size() != 16) {
+		throw std::runtime_error("localPosition for LocalBlockPN: size is not 16");
+		return false;
+	}
+	std::memcpy(localPosition, _localPosition.data(), 16 * sizeof(hkPackedVector3));
+
+	std::vector<hkPackedVector3> _localNormal;
+	class_instance->GetInstanceByFieldName("localNormal")->GetValue(_localNormal);
+	if (_localNormal.size() != 16) {
+		throw std::runtime_error("localNormal for LocalBlockPN: size is not 16");
+		return false;
+	}
+	std::memcpy(localNormal, _localNormal.data(), 16 * sizeof(hkPackedVector3));
+
+	return true;
 }
 
 bool hktypes::hclObjectSpaceDeformer::LocalBlockPN::ToInstance(hkreflex::hkClassInstance* instance)
 {
-	return false;
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclObjectSpaceDeformer::LocalBlockPN") {
+		std::cout << "Mismatching type conversion from LocalBlockPN to " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+
+	std::vector<hkPackedVector3> _localPosition;
+	_localPosition.resize(16);
+	for (int i = 0; i < 16; i++) {
+		_localPosition[i] = localPosition[i];
+	}
+	class_instance->GetInstanceByFieldName("localPosition")->SetValue(_localPosition);
+
+	std::vector<hkPackedVector3> _localNormal;
+	_localNormal.resize(16);
+	for (int i = 0; i < 16; i++) {
+		_localNormal[i] = localNormal[i];
+	}
+	class_instance->GetInstanceByFieldName("localNormal")->SetValue(_localNormal);
+
+	return true;
+}
+
+bool hktypes::hclGatherAllVerticesOperator::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
+		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclGatherAllVerticesOperator" << std::endl;
+		return false;
+	}
+
+	hclOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
+	class_instance->GetInstanceByFieldName("vertexInputFromVertexOutput")->GetValue(vertexInputFromVertexOutput);
+	class_instance->GetInstanceByFieldName("inputBufferIdx")->GetValue(inputBufferIdx);
+	class_instance->GetInstanceByFieldName("outputBufferIdx")->GetValue(outputBufferIdx);
+	class_instance->GetInstanceByFieldName("gatherNormals")->GetValue(gatherNormals);
+	class_instance->GetInstanceByFieldName("partialGather")->GetValue(partialGather);
+
+	return true;
+}
+
+bool hktypes::hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
+		std::cout << "Mismatching type conversion from hclGatherAllVerticesOperator to " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+
+	hclOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
+	class_instance->GetInstanceByFieldName("vertexInputFromVertexOutput")->SetValue(vertexInputFromVertexOutput);
+	class_instance->GetInstanceByFieldName("inputBufferIdx")->SetValue(inputBufferIdx);
+	class_instance->GetInstanceByFieldName("outputBufferIdx")->SetValue(outputBufferIdx);
+	class_instance->GetInstanceByFieldName("gatherNormals")->SetValue(gatherNormals);
+	class_instance->GetInstanceByFieldName("partialGather")->SetValue(partialGather);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceDeformer::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer") {
+		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclBoneSpaceDeformer" << std::endl;
+		return false;
+	}
+
+	class_instance->GetInstanceByFieldName("fourBlendEntries")->GetValue(fourBlendEntries);
+	class_instance->GetInstanceByFieldName("threeBlendEntries")->GetValue(threeBlendEntries);
+	class_instance->GetInstanceByFieldName("twoBlendEntries")->GetValue(twoBlendEntries);
+	class_instance->GetInstanceByFieldName("oneBlendEntries")->GetValue(oneBlendEntries);
+	class_instance->GetInstanceByFieldName("controlBytes")->GetValue(controlBytes);
+	class_instance->GetInstanceByFieldName("startVertexIndex")->GetValue(startVertexIndex);
+	class_instance->GetInstanceByFieldName("endVertexIndex")->GetValue(endVertexIndex);
+	class_instance->GetInstanceByFieldName("partialWrite")->GetValue(partialWrite);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceDeformer::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer") {
+		std::cout << "Mismatching type conversion from hclBoneSpaceDeformer to " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+
+	class_instance->GetInstanceByFieldName("fourBlendEntries")->SetValue(fourBlendEntries);
+	class_instance->GetInstanceByFieldName("threeBlendEntries")->SetValue(threeBlendEntries);
+	class_instance->GetInstanceByFieldName("twoBlendEntries")->SetValue(twoBlendEntries);
+	class_instance->GetInstanceByFieldName("oneBlendEntries")->SetValue(oneBlendEntries);
+	class_instance->GetInstanceByFieldName("controlBytes")->SetValue(controlBytes);
+	class_instance->GetInstanceByFieldName("startVertexIndex")->SetValue(startVertexIndex);
+	class_instance->GetInstanceByFieldName("endVertexIndex")->SetValue(endVertexIndex);
+	class_instance->GetInstanceByFieldName("partialWrite")->SetValue(partialWrite);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceDeformer::LocalBlockPN::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockPN") {
+		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to LocalBlockPN" << std::endl;
+		return false;
+	}
+
+	std::vector<hkVector4Holder> _localPosition;
+	class_instance->GetInstanceByFieldName("localPosition")->GetValue(_localPosition);
+	if (_localPosition.size() != 16) {
+		throw std::runtime_error("localPosition for LocalBlockPN: size is not 16");
+		return false;
+	}
+	std::memcpy(localPosition, _localPosition.data(), 16 * sizeof(hkVector4Holder));
+
+	std::vector<hkPackedVector3> _localNormal;
+	class_instance->GetInstanceByFieldName("localNormal")->GetValue(_localNormal);
+	if (_localNormal.size() != 16) {
+		throw std::runtime_error("localNormal for LocalBlockPN: size is not 16");
+		return false;
+	}
+	std::memcpy(localNormal, _localNormal.data(), 16 * sizeof(hkPackedVector3));
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceDeformer::LocalBlockPN::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockPN") {
+		std::cout << "Mismatching type conversion from LocalBlockPN to " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+
+	std::vector<hkVector4Holder> _localPosition;
+	_localPosition.resize(16);
+	for (int i = 0; i < 16; i++) {
+		_localPosition[i] = localPosition[i];
+	}
+	class_instance->GetInstanceByFieldName("localPosition")->SetValue(_localPosition);
+
+	std::vector<hkPackedVector3> _localNormal;
+	_localNormal.resize(16);
+	for (int i = 0; i < 16; i++) {
+		_localNormal[i] = localNormal[i];
+	}
+	class_instance->GetInstanceByFieldName("localNormal")->SetValue(_localNormal);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceSkinOperator::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBoneSpaceSkinOperator") {
+		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclBoneSpaceSkinOperator" << std::endl;
+		return false;
+	}
+
+	hclOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
+	class_instance->GetInstanceByFieldName("transformSubset")->GetValue(transformSubset);
+	class_instance->GetInstanceByFieldName("outputBufferIndex")->GetValue(outputBufferIndex);
+	class_instance->GetInstanceByFieldName("transformSetIndex")->GetValue(transformSetIndex);
+	class_instance->GetInstanceByFieldName("boneSpaceDeformer")->GetValue(boneSpaceDeformer);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclBoneSpaceSkinOperator") {
+		std::cout << "Mismatching type conversion from hclBoneSpaceSkinOperator to " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+
+	hclOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
+	class_instance->GetInstanceByFieldName("transformSubset")->SetValue(transformSubset);
+	class_instance->GetInstanceByFieldName("outputBufferIndex")->SetValue(outputBufferIndex);
+	class_instance->GetInstanceByFieldName("transformSetIndex")->SetValue(transformSetIndex);
+	class_instance->GetInstanceByFieldName("boneSpaceDeformer")->SetValue(boneSpaceDeformer);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceSkinPNOperator::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBoneSpaceSkinPNOperator") {
+		std::cout << "Mismatching type conversion from " << class_instance->type->type_name << " to hclBoneSpaceSkinPNOperator" << std::endl;
+		return false;
+	}
+
+	hclBoneSpaceSkinOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
+	class_instance->GetInstanceByFieldName("localPNs")->GetValue(localPNs);
+	class_instance->GetInstanceByFieldName("localUnpackedPNs")->GetValue(localUnpackedPNs);
+
+	return true;
+}
+
+bool hktypes::hclBoneSpaceSkinPNOperator::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+	if (class_instance->type->type_name != "hclBoneSpaceSkinPNOperator") {
+		std::cout << "Mismatching type conversion from hclBoneSpaceSkinPNOperator to " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+
+	hclBoneSpaceSkinOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+
+	class_instance->GetInstanceByFieldName("localPNs")->SetValue(localPNs);
+	class_instance->GetInstanceByFieldName("localUnpackedPNs")->SetValue(localUnpackedPNs);
+
+	return true;
 }

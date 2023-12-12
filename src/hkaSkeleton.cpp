@@ -1,8 +1,8 @@
 #include "hkaSkeleton.h"
 
-bool hktypes::hkQsTransform::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkQsTransform::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->ctype_name != "hkQsTransformf") {
 		std::cout << "hkQsTransform::FromInstance: type_name is not hkQsTransformf" << std::endl;
 		return false;
@@ -108,9 +108,9 @@ hktypes::hkQsTransform hktypes::hkQsTransform::fromMatrix(Eigen::Matrix4f& mat, 
 	return result;
 }
 
-bool hktypes::hkaBoneHolder::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkaBoneHolder::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkaBone") {
 		std::cout << "hkaBoneHolder::FromInstance: type_name is not hkaBone" << std::endl;
 		return false;
@@ -173,9 +173,9 @@ hktypes::hkQsTransform hktypes::hkaBoneHolder::GetWorldTransform()
 	return this->world_transform;
 }
 
-bool hktypes::hkaSkeleton::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkaSkeleton::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkaSkeleton") {
 		std::cout << "hkaSkeleton::FromInstance: type_name is not hkaSkeleton" << std::endl;
 		return false;

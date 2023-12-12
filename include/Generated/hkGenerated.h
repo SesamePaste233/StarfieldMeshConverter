@@ -1,8 +1,18 @@
 #pragma once
 
 #include "hkBaseCTypes.h"
-// Class No.211
-// Mapped to c type: hkArray<hkArray, hkContainerHeapAllocator>
+// Class No.224
+// Mapped to c type: hclCapsuleShape
+class hclCapsuleShape : public hclShape {
+	hkVector4Holder start;	// Offset: 32 Unk: 0
+	hkVector4Holder end;	// Offset: 48 Unk: 0
+	hkVector4Holder dir;	// Offset: 64 Unk: 0
+	float radius;	// Offset: 80 Unk: 0
+	float capLenSqrdInv;	// Offset: 84 Unk: 0
+};
+
+// Class No.223
+// Mapped to c type: std::vector<std::vector<int>>
 template<class tT=hkArray<int, hkContainerHeapAllocator>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -10,11 +20,11 @@ class hkArray {
 	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.210
+// Class No.222
 // Original: hkArray<int, hkContainerHeapAllocator> Mapped to c type : std::vector<int>
 
 
-// Class No.209
+// Class No.221
 // Mapped to c type: hclStateDependencyGraph::Branch
 class hclStateDependencyGraph::Branch {
 	int branchId;	// Offset: 0 Unk: 0
@@ -23,31 +33,94 @@ class hclStateDependencyGraph::Branch {
 	std::vector<int> childBranches;	// Offset: 40 Unk: 0
 };
 
-// Class No.208
+// Class No.220
 // Original: hkArray<hclStateDependencyGraph::Branch, hkContainerHeapAllocator> Mapped to c type : std::vector<hclStateDependencyGraph::Branch>
 
 
+// Class No.219
+// Mapped to c type: hkMatrix3Impl<float>
+template<class tFT=float>
+class hkMatrix3Impl {
+	hkVector4Holder col0;	// Offset: 0 Unk: 0
+	hkVector4Holder col1;	// Offset: 16 Unk: 0
+	hkVector4Holder col2;	// Offset: 32 Unk: 0
+};
+
+// Class No.218
+// Mapped to c type: hkRotationImpl<float>
+template<class tFT=float>
+class hkRotationImpl : public hkMatrix3Impl<float> {
+};
+
+// Class No.217
+// Mapped to c type: hkRotationf
+class hkRotationf : public hkRotationImpl<float> {
+};
+
+// Class No.216
+// Original: hkTransformf Mapped to c type : hkMatrix4Holder
+
+
+// Class No.215
+// Mapped to c type: hclShape
+class hclShape : public hkReferencedObject {
+	int type;	// Offset: 24 Unk: 0
+};
+
+// Class No.214
+// Original: T*<hclShape> Mapped to c type : hclShape*
+
+
+// Class No.213
+// Original: hkUint64 Mapped to c type : uint64_t
+
+
+// Class No.212
+// Original: hkTransform Mapped to c type : hkMatrix4Holder
+
+
+// Class No.211
+// Mapped to c type: hclBendStiffnessConstraintSetMx::Single
+class hclBendStiffnessConstraintSetMx::Single;	// [Undefined]
+
+// Class No.210
+// Original: hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator> Mapped to c type : std::vector<hclBendStiffnessConstraintSetMx::Single>
+
+
+// Class No.209
+// Mapped to c type: hclBendStiffnessConstraintSetMx::Batch
+class hclBendStiffnessConstraintSetMx::Batch {
+	std::array<float, 4> weightsA;	// Offset: 0 Unk: 0
+	std::array<float, 4> weightsB;	// Offset: 16 Unk: 0
+	std::array<float, 4> weightsC;	// Offset: 32 Unk: 0
+	std::array<float, 4> weightsD;	// Offset: 48 Unk: 0
+	std::array<float, 4> bendStiffnesses;	// Offset: 64 Unk: 0
+	std::array<float, 4> restCurvatures;	// Offset: 80 Unk: 0
+	std::array<float, 4> invMassesA;	// Offset: 96 Unk: 0
+	std::array<float, 4> invMassesB;	// Offset: 112 Unk: 0
+	std::array<float, 4> invMassesC;	// Offset: 128 Unk: 0
+	std::array<float, 4> invMassesD;	// Offset: 144 Unk: 0
+	std::array<uint16_t, 4> particlesA;	// Offset: 160 Unk: 0
+	std::array<uint16_t, 4> particlesB;	// Offset: 168 Unk: 0
+	std::array<uint16_t, 4> particlesC;	// Offset: 176 Unk: 0
+	std::array<uint16_t, 4> particlesD;	// Offset: 184 Unk: 0
+};
+
+// Class No.208
+// Original: hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator> Mapped to c type : std::vector<hclBendStiffnessConstraintSetMx::Batch>
+
+
 // Class No.207
-// Mapped to c type: hclBonePlanesConstraintSet::BonePlane
-class hclBonePlanesConstraintSet::BonePlane {
-	Eigen::Vector4f planeEquationBone;	// Offset: 0 Unk: 0
-	uint16_t particleIndex;	// Offset: 16 Unk: 0
-	uint16_t transformIndex;	// Offset: 18 Unk: 0
-	float stiffness;	// Offset: 20 Unk: 0
+// Mapped to c type: hclBendStiffnessConstraintSetMx
+class hclBendStiffnessConstraintSetMx : public hclConstraintSet {
+	std::vector<hclBendStiffnessConstraintSetMx::Batch> batches;	// Offset: 40 Unk: 0
+	std::vector<hclBendStiffnessConstraintSetMx::Single> singles;	// Offset: 56 Unk: 0
+	float maxRestPoseHeightSq;	// Offset: 72 Unk: 0
+	bool clampBendStiffness;	// Offset: 76 Unk: 0
+	bool useRestPoseConfig;	// Offset: 77 Unk: 0
 };
 
 // Class No.206
-// Original: hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator> Mapped to c type : std::vector<hclBonePlanesConstraintSet::BonePlane>
-
-
-// Class No.205
-// Mapped to c type: hclBonePlanesConstraintSet
-class hclBonePlanesConstraintSet : public hclConstraintSet {
-	std::vector<hclBonePlanesConstraintSet::BonePlane> bonePlanes;	// Offset: 40 Unk: 0
-	uint32_t transformSetIndex;	// Offset: 56 Unk: 0
-};
-
-// Class No.204
 // Mapped to c type: hclStretchLinkConstraintSetMx::Single
 class hclStretchLinkConstraintSetMx::Single {
 	float restLength;	// Offset: 0 Unk: 0
@@ -56,11 +129,11 @@ class hclStretchLinkConstraintSetMx::Single {
 	uint32_t particleB;	// Offset: 12 Unk: 0
 };
 
-// Class No.203
+// Class No.205
 // Original: hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator> Mapped to c type : std::vector<hclStretchLinkConstraintSetMx::Single>
 
 
-// Class No.202
+// Class No.204
 // Mapped to c type: hclStretchLinkConstraintSetMx::Batch
 class hclStretchLinkConstraintSetMx::Batch {
 	std::array<float, 4> restLengths;	// Offset: 0 Unk: 0
@@ -69,31 +142,38 @@ class hclStretchLinkConstraintSetMx::Batch {
 	std::array<uint16_t, 4> particlesB;	// Offset: 40 Unk: 0
 };
 
-// Class No.201
+// Class No.203
 // Original: hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator> Mapped to c type : std::vector<hclStretchLinkConstraintSetMx::Batch>
 
 
-// Class No.200
+// Class No.202
 // Mapped to c type: hclStretchLinkConstraintSetMx
 class hclStretchLinkConstraintSetMx : public hclConstraintSet {
 	std::vector<hclStretchLinkConstraintSetMx::Batch> batches;	// Offset: 40 Unk: 0
 	std::vector<hclStretchLinkConstraintSetMx::Single> singles;	// Offset: 56 Unk: 0
 };
 
-// Class No.199
+// Class No.201
 // Mapped to c type: hclLocalRangeConstraintSet::ShapeType
 class hclLocalRangeConstraintSet::ShapeType;	// [Undefined]
 
-// Class No.198
+// Class No.200
 // Original: hkEnum<hclLocalRangeConstraintSet::ShapeType, hkUint32> Mapped to c type : hclLocalRangeConstraintSet::ShapeType
 
 
-// Class No.197
+// Class No.199
 // Mapped to c type: hclLocalRangeConstraintSet::LocalStiffnessConstraint
-class hclLocalRangeConstraintSet::LocalStiffnessConstraint;	// [Undefined]
+class hclLocalRangeConstraintSet::LocalStiffnessConstraint {
+	uint16_t particleIndex;	// Offset: 0 Unk: 0
+	uint16_t referenceVertex;	// Offset: 2 Unk: 0
+	float maximumDistance;	// Offset: 4 Unk: 0
+	float maxNormalDistance;	// Offset: 8 Unk: 0
+	float minNormalDistance;	// Offset: 12 Unk: 0
+	float stiffness;	// Offset: 16 Unk: 0
+};
 
-// Class No.196
-// Mapped to c type: hkArray<hclLocalRangeConstraintSet::LocalStiffnessConstraint, hkContainerHeapAllocator>
+// Class No.198
+// Mapped to c type: std::vector<hclLocalRangeConstraintSet::LocalStiffnessConstraint>
 template<class tT=hclLocalRangeConstraintSet::LocalStiffnessConstraint, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -101,97 +181,93 @@ class hkArray {
 	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.195
+// Class No.197
 // Mapped to c type: hclLocalRangeConstraintSet::LocalConstraint
-class hclLocalRangeConstraintSet::LocalConstraint {
-	uint16_t particleIndex;	// Offset: 0 Unk: 0
-	uint16_t referenceVertex;	// Offset: 2 Unk: 0
-	float maximumDistance;	// Offset: 4 Unk: 0
-	float maxNormalDistance;	// Offset: 8 Unk: 0
-	float minNormalDistance;	// Offset: 12 Unk: 0
-};
+class hclLocalRangeConstraintSet::LocalConstraint;	// [Undefined]
 
-// Class No.194
+// Class No.196
 // Original: hkArray<hclLocalRangeConstraintSet::LocalConstraint, hkContainerHeapAllocator> Mapped to c type : std::vector<hclLocalRangeConstraintSet::LocalConstraint>
 
 
-// Class No.193
+// Class No.195
 // Mapped to c type: hclLocalRangeConstraintSet
 class hclLocalRangeConstraintSet : public hclConstraintSet {
 	std::vector<hclLocalRangeConstraintSet::LocalConstraint> localConstraints;	// Offset: 40 Unk: 0
-	hkArray<hclLocalRangeConstraintSet::LocalStiffnessConstraint, hkContainerHeapAllocator> localStiffnessConstraints;	// Offset: 56 Unk: 0
+	std::vector<hclLocalRangeConstraintSet::LocalStiffnessConstraint> localStiffnessConstraints;	// Offset: 56 Unk: 0
 	uint32_t referenceMeshBufferIdx;	// Offset: 72 Unk: 0
 	float stiffness;	// Offset: 76 Unk: 0
 	hclLocalRangeConstraintSet::ShapeType shapeType;	// Offset: 80 Unk: 0
 	bool applyNormalComponent;	// Offset: 84 Unk: 0
 };
 
-// Class No.192
+// Class No.194
 // Original: T[N]<hkUint16, 4> Mapped to c type : std::array<uint16_t, 4>
 
 
-// Class No.191
+// Class No.193
 // Original: T[N]<hkReal, 4> Mapped to c type : std::array<float, 4>
 
 
-// Class No.190
+// Class No.192
 // Original: hkHandle<hkUint32, 2147483647> Mapped to c type : hkHandle<uint32_t>
 
 
-// Class No.189
-// Mapped to c type: hclStandardLinkConstraintSetMx::Single
-class hclStandardLinkConstraintSetMx::Single {
+// Class No.191
+// Mapped to c type: hclCompressibleLinkConstraintSetMx::Single
+class hclCompressibleLinkConstraintSetMx::Single {
 	float restLength;	// Offset: 0 Unk: 0
-	float stiffnessA;	// Offset: 4 Unk: 0
-	float stiffnessB;	// Offset: 8 Unk: 0
-	uint16_t particleA;	// Offset: 12 Unk: 0
-	uint16_t particleB;	// Offset: 14 Unk: 0
+	float compressionLength;	// Offset: 4 Unk: 0
+	float stiffnessA;	// Offset: 8 Unk: 0
+	float stiffnessB;	// Offset: 12 Unk: 0
+	uint16_t particleA;	// Offset: 16 Unk: 0
+	uint16_t particleB;	// Offset: 18 Unk: 0
+};
+
+// Class No.190
+// Original: hkArray<hclCompressibleLinkConstraintSetMx::Single, hkContainerHeapAllocator> Mapped to c type : std::vector<hclCompressibleLinkConstraintSetMx::Single>
+
+
+// Class No.189
+// Mapped to c type: hclCompressibleLinkConstraintSetMx::Batch
+class hclCompressibleLinkConstraintSetMx::Batch {
+	std::array<float, 4> restLengths;	// Offset: 0 Unk: 0
+	std::array<float, 4> compressionLengths;	// Offset: 16 Unk: 0
+	std::array<float, 4> stiffnessesA;	// Offset: 32 Unk: 0
+	std::array<float, 4> stiffnessesB;	// Offset: 48 Unk: 0
+	std::array<uint16_t, 4> particlesA;	// Offset: 64 Unk: 0
+	std::array<uint16_t, 4> particlesB;	// Offset: 72 Unk: 0
 };
 
 // Class No.188
-// Original: hkArray<hclStandardLinkConstraintSetMx::Single, hkContainerHeapAllocator> Mapped to c type : std::vector<hclStandardLinkConstraintSetMx::Single>
+// Original: hkArray<hclCompressibleLinkConstraintSetMx::Batch, hkContainerHeapAllocator> Mapped to c type : std::vector<hclCompressibleLinkConstraintSetMx::Batch>
 
 
 // Class No.187
-// Mapped to c type: hclStandardLinkConstraintSetMx::Batch
-class hclStandardLinkConstraintSetMx::Batch {
-	std::array<float, 4> restLengths;	// Offset: 0 Unk: 0
-	std::array<float, 4> stiffnessesA;	// Offset: 16 Unk: 0
-	std::array<float, 4> stiffnessesB;	// Offset: 32 Unk: 0
-	std::array<uint16_t, 4> particlesA;	// Offset: 48 Unk: 0
-	std::array<uint16_t, 4> particlesB;	// Offset: 56 Unk: 0
+// Mapped to c type: hclCompressibleLinkConstraintSetMx
+class hclCompressibleLinkConstraintSetMx : public hclConstraintSet {
+	std::vector<hclCompressibleLinkConstraintSetMx::Batch> batches;	// Offset: 40 Unk: 0
+	std::vector<hclCompressibleLinkConstraintSetMx::Single> singles;	// Offset: 56 Unk: 0
 };
 
 // Class No.186
-// Original: hkArray<hclStandardLinkConstraintSetMx::Batch, hkContainerHeapAllocator> Mapped to c type : std::vector<hclStandardLinkConstraintSetMx::Batch>
+// Original: hkArray<hkVector4, hkContainerHeapAllocator> Mapped to c type : std::vector<hkVector4Holder>
 
 
 // Class No.185
-// Mapped to c type: hclStandardLinkConstraintSetMx
-class hclStandardLinkConstraintSetMx : public hclConstraintSet {
-	std::vector<hclStandardLinkConstraintSetMx::Batch> batches;	// Offset: 40 Unk: 0
-	std::vector<hclStandardLinkConstraintSetMx::Single> singles;	// Offset: 56 Unk: 0
-};
-
-// Class No.184
-// Original: hkArray<hkVector4, hkContainerHeapAllocator> Mapped to c type : std::vector<Vector4>
-
-
-// Class No.183
 // Mapped to c type: hclStateDependencyGraph
 class hclStateDependencyGraph : public hkReferencedObject {
 	std::vector<hclStateDependencyGraph::Branch> branches;	// Offset: 24 Unk: 0
 	std::vector<int> rootBranchIds;	// Offset: 40 Unk: 0
-	hkArray<hkArray, hkContainerHeapAllocator> children;	// Offset: 56 Unk: 0
-	hkArray<hkArray, hkContainerHeapAllocator> parents;	// Offset: 72 Unk: 0
+	std::vector<std::vector<int>> children;	// Offset: 56 Unk: 0
+	std::vector<std::vector<int>> parents;	// Offset: 72 Unk: 0
 	bool multiThreadable;	// Offset: 88 Unk: 0
 };
 
-// Class No.182
-// Original: T*<hclStateDependencyGraph> Mapped to c type : hclStateDependencyGraph
+// Class No.184
+// Original: T*<hclStateDependencyGraph> Mapped to c type : hclStateDependencyGraph*
 
 
-// Class No.181
+// Class No.183
 // Mapped to c type: hclGatherAllVerticesOperator
 class hclGatherAllVerticesOperator : public hclOperator {
 	std::vector<short> vertexInputFromVertexOutput;	// Offset: 72 Unk: 0
@@ -201,31 +277,31 @@ class hclGatherAllVerticesOperator : public hclOperator {
 	bool partialGather;	// Offset: 97 Unk: 0
 };
 
-// Class No.180
+// Class No.182
 // Mapped to c type: hclSimpleMeshBoneDeformOperator::TriangleBonePair
 class hclSimpleMeshBoneDeformOperator::TriangleBonePair {
 	uint16_t boneOffset;	// Offset: 0 Unk: 0
 	uint16_t triangleOffset;	// Offset: 2 Unk: 0
 };
 
-// Class No.179
+// Class No.181
 // Original: hkArray<hclSimpleMeshBoneDeformOperator::TriangleBonePair, hkContainerHeapAllocator> Mapped to c type : std::vector<hclSimpleMeshBoneDeformOperator::TriangleBonePair>
 
 
-// Class No.178
+// Class No.180
 // Mapped to c type: hclSimpleMeshBoneDeformOperator
 class hclSimpleMeshBoneDeformOperator : public hclOperator {
 	uint32_t inputBufferIdx;	// Offset: 72 Unk: 0
 	uint32_t outputTransformSetIdx;	// Offset: 76 Unk: 0
 	std::vector<hclSimpleMeshBoneDeformOperator::TriangleBonePair> triangleBonePairs;	// Offset: 80 Unk: 0
-	std::vector<Eigen::Matrix4f> localBoneTransforms;	// Offset: 96 Unk: 0
+	std::vector<hkMatrix4Holder> localBoneTransforms;	// Offset: 96 Unk: 0
 };
 
-// Class No.177
+// Class No.179
 // Original: hkArray<hkInt32, hkContainerHeapAllocator> Mapped to c type : std::vector<int>
 
 
-// Class No.176
+// Class No.178
 // Mapped to c type: hclSimulateOperator::Config
 class hclSimulateOperator::Config {
 	std::string name;	// Offset: 0 Unk: 0
@@ -237,29 +313,29 @@ class hclSimulateOperator::Config {
 	bool adaptConstraintStiffness;	// Offset: 43 Unk: 0
 };
 
-// Class No.175
+// Class No.177
 // Original: hkArray<hclSimulateOperator::Config, hkContainerHeapAllocator> Mapped to c type : std::vector<hclSimulateOperator::Config>
 
 
-// Class No.174
+// Class No.176
 // Mapped to c type: hclSimulateOperator
 class hclSimulateOperator : public hclOperator {
 	uint32_t simClothIndex;	// Offset: 72 Unk: 0
 	std::vector<hclSimulateOperator::Config> simulateOpConfigs;	// Offset: 80 Unk: 0
 };
 
-// Class No.173
+// Class No.175
 // Mapped to c type: hclMoveParticlesOperator::VertexParticlePair
 class hclMoveParticlesOperator::VertexParticlePair {
 	uint16_t vertexIndex;	// Offset: 0 Unk: 0
 	uint16_t particleIndex;	// Offset: 2 Unk: 0
 };
 
-// Class No.172
+// Class No.174
 // Original: hkArray<hclMoveParticlesOperator::VertexParticlePair, hkContainerHeapAllocator> Mapped to c type : std::vector<hclMoveParticlesOperator::VertexParticlePair>
 
 
-// Class No.171
+// Class No.173
 // Mapped to c type: hclMoveParticlesOperator
 class hclMoveParticlesOperator : public hclOperator {
 	std::vector<hclMoveParticlesOperator::VertexParticlePair> vertexParticlePairs;	// Offset: 72 Unk: 0
@@ -267,7 +343,7 @@ class hclMoveParticlesOperator : public hclOperator {
 	uint32_t refBufferIdx;	// Offset: 92 Unk: 0
 };
 
-// Class No.170
+// Class No.172
 // Mapped to c type: hkBitFieldStorage<hkArray>
 template<class tStorage=hkArray<hkUint32, hkContainerHeapAllocator>>
 class hkBitFieldStorage {
@@ -275,30 +351,38 @@ class hkBitFieldStorage {
 	int numBits;	// Offset: 16 Unk: 0
 };
 
-// Class No.169
+// Class No.171
 // Mapped to c type: hkBitFieldBase<hkBitFieldStorage>
 template<class tStorage=hkBitFieldStorage<hkArray>>
 class hkBitFieldBase {
 	hkBitFieldStorage<hkArray> storage;	// Offset: 0 Unk: 0
 };
 
-// Class No.168
+// Class No.170
 // Mapped to c type: hkBitField
 class hkBitField : public hkBitFieldBase<hkBitFieldStorage> {
 };
 
-// Class No.167
+// Class No.169
 // Original: T[N]<hkInt16, 4> Mapped to c type : std::array<short, 4>
 
 
-// Class No.166
+// Class No.168
 // Mapped to c type: hkPackedVector3
 class hkPackedVector3 {
 	std::array<short, 4> values;	// Offset: 0 Unk: 3
 };
 
-// Class No.165
+// Class No.167
 // Original: T[N]<hkPackedVector3, 16> Mapped to c type : std::array<hkPackedVector3, 16>
+
+
+// Class No.166
+// Original: T[N]<hkUint8, 32> Mapped to c type : std::array<uint8_t, 32>
+
+
+// Class No.165
+// Original: T[N]<hkUint16, 32> Mapped to c type : std::array<uint16_t, 32>
 
 
 // Class No.164
@@ -322,15 +406,6 @@ class hkPackedVector3 {
 
 
 // Class No.159
-// Original: hkMatrix4Impl<float> Mapped to c type : Eigen::Matrix4f
-
-
-// Class No.158
-// Mapped to c type: hkMatrix4f
-class hkMatrix4f : public hkMatrix4Impl<float> {
-};
-
-// Class No.157
 // Mapped to c type: hclTransformSetUsage::TransformTracker
 class hclTransformSetUsage::TransformTracker {
 	hkBitField read;	// Offset: 0 Unk: 0
@@ -338,49 +413,56 @@ class hclTransformSetUsage::TransformTracker {
 	hkBitField written;	// Offset: 48 Unk: 0
 };
 
-// Class No.156
+// Class No.158
 // Original: hkArray<hclTransformSetUsage::TransformTracker, hkContainerHeapAllocator> Mapped to c type : std::vector<hclTransformSetUsage::TransformTracker>
 
 
-// Class No.155
+// Class No.157
 // Original: T[N]<hkUint8, 2> Mapped to c type : std::array<uint8_t, 2>
 
 
-// Class No.154
+// Class No.156
 // Mapped to c type: hclTransformSetUsage
 class hclTransformSetUsage {
 	std::array<uint8_t, 2> perComponentFlags;	// Offset: 0 Unk: 0
 	std::vector<hclTransformSetUsage::TransformTracker> perComponentTransformTrackers;	// Offset: 8 Unk: 0
 };
 
-// Class No.153
+// Class No.155
 // Original: T[N]<hkUint8, 4> Mapped to c type : std::array<uint8_t, 4>
 
 
-// Class No.152
+// Class No.154
 // Mapped to c type: hclBufferUsage
 class hclBufferUsage {
 	std::array<uint8_t, 4> perComponentFlags;	// Offset: 0 Unk: 0
 	bool trianglesRead;	// Offset: 4 Unk: 0
 };
 
-// Class No.151
+// Class No.153
 // Mapped to c type: hclObjectSpaceDeformer::OneBlendEntryBlock
-class hclObjectSpaceDeformer::OneBlendEntryBlock;	// [Undefined]
+class hclObjectSpaceDeformer::OneBlendEntryBlock {
+	std::array<uint16_t, 16> vertexIndices;	// Offset: 0 Unk: 0
+	std::array<uint16_t, 16> boneIndices;	// Offset: 32 Unk: 0
+};
 
-// Class No.150
+// Class No.152
 // Original: hkArray<hclObjectSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::OneBlendEntryBlock>
 
 
-// Class No.149
+// Class No.151
 // Mapped to c type: hclObjectSpaceDeformer::TwoBlendEntryBlock
-class hclObjectSpaceDeformer::TwoBlendEntryBlock;	// [Undefined]
+class hclObjectSpaceDeformer::TwoBlendEntryBlock {
+	std::array<uint16_t, 16> vertexIndices;	// Offset: 0 Unk: 0
+	std::array<uint16_t, 32> boneIndices;	// Offset: 32 Unk: 0
+	std::array<uint8_t, 32> boneWeights;	// Offset: 96 Unk: 0
+};
 
-// Class No.148
+// Class No.150
 // Original: hkArray<hclObjectSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::TwoBlendEntryBlock>
 
 
-// Class No.147
+// Class No.149
 // Mapped to c type: hclObjectSpaceDeformer::ThreeBlendEntryBlock
 class hclObjectSpaceDeformer::ThreeBlendEntryBlock {
 	std::array<uint16_t, 16> vertexIndices;	// Offset: 0 Unk: 0
@@ -388,11 +470,11 @@ class hclObjectSpaceDeformer::ThreeBlendEntryBlock {
 	std::array<uint8_t, 48> boneWeights;	// Offset: 128 Unk: 0
 };
 
-// Class No.146
+// Class No.148
 // Original: hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::ThreeBlendEntryBlock>
 
 
-// Class No.145
+// Class No.147
 // Mapped to c type: hclObjectSpaceDeformer::FourBlendEntryBlock
 class hclObjectSpaceDeformer::FourBlendEntryBlock {
 	std::array<uint16_t, 16> vertexIndices;	// Offset: 0 Unk: 0
@@ -400,54 +482,54 @@ class hclObjectSpaceDeformer::FourBlendEntryBlock {
 	std::array<uint8_t, 64> boneWeights;	// Offset: 160 Unk: 0
 };
 
-// Class No.144
+// Class No.146
 // Original: hkArray<hclObjectSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::FourBlendEntryBlock>
 
 
-// Class No.143
+// Class No.145
 // Mapped to c type: hclObjectSpaceDeformer::FiveBlendEntryBlock
 class hclObjectSpaceDeformer::FiveBlendEntryBlock;	// [Undefined]
 
-// Class No.142
+// Class No.144
 // Original: hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::FiveBlendEntryBlock>
 
 
-// Class No.141
+// Class No.143
 // Mapped to c type: hclObjectSpaceDeformer::SixBlendEntryBlock
 class hclObjectSpaceDeformer::SixBlendEntryBlock;	// [Undefined]
 
-// Class No.140
+// Class No.142
 // Original: hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::SixBlendEntryBlock>
 
 
-// Class No.139
+// Class No.141
 // Mapped to c type: hclObjectSpaceDeformer::SevenBlendEntryBlock
 class hclObjectSpaceDeformer::SevenBlendEntryBlock;	// [Undefined]
 
-// Class No.138
+// Class No.140
 // Original: hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::SevenBlendEntryBlock>
 
 
-// Class No.137
+// Class No.139
 // Mapped to c type: hclObjectSpaceDeformer::EightBlendEntryBlock
 class hclObjectSpaceDeformer::EightBlendEntryBlock;	// [Undefined]
 
-// Class No.136
+// Class No.138
 // Original: hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::EightBlendEntryBlock>
 
 
-// Class No.135
+// Class No.137
 // Mapped to c type: hclClothState::TransformSetAccess
 class hclClothState::TransformSetAccess {
 	uint32_t transformSetIndex;	// Offset: 0 Unk: 0
 	hclTransformSetUsage transformSetUsage;	// Offset: 8 Unk: 0
 };
 
-// Class No.134
+// Class No.136
 // Original: hkArray<hclClothState::TransformSetAccess, hkContainerHeapAllocator> Mapped to c type : std::vector<hclClothState::TransformSetAccess>
 
 
-// Class No.133
+// Class No.135
 // Mapped to c type: hclClothState::BufferAccess
 class hclClothState::BufferAccess {
 	uint32_t bufferIndex;	// Offset: 0 Unk: 0
@@ -455,11 +537,11 @@ class hclClothState::BufferAccess {
 	uint32_t shadowBufferIndex;	// Offset: 12 Unk: 0
 };
 
-// Class No.132
+// Class No.134
 // Original: hkArray<hclClothState::BufferAccess, hkContainerHeapAllocator> Mapped to c type : std::vector<hclClothState::BufferAccess>
 
 
-// Class No.131
+// Class No.133
 // Mapped to c type: hclObjectSpaceDeformer
 class hclObjectSpaceDeformer {
 	std::vector<hclObjectSpaceDeformer::EightBlendEntryBlock> eightBlendEntries;	// Offset: 0 Unk: 0
@@ -476,78 +558,78 @@ class hclObjectSpaceDeformer {
 	bool partialWrite;	// Offset: 148 Unk: 0
 };
 
-// Class No.130
+// Class No.132
 // Mapped to c type: hclObjectSpaceDeformer::LocalBlockUnpackedPN
 class hclObjectSpaceDeformer::LocalBlockUnpackedPN;	// [Undefined]
 
-// Class No.129
+// Class No.131
 // Original: hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::LocalBlockUnpackedPN>
 
 
-// Class No.128
+// Class No.130
 // Mapped to c type: hclObjectSpaceDeformer::LocalBlockPN
 class hclObjectSpaceDeformer::LocalBlockPN {
 	std::array<hkPackedVector3, 16> localPosition;	// Offset: 0 Unk: 0
 	std::array<hkPackedVector3, 16> localNormal;	// Offset: 128 Unk: 0
 };
 
-// Class No.127
+// Class No.129
 // Original: hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator> Mapped to c type : std::vector<hclObjectSpaceDeformer::LocalBlockPN>
 
 
-// Class No.126
+// Class No.128
 // Mapped to c type: hclObjectSpaceSkinOperator
 class hclObjectSpaceSkinOperator : public hclOperator {
-	std::vector<Eigen::Matrix4f> boneFromSkinMeshTransforms;	// Offset: 72 Unk: 0
+	std::vector<hkMatrix4Holder> boneFromSkinMeshTransforms;	// Offset: 72 Unk: 0
 	std::vector<uint16_t> transformSubset;	// Offset: 88 Unk: 0
 	uint32_t outputBufferIndex;	// Offset: 104 Unk: 0
 	uint32_t transformSetIndex;	// Offset: 108 Unk: 0
 	hclObjectSpaceDeformer objectSpaceDeformer;	// Offset: 112 Unk: 0
 };
 
-// Class No.125
+// Class No.127
 // Mapped to c type: hclObjectSpaceSkinPNOperator
 class hclObjectSpaceSkinPNOperator : public hclObjectSpaceSkinOperator {
 	std::vector<hclObjectSpaceDeformer::LocalBlockPN> localPNs;	// Offset: 264 Unk: 0
 	std::vector<hclObjectSpaceDeformer::LocalBlockUnpackedPN> localUnpackedPNs;	// Offset: 280 Unk: 0
 };
 
-// Class No.124
+// Class No.126
 // Mapped to c type: hclBufferLayout::SlotFlags
 class hclBufferLayout::SlotFlags;	// [Undefined]
 
-// Class No.123
+// Class No.125
 // Original: hkEnum<hclBufferLayout::SlotFlags, hkUint8> Mapped to c type : hclBufferLayout::SlotFlags
 
 
-// Class No.122
+// Class No.124
 // Mapped to c type: hclRuntimeConversionInfo::VectorConversion
 class hclRuntimeConversionInfo::VectorConversion;	// [Undefined]
 
-// Class No.121
+// Class No.123
 // Original: hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8> Mapped to c type : hclRuntimeConversionInfo::VectorConversion
 
 
-// Class No.120
+// Class No.122
 // Mapped to c type: hclBufferLayout::TriangleFormat
 class hclBufferLayout::TriangleFormat;	// [Undefined]
 
-// Class No.119
+// Class No.121
 // Original: hkEnum<hclBufferLayout::TriangleFormat, hkUint8> Mapped to c type : hclBufferLayout::TriangleFormat
 
 
-// Class No.118
+// Class No.120
 // Mapped to c type: hclBufferLayout::Slot
 class hclBufferLayout::Slot {
 	hclBufferLayout::SlotFlags flags;	// Offset: 0 Unk: 0
 	uint8_t stride;	// Offset: 1 Unk: 0
 };
 
-// Class No.117
+// Class No.119
 // Original: T[N]<hclBufferLayout::Slot, 4> Mapped to c type : std::array<hclBufferLayout::Slot, 4>
 
 
-// Class No.116
+// Class No.118
 // Mapped to c type: hclBufferLayout::BufferElement
 class hclBufferLayout::BufferElement {
 	hclRuntimeConversionInfo::VectorConversion vectorConversion;	// Offset: 0 Unk: 0
@@ -556,11 +638,11 @@ class hclBufferLayout::BufferElement {
 	uint8_t slotStart;	// Offset: 3 Unk: 0
 };
 
-// Class No.115
+// Class No.117
 // Original: T[N]<hclBufferLayout::BufferElement, 4> Mapped to c type : std::array<hclBufferLayout::BufferElement, 4>
 
 
-// Class No.114
+// Class No.116
 // Mapped to c type: hclBufferLayout
 class hclBufferLayout {
 	std::array<hclBufferLayout::BufferElement, 4> elementsLayout;	// Offset: 0 Unk: 0
@@ -569,7 +651,7 @@ class hclBufferLayout {
 	hclBufferLayout::TriangleFormat triangleFormat;	// Offset: 25 Unk: 0
 };
 
-// Class No.113
+// Class No.115
 // Mapped to c type: hclScratchBufferDefinition
 class hclScratchBufferDefinition : public hclBufferDefinition {
 	std::vector<uint16_t> triangleIndices;	// Offset: 88 Unk: 0
@@ -577,9 +659,18 @@ class hclScratchBufferDefinition : public hclBufferDefinition {
 	bool storeTangentsAndBiTangents;	// Offset: 105 Unk: 0
 };
 
-// Class No.112
+// Class No.114
 // Original: unsigned char Mapped to c type : uint8_t
 
+
+// Class No.113
+// Original: hkMatrix4Impl<float> Mapped to c type : hkMatrix4Holder
+
+
+// Class No.112
+// Mapped to c type: hkMatrix4f
+class hkMatrix4f : public hkMatrix4Impl<float> {
+};
 
 // Class No.111
 // Original: signed char Mapped to c type : int8_t
@@ -666,11 +757,11 @@ class hclVirtualCollisionPointsData::Block;	// [Undefined]
 
 
 // Class No.90
-// Original: hkMatrix4 Mapped to c type : Eigen::Matrix4f
+// Original: hkMatrix4 Mapped to c type : hkMatrix4Holder
 
 
 // Class No.89
-// Original: hkArray<hkMatrix4, hkContainerHeapAllocator> Mapped to c type : std::vector<Eigen::Matrix4f>
+// Original: hkArray<hkMatrix4, hkContainerHeapAllocator> Mapped to c type : std::vector<hkMatrix4Holder>
 
 
 // Class No.88
@@ -678,7 +769,7 @@ class hclVirtualCollisionPointsData::Block;	// [Undefined]
 
 
 // Class No.87
-// Original: hkVector4 Mapped to c type : Eigen::Vector4f
+// Original: hkVector4 Mapped to c type : hkVector4Holder
 
 
 // Class No.86
@@ -708,7 +799,11 @@ class hclVirtualCollisionPointsData {
 
 // Class No.85
 // Mapped to c type: hclSimClothData::CollidablePinchingData
-class hclSimClothData::CollidablePinchingData;	// [Undefined]
+class hclSimClothData::CollidablePinchingData {
+	bool pinchDetectionEnabled;	// Offset: 0 Unk: 0
+	int8_t pinchDetectionPriority;	// Offset: 1 Unk: 0
+	float pinchDetectionRadius;	// Offset: 4 Unk: 0
+};
 
 // Class No.84
 // Original: hkArray<hclSimClothData::CollidablePinchingData, hkContainerHeapAllocator> Mapped to c type : std::vector<hclSimClothData::CollidablePinchingData>
@@ -761,14 +856,26 @@ class hclSimClothData::TransferMotionData {
 
 // Class No.77
 // Mapped to c type: hclCollidable
-class hclCollidable;	// [Undefined]
+class hclCollidable : public hkReferencedObject {
+	hkMatrix4Holder transform;	// Offset: 32 Unk: 0
+	hkVector4Holder linearVelocity;	// Offset: 96 Unk: 0
+	hkVector4Holder angularVelocity;	// Offset: 112 Unk: 0
+	uint64_t userData;	// Offset: 128 Unk: 3
+	hclShape* shape;	// Offset: 136 Unk: 0
+	std::string name;	// Offset: 144 Unk: 0
+	float pinchDetectionRadius;	// Offset: 152 Unk: 0
+	int8_t pinchDetectionPriority;	// Offset: 156 Unk: 0
+	bool pinchDetectionEnabled;	// Offset: 157 Unk: 0
+	bool virtualCollisionPointCollisionEnabled;	// Offset: 158 Unk: 0
+	bool enabled;	// Offset: 159 Unk: 0
+};
 
 // Class No.76
-// Original: T*<hclCollidable> Mapped to c type : hclCollidable
+// Original: T*<hclCollidable> Mapped to c type : hclCollidable*
 
 
 // Class No.75
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclCollidable*>
 template<class tT=T*<hclCollidable>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -781,7 +888,7 @@ class hkArray {
 class hclSimClothData::CollidableTransformMap {
 	int transformSetIndex;	// Offset: 0 Unk: 0
 	std::vector<uint32_t> transformIndices;	// Offset: 8 Unk: 0
-	std::vector<Eigen::Matrix4f> offsets;	// Offset: 24 Unk: 0
+	std::vector<hkMatrix4Holder> offsets;	// Offset: 24 Unk: 0
 };
 
 // Class No.73
@@ -793,11 +900,11 @@ class hclConstraintSet : public hkReferencedObject {
 };
 
 // Class No.72
-// Original: T*<hclConstraintSet> Mapped to c type : hclConstraintSet
+// Original: T*<hclConstraintSet> Mapped to c type : hclConstraintSet*
 
 
 // Class No.71
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclConstraintSet*>
 template<class tT=T*<hclConstraintSet>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -809,15 +916,15 @@ class hkArray {
 // Mapped to c type: hclSimClothPose
 class hclSimClothPose : public hkReferencedObject {
 	std::string name;	// Offset: 24 Unk: 0
-	std::vector<Vector4> positions;	// Offset: 32 Unk: 0
+	std::vector<hkVector4Holder> positions;	// Offset: 32 Unk: 0
 };
 
 // Class No.69
-// Original: T*<hclSimClothPose> Mapped to c type : hclSimClothPose
+// Original: T*<hclSimClothPose> Mapped to c type : hclSimClothPose*
 
 
 // Class No.68
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclSimClothPose*>
 template<class tT=T*<hclSimClothPose>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -853,7 +960,7 @@ class hclSimClothData::ParticleData {
 // Class No.62
 // Mapped to c type: hclSimClothData::OverridableSimulationInfo
 class hclSimClothData::OverridableSimulationInfo {
-	Eigen::Vector4f gravity;	// Offset: 0 Unk: 0
+	hkVector4Holder gravity;	// Offset: 0 Unk: 0
 	float globalDampingPerSecond;	// Offset: 16 Unk: 0
 };
 
@@ -867,15 +974,15 @@ class float {
 
 
 // Class No.59
-// Original: hkVector4f Mapped to c type : Eigen::Vector4f
+// Original: hkVector4f Mapped to c type : hkVector4Holder
 
 
 // Class No.58
 // Mapped to c type: hkQsTransformf
 class hkQsTransformf {
-	Eigen::Vector4f translation;	// Offset: 0 Unk: 0
+	hkVector4Holder translation;	// Offset: 0 Unk: 0
 	Eigen::Quaternionf rotation;	// Offset: 16 Unk: 0
-	Eigen::Vector4f scale;	// Offset: 32 Unk: 0
+	hkVector4Holder scale;	// Offset: 32 Unk: 0
 };
 
 // Class No.57
@@ -912,12 +1019,11 @@ class hkaSkeleton::LocalFrameOnBone;	// [Undefined]
 
 
 // Class No.49
-// Mapped to c type: hkQsTransform
-class hkQsTransform : public hkQsTransformf {
-};
+// Original: hkQsTransform Mapped to c type : hkQsTransformf
+
 
 // Class No.48
-// Original: hkArray<hkQsTransform, hkContainerHeapAllocator> Mapped to c type : std::vector<hkQsTransform>
+// Original: hkArray<hkQsTransform, hkContainerHeapAllocator> Mapped to c type : std::vector<hkQsTransformf>
 
 
 // Class No.47
@@ -945,7 +1051,7 @@ class hkaSkeleton : public hkReferencedObject {
 	std::string name;	// Offset: 24 Unk: 0
 	std::vector<short> parentIndices;	// Offset: 32 Unk: 0
 	std::vector<hkaBone> bones;	// Offset: 48 Unk: 0
-	std::vector<hkQsTransform> referencePose;	// Offset: 64 Unk: 0
+	std::vector<hkQsTransformf> referencePose;	// Offset: 64 Unk: 0
 	std::vector<float> referenceFloats;	// Offset: 80 Unk: 0
 	std::vector<std::string> floatSlots;	// Offset: 96 Unk: 0
 	std::vector<hkaSkeleton::LocalFrameOnBone> localFrames;	// Offset: 112 Unk: 0
@@ -990,11 +1096,11 @@ class hclClothData::Platform;	// [Undefined]
 class hclAction;	// [Undefined]
 
 // Class No.33
-// Original: T*<hclAction> Mapped to c type : hclAction
+// Original: T*<hclAction> Mapped to c type : hclAction*
 
 
 // Class No.32
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclAction*>
 template<class tT=T*<hclAction>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1007,11 +1113,11 @@ class hkArray {
 class hclStateTransition;	// [Undefined]
 
 // Class No.30
-// Original: T*<hclStateTransition> Mapped to c type : hclStateTransition
+// Original: T*<hclStateTransition> Mapped to c type : hclStateTransition*
 
 
 // Class No.29
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclStateTransition*>
 template<class tT=T*<hclStateTransition>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1027,15 +1133,15 @@ class hclClothState : public hkReferencedObject {
 	std::vector<hclClothState::BufferAccess> usedBuffers;	// Offset: 48 Unk: 0
 	std::vector<hclClothState::TransformSetAccess> usedTransformSets;	// Offset: 64 Unk: 0
 	std::vector<uint32_t> usedSimCloths;	// Offset: 80 Unk: 0
-	hclStateDependencyGraph dependencyGraph;	// Offset: 96 Unk: 0
+	hclStateDependencyGraph* dependencyGraph;	// Offset: 96 Unk: 0
 };
 
 // Class No.27
-// Original: T*<hclClothState> Mapped to c type : hclClothState
+// Original: T*<hclClothState> Mapped to c type : hclClothState*
 
 
 // Class No.26
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclClothState*>
 template<class tT=T*<hclClothState>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1054,11 +1160,11 @@ class hclOperator : public hkReferencedObject {
 };
 
 // Class No.24
-// Original: T*<hclOperator> Mapped to c type : hclOperator
+// Original: T*<hclOperator> Mapped to c type : hclOperator*
 
 
 // Class No.23
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclOperator*>
 template<class tT=T*<hclOperator>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1075,11 +1181,11 @@ class hclTransformSetDefinition : public hkReferencedObject {
 };
 
 // Class No.21
-// Original: T*<hclTransformSetDefinition> Mapped to c type : hclTransformSetDefinition
+// Original: T*<hclTransformSetDefinition> Mapped to c type : hclTransformSetDefinition*
 
 
 // Class No.20
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclTransformSetDefinition*>
 template<class tT=T*<hclTransformSetDefinition>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1100,11 +1206,11 @@ class hclBufferDefinition : public hkReferencedObject {
 };
 
 // Class No.18
-// Original: T*<hclBufferDefinition> Mapped to c type : hclBufferDefinition
+// Original: T*<hclBufferDefinition> Mapped to c type : hclBufferDefinition*
 
 
 // Class No.17
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclBufferDefinition*>
 template<class tT=T*<hclBufferDefinition>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1121,14 +1227,14 @@ class hclSimClothData : public hkReferencedObject {
 	std::vector<uint16_t> fixedParticles;	// Offset: 80 Unk: 0
 	bool doNormals;	// Offset: 96 Unk: 0
 	std::vector<uint32_t> simOpIds;	// Offset: 104 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> simClothPoses;	// Offset: 120 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> staticConstraintSets;	// Offset: 136 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> antiPinchConstraintSets;	// Offset: 152 Unk: 0
+	std::vector<hclSimClothPose*> simClothPoses;	// Offset: 120 Unk: 0
+	std::vector<hclConstraintSet*> staticConstraintSets;	// Offset: 136 Unk: 0
+	std::vector<hclConstraintSet*> antiPinchConstraintSets;	// Offset: 152 Unk: 0
 	hclSimClothData::CollidableTransformMap collidableTransformMap;	// Offset: 168 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> perInstanceCollidables;	// Offset: 208 Unk: 0
+	std::vector<hclCollidable*> perInstanceCollidables;	// Offset: 208 Unk: 0
 	float maxParticleRadius;	// Offset: 224 Unk: 0
 	std::vector<uint32_t> staticCollisionMasks;	// Offset: 232 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> actions;	// Offset: 248 Unk: 0
+	std::vector<hclAction*> actions;	// Offset: 248 Unk: 0
 	float totalMass;	// Offset: 264 Unk: 0
 	hclSimClothData::TransferMotionData transferMotionData;	// Offset: 268 Unk: 0
 	bool transferMotionEnabled;	// Offset: 316 Unk: 0
@@ -1147,11 +1253,11 @@ class hclSimClothData : public hkReferencedObject {
 };
 
 // Class No.15
-// Original: T*<hclSimClothData> Mapped to c type : hclSimClothData
+// Original: T*<hclSimClothData> Mapped to c type : hclSimClothData*
 
 
 // Class No.14
-// Mapped to c type: hkArray<T*, hkContainerHeapAllocator>
+// Mapped to c type: std::vector<hclSimClothData*>
 template<class tT=T*<hclSimClothData>, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
@@ -1163,13 +1269,13 @@ class hkArray {
 // Mapped to c type: hclClothData
 class hclClothData : public hkReferencedObject {
 	std::string name;	// Offset: 24 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> simClothDatas;	// Offset: 32 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> bufferDefinitions;	// Offset: 48 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> transformSetDefinitions;	// Offset: 64 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> operators;	// Offset: 80 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> clothStateDatas;	// Offset: 96 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> stateTransitions;	// Offset: 112 Unk: 0
-	hkArray<T*, hkContainerHeapAllocator> actions;	// Offset: 128 Unk: 0
+	std::vector<hclSimClothData*> simClothDatas;	// Offset: 32 Unk: 0
+	std::vector<hclBufferDefinition*> bufferDefinitions;	// Offset: 48 Unk: 0
+	std::vector<hclTransformSetDefinition*> transformSetDefinitions;	// Offset: 64 Unk: 0
+	std::vector<hclOperator*> operators;	// Offset: 80 Unk: 0
+	std::vector<hclClothState*> clothStateDatas;	// Offset: 96 Unk: 0
+	std::vector<hclStateTransition*> stateTransitions;	// Offset: 112 Unk: 0
+	std::vector<hclAction*> actions;	// Offset: 128 Unk: 0
 	bool generatedAtRuntime;	// Offset: 144 Unk: 0
 	hclClothData::Platform targetPlatform;	// Offset: 148 Unk: 0
 };
@@ -1190,7 +1296,7 @@ class hkReferencedObject : public hkBaseObject {
 
 
 // Class No.9
-// Original: hkRefVariant Mapped to c type : hkReferencedObject
+// Original: hkRefVariant Mapped to c type : hkReferencedObject*
 
 
 // Class No.8
@@ -1219,7 +1325,7 @@ class hkContainerHeapAllocator;	// [Undefined]
 class hkRootLevelContainer::NamedVariant {
 	std::string name;	// Offset: 0 Unk: 0
 	std::string className;	// Offset: 8 Unk: 0
-	hkReferencedObject variant;	// Offset: 16 Unk: 0
+	hkReferencedObject* variant;	// Offset: 16 Unk: 0
 };
 
 // Class No.2

@@ -2,9 +2,11 @@ import bpy
 import bmesh
 import os
 import numpy as np
+import mathutils
 
 import utils_math
 import utils_common as utils
+import CapsuleGenGeoNode as capsule_gen
 
 read_only_marker = '[READONLY]'
 mix_normal = False
@@ -523,3 +525,73 @@ def RevertRenamingBone(name:str):
 
 def RevertRenamingBoneList(names:list):
 	return [RevertRenamingBone(name) for name in names]
+
+def BuildhkBufferedMesh(mesh:dict):
+	mesh_type = mesh['type']
+	name = mesh['name']
+	print(f'Reading havok cloth sim mesh: {name}.')
+	matrix = mesh['localFrame']
+	print(f'Local frame: {matrix}')
+	T = mathutils.Matrix()
+	for i in range(4):
+		for j in range(4):
+			T[i][j] = mesh['localFrame'][i][j]
+
+	if mesh_type == 1: # Capsule
+		mesh_obj = CapsuleFromParameters(name, mesh['capsuleEnd'], mesh['capsuleStart'], mesh['capsuleSmallRadius'], mesh['capsuleBigRadius'])
+		mesh_obj.matrix_world = T
+	elif mesh_type == 0:
+		positions = mesh['positions']
+		normals = mesh['normals']
+		triangles = mesh['triangleIndices']
+		boneWeights = mesh['boneWeights']
+		bl_mesh = bpy.data.meshes.new(name = name)
+		bl_mesh.from_pydata(positions, [], triangles)
+		mesh_obj = bpy.data.objects.new(name, bl_mesh)
+		bpy.context.scene.collection.objects.link(mesh_obj)
+		mesh_obj.matrix_world = T
+
+
+	if 'extraShapes' in mesh.keys():
+		for sub_mesh in mesh['extraShapes']:
+			BuildhkBufferedMesh(sub_mesh)
+
+def GetNodeGroupInputIdentifier(node_group, input_name):
+	inputs = node_group.inputs
+	id = inputs[input_name].identifier
+	return id
+
+def CapsuleFromParameters(name: str, smallEnd: list, bigEnd: list, smallRadius: float, bigRadius: float):
+	mesh = bpy.data.meshes.new(name)
+	obj = bpy.data.objects.new(name, mesh)
+
+	bpy.context.collection.objects.link(obj)
+
+	gnmod = None
+	for gnmod in obj.modifiers:
+		if gnmod.type == "NODES":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES"):
+		gnmod = obj.modifiers.new("Capsule", "NODES")
+
+	gnmod.node_group = capsule_gen.GetGeoNode()
+
+	start_big_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Start/Big")
+	end_small_id = GetNodeGroupInputIdentifier(gnmod.node_group, "End/Small")
+	big_radius_id = GetNodeGroupInputIdentifier(gnmod.node_group, "bigRadius")
+	small_radius_id = GetNodeGroupInputIdentifier(gnmod.node_group, "smallRadius")
+
+	gnmod[start_big_id][0] = bigEnd[0]
+	gnmod[start_big_id][1] = bigEnd[1]
+	gnmod[start_big_id][2] = bigEnd[2]
+
+	gnmod[end_small_id][0] = smallEnd[0]
+	gnmod[end_small_id][1] = smallEnd[1]
+	gnmod[end_small_id][2] = smallEnd[2]
+
+	gnmod[big_radius_id] = bigRadius
+	gnmod[small_radius_id] = smallRadius
+	
+	obj.display_type = 'WIRE'
+	return obj

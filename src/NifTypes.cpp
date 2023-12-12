@@ -426,6 +426,8 @@ std::string nif::RTTIToString(const NiRTTI& rtti)
 		return "BSSkin::Instance";
 	case NiRTTI::BSLightingShaderProperty:
 		return "BSLightingShaderProperty";
+	case NiRTTI::BSConnectPointParents:
+		return "BSConnectPoint::Parents";
 	case NiRTTI::BSSkinBoneData:
 		return "BSSkin::BoneData";
 	case NiRTTI::BoneTranslations:
@@ -434,6 +436,8 @@ std::string nif::RTTIToString(const NiRTTI& rtti)
 		return "NiStringExtraData";
 	case NiRTTI::NiIntegersExtraData:
 		return "NiIntegersExtraData";
+	case NiRTTI::BSBound:
+		return "BSBound";
 	case NiRTTI::UnkBinaryBlock:
 		return "UnkBinaryBlock";
 	case NiRTTI::BSClothExtraData:
@@ -464,6 +468,8 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 		return NiRTTI::NiIntegerExtraData;
 	if (rtti == "SkinAttach")
 		return NiRTTI::SkinAttach;
+	if (rtti == "BSConnectPoint::Parents")
+		return NiRTTI::BSConnectPointParents;
 	if (rtti == "BSSkin::Instance")
 		return NiRTTI::BSSkinInstance;
 	if (rtti == "BSLightingShaderProperty")
@@ -478,6 +484,8 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 		return NiRTTI::NiIntegersExtraData;
 	if (rtti == "BSClothExtraData")
 		return NiRTTI::BSClothExtraData;
+	if (rtti == "BSBound")
+		return NiRTTI::BSBound;
 	if (rtti == "bhkPhysicsSystem")
 		return NiRTTI::bhkPhysicsSystem;
 	if (rtti == "bhkNPCollisionObject")
@@ -539,4 +547,80 @@ void nif::bhkNPCollisionObject::Serialize(std::ostream& file)
 size_t nif::bhkNPCollisionObject::GetSize()
 {
 	return 14;
+}
+
+void nif::BSBound::Deserialize(std::istream& file)
+{
+	this->name_index = utils::read<uint32_t>(file)[0];
+	auto nums = utils::read<float>(file, 6);
+	std::memcpy(this->center, nums.data(), 3 * sizeof(float));
+	std::memcpy(this->dimensions, nums.data() + 3, 3 * sizeof(float));
+}
+
+void nif::BSBound::Serialize(std::ostream& file)
+{
+	utils::writeAsHex(file, this->name_index);
+	utils::writeAsHex(file, this->center[0]);
+	utils::writeAsHex(file, this->center[1]);
+	utils::writeAsHex(file, this->center[2]);
+	utils::writeAsHex(file, this->dimensions[0]);
+	utils::writeAsHex(file, this->dimensions[1]);
+	utils::writeAsHex(file, this->dimensions[2]);
+}
+
+size_t nif::BSBound::GetSize()
+{
+	return size_t(28);
+}
+
+void nif::BSConnectPointParents::Deserialize(std::istream& file)
+{
+	this->name_index = utils::read<uint32_t>(file)[0];
+	this->num_parents = utils::read<uint32_t>(file)[0];
+	for (int i = 0; i < this->num_parents; ++i) {
+		auto length = utils::read<uint32_t>(file)[0];
+		auto parent_name = utils::readString(file, length);
+		auto child_length = utils::read<uint32_t>(file)[0];
+		auto child_name = utils::readString(file, child_length);
+		auto nums = utils::read<float>(file, 8);
+		ConnectPoint cp = {
+			parent_name,
+			child_name,
+			{ nums[0], nums[1], nums[2], nums[3] },
+			{ nums[4], nums[5], nums[6] },
+			nums[7]
+		};
+		this->connect_points.push_back(cp);
+	}
+}
+
+void nif::BSConnectPointParents::Serialize(std::ostream& file)
+{
+	utils::writeAsHex(file, this->name_index);
+	utils::writeAsHex(file, this->num_parents);
+	for (int i = 0; i < this->num_parents; ++i) {
+		uint32_t length = this->connect_points[i].parent_name.length();
+		utils::writeAsHex(file, length);
+		utils::writeString(file, this->connect_points[i].parent_name);
+		uint32_t child_length = this->connect_points[i].child_name.length();
+		utils::writeAsHex(file, child_length);
+		utils::writeString(file, this->connect_points[i].child_name);
+		utils::writeAsHex(file, this->connect_points[i].rot_quat[0]);
+		utils::writeAsHex(file, this->connect_points[i].rot_quat[1]);
+		utils::writeAsHex(file, this->connect_points[i].rot_quat[2]);
+		utils::writeAsHex(file, this->connect_points[i].rot_quat[3]);
+		utils::writeAsHex(file, this->connect_points[i].translation[0]);
+		utils::writeAsHex(file, this->connect_points[i].translation[1]);
+		utils::writeAsHex(file, this->connect_points[i].translation[2]);
+		utils::writeAsHex(file, this->connect_points[i].scale);
+	}
+}
+
+size_t nif::BSConnectPointParents::GetSize()
+{
+	size_t ret = 8;
+	for (auto& cp : this->connect_points) {
+		ret += cp.GetSize();
+	}
+	return ret;
 }

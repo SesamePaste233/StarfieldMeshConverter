@@ -1,15 +1,17 @@
 #include "hkTypes.h"
+#include "hclSimClothData.h"
+#include "hclOperator.h"
 
-bool hktypes::hkPackedVector3::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkPackedVector3::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-	if (array_instance->type->type_name != "hkPackedVector3") {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hkPackedVector3") {
 		std::cout << "hkPackedVector3::FromInstance: type_name is not hkPackedVector3" << std::endl;
 		return false;
 	}
 
 	std::vector<int16_t> _values;
-	array_instance->GetValue(_values);
+	class_instance->GetInstanceByFieldName("values")->GetValue(_values);
 
 	this->values[0] = _values[0];
 	this->values[1] = _values[1];
@@ -21,14 +23,16 @@ bool hktypes::hkPackedVector3::FromInstance(hkreflex::hkClassInstance* instance)
 
 bool hktypes::hkPackedVector3::ToInstance(hkreflex::hkClassInstance* instance)
 {
-	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-	if (array_instance->type->type_name != "hkPackedVector3") {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hkPackedVector3") {
 		std::cout << "hkPackedVector3::FromInstance: type_name is not hkPackedVector3" << std::endl;
 		return false;
 	}
 
 	std::vector<int16_t> _values = { this->values[0], this->values[1], this->values[2], this->values[3] };
-	array_instance->SetValue(_values);
+	class_instance->GetInstanceByFieldName("values")->SetValue(_values);
+
+	return true;
 }
 
 Eigen::Vector3f hktypes::hkPackedVector3::ToVector3f()
@@ -65,11 +69,11 @@ hktypes::hkPackedVector3 hktypes::hkPackedVector3::FromVector3f(const Eigen::Vec
 	return result;
 }
 
-bool hktypes::hkMatrix4Holder::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkMatrix4Holder::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-	if (array_instance->type->type_name != "hkMatrix4" && array_instance->type->type_name != "hkMatrix4f" && array_instance->type->type_name != "hkMatrix4d") {
-		std::cout << "hkMatrix4Holder::FromInstance: type_name is not hkMatrix4" << std::endl;
+	auto array_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkMatrix4Impl" && array_instance->type->type_name != "hkTransformf" && array_instance->type->type_name != "hkMatrix4" && array_instance->type->type_name != "hkMatrix4f" && array_instance->type->type_name != "hkMatrix4d") {
+		std::cout << "hkMatrix4Holder::FromInstance: type_name is: " << array_instance->type->type_name << std::endl;
 		return false;
 	}
 
@@ -85,8 +89,8 @@ bool hktypes::hkMatrix4Holder::FromInstance(hkreflex::hkClassInstance* instance)
 bool hktypes::hkMatrix4Holder::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-	if (array_instance->type->type_name != "hkMatrix4" && array_instance->type->type_name != "hkMatrix4f" && array_instance->type->type_name != "hkMatrix4d") {
-		std::cout << "hkMatrix4Holder::FromInstance: type_name is not hkMatrix4" << std::endl;
+	if (array_instance->type->type_name != "hkMatrix4Impl" && array_instance->type->type_name != "hkMatrix4" && array_instance->type->type_name != "hkMatrix4f" && array_instance->type->type_name != "hkMatrix4d") {
+		std::cout << "hkMatrix4Holder::FromInstance: type_name is: " << array_instance->type->type_name << std::endl;
 		return false;
 	}
 
@@ -128,10 +132,10 @@ hktypes::hkMatrix4Holder hktypes::hkMatrix4Holder::FromMatrix4f(const Eigen::Mat
 	return result;
 }
 
-bool hktypes::hkVector4Holder::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkVector4Holder::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-	if (array_instance->type->type_name != "hkVector4" && array_instance->type->type_name != "hkVector4f" && array_instance->type->type_name != "hkVector4d") {
+	auto array_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkVector4Impl" && array_instance->type->type_name != "hkVector4" && array_instance->type->type_name != "hkVector4f" && array_instance->type->type_name != "hkVector4d") {
 		std::cout << "hkVector4Holder::FromInstance: type_name is not hkVector4" << std::endl;
 		return false;
 	}
@@ -148,7 +152,7 @@ bool hktypes::hkVector4Holder::FromInstance(hkreflex::hkClassInstance* instance)
 bool hktypes::hkVector4Holder::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-	if (array_instance->type->type_name != "hkVector4" && array_instance->type->type_name != "hkVector4f" && array_instance->type->type_name != "hkVector4d") {
+	if (array_instance->type->type_name != "hkVector4Impl" && array_instance->type->type_name != "hkVector4" && array_instance->type->type_name != "hkVector4f" && array_instance->type->type_name != "hkVector4d") {
 		std::cout << "hkVector4Holder::FromInstance: type_name is not hkVector4" << std::endl;
 		return false;
 	}
@@ -174,9 +178,24 @@ hktypes::hkVector4Holder hktypes::hkVector4Holder::FromVector4f(const Eigen::Vec
 	return result;
 }
 
-bool hktypes::hkBitField::FromInstance(hkreflex::hkClassInstance* instance)
+Eigen::Vector3f hktypes::hkVector4Holder::ToVector3f()
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	return Eigen::Vector3f(values[0], values[1], values[2]);
+}
+
+hktypes::hkVector4Holder hktypes::hkVector4Holder::FromVector3f(const Eigen::Vector3f vec)
+{
+	hkVector4Holder result;
+	result.values[0] = vec.x();
+	result.values[1] = vec.y();
+	result.values[2] = vec.z();
+	result.values[3] = 0;
+	return result;
+}
+
+bool hktypes::hkBitField::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkBitField") {
 		std::cout << "hkBitField::FromInstance: type_name is not hkBitField" << std::endl;
 		return false;
@@ -224,9 +243,9 @@ void hktypes::hkBitField::SetMask(std::vector<bool>& mask)
 	}
 }
 
-bool hktypes::hkRootLevelContainer::NamedVariant::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkRootLevelContainer::NamedVariant::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkRootLevelContainer::NamedVariant") {
 		std::cout << "hkRootLevelContainer::NamedVariant::FromInstance: type_name is not hkRootLevelContainer::NamedVariant" << std::endl;
 		return false;
@@ -254,9 +273,9 @@ bool hktypes::hkRootLevelContainer::NamedVariant::ToInstance(hkreflex::hkClassIn
 	return true;
 }
 
-bool hktypes::hkRootLevelContainer::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hkRootLevelContainer::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hkRootLevelContainer") {
 		std::cout << "hkRootLevelContainer::FromInstance: type_name is not hkRootLevelContainer" << std::endl;
 		return false;
@@ -288,4 +307,375 @@ hktypes::hkReferencedObject* hktypes::hkRootLevelContainer::GetNamedVariantRef(s
 		}
 	}
 	return nullptr;
+}
+
+hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromSimClothData(hclSimClothData* simClothData)
+{
+	if (simClothData == nullptr) {
+		return *this;
+	}
+
+	auto& ret = *this;
+
+	ret.name = "hclSimClothData_" + simClothData->name;
+
+	auto& sim_poses = simClothData->simClothPoses;
+	if (sim_poses.size() == 1) {
+		auto& sim_positions = sim_poses[0]->positions;
+		for (auto& p : sim_positions) {
+			auto pos = p.ToVector4f();
+			ret.positions.push_back({ pos.x(), pos.y(), pos.z() });
+		}
+	}
+
+	for (int i = 0; i < simClothData->triangleIndices.size(); i += 3) {
+		ret.triangleIndices.push_back({ simClothData->triangleIndices[i], simClothData->triangleIndices[i + 1], simClothData->triangleIndices[i + 2] });
+	}
+
+	if (simClothData->doNormals) {
+		// Don't know what to do here
+	}
+
+	ret.extraDataList.resize(ret.positions.size());
+	for (int i = 0; i < ret.positions.size(); ++i) {
+		auto particle_data_extra_data = make_extra_data("particleDatas", simClothData->particleDatas[i]);
+		ret.extraDataList[i].push_back(particle_data_extra_data);
+
+		if (std::find(simClothData->fixedParticles.begin(), simClothData->fixedParticles.end(), i) != simClothData->fixedParticles.end()) {
+			auto fixed_particles_extra_data = make_extra_data("fixedParticles", true);
+			ret.extraDataList[i].push_back(fixed_particles_extra_data);
+		}else{
+			auto fixed_particles_extra_data = make_extra_data("fixedParticles", false);
+			ret.extraDataList[i].push_back(fixed_particles_extra_data);
+		}
+
+		auto static_collision_mask_extra_data = make_extra_data("staticCollisionMasks", simClothData->staticCollisionMasks[i]);
+		ret.extraDataList[i].push_back(static_collision_mask_extra_data);
+
+		bool perParticlePinchDetectionEnabledFlags = simClothData->perParticlePinchDetectionEnabledFlags[i];
+		auto perParticlePinchDetectionEnabledFlags_extra_data = make_extra_data("perParticlePinchDetectionEnabledFlags", perParticlePinchDetectionEnabledFlags);
+	}
+
+	size_t num_collidables = simClothData->perInstanceCollidables.size();
+	for (int i = 0; i < num_collidables; i++) {
+		auto& collider = simClothData->perInstanceCollidables[i];
+		auto transform = simClothData->perInstanceCollidables[i]->transform.ToMatrix4f();
+		transform.transposeInPlace();
+		transform.block<1,3>(3, 0) = Eigen::Vector3f::Zero();
+		auto offset = simClothData->collidableTransformMap.offsets[i].ToMatrix4f();
+		offset.transposeInPlace();
+		auto& shape = collider->shape;
+		if (shape->type == 0) {
+			auto mesh = shape->ToVisualizeMeshObj();
+			mesh.localFrame = transform * offset;
+			mesh.name.append(":" + collider->name);
+			ret.extraShapes.push_back(mesh);
+		}
+	}
+
+	return ret;
+}
+
+hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromObjectSpaceSkinPNOperator(hclObjectSpaceSkinPNOperator* skinOperator)
+{
+	if (skinOperator == nullptr) {
+		return *this;
+	}
+
+	auto& ret = *this;
+
+	ret.name = "hclObjectSpaceSkinPNOperator_" + skinOperator->name;
+
+	auto& transformSubSet = skinOperator->transformSubset;
+
+	int num_verts = skinOperator->objectSpaceDeformer.endVertexIndex + 1;
+
+	ret.positions.resize(num_verts);
+	ret.normals.resize(num_verts);
+	ret.boneWeights.resize(num_verts);
+	ret.extraDataList.resize(num_verts);
+
+	int i = 0;
+	for (auto& block : skinOperator->objectSpaceDeformer.eightBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.sevenBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.sixBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.fiveBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.fourBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.threeBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.twoBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->objectSpaceDeformer.oneBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector3f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+		}
+
+		i++;
+	}
+
+	return ret;
+}
+
+hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromBoneSpaceSkinPNOperator(hclBoneSpaceSkinPNOperator* skinOperator)
+{
+	if (skinOperator == nullptr) {
+		return *this;
+	}
+
+	auto& ret = *this;
+
+	ret.name = "hclBoneSpaceSkinPNOperator_" + skinOperator->name;
+
+	auto& transformSubSet = skinOperator->transformSubset;
+
+	int num_verts = skinOperator->boneSpaceDeformer.endVertexIndex + 1;
+
+	ret.positions.resize(num_verts);
+	ret.normals.resize(num_verts);
+
+	int i = 0;
+	for (auto& block : skinOperator->boneSpaceDeformer.fourBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector4f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->boneSpaceDeformer.threeBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector4f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->boneSpaceDeformer.twoBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector4f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+		}
+
+		i++;
+	}
+
+	for (auto& block : skinOperator->boneSpaceDeformer.oneBlendEntries) {
+		auto& vert_id_list = block.vertexIndices;
+		auto localPositions = skinOperator->localPNs[i].localPosition;
+		auto localNormals = skinOperator->localPNs[i].localNormal;
+
+		for (int j = 0; j < 16; ++j) {
+			auto p = localPositions[j].ToVector4f();
+			auto n = localNormals[j].ToVector3f();
+			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
+			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
+		}
+
+		i++;
+	}
+
+	return ret;
+}
+
+nlohmann::json hktypes::hclBufferedMeshObj::ToJson()
+{
+	nlohmann::json ret;
+
+	ret["name"] = this->name;
+
+	ret["type"] = (uint8_t)this->shapeType;
+
+	for (int i = 0; i < 4; ++i) {
+		ret["localFrame"].push_back(nlohmann::json::array());
+		for (int j = 0; j < 4; ++j) {
+			ret["localFrame"][i].push_back(this->localFrame(i, j));
+		}
+	}
+
+	if (this->shapeType == ShapeType::Capsule) {
+		ret["capsuleStart"] = this->capsuleStart;
+		ret["capsuleEnd"] = this->capsuleEnd;
+		ret["capsuleBigRadius"] = this->capsuleBigRadius;
+		ret["capsuleSmallRadius"] = this->capsuleSmallRadius;
+
+		return ret;
+	}
+
+	ret["positions"] = this->positions;
+	ret["normals"] = this->normals;
+	ret["boneWeights"] = this->boneWeights;
+	ret["triangleIndices"] = this->triangleIndices;
+
+	for (int i = 0; i < this->extraDataList.size(); ++i) {
+		auto& extra_data_list = this->extraDataList[i];
+		for (auto& extra_data : extra_data_list) {
+			if (extra_data->name == "particleDatas") {
+				auto particle_data = static_cast<ExtraData<hclSimClothData::ParticleData>*>(extra_data);
+				auto& particle_data_content = particle_data->data;
+				auto particle_data_json = nlohmann::json::object();
+				particle_data_json["mass"] = particle_data_content.mass;
+				particle_data_json["invMass"] = particle_data_content.invMass;
+				particle_data_json["radius"] = particle_data_content.radius;
+				particle_data_json["friction"] = particle_data_content.friction;
+				ret["extraDataList"][i]["particleDatas"] = particle_data_json;
+			}
+			else if (extra_data->name == "fixedParticles") {
+				auto fixed_particles = static_cast<ExtraData<bool>*>(extra_data);
+				ret["extraDataList"][i]["fixedParticles"] = fixed_particles->data;
+			}
+			else if (extra_data->name == "staticCollisionMasks") {
+				auto static_collision_masks = static_cast<ExtraData<uint32_t>*>(extra_data);
+				ret["extraDataList"][i]["staticCollisionMasks"] = static_collision_masks->data;
+			}
+			else if (extra_data->name == "perParticlePinchDetectionEnabledFlags") {
+				auto per_particle_pinch_detection_enabled_flags = static_cast<ExtraData<bool>*>(extra_data);
+				ret["extraDataList"][i]["perParticlePinchDetectionEnabledFlags"] = per_particle_pinch_detection_enabled_flags->data;
+			}
+		}
+	}
+
+	for (auto& extra_shape : this->extraShapes) {
+		ret["extraShapes"].push_back(extra_shape.ToJson());
+	}
+
+	return ret;
 }

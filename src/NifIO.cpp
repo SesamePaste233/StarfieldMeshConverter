@@ -282,6 +282,9 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 	else if (type_name == "SkinAttach") {
 		block = new SkinAttach();
 	}
+	else if (type_name == "BSConnectPoint::Parents") {
+		block = new BSConnectPointParents();
+	}
 	else if (type_name == "BSSkin::Instance") {
 		block = new BSSkin::Instance();
 	}
@@ -301,6 +304,9 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 		_ASSERT(block_bytes != -1);
 		block = new BSClothExtraData(block_bytes);
 		dynamic_cast<BSClothExtraData*>(block)->RTTI = type_name;
+	}
+	else if (type_name == "BSBound") {
+		block = new BSBound();
 	}
 	else if (type_name == "bhkPhysicsSystem") {
 		_ASSERT(block_bytes != -1);
@@ -1332,6 +1338,7 @@ nif::ni_template::RTTI nif::ni_template::NiArmatureTemplate::FromNif(const NifIO
 		auto cloth = dynamic_cast<nif::BSClothExtraData*>(bscloth[0]);
 		if (cloth->data) {
 			this->havok_skeleton = cloth->data->skeleton;
+			this->havok_root_lvl_container = cloth->data->root_level_container;
 		}
 	}
 

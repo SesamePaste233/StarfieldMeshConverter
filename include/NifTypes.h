@@ -19,6 +19,8 @@ namespace nif {
 		BSLightingShaderProperty,
 		BoneTranslations,
 		BSClothExtraData,
+		BSBound,
+		BSConnectPointParents,
 		bhkPhysicsSystem,
 		bhkNPCollisionObject,
 		UnkBinaryBlock,
@@ -526,6 +528,66 @@ namespace nif {
 		};
 		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
+		};
+	};
+
+	class BSBound : public NiNodeBase {
+	public:
+		BSBound() = default;
+		~BSBound() = default;
+
+		float center[3] = { 0,0,0 };
+		float dimensions[3] = { 0,0,0 };
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BSBound;
+		};
+		std::vector<uint32_t> GetBlockReference() const override {
+			return std::vector<uint32_t>();
+		};
+		std::vector<uint32_t> GetStringReference() const override {
+			return NiNodeBase::GetStringReference();
+		};
+	
+	};
+
+	class BSConnectPointParents : public NiNodeBase {
+	public:
+		class ConnectPoint {
+		public:
+			std::string parent_name;
+			std::string child_name;
+			float rot_quat[4] = { 0,0,0,1 };
+			float translation[3] = { 0,0,0 };
+			float scale = 1.f;
+
+			size_t GetSize() {
+				return parent_name.length() + child_name.length() + 40;
+			}
+		};
+
+		BSConnectPointParents() = default;
+		~BSConnectPointParents() = default;
+
+		uint32_t num_parents = 0;
+		std::vector<ConnectPoint> connect_points;
+
+		void Deserialize(std::istream& file) override;
+		void Serialize(std::ostream& file) override;
+		size_t GetSize() override;
+
+		NiRTTI GetRTTI() const override {
+			return NiRTTI::BSConnectPointParents;
+		};
+		std::vector<uint32_t> GetBlockReference() const override {
+			return std::vector<uint32_t>();
+		};
+		std::vector<uint32_t> GetStringReference() const override {
+			return NiNodeBase::GetStringReference();
 		};
 	};
 

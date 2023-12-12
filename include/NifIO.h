@@ -317,7 +317,7 @@ namespace nif {
 				bones = other.bones;
 				skeleton_mode = other.skeleton_mode;
 			};
-			
+
 			NiArmatureTemplate& operator=(const NiArmatureTemplate& other) {
 				bones = other.bones;
 				skeleton_mode = other.skeleton_mode;
@@ -335,6 +335,8 @@ namespace nif {
 			std::vector<NodeInfo> bones;
 
 			hktypes::hkaSkeleton* havok_skeleton = nullptr;
+
+			hktypes::hkRootLevelContainer* havok_root_lvl_container = nullptr;
 
 			bool skeleton_mode = false;
 
@@ -364,6 +366,17 @@ namespace nif {
 					nlohmann::json havok_skeleton_json = havok_skeleton->ToJson();
 
 					json_data["havok_skeleton"] = havok_skeleton_json;
+
+					if (havok_root_lvl_container) {
+						auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(havok_root_lvl_container->GetNamedVariantRef("hclClothData"));
+						if (havok_cloth_data != nullptr) {
+							auto havok_meshes = havok_cloth_data->GetBufferedMeshes();
+							for (auto& mesh : havok_meshes) {
+								auto mesh_json = mesh.ToJson();
+								json_data["havok_meshes"].push_back(mesh_json);
+							}
+						}
+					}
 				}
 
 				return json_data;

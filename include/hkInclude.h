@@ -9,14 +9,14 @@ namespace hkreflex {
 namespace hktypes {
 	class hkHolderBase {
 	public:
-		virtual bool FromInstance(hkreflex::hkClassInstance* instance) = 0;
+		virtual bool FromInstance(const hkreflex::hkClassInstance* instance) = 0;
 		virtual bool ToInstance(hkreflex::hkClassInstance* instance) = 0;
 	};
 
 	class hkReferencedObject : public hkHolderBase {
 	public:
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override { return true; };
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override { return true; };
 		bool ToInstance(hkreflex::hkClassInstance* instance) override { return true; };
 	};
 
@@ -26,7 +26,7 @@ namespace hktypes {
 	template<typename T>
 	concept _is_hk_array_holder_t = utils::_is_vector_t<T> && _is_hk_holder_t<typename T::value_type>;
 
-	hkHolderBase* AllocateHolder(hkreflex::hkClassInstance* instance);
+	hkHolderBase* AllocateHolder(const hkreflex::hkClassInstance* instance);
 };
 
 #include "hkReflection.h"

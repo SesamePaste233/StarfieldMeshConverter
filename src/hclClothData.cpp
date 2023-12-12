@@ -1,8 +1,8 @@
 #include "hclClothData.h"
 
-bool hktypes::hclBufferLayout::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclBufferLayout::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 	if (class_instance->type->type_name != "hclBufferLayout") {
 		std::cout << "hclBufferLayout::FromInstance: type_name is not hclBufferLayout" << std::endl;
@@ -56,9 +56,9 @@ bool hktypes::hclBufferLayout::ToInstance(hkreflex::hkClassInstance* instance)
 	return true;
 }
 
-bool hktypes::hclBufferLayout::BufferElement::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclBufferLayout::BufferElement::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 	if (class_instance->type->type_name != "hclBufferLayout::BufferElement") {
 		std::cout << "hclBufferLayout::BufferElement::FromInstance: type_name is not hclBufferLayout::BufferElement" << std::endl;
@@ -91,9 +91,9 @@ bool hktypes::hclBufferLayout::BufferElement::ToInstance(hkreflex::hkClassInstan
 	return true;
 }
 
-bool hktypes::hclBufferLayout::Slot::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclBufferLayout::Slot::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 	if (class_instance->type->type_name != "hclBufferLayout::Slot") {
 		std::cout << "hclBufferLayout::Slot::FromInstance: type_name is not hclBufferLayout::Slot" << std::endl;
@@ -122,9 +122,9 @@ bool hktypes::hclBufferLayout::Slot::ToInstance(hkreflex::hkClassInstance* insta
 	return true;
 }
 
-bool hktypes::hclBufferDefinition::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclBufferDefinition::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 	if (class_instance->type->type_name != "hclBufferDefinition") {
 		std::cout << "hclBufferDefinition::FromInstance: type_name is not hclBufferDefinition" << std::endl;
@@ -162,9 +162,9 @@ bool hktypes::hclBufferDefinition::ToInstance(hkreflex::hkClassInstance* instanc
 	return true;
 }
 
-bool hktypes::hclScratchBufferDefinition::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclScratchBufferDefinition::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 	if (class_instance->type->ctype_name != "hclScratchBufferDefinition") {
 		std::cout << "hclScratchBufferDefinition::FromInstance: type_name is not hclScratchBufferDefinition" << std::endl;
@@ -198,9 +198,9 @@ bool hktypes::hclScratchBufferDefinition::ToInstance(hkreflex::hkClassInstance* 
 	return true;
 }
 
-bool hktypes::hclTransformSetDefinition::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclTransformSetDefinition::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->ctype_name != "hclTransformSetDefinition") {
 		std::cout << "hclTransformSetDefinition::FromInstance: type_name is not hclTransformSetDefinition" << std::endl;
 		return false;
@@ -229,9 +229,9 @@ bool hktypes::hclTransformSetDefinition::ToInstance(hkreflex::hkClassInstance* i
 	return true;
 }
 
-bool hktypes::hclClothData::FromInstance(hkreflex::hkClassInstance* instance)
+bool hktypes::hclClothData::FromInstance(const hkreflex::hkClassInstance* instance)
 {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclClothData") {
 		std::cout << "hclClothData::FromInstance: type_name is not hclClothData" << std::endl;
 		return false;
@@ -241,6 +241,8 @@ bool hktypes::hclClothData::FromInstance(hkreflex::hkClassInstance* instance)
 	this->simClothDatas = class_instance->GetArrayOfPointersByFieldName<hclSimClothData>("simClothDatas");
 	this->bufferDefinitions = class_instance->GetArrayOfPointersByFieldName<hclBufferDefinition>("bufferDefinitions");
 	this->transformSetDefinitions = class_instance->GetArrayOfPointersByFieldName<hclTransformSetDefinition>("transformSetDefinitions");
+	this->operators = class_instance->GetArrayOfPointersByFieldName<hclOperator>("operators");
+	this->clothStateDatas = class_instance->GetArrayOfPointersByFieldName<hclClothState>("clothStateDatas");
 	this->generatedAtRuntime = class_instance->GetBoolByFieldName("generatedAtRuntime");
 	this->targetPlatform = (Platform)class_instance->GetUIntByFieldName("targetPlatform");
 
@@ -274,10 +276,52 @@ bool hktypes::hclClothData::ToInstance(hkreflex::hkClassInstance* instance)
 		_transformSetDefinitions.push_back(*transformSetDefinition);
 	}
 	class_instance->GetInstanceByFieldName("transformSetDefinitions")->SetValue(_transformSetDefinitions);
+
+	std::vector<hclOperator> _operators;
+	for (auto& op : this->operators) {
+		_operators.push_back(*op);
+	}
+	class_instance->GetInstanceByFieldName("operators")->SetValue(_operators);
+
+	std::vector<hclClothState> _clothStateDatas;
+	for (auto& clothStateData : this->clothStateDatas) {
+		_clothStateDatas.push_back(*clothStateData);
+	}
+	class_instance->GetInstanceByFieldName("clothStateDatas")->SetValue(_clothStateDatas);
 	
 	class_instance->GetInstanceByFieldName("generatedAtRuntime")->SetValue(this->generatedAtRuntime);
 	uint32_t _target_platform = (uint32_t)this->targetPlatform;
 	class_instance->GetInstanceByFieldName("targetPlatform")->SetValue(_target_platform);
 
 	return true;
+}
+
+std::vector<hktypes::hclBufferedMeshObj> hktypes::hclClothData::GetBufferedMeshes()
+{
+	auto ret = std::vector<hclBufferedMeshObj>();
+
+	for (auto sim_cloth_data : this->simClothDatas) {
+		hclBufferedMeshObj mesh_obj;
+		mesh_obj.FromSimClothData(sim_cloth_data);
+		ret.push_back(mesh_obj);
+	}
+
+	for (auto op : this->operators) {
+		auto skin_operator = dynamic_cast<hclObjectSpaceSkinPNOperator*>(op);
+		if (skin_operator) {
+			hclBufferedMeshObj mesh_obj;
+			mesh_obj.FromObjectSpaceSkinPNOperator(skin_operator);
+			ret.push_back(mesh_obj);
+			continue;
+		}
+		auto bone_skin_operator = dynamic_cast<hclBoneSpaceSkinPNOperator*>(op);
+		if (bone_skin_operator) {
+			hclBufferedMeshObj mesh_obj;
+			mesh_obj.FromBoneSpaceSkinPNOperator(bone_skin_operator);
+			ret.push_back(mesh_obj);
+			continue;
+		}
+	}
+
+	return ret;
 }

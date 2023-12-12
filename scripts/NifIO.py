@@ -179,9 +179,12 @@ def ImportNif(file_path, options, context, operator):
 	ResetSkeletonObjDict()
 	assets_folder = options.assets_folder
 	nifname = os.path.basename(file_path)
-	additional_assets_folders = utils.ParentDirIfExsit(file_path, 4)
+	additional_assets_folders = utils.ParentDirIfExsit(file_path, 6)
 	nif_folder_name = os.path.basename(os.path.dirname(file_path))
 	
+	for additional_assets_f in additional_assets_folders:
+		print(additional_assets_f)
+
 	if assets_folder == utils.default_assets_folder:
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')
 		return {'CANCELLED'}, None, None
@@ -193,6 +196,14 @@ def ImportNif(file_path, options, context, operator):
 		return {'CANCELLED'}, None, None
 	
 	_data = json.loads(json_str)
+
+	# Save the JSON data to a file
+	#with open(utils.export_mesh_folder_path + '/nifDebug.json', 'w') as json_file:
+	#	json.dump(_data, json_file, indent = 4)
+
+	# Save the JSON str to a file
+	#with open(utils.export_mesh_folder_path + '/nifDebugStr.json', 'w') as json_file:
+	#	json_file.write(json_str)
 
 	prev_coll = bpy.data.collections.new(nifname)
 	bpy.context.scene.collection.children.link(prev_coll)
@@ -233,6 +244,12 @@ def ImportNif(file_path, options, context, operator):
 		# DEBUG: Save the JSON data to a file
 		#with open(utils.export_mesh_folder_path + '/hkaSkeletonDebug.json', 'w') as json_file:
 		#	json.dump(_data['havok_skeleton'], json_file, indent = 4)
+
+	if options.debug_havok_physics and 'havok_meshes' in _data.keys():
+		havok_meshes = _data['havok_meshes']
+		for mesh in havok_meshes:
+			utils_blender.BuildhkBufferedMesh(mesh)
+
 
 	return {'FINISHED'}, best_skel, obj_list
 

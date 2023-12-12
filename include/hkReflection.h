@@ -34,6 +34,17 @@ namespace hkreflex {
 
 	class hkClassBase;
 
+	class CTranscriptableBase {
+	public:
+		virtual std::string to_C_identifier() = 0;
+
+		virtual std::string to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent = 0) = 0;
+
+		virtual std::string to_C_from_instance() = 0;
+
+		virtual std::string to_C_to_instance() = 0;
+	};
+
 	class hkTemplateArgumentBase {
 	public:
 		enum class ArgumentType {
@@ -47,9 +58,11 @@ namespace hkreflex {
 
 		virtual ArgumentType GetArgumentType() = 0;
 		virtual std::string to_literal(bool argument_only = true) = 0;
+		virtual std::string to_arg_specifier() { return template_arg_name; };
+		virtual std::string to_arg_identifier() = 0;
 	};
 
-	class hkFieldBase {
+	class hkFieldBase : public CTranscriptableBase {
 	public:
 		enum FieldFlags :uint16_t {
 			None = 0,
@@ -70,6 +83,14 @@ namespace hkreflex {
 		uint8_t unk_value;
 
 		virtual std::string to_literal(bool use_mapped_ctype = false);
+
+		std::string to_C_identifier() override;
+
+		std::string to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent = 0) override;
+
+		std::string to_C_from_instance() override;
+
+		std::string to_C_to_instance() override;
 	};
 
 	class hkInterfaceBase {
@@ -90,15 +111,19 @@ namespace hkreflex {
 
 		template<typename T>
 		requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
-		bool GetValue(T & container);
+		bool GetValue(T & container) const;
 
 		template<typename arithmetic_t>
 		requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
-		bool GetValue(arithmetic_t & container);
+		bool GetValue(arithmetic_t & container) const;
 
 		template<typename elem_t>
 		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
-		bool GetValue(std::vector<elem_t> & container);
+		bool GetValue(std::vector<elem_t> & container) const;
+
+		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
+		requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+		bool GetValue(ptr_t &container) const;
 
 		template<typename T>
 		requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
@@ -111,6 +136,10 @@ namespace hkreflex {
 		template<typename elem_t>
 		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool SetValue(std::vector<elem_t> & container);
+
+		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
+		requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+		bool SetValue(ptr_t & container);
 	
 	};
 
@@ -331,29 +360,29 @@ namespace hkreflex {
 
 		hkClassInstance* GetParentInstance();
 
-		hkClassInstance* GetInstanceByFieldName(const std::string& field_name);
+		hkClassInstance* GetInstanceByFieldName(const std::string& field_name) const;
 
-		std::string GetStringByFieldName(const std::string& field_name);
+		std::string GetStringByFieldName(const std::string& field_name) const;
 
-		int64_t GetIntByFieldName(const std::string& field_name);
+		int64_t GetIntByFieldName(const std::string& field_name) const;
 
-		uint64_t GetUIntByFieldName(const std::string& field_name);
+		uint64_t GetUIntByFieldName(const std::string& field_name) const;
 
-		double GetFloatByFieldName(const std::string& field_name);
+		double GetFloatByFieldName(const std::string& field_name) const;
 
-		bool GetBoolByFieldName(const std::string& field_name);
-
-		template<typename T>
-		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
-		std::vector<T> GetArrayByFieldName(const std::string& field_name);
+		bool GetBoolByFieldName(const std::string& field_name) const;
 
 		template<typename T>
 		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
-		std::vector<T*> GetArrayOfPointersByFieldName(const std::string & field_name);
+		std::vector<T> GetArrayByFieldName(const std::string& field_name) const;
 
 		template<typename T>
 		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
-		T* GetPointersByFieldName(const std::string & field_name);
+		std::vector<T*> GetArrayOfPointersByFieldName(const std::string & field_name) const;
+
+		template<typename T>
+		requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
+		T* GetPointersByFieldName(const std::string & field_name) const;
 	};
 
 	class hkClassArrayInstance : public hkClassInstance {
@@ -428,7 +457,7 @@ namespace hkreflex {
 		}
 	};
 
-	class hkClassBase {
+	class hkClassBase : public CTranscriptableBase {
 	public:
 		enum TypeKind
 		{
@@ -470,6 +499,12 @@ namespace hkreflex {
 		std::vector<hkFieldBase*> fields;
 		std::vector<hkInterfaceBase*> interfaces;
 
+		std::vector<hkClassBase*> nested_classes;
+		bool is_nested_class = false;
+		hkClassBase* parent_nested_class = nullptr;
+		std::string nested_type_name;
+		std::string nested_parent_type_name;
+
 		uint32_t hash;
 
 		hkIndexedDataBlock* data_block; // None static
@@ -478,6 +513,16 @@ namespace hkreflex {
 		bool _defined = false;
 
 		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false, bool use_mapped_ctype = false);
+
+		std::string to_C_simp_identifier();
+
+		std::string to_C_identifier() override;
+
+		std::string to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent = 0) override;
+
+		std::string to_C_from_instance() override;
+
+		std::string to_C_to_instance() override;
 
 		uint8_t is_parent_of(hkClassBase* cls) {
 			uint8_t i = 1;
@@ -505,6 +550,10 @@ namespace hkreflex {
 			else
 				return "class " + template_arg_name + "=" + type->to_literal(false, true);
 		}
+
+		std::string to_arg_identifier() override {
+			return type->to_C_identifier();
+		}
 	};
 
 	class hkTemplateArgumentValue : public hkTemplateArgumentBase {
@@ -520,6 +569,10 @@ namespace hkreflex {
 				return std::to_string(value);
 			else
 				return "class " + template_arg_name + "=" + std::to_string(value);
+		}
+
+		std::string to_arg_identifier() override {
+			return std::to_string(value);
 		}
 	};
 
@@ -537,6 +590,10 @@ namespace hkreflex {
 			else
 				return template_arg_name + "[UNK]=" + std::to_string(unk);
 		}
+
+		std::string to_arg_identifier() override {
+			return std::to_string(unk);
+		}
 	};
 
 
@@ -544,11 +601,11 @@ namespace hkreflex {
 
 	template<typename T>
 	requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
-	inline bool hkClassInstance::GetValue(T& container)
+	inline bool hkClassInstance::GetValue(T& container) const
 	{
 		if (utils::_is_string_t<T> && type->kind == hkClassBase::TypeKind::String) {
-			auto string_type = dynamic_cast<hkClassStringInstance*>(this);
-			container = *reinterpret_cast<T*>(&string_type->value);
+			auto string_type = dynamic_cast<const hkClassStringInstance*>(this);
+			container = *reinterpret_cast<const T*>(&string_type->value);
 			return true;
 		}
 		else if (hktypes::_is_hk_holder_t<T>) {
@@ -567,20 +624,20 @@ namespace hkreflex {
 
 	template<typename arithmetic_t>
 	requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
-	inline bool hkClassInstance::GetValue(arithmetic_t& container)
+	inline bool hkClassInstance::GetValue(arithmetic_t& container) const
 	{
 		if (utils::_is_bool_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Bool) {
-			auto bool_type = dynamic_cast<hkClassBoolInstance*>(this);
+			auto bool_type = dynamic_cast<const hkClassBoolInstance*>(this);
 			container = static_cast<arithmetic_t>(bool_type->value);
 			return true;
 		}
 		else if (utils::_is_float_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Float) {
-			auto float_type = dynamic_cast<hkClassFloatInstance*>(this);
+			auto float_type = dynamic_cast<const hkClassFloatInstance*>(this);
 			container = static_cast<arithmetic_t>(float_type->value);
 			return true;
 		}
 		else if (utils::_is_integer_t<arithmetic_t> && type->kind == hkClassBase::TypeKind::Int) {
-			auto int_type = dynamic_cast<hkClassIntInstance*>(this);
+			auto int_type = dynamic_cast<const hkClassIntInstance*>(this);
 			if (int_type->is_signed) {
 				if (!utils::_signed_integer_t<arithmetic_t>) {
 					std::cout << "Warning: Attempting to retrieve an unsigned value from a signed value." << std::endl;
@@ -602,16 +659,31 @@ namespace hkreflex {
 
 	template<typename elem_t>
 	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
-	inline bool hkClassInstance::GetValue(std::vector<elem_t> & container)
+	inline bool hkClassInstance::GetValue(std::vector<elem_t> & container) const
 	{
 		if (type->kind == hkClassBase::TypeKind::Array) {
-			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+			auto array_instance = dynamic_cast<const hkClassArrayInstance*>(this);
 			container.clear();
 			for (auto& instance : array_instance->array_instances) {
 				elem_t elem_container;
 				if (instance->GetValue(elem_container)) {
 					container.push_back(elem_container);
 				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template<typename ptr_t, typename sub_t>
+	requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+	inline bool hkClassInstance::GetValue(ptr_t& container) const
+	{
+		if (type->kind == hkClassBase::TypeKind::Pointer) {
+			auto ptr_instance = dynamic_cast<const hkClassPointerInstance*>(this);
+			container = dynamic_cast<sub_t*>(hktypes::AllocateHolder(ptr_instance->ptr_instance));
+			if (ptr_instance->ptr_instance->GetValue(*container)) {
+				return false;
 			}
 			return true;
 		}
@@ -701,9 +773,22 @@ namespace hkreflex {
 		return false;
 	}
 
+	template<typename ptr_t, typename sub_t>
+	requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+	inline bool hkClassInstance::SetValue(ptr_t & container) {
+		if (type->kind == hkClassBase::TypeKind::Pointer) {
+			auto ptr_instance = dynamic_cast<hkClassPointerInstance*>(this);
+			if (ptr_instance->ptr_instance->SetValue(*container)) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+
 	template<typename T>
 	requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
-	inline std::vector<T> hkClassRecordInstance::GetArrayByFieldName(const std::string& field_name)
+	inline std::vector<T> hkClassRecordInstance::GetArrayByFieldName(const std::string& field_name) const
 	{
 		std::vector<T> ret;
 		for (auto& record : record_instances) {
@@ -727,7 +812,7 @@ namespace hkreflex {
 
 	template<typename T>
 	requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
-	inline std::vector<T*> hkClassRecordInstance::GetArrayOfPointersByFieldName(const std::string& field_name)
+	inline std::vector<T*> hkClassRecordInstance::GetArrayOfPointersByFieldName(const std::string& field_name) const
 	{
 		std::vector<T*> ret;
 		for (auto& record : record_instances) {
@@ -762,7 +847,7 @@ namespace hkreflex {
 
 	template<typename T>
 	requires utils::_is_string_t<T> || utils::_is_bool_t<T> || utils::_is_float_t<T> || utils::_is_integer_t<T> || hktypes::_is_hk_holder_t<T>
-	inline T* hkClassRecordInstance::GetPointersByFieldName(const std::string& field_name)
+	inline T* hkClassRecordInstance::GetPointersByFieldName(const std::string& field_name) const
 	{
 		T* ret = nullptr;
 		for (auto& record : record_instances) {
@@ -784,5 +869,4 @@ namespace hkreflex {
 			}
 		}
 	}
-
 }

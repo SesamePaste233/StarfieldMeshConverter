@@ -24,9 +24,35 @@ std::string hktypes::hkTypeMapper::GetCType(hkreflex::hkClassBase* type)
 		}
 		return ctype_name + ">";
 	}
+	else if (type->type_name == "T*") {
+		std::string ctype_name = "";
+		for (auto& arg : type->template_args) {
+			if (arg->template_arg_name == "tT") {
+				auto type_arg = dynamic_cast<hkreflex::hkTemplateArgumentType*>(arg);
+
+				auto temp_type = type_arg->type;
+				ctype_name += GetCType(temp_type);
+				break;
+			}
+		}
+		return ctype_name + "*";
+	}
+	else if (type->type_name == "hkArray") {
+		std::string ctype_name = "std::vector<";
+		for (auto& arg : type->template_args) {
+			if (arg->template_arg_name == "tT") {
+				auto type_arg = dynamic_cast<hkreflex::hkTemplateArgumentType*>(arg);
+
+				auto temp_type = type_arg->type;
+				ctype_name += GetCType(temp_type);
+				break;
+			}
+		}
+		return ctype_name + ">";
+	}
 	else if (type->type_name == "hkMatrix4Impl") {
 		std::string ret = type->to_literal(false, true);
-		return "Eigen::Matrix4f";
+		return "hkMatrix4Holder";
 	}
 	else {
 		std::string ret = type->to_literal(false, true);

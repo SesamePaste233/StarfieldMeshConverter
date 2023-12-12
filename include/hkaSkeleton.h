@@ -16,7 +16,7 @@ namespace hktypes {
 		Eigen::Vector4f scale;
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 
 		Eigen::Matrix4f getMatrix(bool force_M44_1 = false);
@@ -38,7 +38,7 @@ namespace hktypes {
 
 		// Extra
 		std::vector<hkaBoneHolder*> children;
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 
 		void SetTransform(hkQsTransform& transform, bool update_world_trans = true);
@@ -60,7 +60,7 @@ namespace hktypes {
 		hkaBoneHolder* root = nullptr;
 
 		// Extra
-		bool FromInstance(hkreflex::hkClassInstance* instance) override;
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 
 		void TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func = [](hkaBoneHolder*)->void {});
