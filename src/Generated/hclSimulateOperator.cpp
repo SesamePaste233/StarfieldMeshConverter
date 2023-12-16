@@ -60,3 +60,24 @@ bool hktypes::hclSimulateOperator::Config::ToInstance(hkreflex::hkClassInstance*
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclSimulateOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimulateOperator::Config::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimulateOperator::GetFieldTypeAndNames() { return {
+	{ "hkUint32", { "simClothIndex", 72, 32 } },
+	{ "hkArray<hclSimulateOperator::Config, hkContainerHeapAllocator>", { "simulateOpConfigs", 80, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimulateOperator::Config::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 0, 32 } },
+	{ "hkArray<hkInt32, hkContainerHeapAllocator>", { "constraintExecution", 8, 32 } },
+	{ "hkArray<hkBool, hkContainerHeapAllocator>", { "instanceCollidablesUsed", 24, 32 } },
+	{ "hkUint8", { "subSteps", 40, 32 } },
+	{ "hkUint8", { "numberOfSolveIterations", 41, 32 } },
+	{ "hkBool", { "useAllInstanceCollidables", 42, 32 } },
+	{ "hkBool", { "adaptConstraintStiffness", 43, 32 } },
+}; };
+

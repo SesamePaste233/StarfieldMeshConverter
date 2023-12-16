@@ -60,3 +60,24 @@ bool hktypes::hclStateDependencyGraph::Branch::ToInstance(hkreflex::hkClassInsta
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclStateDependencyGraph::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclStateDependencyGraph::Branch::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStateDependencyGraph::GetFieldTypeAndNames() { return {
+	{ "hkArray<hclStateDependencyGraph::Branch, hkContainerHeapAllocator>", { "branches", 24, 36 } },
+	{ "hkArray<int, hkContainerHeapAllocator>", { "rootBranchIds", 40, 36 } },
+	{ "hkArray<hkArray<int, hkContainerHeapAllocator>, hkContainerHeapAllocator>", { "children", 56, 36 } },
+	{ "hkArray<hkArray<int, hkContainerHeapAllocator>, hkContainerHeapAllocator>", { "parents", 72, 36 } },
+	{ "hkBool", { "multiThreadable", 88, 36 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStateDependencyGraph::Branch::GetFieldTypeAndNames() { return {
+	{ "int", { "branchId", 0, 32 } },
+	{ "hkArray<int, hkContainerHeapAllocator>", { "stateOperatorIndices", 8, 32 } },
+	{ "hkArray<int, hkContainerHeapAllocator>", { "parentBranches", 24, 32 } },
+	{ "hkArray<int, hkContainerHeapAllocator>", { "childBranches", 40, 32 } },
+}; };
+

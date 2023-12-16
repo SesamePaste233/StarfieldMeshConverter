@@ -24,3 +24,11 @@ bool hktypes::hkaBone::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkaBone::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkaBone::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 0, 32 } },
+	{ "hkBool", { "lockTranslation", 8, 32 } },
+}; };
+

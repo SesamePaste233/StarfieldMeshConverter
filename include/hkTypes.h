@@ -263,4 +263,19 @@ namespace hktypes {
 
 		return true;
 	}
+
+	//template<class T>
+	//requires hktypes::_is_hk_holder_t<T>
+	//void GethkClassDefinitions(std::map<std::string, hkreflex::hkClassBase*>& class_map) {
+	//	std::string hk_class_name = T::GethkClassName();
+	//	bool has_parent = false;
+	//	if (class_map.find(hk_class_name) == class_map.end()) { // if not defined
+	//		using BaseType = typename T::BaseType;
+	//		has_parent = std::is_same_v<BaseType, T>;
+	//		if (has_parent) {
+	//			class_map[BaseType::GethkClassName()] = new hkreflex::hkClassBase();
+	//		}
+	//		class_map[hk_class_name] = new hkreflex::hkClassBase();
+	//	}
+	//}
 }

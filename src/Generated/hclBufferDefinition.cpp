@@ -36,3 +36,16 @@ bool hktypes::hclBufferDefinition::ToInstance(hkreflex::hkClassInstance* instanc
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclBufferDefinition::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferDefinition::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "meshName", 24, 32 } },
+	{ "hkStringPtr", { "bufferName", 32, 32 } },
+	{ "hkInt32", { "type", 40, 32 } },
+	{ "hkInt32", { "subType", 44, 32 } },
+	{ "hkUint32", { "numVertices", 48, 32 } },
+	{ "hkUint32", { "numTriangles", 52, 32 } },
+	{ "hclBufferLayout", { "bufferLayout", 56, 32 } },
+}; };
+

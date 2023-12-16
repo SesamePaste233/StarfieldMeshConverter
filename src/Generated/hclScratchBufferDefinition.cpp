@@ -28,3 +28,12 @@ bool hktypes::hclScratchBufferDefinition::ToInstance(hkreflex::hkClassInstance* 
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclScratchBufferDefinition::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclScratchBufferDefinition::GetFieldTypeAndNames() { return {
+	{ "hkArray<hkUint16, hkContainerHeapAllocator>", { "triangleIndices", 88, 32 } },
+	{ "hkBool", { "storeNormals", 104, 32 } },
+	{ "hkBool", { "storeTangentsAndBiTangents", 105, 32 } },
+}; };
+

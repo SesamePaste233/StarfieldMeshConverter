@@ -54,3 +54,21 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance(hkre
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclSimpleMeshBoneDeformOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimpleMeshBoneDeformOperator::GetFieldTypeAndNames() { return {
+	{ "hkUint32", { "inputBufferIdx", 72, 32 } },
+	{ "hkUint32", { "outputTransformSetIdx", 76, 32 } },
+	{ "hkArray<hclSimpleMeshBoneDeformOperator::TriangleBonePair, hkContainerHeapAllocator>", { "triangleBonePairs", 80, 32 } },
+	{ "hkArray<hkMatrix4, hkContainerHeapAllocator>", { "localBoneTransforms", 96, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::GetFieldTypeAndNames() { return {
+	{ "hkUint16", { "boneOffset", 0, 32 } },
+	{ "hkUint16", { "triangleOffset", 2, 32 } },
+}; };
+

@@ -26,3 +26,12 @@ bool hktypes::hkQsTransformf::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkQsTransformf::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkQsTransformf::GetFieldTypeAndNames() { return {
+	{ "hkVector4f", { "translation", 0, 32 } },
+	{ "hkQuaternionf", { "rotation", 16, 32 } },
+	{ "hkVector4f", { "scale", 32, 32 } },
+}; };
+

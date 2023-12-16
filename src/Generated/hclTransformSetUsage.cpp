@@ -50,3 +50,20 @@ bool hktypes::hclTransformSetUsage::TransformTracker::ToInstance(hkreflex::hkCla
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclTransformSetUsage::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclTransformSetUsage::TransformTracker::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclTransformSetUsage::GetFieldTypeAndNames() { return {
+	{ "T[N]<hkUint8, 2>", { "perComponentFlags", 0, 32 } },
+	{ "hkArray<hclTransformSetUsage::TransformTracker, hkContainerHeapAllocator>", { "perComponentTransformTrackers", 8, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclTransformSetUsage::TransformTracker::GetFieldTypeAndNames() { return {
+	{ "hkBitField", { "read", 0, 32 } },
+	{ "hkBitField", { "readBeforeWrite", 24, 32 } },
+	{ "hkBitField", { "written", 48, 32 } },
+}; };
+

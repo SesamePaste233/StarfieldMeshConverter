@@ -26,3 +26,11 @@ bool hktypes::hkReferencedObject::ToInstance(hkreflex::hkClassInstance* instance
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkReferencedObject::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkReferencedObject::GetFieldTypeAndNames() { return {
+	{ "hkUlong", { "sizeAndFlags", 8, 37 } },
+	{ "hkUlong", { "refCount", 16, 37 } },
+}; };
+

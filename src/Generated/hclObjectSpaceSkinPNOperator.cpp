@@ -26,3 +26,11 @@ bool hktypes::hclObjectSpaceSkinPNOperator::ToInstance(hkreflex::hkClassInstance
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclObjectSpaceSkinPNOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclObjectSpaceSkinPNOperator::GetFieldTypeAndNames() { return {
+	{ "hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>", { "localPNs", 264, 32 } },
+	{ "hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>", { "localUnpackedPNs", 280, 32 } },
+}; };
+

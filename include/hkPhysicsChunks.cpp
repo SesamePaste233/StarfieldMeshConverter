@@ -321,10 +321,6 @@ bool hkphysics::hkDataChunkTNA1::Decode()
 
 	auto num_types = utils::readHavokVarUIntFromAccessor(_accessor, cur_pos);
 
-	if (num_types > 500) {
-		num_types = 500;
-	}
-
 	for (size_t i = 0; i < num_types; i++) {
 		ref_data->classes.push_back(new hkreflex::hkClassBase);
 	}

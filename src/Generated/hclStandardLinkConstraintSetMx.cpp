@@ -20,11 +20,6 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::FromInstance(const hkreflex
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("restLengths")->GetValue(restLengths);
-	class_instance->GetInstanceByFieldName("stiffnessesA")->GetValue(stiffnessesA);
-	class_instance->GetInstanceByFieldName("stiffnessesB")->GetValue(stiffnessesB);
-	class_instance->GetInstanceByFieldName("particlesA")->GetValue(particlesA);
-	class_instance->GetInstanceByFieldName("particlesB")->GetValue(particlesB);
 	return true;
 }
 
@@ -63,11 +58,6 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClas
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("restLengths")->SetValue(restLengths);
-	class_instance->GetInstanceByFieldName("stiffnessesA")->SetValue(stiffnessesA);
-	class_instance->GetInstanceByFieldName("stiffnessesB")->SetValue(stiffnessesB);
-	class_instance->GetInstanceByFieldName("particlesA")->SetValue(particlesA);
-	class_instance->GetInstanceByFieldName("particlesB")->SetValue(particlesB);
 	return true;
 }
 
@@ -85,4 +75,29 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::ToInstance(hkreflex::hkCla
 	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
 	return true;
 }
+
+inline std::vector<std::string> hktypes::hclStandardLinkConstraintSetMx::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclStandardLinkConstraintSetMx::Batch::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclStandardLinkConstraintSetMx::Single::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStandardLinkConstraintSetMx::GetFieldTypeAndNames() { return {
+	{ "hkArray<hclStandardLinkConstraintSetMx::Batch, hkContainerHeapAllocator>", { "batches", 40, 32 } },
+	{ "hkArray<hclStandardLinkConstraintSetMx::Single, hkContainerHeapAllocator>", { "singles", 56, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStandardLinkConstraintSetMx::Batch::GetFieldTypeAndNames() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStandardLinkConstraintSetMx::Single::GetFieldTypeAndNames() { return {
+	{ "hkReal", { "restLength", 0, 32 } },
+	{ "hkReal", { "stiffnessA", 4, 32 } },
+	{ "hkReal", { "stiffnessB", 8, 32 } },
+	{ "hkUint16", { "particleA", 12, 32 } },
+	{ "hkUint16", { "particleB", 14, 32 } },
+}; };
 

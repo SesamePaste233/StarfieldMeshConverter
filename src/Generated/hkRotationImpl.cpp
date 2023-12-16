@@ -1,0 +1,2 @@
+#include "Generated\hkRotationImpl.h"
+

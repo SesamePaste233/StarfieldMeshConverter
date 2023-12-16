@@ -1,0 +1,2 @@
+#include "Generated\hkQuaternionf.h"
+

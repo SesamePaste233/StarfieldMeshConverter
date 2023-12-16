@@ -22,3 +22,10 @@ bool hktypes::hkPackedVector3::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkPackedVector3::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkPackedVector3::GetFieldTypeAndNames() { return {
+	{ "T[N]<hkInt16, 4>", { "values", 0, 160 } },
+}; };
+

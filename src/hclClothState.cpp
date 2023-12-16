@@ -241,7 +241,7 @@ bool hktypes::hclStateDependencyGraph::FromInstance(const hkreflex::hkClassInsta
 	class_instance->GetInstanceByFieldName("branches")->GetValue(branches);
 	class_instance->GetInstanceByFieldName("rootBranchIds")->GetValue(rootBranchIds);
 	class_instance->GetInstanceByFieldName("children")->GetValue(children);
-	class_instance->GetInstanceByFieldName("connect_points")->GetValue(parents);
+	class_instance->GetInstanceByFieldName("parents")->GetValue(parents);
 	class_instance->GetInstanceByFieldName("multiThreadable")->GetValue(multiThreadable);
 
 	return true;
@@ -258,7 +258,7 @@ bool hktypes::hclStateDependencyGraph::ToInstance(hkreflex::hkClassInstance* ins
 	class_instance->GetInstanceByFieldName("branches")->SetValue(branches);
 	class_instance->GetInstanceByFieldName("rootBranchIds")->SetValue(rootBranchIds);
 	class_instance->GetInstanceByFieldName("children")->SetValue(children);
-	class_instance->GetInstanceByFieldName("connect_points")->SetValue(parents);
+	class_instance->GetInstanceByFieldName("parents")->SetValue(parents);
 	class_instance->GetInstanceByFieldName("multiThreadable")->SetValue(multiThreadable);
 
 	return true;

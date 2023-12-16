@@ -84,3 +84,32 @@ bool hktypes::hclClothState::TransformSetAccess::ToInstance(hkreflex::hkClassIns
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclClothState::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclClothState::BufferAccess::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclClothState::TransformSetAccess::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclClothState::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 24, 32 } },
+	{ "hkArray<hkUint32, hkContainerHeapAllocator>", { "operators", 32, 32 } },
+	{ "hkArray<hclClothState::BufferAccess, hkContainerHeapAllocator>", { "usedBuffers", 48, 32 } },
+	{ "hkArray<hclClothState::TransformSetAccess, hkContainerHeapAllocator>", { "usedTransformSets", 64, 32 } },
+	{ "hkArray<hkUint32, hkContainerHeapAllocator>", { "usedSimCloths", 80, 32 } },
+	{ "T*<hclStateDependencyGraph>", { "dependencyGraph", 96, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclClothState::BufferAccess::GetFieldTypeAndNames() { return {
+	{ "hkUint32", { "bufferIndex", 0, 32 } },
+	{ "hclBufferUsage", { "bufferUsage", 4, 32 } },
+	{ "hkUint32", { "shadowBufferIndex", 12, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclClothState::TransformSetAccess::GetFieldTypeAndNames() { return {
+	{ "hkUint32", { "transformSetIndex", 0, 32 } },
+	{ "hclTransformSetUsage", { "transformSetUsage", 8, 32 } },
+}; };
+

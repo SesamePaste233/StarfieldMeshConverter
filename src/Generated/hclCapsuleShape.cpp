@@ -32,3 +32,14 @@ bool hktypes::hclCapsuleShape::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclCapsuleShape::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclCapsuleShape::GetFieldTypeAndNames() { return {
+	{ "hkVector4", { "start", 32, 34 } },
+	{ "hkVector4", { "end", 48, 34 } },
+	{ "hkVector4", { "dir", 64, 34 } },
+	{ "hkReal", { "radius", 80, 34 } },
+	{ "hkReal", { "capLenSqrdInv", 84, 34 } },
+}; };
+

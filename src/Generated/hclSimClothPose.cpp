@@ -26,3 +26,11 @@ bool hktypes::hclSimClothPose::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclSimClothPose::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothPose::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 24, 32 } },
+	{ "hkArray<hkVector4, hkContainerHeapAllocator>", { "positions", 32, 32 } },
+}; };
+

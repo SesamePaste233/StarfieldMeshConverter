@@ -48,3 +48,19 @@ bool hktypes::hkRootLevelContainer::NamedVariant::ToInstance(hkreflex::hkClassIn
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkRootLevelContainer::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hkRootLevelContainer::NamedVariant::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkRootLevelContainer::GetFieldTypeAndNames() { return {
+	{ "hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>", { "namedVariants", 0, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkRootLevelContainer::NamedVariant::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 0, 36 } },
+	{ "hkStringPtr", { "className", 8, 36 } },
+	{ "hkRefVariant", { "variant", 16, 36 } },
+}; };
+

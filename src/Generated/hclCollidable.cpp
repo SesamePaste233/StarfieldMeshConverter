@@ -44,3 +44,20 @@ bool hktypes::hclCollidable::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclCollidable::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclCollidable::GetFieldTypeAndNames() { return {
+	{ "hkTransform", { "transform", 32, 32 } },
+	{ "hkVector4", { "linearVelocity", 96, 32 } },
+	{ "hkVector4", { "angularVelocity", 112, 32 } },
+	{ "hkUint64", { "userData", 128, 160 } },
+	{ "T*<hclShape>", { "shape", 136, 32 } },
+	{ "hkStringPtr", { "name", 144, 32 } },
+	{ "hkReal", { "pinchDetectionRadius", 152, 32 } },
+	{ "hkInt8", { "pinchDetectionPriority", 156, 32 } },
+	{ "hkBool", { "pinchDetectionEnabled", 157, 32 } },
+	{ "hkBool", { "virtualCollisionPointCollisionEnabled", 158, 32 } },
+	{ "hkBool", { "enabled", 159, 32 } },
+}; };
+

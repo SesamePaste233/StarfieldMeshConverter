@@ -316,11 +316,19 @@ namespace nif {
 			NiArmatureTemplate(const NiArmatureTemplate& other) {
 				bones = other.bones;
 				skeleton_mode = other.skeleton_mode;
+				bsx_flags = other.bsx_flags;
+				sub_template = other.sub_template;
+				havok_skeleton = other.havok_skeleton;
+				havok_root_lvl_container = other.havok_root_lvl_container;
 			};
 
 			NiArmatureTemplate& operator=(const NiArmatureTemplate& other) {
 				bones = other.bones;
 				skeleton_mode = other.skeleton_mode;
+				bsx_flags = other.bsx_flags;
+				sub_template = other.sub_template;
+				havok_skeleton = other.havok_skeleton;
+				havok_root_lvl_container = other.havok_root_lvl_container;
 				return *this;
 			};
 
@@ -402,7 +410,7 @@ namespace nif {
 					}
 					else if (!root_name.empty()) {
 						for (auto& child : data["children"]) {
-							if (child['name'] == "Root") {
+							if (child["name"] == "Root") {
 								sub_template = SubTemplate::PureSkeleton;
 								break;
 							}

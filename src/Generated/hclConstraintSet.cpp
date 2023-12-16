@@ -28,3 +28,12 @@ bool hktypes::hclConstraintSet::ToInstance(hkreflex::hkClassInstance* instance) 
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclConstraintSet::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclConstraintSet::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 24, 32 } },
+	{ "hkHandle<hkUint32, 2147483647>", { "constraintId", 32, 32 } },
+	{ "unsigned int", { "type", 36, 35 } },
+}; };
+

@@ -22,3 +22,9 @@ bool hktypes::hkBitField::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkBitField::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkBitField::GetFieldTypeAndNames() { return {
+}; };
+

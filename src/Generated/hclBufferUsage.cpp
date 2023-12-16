@@ -24,3 +24,11 @@ bool hktypes::hclBufferUsage::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclBufferUsage::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferUsage::GetFieldTypeAndNames() { return {
+	{ "T[N]<hkUint8, 4>", { "perComponentFlags", 0, 32 } },
+	{ "hkBool", { "trianglesRead", 4, 32 } },
+}; };
+

@@ -52,3 +52,20 @@ bool hktypes::hclMoveParticlesOperator::VertexParticlePair::ToInstance(hkreflex:
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclMoveParticlesOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclMoveParticlesOperator::VertexParticlePair::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclMoveParticlesOperator::GetFieldTypeAndNames() { return {
+	{ "hkArray<hclMoveParticlesOperator::VertexParticlePair, hkContainerHeapAllocator>", { "vertexParticlePairs", 72, 32 } },
+	{ "hkUint32", { "simClothIndex", 88, 32 } },
+	{ "hkUint32", { "refBufferIdx", 92, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclMoveParticlesOperator::VertexParticlePair::GetFieldTypeAndNames() { return {
+	{ "hkUint16", { "vertexIndex", 0, 32 } },
+	{ "hkUint16", { "particleIndex", 2, 32 } },
+}; };
+

@@ -262,162 +262,161 @@ def ExportNif(options, context, operator):
 	options.export_sf_mesh_hash_result = False
 	options.use_world_origin = False
 
-	if options.export_template == 'None':
-		root = utils_blender.GetActiveObject()
-		if root.type != 'EMPTY':
-			if root.type != 'MESH':
-				operator.report({'WARNING'}, f'Must select an empty object as Root Node or a mesh object as BSGeometry.')
-				return {'CANCELLED'}
+	root = utils_blender.GetActiveObject()
+	if root.type not in ['EMPTY','MESH', 'ARMATURE']:
+		operator.report({'WARNING'}, f'Must select an empty object as Root Node or a mesh object as BSGeometry or an armature object as Skeleton.')
+		return {'CANCELLED'}
 
-		geometries = []
+	geometries = []
+	mode = "MULTI_MESH"
+	if root.type == 'EMPTY':
 		mode = "MULTI_MESH"
-		if root.type == 'EMPTY':
-			mode = "MULTI_MESH"
-			_data = nif_template.RootNodeTemplate(root, geometries)
-		elif root.type == 'MESH':
-			mode = "SINGLE_MESH"
-			_data = nif_template.SingleClothTemplate(root, geometries)
+		_data = nif_template.RootNodeTemplate(root, geometries)
+	elif root.type == 'MESH':
+		mode = "SINGLE_MESH"
+		_data = nif_template.SingleClothTemplate(root, geometries)
+	elif root.type == 'ARMATURE':
+		mode = "SINGLE_MESH"
+		_data = nif_template.NifArmatureTemplate(root)
+		_data['sub_template'] = 2
 
-		_data['geometries'] = []
+	_data['geometries'] = []
 
-		for mesh_obj in geometries:
-			if mesh_obj.data == None:
-				operator.report({'WARNING'}, f'Object {mesh_obj.name} has no mesh. Skipping...')
-				continue
+	for mesh_obj in geometries:
+		if mesh_obj.data == None:
+			operator.report({'WARNING'}, f'Object {mesh_obj.name} has no mesh. Skipping...')
+			continue
 
-			mesh_data = {}
-			mesh_data['geo_mesh_lod'] = []
+		mesh_data = {}
+		mesh_data['geo_mesh_lod'] = []
 
-			if mesh_obj.data.materials and len(mesh_obj.data.materials) > 0 and mesh_obj.data.materials[0]:
-				mat_path = mesh_obj.data.materials[0].name
-				mesh_data['mat_path'] = mat_path[:mat_path.rfind('.mat') + 4]
+		if mesh_obj.data.materials and len(mesh_obj.data.materials) > 0 and mesh_obj.data.materials[0]:
+			mat_path = mesh_obj.data.materials[0].name
+			mesh_data['mat_path'] = mat_path[:mat_path.rfind('.mat') + 4]
+		else:
+			mesh_data['mat_path'] = 'MATERIAL_PATH'
+
+		bbox_center, bbox_expand = utils_blender.GetObjBBoxCenterExpand(mesh_obj)
+		mesh_data["geo_bounding_center"] = bbox_center
+		mesh_data["geo_bounding_expand"] = bbox_expand
+
+		mesh_lod_info = {}
+		utils_blender.SetActiveObject(mesh_obj)
+
+		vertex_groups = mesh_obj.vertex_groups
+		vgrp_names = [vg.name for vg in vertex_groups]
+
+		skeleton_info = None
+		bone_list_filter = None
+		if len(vgrp_names) > 0 and options.WEIGHTS:
+			armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
+
+			cloth_bones = [vg for vg in vgrp_names if 'cloth' in utils._tag(vg)]
+
+			if len(armatures) == 0:
+				armature_name, bone_list_filter = nif_armature.MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
+				if armature_name != None:
+					skeleton_info = nif_armature.SkeletonLookup(armature_name)
 			else:
-				mesh_data['mat_path'] = 'MATERIAL_PATH'
+				skeleton_info = {}
+				armature = armatures[0]
+				utils_blender.SetSelectObjects([])
+				utils_blender.SetActiveObject(armature)
+				bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+				for bone in armature.data.edit_bones:
+					info = {}
+					info['matrix'] = nif_armature.BoneAxisCorrectionRevert(bone.matrix)
+					info['scale'] = 1
+					skeleton_info[bone.name] = info
+				
+				bone_list_filter = list(set(skeleton_info.keys()) & set(vgrp_names))
+				bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
-			bbox_center, bbox_expand = utils_blender.GetObjBBoxCenterExpand(mesh_obj)
-			mesh_data["geo_bounding_center"] = bbox_center
-			mesh_data["geo_bounding_expand"] = bbox_expand
+			#bone_list_filter = list(set(bone_list_filter) | set(cloth_bones))
 
-			mesh_lod_info = {}
+		if hash_filepath:
+			mesh_folder, mesh_name = utils.hash_string(mesh_obj.name)
+		else:
+			mesh_folder = utils.sanitize_filename(mesh_obj.name)
+			mesh_name = utils.sanitize_filename(mesh_obj.data.name)
+
+		result_file_folder = os.path.join(export_folder, 'geometries', mesh_folder)
+		os.makedirs(result_file_folder, exist_ok = True)
+		result_file_path = os.path.join(result_file_folder, mesh_name + ".mesh")
+		factory_name = mesh_folder + '\\' + mesh_name
+
+		if mode == "SINGLE_MESH":
+			utils_blender.SetSelectObjects(original_selected)
 			utils_blender.SetActiveObject(mesh_obj)
-
-			vertex_groups = mesh_obj.vertex_groups
-			vgrp_names = [vg.name for vg in vertex_groups]
-
-			skeleton_info = None
-			bone_list_filter = None
-			if len(vgrp_names) > 0 and options.WEIGHTS:
-				armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
-
-				cloth_bones = [vg for vg in vgrp_names if 'cloth' in utils._tag(vg)]
-
-				if len(armatures) == 0:
-					armature_name, bone_list_filter = nif_armature.MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
-					if armature_name != None:
-						skeleton_info = nif_armature.SkeletonLookup(armature_name)
-				else:
-					skeleton_info = {}
-					armature = armatures[0]
-					utils_blender.SetSelectObjects([])
-					utils_blender.SetActiveObject(armature)
-					bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-					for bone in armature.data.edit_bones:
-						info = {}
-						info['matrix'] = nif_armature.BoneAxisCorrectionRevert(bone.matrix)
-						info['scale'] = 1
-						skeleton_info[bone.name] = info
-					
-					bone_list_filter = list(set(skeleton_info.keys()) & set(vgrp_names))
-					bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-				#bone_list_filter = list(set(bone_list_filter) | set(cloth_bones))
-
-			if hash_filepath:
-				mesh_folder, mesh_name = utils.hash_string(mesh_obj.name)
-			else:
-				mesh_folder = utils.sanitize_filename(mesh_obj.name)
-				mesh_name = utils.sanitize_filename(mesh_obj.data.name)
-
-			result_file_folder = os.path.join(export_folder, 'geometries', mesh_folder)
-			os.makedirs(result_file_folder, exist_ok = True)
-			result_file_path = os.path.join(result_file_folder, mesh_name + ".mesh")
-			factory_name = mesh_folder + '\\' + mesh_name
-
+		else:
+			utils_blender.SetSelectObjects([])
+			utils_blender.SetActiveObject(mesh_obj)
+		rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True)
+		
+		if 'FINISHED' not in rtn:
+			operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
+			continue
+		
+		if options.export_morph:
 			if mode == "SINGLE_MESH":
+				result_morph_folder = os.path.join(export_folder, 'meshes', 'morphs', mesh_folder, mesh_name)
+				os.makedirs(result_morph_folder, exist_ok = True)
+				result_morph_path = os.path.join(result_morph_folder, "morph.dat")
+
 				utils_blender.SetSelectObjects(original_selected)
 				utils_blender.SetActiveObject(mesh_obj)
-			else:
-				utils_blender.SetSelectObjects([])
-				utils_blender.SetActiveObject(mesh_obj)
-			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True)
-			
-			if 'FINISHED' not in rtn:
-				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
-				continue
-			
-			if options.export_morph:
-				if mode == "SINGLE_MESH":
-					result_morph_folder = os.path.join(export_folder, 'meshes', 'morphs', mesh_folder, mesh_name)
-					os.makedirs(result_morph_folder, exist_ok = True)
-					result_morph_path = os.path.join(result_morph_folder, "morph.dat")
 
-					utils_blender.SetSelectObjects(original_selected)
-					utils_blender.SetActiveObject(mesh_obj)
+				morph_success = MorphIO.ExportMorph(options, context, result_morph_path, operator)
 
-					morph_success = MorphIO.ExportMorph(options, context, result_morph_path, operator)
-
-					if 'FINISHED' in morph_success:
-						operator.report({'INFO'}, f"Morph export for {mesh_obj.name} successful.")
-					else:
-						operator.report({'WARNING'}, f"Morph export for {mesh_obj.name} failed.")
+				if 'FINISHED' in morph_success:
+					operator.report({'INFO'}, f"Morph export for {mesh_obj.name} successful.")
 				else:
-					operator.report({'WARNING'}, f'Morph export for multiple geometries in one nif is not supported!')
+					operator.report({'WARNING'}, f"Morph export for {mesh_obj.name} failed.")
+			else:
+				operator.report({'WARNING'}, f'Morph export for multiple geometries in one nif is not supported!')
 
-			mesh_lod_info['factory_path'] = factory_name
-			mesh_lod_info['num_indices'] = indices_count
-			mesh_lod_info['num_vertices'] = verts_count
+		mesh_lod_info['factory_path'] = factory_name
+		mesh_lod_info['num_indices'] = indices_count
+		mesh_lod_info['num_vertices'] = verts_count
 
-			mesh_data['geo_mesh_lod'].append(mesh_lod_info)
+		mesh_data['geo_mesh_lod'].append(mesh_lod_info)
 
-			if bone_list != None and len(bone_list) > 0 and skeleton_info != None:
-				mesh_data['has_skin'] = 1
-				mesh_data['bone_names'] = utils_blender.RevertRenamingBoneList(bone_list)
-				mesh_data['bone_infos'] = []
+		if bone_list != None and len(bone_list) > 0 and skeleton_info != None:
+			mesh_data['has_skin'] = 1
+			mesh_data['bone_names'] = utils_blender.RevertRenamingBoneList(bone_list)
+			mesh_data['bone_infos'] = []
 
-				#pivot = mathutils.Matrix.Identity(4)
-				#for j in range(3):
-				#	pivot[j][3] = mesh_obj.matrix_local[j][3]
+			#pivot = mathutils.Matrix.Identity(4)
+			#for j in range(3):
+			#	pivot[j][3] = mesh_obj.matrix_local[j][3]
 
-				for bone_name in bone_list:
-					bone_info = {}
-					B_inv = skeleton_info[bone_name]['matrix'].inverted()
+			for bone_name in bone_list:
+				bone_info = {}
+				B_inv = skeleton_info[bone_name]['matrix'].inverted()
 
-					V = B_inv @ mesh_obj.matrix_local # Or 'matrix_world' idk
+				V = B_inv @ mesh_obj.matrix_local # Or 'matrix_world' idk
 
-					bone_info['matrix'] = [[V[i][j] for j in range(4)]for i in range(4)]
-					bone_info['scale'] = 1 / skeleton_info[bone_name]['scale']
-					mesh_data['bone_infos'].append(bone_info)
-
-
-			_data["geometries"].append(mesh_data)
+				bone_info['matrix'] = [[V[i][j] for j in range(4)]for i in range(4)]
+				bone_info['scale'] = 1 / skeleton_info[bone_name]['scale']
+				mesh_data['bone_infos'].append(bone_info)
 
 
-		_data['skeleton_mode'] = False
-		#print(_data)
-		json_data = json.dumps(_data)
+		_data["geometries"].append(mesh_data)
 
-		# Write the JSON data to a file
-		#with open(nif_filepath + '.json', 'w') as json_file:
-		#	json_file.write(json_data)
+	_data['skeleton_mode'] = False
+	_data['auto_detect'] = True
+	#print(_data)
+	json_data = json.dumps(_data)
 
-		returncode = MeshConverter._dll_export_nif(json_data.encode('utf-8'), nif_filepath.encode('utf-8'), export_folder.encode('utf-8'))
+	# Write the JSON data to a file
+	with open(nif_filepath + '.json', 'w') as json_file:
+		json_file.write(json_data)
 
-		if returncode != 0:
-			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
-			return {'CANCELLED'}
+	returncode = MeshConverter._dll_export_nif(json_data.encode('utf-8'), nif_filepath.encode('utf-8'), export_folder.encode('utf-8'))
 
-		operator.report({'INFO'},f'Export Nif successful.')
-		return {'FINISHED'}
-	
-	operator.report({'WARNING'}, f'Unimplemented Template.')
-	return {'CANCELLED'}
+	if returncode != 0:
+		operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+		return {'CANCELLED'}
+
+	operator.report({'INFO'},f'Export Nif successful.')
+	return {'FINISHED'}

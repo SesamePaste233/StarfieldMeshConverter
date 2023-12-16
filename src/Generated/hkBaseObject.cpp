@@ -20,3 +20,9 @@ bool hktypes::hkBaseObject::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hkBaseObject::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkBaseObject::GetFieldTypeAndNames() { return {
+}; };
+

@@ -93,4 +93,5 @@ namespace utils {
 			return serialized_index != -1;
 		}
 	};
+
 }

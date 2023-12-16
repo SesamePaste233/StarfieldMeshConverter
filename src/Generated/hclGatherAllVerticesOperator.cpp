@@ -16,7 +16,7 @@ bool hktypes::hclGatherAllVerticesOperator::FromInstance(const hkreflex::hkClass
 	return true;
 }
 
-bool hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
 		std::cout << "hclGatherAllVerticesOperator::ToInstance: Wrong type!" << std::endl;
@@ -31,4 +31,15 @@ bool hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance* instanc
 	class_instance->GetInstanceByFieldName("partialGather")->SetValue(partialGather);
 	return true;
 }
+
+inline std::vector<std::string> hktypes::hclGatherAllVerticesOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclGatherAllVerticesOperator::GetFieldTypeAndNames() { return {
+	{ "hkArray<hkInt16, hkContainerHeapAllocator>", { "vertexInputFromVertexOutput", 72, 32 } },
+	{ "hkUint32", { "inputBufferIdx", 88, 32 } },
+	{ "hkUint32", { "outputBufferIdx", 92, 32 } },
+	{ "hkBool", { "gatherNormals", 96, 32 } },
+	{ "hkBool", { "partialGather", 97, 32 } },
+}; };
 

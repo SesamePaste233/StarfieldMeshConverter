@@ -28,3 +28,12 @@ bool hktypes::hclTransformSetDefinition::ToInstance(hkreflex::hkClassInstance* i
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclTransformSetDefinition::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclTransformSetDefinition::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 24, 32 } },
+	{ "hkInt32", { "type", 32, 32 } },
+	{ "hkUint32", { "numTransforms", 36, 32 } },
+}; };
+

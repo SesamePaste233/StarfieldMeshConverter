@@ -9,9 +9,9 @@ std::string hkreflex::hkClassBase::to_literal(bool show_class_members, bool as_p
 
 	std::string type_literal = "";
 
-	if (use_mapped_ctype && hktypes::hkTypeMapper::GetSingleton().IsMapped(this)) {
+	/*if (use_mapped_ctype && hktypes::hkTypeMapper::GetSingleton().IsMapped(this)) {
 		return "// Original: " + this->to_literal(false, true) + " Mapped to c type : " + this->ctype_name + "\n";
-	}
+	}*/
 
 	if (as_plain_class) {
 		type_literal = type_name;
@@ -99,6 +99,9 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 	}
 
 	std::string c_class_definition = "";
+
+	std::string type_body = "";
+
 	if (this->template_args.size() != 0) {
 		c_class_definition += indent_str;
 		c_class_definition += "template<";
@@ -117,22 +120,22 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 		auto parent_identifier = this->parent_class->to_C_identifier();
 		c_class_definition += " : public " + parent_identifier;
 		ref_types.push_back(this->parent_class);
+		type_body += indent_str + "\tusing BaseType = " + parent_identifier + ";\n";
 	}
 	else {
 		c_class_definition += " : public hkHolderBase";
+		type_body += indent_str + "\tusing BaseType = void;\n";
 	}
-
-	std::string type_body = "";
 
 	for (auto& nested_class : this->nested_classes) {
 		type_body += nested_class->to_C_class_definition(ref_types, indent + 1) + "\n";
 	}
 
 	for (auto& member : this->fields) {
-		type_body += indent_str + "\t" + member->type->ctype_name + " " + member->to_C_identifier() + "; // Offset: " + std::to_string(member->offset) + "\n";
+		type_body += indent_str + "\t" + member->type->to_C_identifier() + " " + member->to_C_identifier() + "; // Offset: " + std::to_string(member->offset) + "\n";
 		
 		auto sub_t = member->type;
-		while (sub_t->kind != TypeKind::Record) {
+		while (sub_t->kind != TypeKind::Record && sub_t->type_name != "hkArray") {
 			if (!sub_t->sub_type) {
 				break;
 			}
@@ -143,7 +146,7 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 			}
 		}
 		
-		if (sub_t->kind == TypeKind::Record
+		if ((sub_t->kind == TypeKind::Record || sub_t->type_name == "hkArray")
 			&& std::find(this->nested_classes.begin(), this->nested_classes.end(), sub_t) == this->nested_classes.end()
 			&& std::find(ref_types.begin(), ref_types.end(), sub_t) == ref_types.end()
 		) {
@@ -153,16 +156,21 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 	type_body += "\n" + indent_str + "\t// Extra\n";
 	type_body += indent_str + "\tbool FromInstance(const hkreflex::hkClassInstance* instance) override;\n";
 	type_body += indent_str + "\tbool ToInstance(hkreflex::hkClassInstance* instance) override;\n";
+	type_body += indent_str + "\tstatic inline std::string GethkClassName() { return \"" + this->type_name + "\"; };\n";
+	type_body += indent_str + "\tstatic inline std::vector<std::string> GetTemplateArgs();\n";
+	type_body += indent_str + "\tstatic inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();\n";
+	type_body += indent_str + "\tstatic inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();\n";
+
 
 	c_class_definition += " {\n" + indent_str + "public:\n" + type_body + indent_str + "};\n";
 
 	return c_class_definition;
 }
 
-std::string hkreflex::hkClassBase::to_C_from_instance()
+std::string hkreflex::hkClassBase::to_C_FromInstance()
 {
 	std::string c_from_instance = "";
-	if (this->kind == TypeKind::Record) {
+	if (/*this->kind == TypeKind::Record*/true) {
 		c_from_instance += "bool hktypes::" + this->to_C_identifier() + "::FromInstance(const hkreflex::hkClassInstance* instance) {\n";
 		c_from_instance += "\tauto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);\n";
 		c_from_instance += "\tif (class_instance->type->type_name != \"" + this->type_name + "\") {\n";
@@ -183,16 +191,16 @@ std::string hkreflex::hkClassBase::to_C_from_instance()
 	}
 
 	for (auto nested_classes : this->nested_classes) {
-		c_from_instance += nested_classes->to_C_from_instance();
+		c_from_instance += nested_classes->to_C_FromInstance();
 	}
 
 	return c_from_instance;
 }
 
-std::string hkreflex::hkClassBase::to_C_to_instance()
+std::string hkreflex::hkClassBase::to_C_ToInstance()
 {
 	std::string c_to_instance = "";
-	if (this->kind == TypeKind::Record) {
+	if (/*this->kind == TypeKind::Record*/true) {
 		c_to_instance += "bool hktypes::" + this->to_C_identifier() + "::ToInstance(hkreflex::hkClassInstance* instance) {\n";
 		c_to_instance += "\tauto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);\n";
 		c_to_instance += "\tif (class_instance->type->type_name != \"" + this->type_name + "\") {\n";
@@ -213,9 +221,68 @@ std::string hkreflex::hkClassBase::to_C_to_instance()
 	}
 
 	for (auto nested_classes : this->nested_classes) {
-		c_to_instance += nested_classes->to_C_to_instance();
+		c_to_instance += nested_classes->to_C_ToInstance();
 	}
 	return c_to_instance;
+}
+
+std::string hkreflex::hkClassBase::to_C_GetTemplateArgs()
+{
+	std::string GetTemplateArgs = "";
+	if (/*this->kind == TypeKind::Record*/true) {
+		GetTemplateArgs += "inline std::vector<std::string> hktypes::" + this->to_C_identifier() + "::GetTemplateArgs() { return {\n";
+		for (auto& arg : this->template_args) {
+			GetTemplateArgs += "\t\"" + arg->to_arg_specifier() + "\",\n";
+		}
+		GetTemplateArgs += "}; };\n\n";
+	}
+
+	for (auto nested_classes : this->nested_classes) {
+		GetTemplateArgs += nested_classes->to_C_GetTemplateArgs();
+	}
+
+	return GetTemplateArgs;
+}
+
+std::string hkreflex::hkClassBase::to_C_GetFieldTypeAndNames()
+{
+	std::string GetFieldTypeAndNames = "";
+	if (/*this->kind == TypeKind::Record*/true) {
+		GetFieldTypeAndNames += "inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::" + this->to_C_identifier() + "::GetFieldTypeAndNames() { return {\n";
+		for (auto& member : this->fields) {
+			GetFieldTypeAndNames += "\t{ \"" + member->type->to_C_identifier() + "\", { \"" + member->name + "\", " + std::to_string(member->offset) + ", " + std::to_string((uint16_t)member->flags) + " } },\n";
+		}
+		GetFieldTypeAndNames += "}; };\n\n";
+	}
+
+	for (auto nested_classes : this->nested_classes) {
+		GetFieldTypeAndNames += nested_classes->to_C_GetFieldTypeAndNames();
+	}
+
+	return GetFieldTypeAndNames;
+}
+
+std::string hkreflex::hkClassBase::to_C_GetPropertyBag()
+{
+	std::string GetPropertyBag = "";
+	if (this->kind == TypeKind::Record) {
+		GetPropertyBag += "inline hkreflex::hkClassBase::DefinitionPropertyBag hktypes::" + this->to_C_identifier() + "::GetPropertyBag() { return { \"" 
+			+ this->type_name + "\", " 
+			+ std::to_string((uint8_t)this->optionals) + ", "
+			+ std::to_string((uint32_t)this->format) + ", "
+			+ std::to_string((uint32_t)this->version) + ", "
+			+ std::to_string((uint32_t)this->size) + ", "
+			+ std::to_string((uint32_t)this->alignment) + ", "
+			+ std::to_string((uint8_t)this->type_flags) + ", "
+			+ std::to_string((uint32_t)this->hash)
+			+ " }; };\n\n";
+	}
+
+	for (auto nested_classes : this->nested_classes) {
+		GetPropertyBag += nested_classes->to_C_GetPropertyBag();
+	}
+
+	return GetPropertyBag;
 }
 
 bool hkreflex::hkIndexedDataBlock::BuildInstances()
@@ -346,12 +413,12 @@ std::string hkreflex::hkFieldBase::to_C_class_definition(std::vector<hkClassBase
 	return std::string();
 }
 
-std::string hkreflex::hkFieldBase::to_C_from_instance()
+std::string hkreflex::hkFieldBase::to_C_FromInstance()
 {
 	return std::string();
 }
 
-std::string hkreflex::hkFieldBase::to_C_to_instance()
+std::string hkreflex::hkFieldBase::to_C_ToInstance()
 {
 	return std::string();
 }

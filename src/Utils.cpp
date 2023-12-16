@@ -484,3 +484,158 @@ int16_t utils::double_to_snorm(double value, double max_border)
 		return static_cast<int16_t>(value * 32768.0);
 	}
 }
+
+std::string utils::ClassProperty::dump() const {
+	std::string result = "Declaration Type: " + declarationType + "\n";
+	result += std::string("Is Pointer: ") + (isPointer ? std::string("true") : std::string("false")) + std::string("\n");
+	result += "Base Name: " + baseName + "\n";
+	result += "Namespaces: ";
+	for (const auto& ns : namespaces) {
+		result += ns + "::";
+	}
+	result += "\n";
+	result += "Pure Name: " + pureName + "\n";
+	result += "Template Arguments: ";
+	for (const auto& arg : templateArgs) {
+		result += arg.getCxxIdentifier() + " ";
+	}
+	result += "\n";
+	result += "C++ Identifier: " + getCxxIdentifier() + "\n";
+	return result;
+}
+
+void utils::ClassProperty::parseTypeName(std::string typeName) {
+	// Check if the type is a pointer
+	auto p = typeName.rfind("* __ptr64");
+	if (p + 9 == typeName.length()) {
+		typeName = typeName.substr(0, p - 1);
+		isPointer = true;
+	}
+	else {
+		isPointer = false;
+	}
+
+	// Extract template arguments
+	size_t openBracketPos = typeName.find('<');
+	size_t closeBracketPos = typeName.rfind('>');
+
+	if (openBracketPos != std::string::npos && closeBracketPos != std::string::npos && closeBracketPos > openBracketPos) {
+		std::string argsString = typeName.substr(openBracketPos + 1, closeBracketPos - openBracketPos - 1);
+		templateArgs = splitTemplateArgs(argsString);
+		typeName = typeName.substr(0, openBracketPos);
+	}
+
+	// Extract base name
+	auto sub_str = typeName.substr(0, 6);
+	switch (sub_str[0]) {
+	case 'c':
+		if (sub_str.find("class") == 0) {
+			baseName = typeName.substr(6);
+			declarationType = "class";
+		}
+		else if (sub_str.find("const") == 0) {
+			baseName = typeName.substr(6);
+			declarationType = "const";
+		}
+		else {
+			baseName = typeName;
+			declarationType = "typename";
+		}
+		break;
+	case 's':
+		if (sub_str.find("struct") == 0) {
+			baseName = typeName.substr(7);
+			declarationType = "struct";
+		}
+		else {
+			baseName = typeName;
+			declarationType = "typename";
+		}
+		break;
+	case 'e':
+		if (sub_str.find("enum") == 0) {
+			baseName = typeName.substr(5);
+			declarationType = "enum";
+		}
+		else {
+			baseName = typeName;
+			declarationType = "typename";
+		}
+		break;
+	case 'u':
+		if (sub_str.find("union") == 0) {
+			baseName = typeName.substr(6);
+			declarationType = "union";
+		}
+		else {
+			baseName = typeName;
+			declarationType = "typename";
+		}
+		break;
+	default:
+		// if typeName is a number
+		if (std::all_of(typeName.begin(), typeName.end(), ::isdigit)) {
+			baseName = typeName;
+			declarationType = "int64_t";
+		}
+		else {
+			baseName = typeName;
+			declarationType = "typename";
+		}
+	}
+
+	// Extract namespaces
+	size_t pos = 0;
+	pureName = baseName;
+	while (pos != std::string::npos) {
+		pos = pureName.find("::", pos);
+		if (pos != std::string::npos) {
+			namespaces.push_back(pureName.substr(0, pos));
+			pureName = pureName.substr(pos + 2);
+			pos = 0;
+		}
+	}
+
+	// Get cxxidentifier
+	this->cxxIdentifier = baseName;
+	if (!templateArgs.empty()) {
+		cxxIdentifier += "<" + concatenateTemplateArgs() + ">";
+	}
+
+	if (isPointer) {
+		cxxIdentifier += "*";
+	}
+}
+
+std::vector<utils::ClassProperty> utils::ClassProperty::splitTemplateArgs(const std::string& argsString) const {
+	std::vector<ClassProperty> args;
+	size_t start = 0;
+	size_t lock = 0;
+	size_t pos = 0;
+	for (const char& c : argsString) {
+		if (c == '<') {
+			++lock;
+		}
+		else if (c == '>') {
+			--lock;
+		}
+		else if (c == ',' && lock == 0) {
+			args.push_back(ClassProperty(argsString.substr(start, pos - start)));
+			start = pos + 1;
+		}
+		++pos;
+	}
+	args.push_back(ClassProperty(argsString.substr(start, pos - start)));
+	return args;
+}
+
+std::string utils::ClassProperty::concatenateTemplateArgs() const {
+	std::string result;
+	for (const auto& arg : templateArgs) {
+		if (!result.empty()) {
+			result += ", ";
+		}
+		result += arg.getCxxIdentifier();
+	}
+	return result;
+}

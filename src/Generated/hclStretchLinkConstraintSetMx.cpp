@@ -34,10 +34,6 @@ bool hktypes::hclStretchLinkConstraintSetMx::Single::FromInstance(const hkreflex
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("restLength")->GetValue(restLength);
-	class_instance->GetInstanceByFieldName("stiffness")->GetValue(stiffness);
-	class_instance->GetInstanceByFieldName("particleA")->GetValue(particleA);
-	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
 	return true;
 }
 
@@ -75,10 +71,30 @@ bool hktypes::hclStretchLinkConstraintSetMx::Single::ToInstance(hkreflex::hkClas
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("restLength")->SetValue(restLength);
-	class_instance->GetInstanceByFieldName("stiffness")->SetValue(stiffness);
-	class_instance->GetInstanceByFieldName("particleA")->SetValue(particleA);
-	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
 	return true;
 }
+
+inline std::vector<std::string> hktypes::hclStretchLinkConstraintSetMx::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclStretchLinkConstraintSetMx::Batch::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclStretchLinkConstraintSetMx::Single::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStretchLinkConstraintSetMx::GetFieldTypeAndNames() { return {
+	{ "hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator>", { "batches", 40, 32 } },
+	{ "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>", { "singles", 56, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStretchLinkConstraintSetMx::Batch::GetFieldTypeAndNames() { return {
+	{ "T[N]<hkReal, 4>", { "restLengths", 0, 32 } },
+	{ "T[N]<hkReal, 4>", { "stiffnesses", 16, 32 } },
+	{ "T[N]<hkUint16, 4>", { "particlesA", 32, 32 } },
+	{ "T[N]<hkUint16, 4>", { "particlesB", 40, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStretchLinkConstraintSetMx::Single::GetFieldTypeAndNames() { return {
+}; };
 

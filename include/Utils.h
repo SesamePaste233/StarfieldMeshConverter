@@ -33,6 +33,8 @@ namespace utils {
 	template<typename T, typename Elem_T = std::remove_reference_t<T>::value_type>
 	concept _is_vector_t = std::is_same_v<T, std::vector<Elem_T>> && (_is_integer_t<Elem_T> || _is_float_t<Elem_T> || _is_bool_t<Elem_T> || _is_string_t<Elem_T>);
 
+	template<typename T, typename Elem_T = std::remove_reference_t<T>::value_type>
+	concept _is_array_t = std::is_array_v<T> && (_is_integer_t<Elem_T> || _is_float_t<Elem_T> || _is_bool_t<Elem_T> || _is_string_t<Elem_T>);
 
 	const wchar_t* charToWchar(const char* c);
 
@@ -275,4 +277,77 @@ namespace utils {
 		}
 		return result;
 	}
+
+	class ClassProperty {
+	public:
+		template<typename T>
+		[[nodiscard]] static inline ClassProperty parse() {
+			return ClassProperty(typeid(T));
+		}
+
+		template<typename T>
+		[[nodiscard]] static inline ClassProperty parse(const T& instance) {
+			return ClassProperty(typeid(T));
+		}
+
+		inline std::string getDeclarationType() const {
+			return declarationType;
+		}
+
+		inline std::string getBaseName() const {
+			return baseName;
+		}
+
+		inline const std::vector<ClassProperty>& getTemplateArgs() const {
+			return templateArgs;
+		}
+
+		inline std::string getCxxIdentifier() const {
+			return cxxIdentifier;
+		}
+
+		std::string dump() const;
+
+		inline bool is_valid() const {
+			return !cxxIdentifier.empty();
+		}
+
+		operator std::string() const {
+			return cxxIdentifier;
+		}
+
+		bool operator ==(const ClassProperty& other) const {
+			return cxxIdentifier == other.cxxIdentifier;
+		}
+
+		struct Hash {
+			std::size_t operator()(const ClassProperty& _property) const {
+				std::hash<std::string> stringHasher;
+				return stringHasher(_property.getCxxIdentifier());
+			}
+		};
+
+	protected:
+		ClassProperty(const std::type_info& typeInfo) {
+			parseTypeName(typeInfo.name());
+		}
+
+		ClassProperty(const std::string& typeInfoName) {
+			parseTypeName(typeInfoName);
+		}
+
+		void parseTypeName(std::string typeName);
+
+		std::vector<ClassProperty> splitTemplateArgs(const std::string& argsString) const;
+
+		std::string concatenateTemplateArgs() const;
+
+		bool isPointer = false;
+		std::string declarationType;
+		std::string baseName;
+		std::vector<std::string> namespaces;
+		std::string pureName;
+		std::string cxxIdentifier;
+		std::vector<ClassProperty> templateArgs;
+	};
 }

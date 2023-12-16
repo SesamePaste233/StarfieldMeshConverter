@@ -552,7 +552,15 @@ namespace nif {
 		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
-	
+		
+		static BSBound _human_bsbound_prefab() {
+			BSBound bound;
+			float _center[3] = {0, 0, 0.9};
+			float _dimensions[3] = {0.31, 0.31, 0.9};
+			memcpy(bound.center, _center, sizeof(float) * 3);
+			memcpy(bound.dimensions, _dimensions, sizeof(float) * 3);
+			return bound;
+		}
 	};
 
 	class BSConnectPointParents : public NiNodeBase {
@@ -589,6 +597,19 @@ namespace nif {
 		std::vector<uint32_t> GetStringReference() const override {
 			return NiNodeBase::GetStringReference();
 		};
+
+		static BSConnectPointParents _human_head_attachlight_cp_prefab() {
+			BSConnectPointParents cp;
+			cp.num_parents = 1;
+			cp.connect_points.push_back({
+				"C_Head",
+				"p-AttachLight",
+				{3.11183E-08,0.711903,0.702277,-3.06975E-08},
+				{0.149805,0.126082,-8.60542E-09},
+				1.f
+				});
+			return cp;
+		}
 	};
 
 	class bhkNPCollisionObject : public NiNodeBase {

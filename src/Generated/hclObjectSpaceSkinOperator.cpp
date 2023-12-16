@@ -32,3 +32,14 @@ bool hktypes::hclObjectSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* 
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclObjectSpaceSkinOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclObjectSpaceSkinOperator::GetFieldTypeAndNames() { return {
+	{ "hkArray<hkMatrix4, hkContainerHeapAllocator>", { "boneFromSkinMeshTransforms", 72, 32 } },
+	{ "hkArray<hkUint16, hkContainerHeapAllocator>", { "transformSubset", 88, 32 } },
+	{ "hkUint32", { "outputBufferIndex", 104, 32 } },
+	{ "hkUint32", { "transformSetIndex", 108, 32 } },
+	{ "hclObjectSpaceDeformer", { "objectSpaceDeformer", 112, 32 } },
+}; };
+

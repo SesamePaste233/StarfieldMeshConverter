@@ -32,3 +32,14 @@ bool hktypes::hclOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclOperator::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclOperator::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 24, 32 } },
+	{ "unsigned int", { "operatorID", 32, 32 } },
+	{ "unsigned int", { "type", 36, 33 } },
+	{ "hkArray<hclClothState::BufferAccess, hkContainerHeapAllocator>", { "usedBuffers", 40, 32 } },
+	{ "hkArray<hclClothState::TransformSetAccess, hkContainerHeapAllocator>", { "usedTransformSets", 56, 32 } },
+}; };
+

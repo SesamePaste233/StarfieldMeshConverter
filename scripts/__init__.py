@@ -204,6 +204,13 @@ class ImportCustomNif(bpy.types.Operator):
 	filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
 
 	assets_folder: bpy.props.StringProperty(subtype="FILE_PATH")
+
+	debug_havok_physics: bpy.props.BoolProperty(
+		name="Visualize Havok Cloth Sim Data",
+		description="Reinterpret Havok Cloth Sim Data as mesh objects and capsules.",
+		default=True
+	)
+
 	import_as_read_only: bpy.props.BoolProperty(
 		name="As Read Only",
 		description="The object will be marked as read only. You can import morph once, however, as long as there's morph data in this object, any attempt to import a new morph will be prohibited.",
@@ -252,12 +259,6 @@ class ImportCustomNif(bpy.types.Operator):
 	)
 	geo_bounding_debug: bpy.props.BoolProperty(
 		name="Debug Min Max Bounding",
-		description="Debug option. DO NOT USE.",
-		default=False
-	)
-
-	debug_havok_physics: bpy.props.BoolProperty(
-		name="Debug Havok Physics",
 		description="Debug option. DO NOT USE.",
 		default=False
 	)

@@ -316,7 +316,7 @@ void pmain() {
 
 void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_colonist_adventurous_01_poncho_f.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.nif");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -335,11 +335,11 @@ void main() {
 			// No nested classes
 			continue;
 		}
-		if (hk_class->template_args.size() != 0) {
-			// No template classes
-			continue;
-		}
-		if (hk_class->kind != hkreflex::hkClassBase::TypeKind::Record) {
+		//if (hk_class->template_args.size() != 0) {
+		//	// No template classes
+		//	continue;
+		//}
+		if (hk_class->kind != hkreflex::hkClassBase::TypeKind::Record && hk_class->type_name != "hkArray") {
 			// Record classes only
 			continue;
 		}
@@ -354,11 +354,24 @@ void main() {
 		hk_class_definition += "#pragma once\n";
 		hk_class_definition += "#include \"hkInclude.h\"\n\n";
 		for (auto& ref_type : ref_types) {
-			hk_class_definition += "#include \"Generated\\" + ref_type->to_C_identifier() + ".h\"\n";
+			hk_class_definition += "#include \"Generated\\" + ref_type->type_name + ".h\"\n";
 		}
 		hk_class_definition += "\nnamespace hktypes{\n";
 		for (auto& ref_type : ref_types) {
-			hk_class_definition += "\tclass " + ref_type->to_C_identifier() + ";\n";
+			if (ref_type->template_args.size() == 0) {
+				hk_class_definition += "\tclass " + ref_type->to_C_identifier() + ";\n";
+			}
+			else {
+				hk_class_definition += "\ttemplate <";
+				for (int i = 0; i < ref_type->template_args.size(); i++) {
+					hk_class_definition += "typename " + ref_type->template_args[i]->template_arg_name;
+					if (i != ref_type->template_args.size() - 1) {
+						hk_class_definition += ", ";
+					}
+				}
+				hk_class_definition += ">\n";
+				hk_class_definition += "\tclass " + ref_type->type_name + ";\n";
+			}
 		}
 		hk_class_definition += "\n" + def_str;
 		hk_class_definition += "}\n";
@@ -369,15 +382,17 @@ void main() {
 		std::string hk_class_definition_cpp = "";
 		hk_class_definition_cpp += "#include \"Generated\\" + hk_class->type_name + ".h\"\n\n";
 
-		hk_class_definition_cpp += hk_class->to_C_from_instance();
-		hk_class_definition_cpp += hk_class->to_C_to_instance();
+		hk_class_definition_cpp += hk_class->to_C_FromInstance();
+		hk_class_definition_cpp += hk_class->to_C_ToInstance();
+		hk_class_definition_cpp += hk_class->to_C_GetTemplateArgs();
+		hk_class_definition_cpp += hk_class->to_C_GetFieldTypeAndNames();
 
 		std::ofstream file1("C:\\repo\\MeshConverter\\src\\Generated\\" + hk_class->type_name + ".cpp");
 		file1 << hk_class_definition_cpp;
 		file1.close();
 	}
 
-	auto literals = data->classes_to_literal(true, true, true);
+	auto literals = data->classes_to_literal(true, false, true);
 
 	auto instances = data->dump_root_instance();
 
@@ -410,7 +425,7 @@ int retmain() {
 	nif.SetAssetsPath("C:\\repo\\MeshConverter");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\ExportScene.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\skeleton.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

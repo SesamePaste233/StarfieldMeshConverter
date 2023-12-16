@@ -24,3 +24,10 @@ bool hktypes::hclShape::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclShape::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclShape::GetFieldTypeAndNames() { return {
+	{ "int", { "type", 24, 33 } },
+}; };
+

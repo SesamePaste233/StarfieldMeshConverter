@@ -262,3 +262,105 @@ bool hktypes::hclSimClothData::CollidablePinchingData::ToInstance(hkreflex::hkCl
 	return true;
 }
 
+inline std::vector<std::string> hktypes::hclSimClothData::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimClothData::OverridableSimulationInfo::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimClothData::ParticleData::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimClothData::CollidableTransformMap::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimClothData::TransferMotionData::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimClothData::LandscapeCollisionData::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclSimClothData::CollidablePinchingData::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::GetFieldTypeAndNames() { return {
+	{ "hkStringPtr", { "name", 24, 32 } },
+	{ "hclSimClothData::OverridableSimulationInfo", { "simulationInfo", 32, 32 } },
+	{ "hkArray<hclSimClothData::ParticleData, hkContainerHeapAllocator>", { "particleDatas", 64, 32 } },
+	{ "hkArray<hkUint16, hkContainerHeapAllocator>", { "fixedParticles", 80, 32 } },
+	{ "hkBool", { "doNormals", 96, 32 } },
+	{ "hkArray<unsigned int, hkContainerHeapAllocator>", { "simOpIds", 104, 32 } },
+	{ "hkArray<T*<hclSimClothPose>, hkContainerHeapAllocator>", { "simClothPoses", 120, 32 } },
+	{ "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>", { "staticConstraintSets", 136, 32 } },
+	{ "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>", { "antiPinchConstraintSets", 152, 32 } },
+	{ "hclSimClothData::CollidableTransformMap", { "collidableTransformMap", 168, 32 } },
+	{ "hkArray<T*<hclCollidable>, hkContainerHeapAllocator>", { "perInstanceCollidables", 208, 32 } },
+	{ "hkReal", { "maxParticleRadius", 224, 32 } },
+	{ "hkArray<hkUint32, hkContainerHeapAllocator>", { "staticCollisionMasks", 232, 32 } },
+	{ "hkArray<T*<hclAction>, hkContainerHeapAllocator>", { "actions", 248, 32 } },
+	{ "hkReal", { "totalMass", 264, 32 } },
+	{ "hclSimClothData::TransferMotionData", { "transferMotionData", 268, 32 } },
+	{ "hkBool", { "transferMotionEnabled", 316, 32 } },
+	{ "hkBool", { "landscapeCollisionEnabled", 317, 32 } },
+	{ "hclSimClothData::LandscapeCollisionData", { "landscapeCollisionData", 320, 32 } },
+	{ "hkUint32", { "numLandscapeCollidableParticles", 344, 32 } },
+	{ "hkArray<hkUint16, hkContainerHeapAllocator>", { "triangleIndices", 352, 32 } },
+	{ "hkArray<hkUint8, hkContainerHeapAllocator>", { "triangleFlips", 368, 32 } },
+	{ "hkBool", { "pinchDetectionEnabled", 384, 32 } },
+	{ "hkArray<hkBool, hkContainerHeapAllocator>", { "perParticlePinchDetectionEnabledFlags", 392, 32 } },
+	{ "hkArray<hclSimClothData::CollidablePinchingData, hkContainerHeapAllocator>", { "collidablePinchingDatas", 408, 32 } },
+	{ "hkUint16", { "minPinchedParticleIndex", 424, 32 } },
+	{ "hkUint16", { "maxPinchedParticleIndex", 426, 32 } },
+	{ "hkUint32", { "maxCollisionPairs", 428, 32 } },
+	{ "hclVirtualCollisionPointsData", { "virtualCollisionPointsData", 432, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::OverridableSimulationInfo::GetFieldTypeAndNames() { return {
+	{ "hkVector4", { "gravity", 0, 32 } },
+	{ "hkReal", { "globalDampingPerSecond", 16, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::ParticleData::GetFieldTypeAndNames() { return {
+	{ "hkReal", { "mass", 0, 32 } },
+	{ "hkReal", { "invMass", 4, 32 } },
+	{ "hkReal", { "radius", 8, 32 } },
+	{ "hkReal", { "friction", 12, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::CollidableTransformMap::GetFieldTypeAndNames() { return {
+	{ "hkInt32", { "transformSetIndex", 0, 32 } },
+	{ "hkArray<hkUint32, hkContainerHeapAllocator>", { "transformIndices", 8, 32 } },
+	{ "hkArray<hkMatrix4, hkContainerHeapAllocator>", { "offsets", 24, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::TransferMotionData::GetFieldTypeAndNames() { return {
+	{ "hkUint32", { "transformSetIndex", 0, 32 } },
+	{ "hkUint32", { "transformIndex", 4, 32 } },
+	{ "hkBool", { "transferTranslationMotion", 8, 32 } },
+	{ "hkReal", { "minTranslationSpeed", 12, 32 } },
+	{ "hkReal", { "maxTranslationSpeed", 16, 32 } },
+	{ "hkReal", { "minTranslationBlend", 20, 32 } },
+	{ "hkReal", { "maxTranslationBlend", 24, 32 } },
+	{ "hkBool", { "transferRotationMotion", 28, 32 } },
+	{ "hkReal", { "minRotationSpeed", 32, 32 } },
+	{ "hkReal", { "maxRotationSpeed", 36, 32 } },
+	{ "hkReal", { "minRotationBlend", 40, 32 } },
+	{ "hkReal", { "maxRotationBlend", 44, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::LandscapeCollisionData::GetFieldTypeAndNames() { return {
+	{ "hkReal", { "landscapeRadius", 0, 32 } },
+	{ "hkBool", { "enableStuckParticleDetection", 4, 32 } },
+	{ "hkReal", { "stuckParticlesStretchFactorSq", 8, 32 } },
+	{ "hkBool", { "pinchDetectionEnabled", 12, 32 } },
+	{ "hkInt8", { "pinchDetectionPriority", 13, 32 } },
+	{ "hkReal", { "pinchDetectionRadius", 16, 32 } },
+	{ "hkReal", { "collisionTolerance", 20, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::CollidablePinchingData::GetFieldTypeAndNames() { return {
+	{ "hkBool", { "pinchDetectionEnabled", 0, 32 } },
+	{ "hkInt8", { "pinchDetectionPriority", 1, 32 } },
+	{ "hkReal", { "pinchDetectionRadius", 4, 32 } },
+}; };
+

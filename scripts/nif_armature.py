@@ -236,7 +236,7 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 			T[i][j] = armature_dict['matrix'][i][j]
 	
 	b.matrix = BoneAxisCorrection(T)
-	print(armature_dict['name'])
+	#print(armature_dict['name'])
 	if parent_bone != None:
 		b.parent = parent_bone
 
@@ -298,3 +298,34 @@ def ImportArmatureFromJson(skeleton_name, collection, skin_objs, armature_name =
 
 		return CreateArmature(data, skin_objs, collection, armature_name, debug_capsule)
 
+def CreateArmatureDictRecursive(cur_bone, edit_bones) -> dict:
+	armature_dict = {}
+	armature_dict['name'] = utils_blender.RevertRenamingBone(cur_bone.name)
+	armature_dict['head'] = list(cur_bone.head)
+	armature_dict['tail'] = list(cur_bone.tail)
+	armature_dict['matrix'] = [[1 if i == j else 0 for i in range(4)] for j in range(4)]
+	armature_dict['scale'] = 1
+	armature_dict['sgo_keep'] = 1
+	armature_dict['geometry_index'] = 4294967295
+	T = cur_bone.matrix
+	for i in range(4):
+		for j in range(4):
+			armature_dict['matrix'][i][j] = float(T[i][j])
+	armature_dict['children'] = []
+	for child in cur_bone.children:
+		armature_dict['children'].append(CreateArmatureDictRecursive(child, edit_bones))
+
+	return armature_dict
+
+def CreateArmatureDict(armature_obj) -> dict:
+	old_active = utils_blender.GetActiveObject()
+	utils_blender.SetActiveObject(armature_obj)
+	bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+	edit_bones = armature_obj.data.edit_bones
+
+	armature_dict = CreateArmatureDictRecursive(edit_bones[0], edit_bones)
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+	utils_blender.SetActiveObject(old_active)
+
+	return armature_dict

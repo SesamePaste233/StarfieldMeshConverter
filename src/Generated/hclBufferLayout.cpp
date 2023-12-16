@@ -40,6 +40,26 @@ bool hktypes::hclBufferLayout::Slot::FromInstance(const hkreflex::hkClassInstanc
 	return true;
 }
 
+bool hktypes::hclBufferLayout::TriangleFormat::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
+		std::cout << "hclBufferLayout::TriangleFormat::FromInstance: Wrong type!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool hktypes::hclBufferLayout::SlotFlags::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
+		std::cout << "hclBufferLayout::SlotFlags::FromInstance: Wrong type!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 bool hktypes::hclBufferLayout::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclBufferLayout") {
@@ -79,4 +99,64 @@ bool hktypes::hclBufferLayout::Slot::ToInstance(hkreflex::hkClassInstance* insta
 	class_instance->GetInstanceByFieldName("stride")->SetValue(stride);
 	return true;
 }
+
+bool hktypes::hclBufferLayout::TriangleFormat::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
+		std::cout << "hclBufferLayout::TriangleFormat::ToInstance: Wrong type!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+bool hktypes::hclBufferLayout::SlotFlags::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+	if (class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
+		std::cout << "hclBufferLayout::SlotFlags::ToInstance: Wrong type!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+inline std::vector<std::string> hktypes::hclBufferLayout::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclBufferLayout::BufferElement::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclBufferLayout::Slot::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclBufferLayout::TriangleFormat::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::string> hktypes::hclBufferLayout::SlotFlags::GetTemplateArgs() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::GetFieldTypeAndNames() { return {
+	{ "T[N]<hclBufferLayout::BufferElement, 4>", { "elementsLayout", 0, 32 } },
+	{ "T[N]<hclBufferLayout::Slot, 4>", { "slots", 16, 32 } },
+	{ "hkUint8", { "numSlots", 24, 32 } },
+	{ "hkEnum<hclBufferLayout::TriangleFormat, hkUint8>", { "triangleFormat", 25, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::BufferElement::GetFieldTypeAndNames() { return {
+	{ "hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>", { "vectorConversion", 0, 32 } },
+	{ "hkUint8", { "vectorSize", 1, 32 } },
+	{ "hkUint8", { "slotId", 2, 32 } },
+	{ "hkUint8", { "slotStart", 3, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::Slot::GetFieldTypeAndNames() { return {
+	{ "hkEnum<hclBufferLayout::SlotFlags, hkUint8>", { "flags", 0, 32 } },
+	{ "hkUint8", { "stride", 1, 32 } },
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::TriangleFormat::GetFieldTypeAndNames() { return {
+}; };
+
+inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::SlotFlags::GetFieldTypeAndNames() { return {
+}; };
 

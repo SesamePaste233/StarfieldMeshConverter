@@ -45,7 +45,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::Single::FromInstance(const hkr
 	return true;
 }
 
-bool hclCompressibleLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hclCompressibleLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::ToInstance: Wrong type!" << std::endl;
@@ -58,7 +58,7 @@ bool hclCompressibleLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstance* i
 	return true;
 }
 
-bool hclCompressibleLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hclCompressibleLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx::Batch") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::Batch::ToInstance: Wrong type!" << std::endl;
@@ -74,7 +74,7 @@ bool hclCompressibleLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClassInst
 	return true;
 }
 
-bool hclCompressibleLinkConstraintSetMx::Single::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hclCompressibleLinkConstraintSetMx::Single::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx::Single") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::Single::ToInstance: Wrong type!" << std::endl;

@@ -871,7 +871,7 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 	if (rtti != RTTI::NiArmature)
 		return rtti;
 
-	if (_data.find("geometries") == _data.end())
+	if (_data.find("geometries") == _data.end() || _data["geometries"].empty())
 		return rtti;
 
 
@@ -1279,7 +1279,7 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 		}
 		else {
 			cur_ni_node = dynamic_cast<nif::NiObject*>(nif.AddBlock("NiNode", cur_node.name));
-			if (sub_template & (SubTemplate::PureSkeleton|SubTemplate::Weapon) && cur_node.prevent_optimization) {
+			if (this->sub_template & (SubTemplate::PureSkeleton|SubTemplate::Weapon) && cur_node.prevent_optimization) {
 				auto extra_data = dynamic_cast<nif::NiStringExtraData*>(nif.AddBlock(nif::NiRTTI::NiStringExtraData, "sgoKeep"));
 				auto extra_data_id = nif.block_manager.FindBlock(extra_data);
 				extra_data->string_index = nif.string_manager.AddString("sgoKeep", extra_data_id);
@@ -1320,6 +1320,26 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 	root_node->AddExtraData(nif.block_manager.FindBlock(bsxflags));
 
 	bsxflags->flags = this->bsx_flags;
+
+	if (this->sub_template & SubTemplate::PureSkeleton) {
+		auto bsbound = dynamic_cast<nif::BSBound*>(nif.AddBlock(nif::NiRTTI::BSBound, "BBX"));
+
+		auto BBX_prefab = nif::BSBound::_human_bsbound_prefab();
+
+		std::memcpy(bsbound->center, BBX_prefab.center, 3 * sizeof(float));
+		std::memcpy(bsbound->dimensions, BBX_prefab.dimensions, 3 * sizeof(float));
+
+		root_node->AddExtraData(nif.block_manager.FindBlock(bsbound));
+
+		auto bsconnectpointparents = dynamic_cast<nif::BSConnectPointParents*>(nif.AddBlock(nif::NiRTTI::BSConnectPointParents, "CPA"));
+
+		auto CPA_prefab = nif::BSConnectPointParents::_human_head_attachlight_cp_prefab();
+
+		bsconnectpointparents->num_parents = CPA_prefab.num_parents;
+		bsconnectpointparents->connect_points = CPA_prefab.connect_points;
+
+		root_node->AddExtraData(nif.block_manager.FindBlock(bsconnectpointparents));
+	}
 
 	nif.UpdateBlockReference(root_node);
 
