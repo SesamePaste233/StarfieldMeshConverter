@@ -38,7 +38,7 @@ namespace hkreflex {
 	public:
 		virtual std::string to_C_identifier() = 0;
 
-		virtual std::string to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent = 0) = 0;
+		virtual std::string to_C_class_definition(std::set<hkClassBase*>& ref_types, int indent = 0) = 0;
 
 		virtual std::string to_C_FromInstance() = 0;
 
@@ -76,30 +76,17 @@ namespace hkreflex {
 			AdditionalUnkValue = 1 << 7,
 		};
 
-		class DefinitionPropertyBag {
-		public:
-			std::string name;
-			uint32_t offset;
-			uint16_t flags;
-		};
-
 		hkClassBase* type;
 		std::string name;
 		uint32_t offset;
 		FieldFlags flags;
 		uint8_t unk_value;
 
-		void FromPropertyBag(DefinitionPropertyBag& property_bag) {
-			name = property_bag.name;
-			offset = property_bag.offset;
-			flags = static_cast<FieldFlags>(property_bag.flags);
-		}
-
 		virtual std::string to_literal(bool use_mapped_ctype = false);
 
 		std::string to_C_identifier() override;
 
-		std::string to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent = 0) override;
+		std::string to_C_class_definition(std::set<hkClassBase*>& ref_types, int indent = 0) override;
 
 		std::string to_C_FromInstance() override;
 
@@ -485,18 +472,6 @@ namespace hkreflex {
 			Array
 		};
 
-		class DefinitionPropertyBag {
-		public:
-			std::string type_name;
-			uint8_t optionals;
-			uint32_t format;
-			uint32_t version;
-			uint32_t size;
-			uint32_t alignment;
-			uint8_t type_flags;
-			uint32_t hash;
-		};
-
 		~hkClassBase()
 		{
 			for (auto template_arg : template_args)
@@ -507,49 +482,35 @@ namespace hkreflex {
 				delete _interface;
 		}
 
+		uint32_t hash = 0;
 		std::string type_name;
-		std::string ctype_name;
-		std::vector<hkTemplateArgumentBase*> template_args;
+		std::string ctype_name; // Generate at runtime via type mapper
+		std::vector<hkTemplateArgumentBase*> template_args; // Has references to other types
 
-		hkClassBase* parent_class;
+		hkClassBase* parent_class; // reference to other type or nullptr
 		Optional optionals;
 		uint32_t format;
-		TypeKind kind;
-		hkClassBase* sub_type;
-		//uint32_t flags;
+		TypeKind kind; // Generated at runtime
+		hkClassBase* sub_type; // reference to other type or nullptr
 		uint32_t version;
 		uint32_t size;
 		uint32_t alignment;
 		TypeFlags type_flags;
-		std::vector<hkFieldBase*> fields;
-		std::vector<hkInterfaceBase*> interfaces;
+		std::vector<hkFieldBase*> fields; // Has references to other types
+		std::vector<hkInterfaceBase*> interfaces; // Ignored
 
+		// Generated at runtime
 		std::vector<hkClassBase*> nested_classes;
 		bool is_nested_class = false;
 		hkClassBase* parent_nested_class = nullptr;
 		std::string nested_type_name;
 		std::string nested_parent_type_name;
 
-		uint32_t hash;
+		hkIndexedDataBlock* data_block; // None static, generated at runtime
 
-		hkIndexedDataBlock* data_block; // None static
-
-		utils::DataAccessor _declaration_serialize_data;
 		bool _declared = false;
 
-		utils::DataAccessor _definition_serialize_data;
 		bool _defined = false;
-
-		void FromPropertyBag(DefinitionPropertyBag& property_bag) {
-			optionals = static_cast<Optional>(property_bag.optionals);
-			format = property_bag.format;
-			kind = static_cast<TypeKind>(property_bag.format & 0x0000000F);
-			version = property_bag.version;
-			size = property_bag.size;
-			alignment = property_bag.alignment;
-			type_flags = static_cast<TypeFlags>(property_bag.type_flags);
-			hash = property_bag.hash;
-		}
 
 		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false, bool use_mapped_ctype = false);
 
@@ -557,7 +518,7 @@ namespace hkreflex {
 
 		std::string to_C_identifier() override;
 
-		std::string to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent = 0) override;
+		std::string to_C_class_definition(std::set<hkClassBase*>& ref_types, int indent = 0) override;
 
 		std::string to_C_FromInstance() override;
 
@@ -915,88 +876,88 @@ namespace hkreflex {
 		}
 	}
 
-	class ClassSerializeContext {
-	public:
-		std::map<std::string, hkreflex::hkClassBase*> class_map;
+	//class ClassSerializeContext {
+	//public:
+	//	std::map<std::string, hkreflex::hkClassBase*> class_map;
 
-		ClassSerializeContext() {};
+	//	ClassSerializeContext() {};
 
-		// Delete copy constructor
-		ClassSerializeContext(const ClassSerializeContext&) = delete;
+	//	// Delete copy constructor
+	//	ClassSerializeContext(const ClassSerializeContext&) = delete;
 
-		// Delete copy assignment
-		ClassSerializeContext& operator=(const ClassSerializeContext&) = delete;
+	//	// Delete copy assignment
+	//	ClassSerializeContext& operator=(const ClassSerializeContext&) = delete;
 
-		template<class T>
-		requires hktypes::_is_hk_holder_t<T>
-		hkreflex::hkClassBase* AddClassDefinition(T& c_instance) {
-			utils::ClassProperty parent_class_entry = utils::ClassProperty::parse<T::BaseType>();
-			utils::ClassProperty class_entry = utils::ClassProperty::parse<T>();
-			std::map<std::string, utils::ClassProperty> template_args = {};
-			std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> field_properties = T::GetFieldTypeAndNames();
+	//	template<class T>
+	//	requires hktypes::_is_hk_holder_t<T>
+	//	hkreflex::hkClassBase* AddClassDefinition(T& c_instance) {
+	//		utils::ClassProperty parent_class_entry = utils::ClassProperty::parse<T::BaseType>();
+	//		utils::ClassProperty class_entry = utils::ClassProperty::parse<T>();
+	//		std::map<std::string, utils::ClassProperty> template_args = {};
+	//		std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> field_properties = T::GetFieldTypeAndNames();
 
-			auto hk_class = AddClassDeclarationImpl(class_entry, template_args);
+	//		auto hk_class = AddClassDeclarationImpl(class_entry, template_args);
 
-			hk_class = AddClassDefinitionImpl(class_entry, parent_class_entry, T::GetPropertyBag(), field_properties);
+	//		hk_class = AddClassDefinitionImpl(class_entry, parent_class_entry, T::GetPropertyBag(), field_properties);
 
-			return hk_class;
-		}
+	//		return hk_class;
+	//	}
 
-		hkreflex::hkClassBase* AddClassDeclarationImpl(std::string class_registry, std::map<std::string, utils::ClassProperty>& template_args) {
-			if (class_map.find(class_registry) != class_map.end()) {
-				return class_map[class_registry];
-			}
-			
-			auto class_def = new hkreflex::hkClassBase;
+	//	hkreflex::hkClassBase* AddClassDeclarationImpl(std::string class_registry, std::map<std::string, utils::ClassProperty>& template_args) {
+	//		if (class_map.find(class_registry) != class_map.end()) {
+	//			return class_map[class_registry];
+	//		}
+	//		
+	//		auto class_def = new hkreflex::hkClassBase;
 
-			for (auto& arg_pair : template_args) {
-				auto& arg_name = arg_pair.first;
-				auto& arg_value = arg_pair.second;
-				if (arg_name[0] == 'v') {
-					hkreflex::hkTemplateArgumentValue* arg = new hkreflex::hkTemplateArgumentValue;
-					arg->template_arg_name = arg_name;
-					arg->value = stoi(arg_value.getCxxIdentifier());
-				}
-				else {
-					hkreflex::hkTemplateArgumentType* arg = new hkreflex::hkTemplateArgumentType;
-					arg->template_arg_name = arg_name;
-					arg->type = class_map[arg_value];
-				}
-			}
+	//		for (auto& arg_pair : template_args) {
+	//			auto& arg_name = arg_pair.first;
+	//			auto& arg_value = arg_pair.second;
+	//			if (arg_name[0] == 'v') {
+	//				hkreflex::hkTemplateArgumentValue* arg = new hkreflex::hkTemplateArgumentValue;
+	//				arg->template_arg_name = arg_name;
+	//				arg->value = stoi(arg_value.getCxxIdentifier());
+	//			}
+	//			else {
+	//				hkreflex::hkTemplateArgumentType* arg = new hkreflex::hkTemplateArgumentType;
+	//				arg->template_arg_name = arg_name;
+	//				arg->type = class_map[arg_value];
+	//			}
+	//		}
 
-			class_map[class_registry] = class_def;
+	//		class_map[class_registry] = class_def;
 
-			class_def->_declared = true;
+	//		class_def->_declared = true;
 
-			return class_def;
-		}
+	//		return class_def;
+	//	}
 
-		hkreflex::hkClassBase* AddClassDefinitionImpl(utils::ClassProperty& class_entry, utils::ClassProperty& parent_class_entry, hkreflex::hkClassBase::DefinitionPropertyBag& class_properties, std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag>& field_properties) {
-			if (class_map.find(class_entry) == class_map.end()) {
-				std::cout << "Error: Class Registry \"" << class_entry.getCxxIdentifier() << "\": Attempting to define before declare." << std::endl;
-				throw;
-			}
-			
-			auto class_def = class_map[class_entry];
-			
-			if (parent_class_entry.is_valid() || parent_class_entry == class_entry) {
-				class_def->parent_class = nullptr;
-			}
-			else {
-				std::map<std::string, utils::ClassProperty> template_args = {};
-				AddClassDeclarationImpl(parent_class_entry, template_args);
-				class_def->parent_class = class_map[parent_class_entry];
-			}
+	//	hkreflex::hkClassBase* AddClassDefinitionImpl(utils::ClassProperty& class_entry, utils::ClassProperty& parent_class_entry, hkreflex::hkClassBase::DefinitionPropertyBag& class_properties, std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag>& field_properties) {
+	//		if (class_map.find(class_entry) == class_map.end()) {
+	//			std::cout << "Error: Class Registry \"" << class_entry.getCxxIdentifier() << "\": Attempting to define before declare." << std::endl;
+	//			throw;
+	//		}
+	//		
+	//		auto class_def = class_map[class_entry];
+	//		
+	//		if (parent_class_entry.is_valid() || parent_class_entry == class_entry) {
+	//			class_def->parent_class = nullptr;
+	//		}
+	//		else {
+	//			std::map<std::string, utils::ClassProperty> template_args = {};
+	//			AddClassDeclarationImpl(parent_class_entry, template_args);
+	//			class_def->parent_class = class_map[parent_class_entry];
+	//		}
 
-			class_def->FromPropertyBag(class_properties);
+	//		class_def->FromPropertyBag(class_properties);
 
-			for (auto& field : field_properties) {
-				auto& field_type_entry = field.first;
-				auto& field_type_properties = field.second;
-				//auto field_hk_class = AddClassDeclarationImpl(field_type_entry, field_type_properties.template_args);
-			}
+	//		for (auto& field : field_properties) {
+	//			auto& field_type_entry = field.first;
+	//			auto& field_type_properties = field.second;
+	//			//auto field_hk_class = AddClassDeclarationImpl(field_type_entry, field_type_properties.template_args);
+	//		}
 
-			return class_def;
-		}
-	};
+	//		return class_def;
+	//	}
+	//};
 }

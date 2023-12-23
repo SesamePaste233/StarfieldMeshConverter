@@ -1,11 +1,17 @@
 #include "Generated\hclTransformSetDefinition.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclTransformSetDefinition::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclTransformSetDefinition") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclTransformSetDefinition") {
 		std::cout << "hclTransformSetDefinition::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("name")->GetValue(name);
@@ -16,10 +22,13 @@ bool hktypes::hclTransformSetDefinition::FromInstance(const hkreflex::hkClassIns
 
 bool hktypes::hclTransformSetDefinition::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclTransformSetDefinition") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclTransformSetDefinition") {
 		std::cout << "hclTransformSetDefinition::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("name")->SetValue(name);
@@ -28,12 +37,6 @@ bool hktypes::hclTransformSetDefinition::ToInstance(hkreflex::hkClassInstance* i
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclTransformSetDefinition::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclTransformSetDefinition::GetFieldTypeAndNames() { return {
-	{ "hkStringPtr", { "name", 24, 32 } },
-	{ "hkInt32", { "type", 32, 32 } },
-	{ "hkUint32", { "numTransforms", 36, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclTransformSetDefinition::GetTemplateArgs() { return {
 }; };
 

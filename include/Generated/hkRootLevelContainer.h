@@ -1,13 +1,12 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
-	class hkReferencedObject;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
+	class hkStringPtr;
+	class hkRefVariant;
 
 	class hkRootLevelContainer : public hkHolderBase {
 	public:
@@ -22,10 +21,17 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hkRootLevelContainer::NamedVariant"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hkRootLevelContainer::NamedVariant"; };
+			inline std::string GetTranscriptId() override { return "hkRootLevelContainer::NamedVariant"; };
+			inline uint32_t GethkClassHash() override { return 2807201; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "name", "hkStringPtr" },
+					{ "className", "hkStringPtr" },
+					{ "variant", "hkRefVariant" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator> namedVariants; // Offset: 0
@@ -33,9 +39,15 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hkRootLevelContainer"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hkRootLevelContainer"; };
+		inline std::string GetTranscriptId() override { return "hkRootLevelContainer"; };
+		inline uint32_t GethkClassHash() override { return 54921221; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "namedVariants", "hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

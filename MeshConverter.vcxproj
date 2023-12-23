@@ -71,6 +71,7 @@
     <ClInclude Include="include\hkReflection.h" />
     <ClInclude Include="include\hkTypeMapper.h" />
     <ClInclude Include="include\hkTypesHeader.h" />
+    <ClInclude Include="include\hkTypeTranscriptor.h" />
     <ClInclude Include="include\hkUtils.h" />
     <ClInclude Include="include\MeshConverter.h" />
     <ClInclude Include="include\MeshIO.h" />
@@ -97,6 +98,7 @@
     <ClCompile Include="src\hkReflection.cpp" />
     <ClCompile Include="src\hkTypeMapper.cpp" />
     <ClCompile Include="src\hkTypes.cpp" />
+    <ClCompile Include="src\hkTypeTranscriptor.cpp" />
     <ClCompile Include="src\hkUtils.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MeshConverter.cpp" />

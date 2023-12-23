@@ -1,13 +1,12 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclConstraintSet.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	class hclConstraintSet;
+	class hkVector4;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclBonePlanesConstraintSet : public hclConstraintSet {
 	public:
@@ -23,10 +22,18 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclBonePlanesConstraintSet::BonePlane"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclBonePlanesConstraintSet::BonePlane"; };
+			inline std::string GetTranscriptId() override { return "hclBonePlanesConstraintSet::BonePlane"; };
+			inline uint32_t GethkClassHash() override { return 3326918113; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "planeEquationBone", "hkVector4" },
+					{ "particleIndex", "hkUint16" },
+					{ "transformIndex", "hkUint16" },
+					{ "stiffness", "hkReal" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator> bonePlanes; // Offset: 40
@@ -35,9 +42,16 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclBonePlanesConstraintSet"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclBonePlanesConstraintSet"; };
+		inline std::string GetTranscriptId() override { return "hclBonePlanesConstraintSet"; };
+		inline uint32_t GethkClassHash() override { return 2481738222; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "bonePlanes", "hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>" },
+				{ "transformSetIndex", "hkUint32" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

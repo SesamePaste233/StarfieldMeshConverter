@@ -1230,3 +1230,35 @@ bool hktypes::hclBonePlanesConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 
 	return true;
 }
+
+bool hktypes::hclSimClothData::CollidablePinchingData::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
+		std::cout << "hclSimClothData::CollidablePinchingData::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->GetValue(pinchDetectionEnabled);
+	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->GetValue(pinchDetectionPriority);
+	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->GetValue(pinchDetectionRadius);
+	return true;
+}
+
+bool hktypes::hclSimClothData::CollidablePinchingData::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
+		std::cout << "hclSimClothData::CollidablePinchingData::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(pinchDetectionEnabled);
+	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->SetValue(pinchDetectionPriority);
+	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->SetValue(pinchDetectionRadius);
+	return true;
+}

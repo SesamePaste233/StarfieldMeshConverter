@@ -1,31 +1,27 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
+	class hkStringPtr;
 	class hkReferencedObject;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
+	template <typename tENUM, typename tSTORAGE>
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
+	class hkBool;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclClothData : public hkReferencedObject {
 	public:
@@ -37,10 +33,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclClothData::Platform"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclClothData::Platform"; };
+			inline std::string GetTranscriptId() override { return "hclClothData::Platform"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkStringPtr name; // Offset: 24
@@ -57,9 +57,24 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclClothData"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclClothData"; };
+		inline std::string GetTranscriptId() override { return "hclClothData"; };
+		inline uint32_t GethkClassHash() override { return 3195387577; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "simClothDatas", "hkArray<T*<hclSimClothData>, hkContainerHeapAllocator>" },
+				{ "bufferDefinitions", "hkArray<T*<hclBufferDefinition>, hkContainerHeapAllocator>" },
+				{ "transformSetDefinitions", "hkArray<T*<hclTransformSetDefinition>, hkContainerHeapAllocator>" },
+				{ "operators", "hkArray<T*<hclOperator>, hkContainerHeapAllocator>" },
+				{ "clothStateDatas", "hkArray<T*<hclClothState>, hkContainerHeapAllocator>" },
+				{ "stateTransitions", "hkArray<T*<hclStateTransition>, hkContainerHeapAllocator>" },
+				{ "actions", "hkArray<T*<hclAction>, hkContainerHeapAllocator>" },
+				{ "generatedAtRuntime", "hkBool" },
+				{ "targetPlatform", "hkEnum<hclClothData::Platform, hkUint32>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

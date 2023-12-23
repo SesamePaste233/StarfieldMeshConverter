@@ -1,11 +1,18 @@
 #include "Generated\hclObjectSpaceSkinPNOperator.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclObjectSpaceSkinPNOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclObjectSpaceSkinPNOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclObjectSpaceSkinPNOperator") {
 		std::cout << "hclObjectSpaceSkinPNOperator::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclObjectSpaceSkinOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("localPNs")->GetValue(localPNs);
@@ -15,10 +22,13 @@ bool hktypes::hclObjectSpaceSkinPNOperator::FromInstance(const hkreflex::hkClass
 
 bool hktypes::hclObjectSpaceSkinPNOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclObjectSpaceSkinPNOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclObjectSpaceSkinPNOperator") {
 		std::cout << "hclObjectSpaceSkinPNOperator::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclObjectSpaceSkinOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("localPNs")->SetValue(localPNs);
@@ -26,11 +36,6 @@ bool hktypes::hclObjectSpaceSkinPNOperator::ToInstance(hkreflex::hkClassInstance
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclObjectSpaceSkinPNOperator::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclObjectSpaceSkinPNOperator::GetFieldTypeAndNames() { return {
-	{ "hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>", { "localPNs", 264, 32 } },
-	{ "hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>", { "localUnpackedPNs", 280, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclObjectSpaceSkinPNOperator::GetTemplateArgs() { return {
 }; };
 

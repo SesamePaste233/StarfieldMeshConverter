@@ -326,6 +326,11 @@ void main() {
 
 	auto data = dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->data;
 
+	std::map<std::string, std::string> header_strings;
+	std::map<std::string, std::vector<std::string>> header_template_args;
+	std::map<std::string, std::string> source_strings;
+	std::map<std::string, std::set<hkreflex::hkClassBase*>> extra_includes;
+
 	for (auto& hk_class : data->classes) {
 		if (hk_class->_defined == false) {
 			// No undeclared classes
@@ -339,23 +344,52 @@ void main() {
 		//	// No template classes
 		//	continue;
 		//}
-		if (hk_class->kind != hkreflex::hkClassBase::TypeKind::Record && hk_class->type_name != "hkArray") {
+		if (hk_class->kind != hkreflex::hkClassBase::TypeKind::Record 
+			&& hktypes::hkTypeMapper::IsMapped(hk_class)
+			) {
 			// Record classes only
 			continue;
 		}
-		std::string hk_class_definition = "";
-		std::vector<hkreflex::hkClassBase*> ref_types;
-
-		if (hk_class->type_name == "hkaSkeleton") {
-			std::cout << "hkaSkeleton" << std::endl;
+		if (hktypes::hkTypeMapper::IsBasicTypes(hk_class)) {
+			// No basic types
+			continue;
 		}
+		std::string hk_class_definition = "";
+		std::set<hkreflex::hkClassBase*> ref_types;
 
 		auto def_str = hk_class->to_C_class_definition(ref_types, 1);
+		header_strings[hk_class->type_name] += def_str + "\n";
+		auto& lst = extra_includes[hk_class->type_name];
+		lst.insert(ref_types.begin(), ref_types.end());
+
+		std::vector<std::string> h_template_args;
+		for (auto& template_arg : hk_class->template_args) {
+			h_template_args.push_back(template_arg->template_arg_name);
+		}
+
+		header_template_args[hk_class->type_name] = h_template_args;
+
+		std::string hk_class_definition_cpp = "";
+		hk_class_definition_cpp += hk_class->to_C_FromInstance();
+		hk_class_definition_cpp += hk_class->to_C_ToInstance();
+		hk_class_definition_cpp += hk_class->to_C_GetTemplateArgs();
+		//hk_class_definition_cpp += hk_class->to_C_GetFieldTypeAndNames();
+		//hk_class_definition_cpp += hk_class->to_C_GetPropertyBag();
+
+		source_strings[hk_class->type_name] += hk_class_definition_cpp;
+	}
+
+	auto header_strings_iter = header_strings.begin();
+	auto source_strings_iter = source_strings.begin();
+	for (int i = 0; i < header_strings.size(); ++i) {
+		auto& header = *(header_strings_iter++);
+		auto& source = *(source_strings_iter++);
+		auto& ref_types = extra_includes[header.first];
+		auto& header_t_args = header_template_args[header.first];
+
+		std::string hk_class_definition = "";
 		hk_class_definition += "#pragma once\n";
 		hk_class_definition += "#include \"hkInclude.h\"\n\n";
-		for (auto& ref_type : ref_types) {
-			hk_class_definition += "#include \"Generated\\" + ref_type->type_name + ".h\"\n";
-		}
 		hk_class_definition += "\nnamespace hktypes{\n";
 		for (auto& ref_type : ref_types) {
 			if (ref_type->template_args.size() == 0) {
@@ -370,24 +404,36 @@ void main() {
 					}
 				}
 				hk_class_definition += ">\n";
-				hk_class_definition += "\tclass " + ref_type->type_name + ";\n";
+				hk_class_definition += "\tclass " + ref_type->nested_parent_type_name + ";\n";
 			}
 		}
-		hk_class_definition += "\n" + def_str;
+		hk_class_definition += "\n";
+
+		if (!header_t_args.empty()) {
+			hk_class_definition += "\ttemplate <";
+			for (int i = 0; i < header_t_args.size(); i++) {
+				hk_class_definition += "typename " + header_t_args[i];
+				if (i != header_t_args.size() - 1) {
+					hk_class_definition += ", ";
+				}
+			}
+			hk_class_definition += ">\n";
+			hk_class_definition += "\tclass " + header.first + ";\n";
+		}
+
+		hk_class_definition += header.second;
 		hk_class_definition += "}\n";
-		std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\" + hk_class->type_name + ".h");
+		std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\" + header.first + ".h");
 		file << hk_class_definition;
 		file.close();
 
 		std::string hk_class_definition_cpp = "";
-		hk_class_definition_cpp += "#include \"Generated\\" + hk_class->type_name + ".h\"\n\n";
-
-		hk_class_definition_cpp += hk_class->to_C_FromInstance();
-		hk_class_definition_cpp += hk_class->to_C_ToInstance();
-		hk_class_definition_cpp += hk_class->to_C_GetTemplateArgs();
-		hk_class_definition_cpp += hk_class->to_C_GetFieldTypeAndNames();
-
-		std::ofstream file1("C:\\repo\\MeshConverter\\src\\Generated\\" + hk_class->type_name + ".cpp");
+		hk_class_definition_cpp += "#include \"Generated\\" + source.first + ".h\"\n\n";
+		for (auto& ref_type : ref_types) {
+			hk_class_definition_cpp += "#include \"Generated\\" + ref_type->nested_parent_type_name + ".h\"\n";
+		}
+		hk_class_definition_cpp += "\n" + source.second;
+		std::ofstream file1("C:\\repo\\MeshConverter\\src\\Generated\\" + source.first + ".cpp");
 		file1 << hk_class_definition_cpp;
 		file1.close();
 	}
@@ -395,6 +441,8 @@ void main() {
 	auto literals = data->classes_to_literal(true, false, true);
 
 	auto instances = data->dump_root_instance();
+
+	data->RegisterClassesToTranscriptor();
 
 	//auto json = nlohmann::json::array();
 	//auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(data->root_level_container->GetNamedVariantRef("hclClothData"));

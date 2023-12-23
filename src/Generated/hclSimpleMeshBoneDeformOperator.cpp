@@ -1,11 +1,18 @@
 #include "Generated\hclSimpleMeshBoneDeformOperator.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
 		std::cout << "hclSimpleMeshBoneDeformOperator::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("inputBufferIdx")->GetValue(inputBufferIdx);
@@ -17,10 +24,13 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(const hkreflex::hkCl
 
 bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
 		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("boneOffset")->GetValue(boneOffset);
 	class_instance->GetInstanceByFieldName("triangleOffset")->GetValue(triangleOffset);
@@ -29,10 +39,13 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance(co
 
 bool hktypes::hclSimpleMeshBoneDeformOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
 		std::cout << "hclSimpleMeshBoneDeformOperator::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("inputBufferIdx")->SetValue(inputBufferIdx);
@@ -44,31 +57,22 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::ToInstance(hkreflex::hkClassInsta
 
 bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
 		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("boneOffset")->SetValue(boneOffset);
 	class_instance->GetInstanceByFieldName("triangleOffset")->SetValue(triangleOffset);
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclSimpleMeshBoneDeformOperator::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimpleMeshBoneDeformOperator::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimpleMeshBoneDeformOperator::GetFieldTypeAndNames() { return {
-	{ "hkUint32", { "inputBufferIdx", 72, 32 } },
-	{ "hkUint32", { "outputTransformSetIdx", 76, 32 } },
-	{ "hkArray<hclSimpleMeshBoneDeformOperator::TriangleBonePair, hkContainerHeapAllocator>", { "triangleBonePairs", 80, 32 } },
-	{ "hkArray<hkMatrix4, hkContainerHeapAllocator>", { "localBoneTransforms", 96, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::GetFieldTypeAndNames() { return {
-	{ "hkUint16", { "boneOffset", 0, 32 } },
-	{ "hkUint16", { "triangleOffset", 2, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::GetTemplateArgs() { return {
 }; };
 

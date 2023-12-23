@@ -1,9 +1,9 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
 
 namespace hktypes{
+	class hkStringPtr;
 	class hkReferencedObject;
 
 	class hclTransformSetDefinition : public hkReferencedObject {
@@ -16,9 +16,17 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclTransformSetDefinition"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclTransformSetDefinition"; };
+		inline std::string GetTranscriptId() override { return "hclTransformSetDefinition"; };
+		inline uint32_t GethkClassHash() override { return 1127359486; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "type", "hkInt32" },
+				{ "numTransforms", "hkUint32" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

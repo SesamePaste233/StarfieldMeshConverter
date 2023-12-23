@@ -6,6 +6,7 @@
 #include "DataAccessor.h"
 
 #include "hkTypesHeader.h"
+#include "hkTypeTranscriptor.h"
 
 namespace hkreflex {
 	class hkClassBase;
@@ -88,5 +89,6 @@ namespace hkphysics {
 
 		std::vector<hkreflex::hkClassInstance*> GetInstancesByClassName(const std::string& name);
 
+		void RegisterClassesToTranscriptor();
 	};
 }

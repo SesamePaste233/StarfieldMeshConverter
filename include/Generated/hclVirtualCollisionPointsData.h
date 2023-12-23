@@ -1,41 +1,30 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclVirtualCollisionPointsData : public hkHolderBase {
 	public:
@@ -47,10 +36,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::Block"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::Block"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::Block"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class BarycentricDictionaryEntry : public hkHolderBase {
@@ -60,10 +53,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::BarycentricDictionaryEntry"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::BarycentricDictionaryEntry"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::BarycentricDictionaryEntry"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class BarycentricPair : public hkHolderBase {
@@ -73,10 +70,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::BarycentricPair"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::BarycentricPair"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::BarycentricPair"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class EdgeFanSection : public hkHolderBase {
@@ -86,10 +87,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::EdgeFanSection"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::EdgeFanSection"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::EdgeFanSection"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class EdgeFan : public hkHolderBase {
@@ -99,10 +104,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::EdgeFan"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::EdgeFan"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::EdgeFan"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TriangleFanSection : public hkHolderBase {
@@ -112,10 +121,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::TriangleFanSection"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::TriangleFanSection"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::TriangleFanSection"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TriangleFan : public hkHolderBase {
@@ -125,10 +138,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::TriangleFan"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::TriangleFan"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::TriangleFan"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class EdgeFanLandscape : public hkHolderBase {
@@ -138,10 +155,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::EdgeFanLandscape"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::EdgeFanLandscape"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::EdgeFanLandscape"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TriangleFanLandscape : public hkHolderBase {
@@ -151,10 +172,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData::TriangleFanLandscape"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData::TriangleFanLandscape"; };
+			inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData::TriangleFanLandscape"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkArray<hclVirtualCollisionPointsData::Block, hkContainerHeapAllocator> blocks; // Offset: 0
@@ -181,9 +206,34 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclVirtualCollisionPointsData"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclVirtualCollisionPointsData"; };
+		inline std::string GetTranscriptId() override { return "hclVirtualCollisionPointsData"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "blocks", "hkArray<hclVirtualCollisionPointsData::Block, hkContainerHeapAllocator>" },
+				{ "numVCPoints", "hkUint16" },
+				{ "landscapeParticlesBlockIndex", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "numLandscapeVCPoints", "hkUint16" },
+				{ "edgeBarycentricsDictionary", "hkArray<hkReal, hkContainerHeapAllocator>" },
+				{ "edgeDictionaryEntries", "hkArray<hclVirtualCollisionPointsData::BarycentricDictionaryEntry, hkContainerHeapAllocator>" },
+				{ "triangleBarycentricsDictionary", "hkArray<hclVirtualCollisionPointsData::BarycentricPair, hkContainerHeapAllocator>" },
+				{ "triangleDictionaryEntries", "hkArray<hclVirtualCollisionPointsData::BarycentricDictionaryEntry, hkContainerHeapAllocator>" },
+				{ "edges", "hkArray<hclVirtualCollisionPointsData::EdgeFanSection, hkContainerHeapAllocator>" },
+				{ "edgeFans", "hkArray<hclVirtualCollisionPointsData::EdgeFan, hkContainerHeapAllocator>" },
+				{ "triangles", "hkArray<hclVirtualCollisionPointsData::TriangleFanSection, hkContainerHeapAllocator>" },
+				{ "triangleFans", "hkArray<hclVirtualCollisionPointsData::TriangleFan, hkContainerHeapAllocator>" },
+				{ "edgesLandscape", "hkArray<hclVirtualCollisionPointsData::EdgeFanSection, hkContainerHeapAllocator>" },
+				{ "edgeFansLandscape", "hkArray<hclVirtualCollisionPointsData::EdgeFanLandscape, hkContainerHeapAllocator>" },
+				{ "trianglesLandscape", "hkArray<hclVirtualCollisionPointsData::TriangleFanSection, hkContainerHeapAllocator>" },
+				{ "triangleFansLandscape", "hkArray<hclVirtualCollisionPointsData::TriangleFanLandscape, hkContainerHeapAllocator>" },
+				{ "edgeFanIndices", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "triangleFanIndices", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "edgeFanIndicesLandscape", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "triangleFanIndicesLandscape", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

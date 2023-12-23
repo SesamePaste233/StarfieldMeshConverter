@@ -299,6 +299,42 @@ bool hktypes::hkRootLevelContainer::ToInstance(hkreflex::hkClassInstance* instan
 	return true;
 }
 
+hkreflex::hkClassInstance* hktypes::hkRootLevelContainer::Instantiate()
+{
+	auto& transcriptor = utils::hkTypeTranscriptor::GetInstance();
+	auto hk_this_class = transcriptor.AllocateClassByUniqueId(this->GetTranscriptId());
+	if (hk_this_class == nullptr) {
+		throw std::runtime_error("hkRootLevelContainer::Instantiate: unable to load class.");
+	}
+
+	auto hk_this_instance = hkreflex::AllocateInstance(hk_this_class, nullptr);
+	if (hk_this_instance == nullptr) {
+		throw std::runtime_error("hkRootLevelContainer::Instantiate: unable to allocate instance.");
+	}
+
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_this_instance);
+	if (class_instance == nullptr) {
+		throw std::runtime_error("hkRootLevelContainer::Instantiate: unable to cast to hkClassRecordInstance.");
+	}
+
+	if (!std::is_same_v<BaseType, void>) {
+
+	}
+
+	for (auto& [field_name, field_type_id] : this->GethkClassMembers()) {
+		auto hk_field_class = transcriptor.AllocateClassByUniqueId(field_type_id);
+		if (hk_field_class == nullptr) {
+			throw std::runtime_error("hkRootLevelContainer::Instantiate: unable to load field class.");
+		}
+
+		auto hk_field_instance = hkreflex::AllocateInstance(hk_field_class, nullptr);
+		if (hk_field_instance == nullptr) {
+			throw std::runtime_error("hkRootLevelContainer::Instantiate: unable to allocate field instance.");
+		}
+
+	}
+}
+
 hktypes::hkReferencedObject* hktypes::hkRootLevelContainer::GetNamedVariantRef(std::string type_name, std::string instance_name)
 {
 	for (auto& namedVariant : this->namedVariants) {

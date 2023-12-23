@@ -19,7 +19,9 @@ namespace hktypes {
 
 		std::string GetCType(std::string_view type);
 
-		bool IsMapped(hkreflex::hkClassBase* type);
+		static bool IsMapped(hkreflex::hkClassBase* type);
+
+		static bool IsBasicTypes(hkreflex::hkClassBase* type, bool check_parent = true);
 
 	protected:
 		hkTypeMapper() = default;

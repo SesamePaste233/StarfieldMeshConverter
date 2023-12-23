@@ -1,16 +1,13 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclObjectSpaceSkinOperator.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	class hclObjectSpaceSkinOperator;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclObjectSpaceSkinPNOperator : public hclObjectSpaceSkinOperator {
 	public:
@@ -21,9 +18,16 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclObjectSpaceSkinPNOperator"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclObjectSpaceSkinPNOperator"; };
+		inline std::string GetTranscriptId() override { return "hclObjectSpaceSkinPNOperator"; };
+		inline uint32_t GethkClassHash() override { return 3464584781; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "localPNs", "hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>" },
+				{ "localUnpackedPNs", "hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

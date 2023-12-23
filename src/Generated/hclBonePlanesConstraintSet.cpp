@@ -1,11 +1,18 @@
 #include "Generated\hclBonePlanesConstraintSet.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclBonePlanesConstraintSet::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBonePlanesConstraintSet") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet") {
 		std::cout << "hclBonePlanesConstraintSet::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclConstraintSet::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("bonePlanes")->GetValue(bonePlanes);
@@ -15,10 +22,13 @@ bool hktypes::hclBonePlanesConstraintSet::FromInstance(const hkreflex::hkClassIn
 
 bool hktypes::hclBonePlanesConstraintSet::BonePlane::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
 		std::cout << "hclBonePlanesConstraintSet::BonePlane::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("planeEquationBone")->GetValue(planeEquationBone);
 	class_instance->GetInstanceByFieldName("particleIndex")->GetValue(particleIndex);
@@ -29,10 +39,13 @@ bool hktypes::hclBonePlanesConstraintSet::BonePlane::FromInstance(const hkreflex
 
 bool hktypes::hclBonePlanesConstraintSet::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBonePlanesConstraintSet") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet") {
 		std::cout << "hclBonePlanesConstraintSet::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclConstraintSet::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("bonePlanes")->SetValue(bonePlanes);
@@ -42,10 +55,13 @@ bool hktypes::hclBonePlanesConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 
 bool hktypes::hclBonePlanesConstraintSet::BonePlane::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
 		std::cout << "hclBonePlanesConstraintSet::BonePlane::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("planeEquationBone")->SetValue(planeEquationBone);
 	class_instance->GetInstanceByFieldName("particleIndex")->SetValue(particleIndex);
@@ -54,21 +70,9 @@ bool hktypes::hclBonePlanesConstraintSet::BonePlane::ToInstance(hkreflex::hkClas
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclBonePlanesConstraintSet::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBonePlanesConstraintSet::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclBonePlanesConstraintSet::BonePlane::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBonePlanesConstraintSet::GetFieldTypeAndNames() { return {
-	{ "hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>", { "bonePlanes", 40, 32 } },
-	{ "hkUint32", { "transformSetIndex", 56, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBonePlanesConstraintSet::BonePlane::GetFieldTypeAndNames() { return {
-	{ "hkVector4", { "planeEquationBone", 0, 32 } },
-	{ "hkUint16", { "particleIndex", 16, 32 } },
-	{ "hkUint16", { "transformIndex", 18, 32 } },
-	{ "hkReal", { "stiffness", 20, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBonePlanesConstraintSet::BonePlane::GetTemplateArgs() { return {
 }; };
 

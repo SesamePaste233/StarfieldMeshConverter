@@ -1,24 +1,18 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hclBufferUsage.h"
-#include "Generated\hclTransformSetUsage.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hclStateDependencyGraph.h"
 
 namespace hktypes{
+	class hkStringPtr;
 	class hkReferencedObject;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
 	class hclBufferUsage;
 	class hclTransformSetUsage;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
 	class hclStateDependencyGraph;
 
 	class hclClothState : public hkReferencedObject {
@@ -34,10 +28,17 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclClothState::BufferAccess"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclClothState::BufferAccess"; };
+			inline std::string GetTranscriptId() override { return "hclClothState::BufferAccess"; };
+			inline uint32_t GethkClassHash() override { return 746522671; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "bufferIndex", "hkUint32" },
+					{ "bufferUsage", "hclBufferUsage" },
+					{ "shadowBufferIndex", "hkUint32" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TransformSetAccess : public hkHolderBase {
@@ -49,10 +50,16 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclClothState::TransformSetAccess"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclClothState::TransformSetAccess"; };
+			inline std::string GetTranscriptId() override { return "hclClothState::TransformSetAccess"; };
+			inline uint32_t GethkClassHash() override { return 3568223325; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "transformSetIndex", "hkUint32" },
+					{ "transformSetUsage", "hclTransformSetUsage" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkStringPtr name; // Offset: 24
@@ -65,9 +72,20 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclClothState"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclClothState"; };
+		inline std::string GetTranscriptId() override { return "hclClothState"; };
+		inline uint32_t GethkClassHash() override { return 1309046206; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "operators", "hkArray<hkUint32, hkContainerHeapAllocator>" },
+				{ "usedBuffers", "hkArray<hclClothState::BufferAccess, hkContainerHeapAllocator>" },
+				{ "usedTransformSets", "hkArray<hclClothState::TransformSetAccess, hkContainerHeapAllocator>" },
+				{ "usedSimCloths", "hkArray<hkUint32, hkContainerHeapAllocator>" },
+				{ "dependencyGraph", "T*<hclStateDependencyGraph>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

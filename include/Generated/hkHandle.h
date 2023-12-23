@@ -4,8 +4,10 @@
 
 namespace hktypes{
 
-	template<class tTYPE, class vINVALID_VALUE>
-	class hkHandle : public hkHolderBase {
+	template <typename tTYPE, typename vINVALID_VALUE>
+	class hkHandle;
+	template<>
+	class hkHandle<hkUint32, 2147483647> : public hkHolderBase {
 	public:
 		using BaseType = void;
 		hkUint32 value; // Offset: 0
@@ -13,9 +15,15 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hkHandle"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hkHandle"; };
+		inline std::string GetTranscriptId() override { return "hkHandle<hkUint32, 2147483647>"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "value", "hkUint32" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

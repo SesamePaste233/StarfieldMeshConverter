@@ -1,11 +1,32 @@
 #include "Generated\hclSimClothData.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclSimClothData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData") {
 		std::cout << "hclSimClothData::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("name")->GetValue(name);
@@ -42,10 +63,13 @@ bool hktypes::hclSimClothData::FromInstance(const hkreflex::hkClassInstance* ins
 
 bool hktypes::hclSimClothData::OverridableSimulationInfo::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
 		std::cout << "hclSimClothData::OverridableSimulationInfo::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("gravity")->GetValue(gravity);
 	class_instance->GetInstanceByFieldName("globalDampingPerSecond")->GetValue(globalDampingPerSecond);
@@ -54,10 +78,13 @@ bool hktypes::hclSimClothData::OverridableSimulationInfo::FromInstance(const hkr
 
 bool hktypes::hclSimClothData::ParticleData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::ParticleData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::ParticleData") {
 		std::cout << "hclSimClothData::ParticleData::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("mass")->GetValue(mass);
 	class_instance->GetInstanceByFieldName("invMass")->GetValue(invMass);
@@ -68,10 +95,13 @@ bool hktypes::hclSimClothData::ParticleData::FromInstance(const hkreflex::hkClas
 
 bool hktypes::hclSimClothData::CollidableTransformMap::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
 		std::cout << "hclSimClothData::CollidableTransformMap::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("transformSetIndex")->GetValue(transformSetIndex);
 	class_instance->GetInstanceByFieldName("transformIndices")->GetValue(transformIndices);
@@ -81,10 +111,13 @@ bool hktypes::hclSimClothData::CollidableTransformMap::FromInstance(const hkrefl
 
 bool hktypes::hclSimClothData::TransferMotionData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
 		std::cout << "hclSimClothData::TransferMotionData::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("transformSetIndex")->GetValue(transformSetIndex);
 	class_instance->GetInstanceByFieldName("transformIndex")->GetValue(transformIndex);
@@ -103,10 +136,13 @@ bool hktypes::hclSimClothData::TransferMotionData::FromInstance(const hkreflex::
 
 bool hktypes::hclSimClothData::LandscapeCollisionData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
 		std::cout << "hclSimClothData::LandscapeCollisionData::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("landscapeRadius")->GetValue(landscapeRadius);
 	class_instance->GetInstanceByFieldName("enableStuckParticleDetection")->GetValue(enableStuckParticleDetection);
@@ -120,10 +156,13 @@ bool hktypes::hclSimClothData::LandscapeCollisionData::FromInstance(const hkrefl
 
 bool hktypes::hclSimClothData::CollidablePinchingData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
 		std::cout << "hclSimClothData::CollidablePinchingData::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->GetValue(pinchDetectionEnabled);
 	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->GetValue(pinchDetectionPriority);
@@ -133,10 +172,13 @@ bool hktypes::hclSimClothData::CollidablePinchingData::FromInstance(const hkrefl
 
 bool hktypes::hclSimClothData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData") {
 		std::cout << "hclSimClothData::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("name")->SetValue(name);
@@ -173,10 +215,13 @@ bool hktypes::hclSimClothData::ToInstance(hkreflex::hkClassInstance* instance) {
 
 bool hktypes::hclSimClothData::OverridableSimulationInfo::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
 		std::cout << "hclSimClothData::OverridableSimulationInfo::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("gravity")->SetValue(gravity);
 	class_instance->GetInstanceByFieldName("globalDampingPerSecond")->SetValue(globalDampingPerSecond);
@@ -185,10 +230,13 @@ bool hktypes::hclSimClothData::OverridableSimulationInfo::ToInstance(hkreflex::h
 
 bool hktypes::hclSimClothData::ParticleData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::ParticleData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::ParticleData") {
 		std::cout << "hclSimClothData::ParticleData::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("mass")->SetValue(mass);
 	class_instance->GetInstanceByFieldName("invMass")->SetValue(invMass);
@@ -199,10 +247,13 @@ bool hktypes::hclSimClothData::ParticleData::ToInstance(hkreflex::hkClassInstanc
 
 bool hktypes::hclSimClothData::CollidableTransformMap::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
 		std::cout << "hclSimClothData::CollidableTransformMap::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("transformSetIndex")->SetValue(transformSetIndex);
 	class_instance->GetInstanceByFieldName("transformIndices")->SetValue(transformIndices);
@@ -212,10 +263,13 @@ bool hktypes::hclSimClothData::CollidableTransformMap::ToInstance(hkreflex::hkCl
 
 bool hktypes::hclSimClothData::TransferMotionData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
 		std::cout << "hclSimClothData::TransferMotionData::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("transformSetIndex")->SetValue(transformSetIndex);
 	class_instance->GetInstanceByFieldName("transformIndex")->SetValue(transformIndex);
@@ -234,10 +288,13 @@ bool hktypes::hclSimClothData::TransferMotionData::ToInstance(hkreflex::hkClassI
 
 bool hktypes::hclSimClothData::LandscapeCollisionData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
 		std::cout << "hclSimClothData::LandscapeCollisionData::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("landscapeRadius")->SetValue(landscapeRadius);
 	class_instance->GetInstanceByFieldName("enableStuckParticleDetection")->SetValue(enableStuckParticleDetection);
@@ -251,10 +308,13 @@ bool hktypes::hclSimClothData::LandscapeCollisionData::ToInstance(hkreflex::hkCl
 
 bool hktypes::hclSimClothData::CollidablePinchingData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
 		std::cout << "hclSimClothData::CollidablePinchingData::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(pinchDetectionEnabled);
 	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->SetValue(pinchDetectionPriority);
@@ -262,105 +322,24 @@ bool hktypes::hclSimClothData::CollidablePinchingData::ToInstance(hkreflex::hkCl
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclSimClothData::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimClothData::OverridableSimulationInfo::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::OverridableSimulationInfo::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimClothData::ParticleData::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::ParticleData::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimClothData::CollidableTransformMap::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::CollidableTransformMap::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimClothData::TransferMotionData::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::TransferMotionData::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimClothData::LandscapeCollisionData::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::LandscapeCollisionData::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclSimClothData::CollidablePinchingData::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::GetFieldTypeAndNames() { return {
-	{ "hkStringPtr", { "name", 24, 32 } },
-	{ "hclSimClothData::OverridableSimulationInfo", { "simulationInfo", 32, 32 } },
-	{ "hkArray<hclSimClothData::ParticleData, hkContainerHeapAllocator>", { "particleDatas", 64, 32 } },
-	{ "hkArray<hkUint16, hkContainerHeapAllocator>", { "fixedParticles", 80, 32 } },
-	{ "hkBool", { "doNormals", 96, 32 } },
-	{ "hkArray<unsigned int, hkContainerHeapAllocator>", { "simOpIds", 104, 32 } },
-	{ "hkArray<T*<hclSimClothPose>, hkContainerHeapAllocator>", { "simClothPoses", 120, 32 } },
-	{ "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>", { "staticConstraintSets", 136, 32 } },
-	{ "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>", { "antiPinchConstraintSets", 152, 32 } },
-	{ "hclSimClothData::CollidableTransformMap", { "collidableTransformMap", 168, 32 } },
-	{ "hkArray<T*<hclCollidable>, hkContainerHeapAllocator>", { "perInstanceCollidables", 208, 32 } },
-	{ "hkReal", { "maxParticleRadius", 224, 32 } },
-	{ "hkArray<hkUint32, hkContainerHeapAllocator>", { "staticCollisionMasks", 232, 32 } },
-	{ "hkArray<T*<hclAction>, hkContainerHeapAllocator>", { "actions", 248, 32 } },
-	{ "hkReal", { "totalMass", 264, 32 } },
-	{ "hclSimClothData::TransferMotionData", { "transferMotionData", 268, 32 } },
-	{ "hkBool", { "transferMotionEnabled", 316, 32 } },
-	{ "hkBool", { "landscapeCollisionEnabled", 317, 32 } },
-	{ "hclSimClothData::LandscapeCollisionData", { "landscapeCollisionData", 320, 32 } },
-	{ "hkUint32", { "numLandscapeCollidableParticles", 344, 32 } },
-	{ "hkArray<hkUint16, hkContainerHeapAllocator>", { "triangleIndices", 352, 32 } },
-	{ "hkArray<hkUint8, hkContainerHeapAllocator>", { "triangleFlips", 368, 32 } },
-	{ "hkBool", { "pinchDetectionEnabled", 384, 32 } },
-	{ "hkArray<hkBool, hkContainerHeapAllocator>", { "perParticlePinchDetectionEnabledFlags", 392, 32 } },
-	{ "hkArray<hclSimClothData::CollidablePinchingData, hkContainerHeapAllocator>", { "collidablePinchingDatas", 408, 32 } },
-	{ "hkUint16", { "minPinchedParticleIndex", 424, 32 } },
-	{ "hkUint16", { "maxPinchedParticleIndex", 426, 32 } },
-	{ "hkUint32", { "maxCollisionPairs", 428, 32 } },
-	{ "hclVirtualCollisionPointsData", { "virtualCollisionPointsData", 432, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::OverridableSimulationInfo::GetFieldTypeAndNames() { return {
-	{ "hkVector4", { "gravity", 0, 32 } },
-	{ "hkReal", { "globalDampingPerSecond", 16, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::ParticleData::GetFieldTypeAndNames() { return {
-	{ "hkReal", { "mass", 0, 32 } },
-	{ "hkReal", { "invMass", 4, 32 } },
-	{ "hkReal", { "radius", 8, 32 } },
-	{ "hkReal", { "friction", 12, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::CollidableTransformMap::GetFieldTypeAndNames() { return {
-	{ "hkInt32", { "transformSetIndex", 0, 32 } },
-	{ "hkArray<hkUint32, hkContainerHeapAllocator>", { "transformIndices", 8, 32 } },
-	{ "hkArray<hkMatrix4, hkContainerHeapAllocator>", { "offsets", 24, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::TransferMotionData::GetFieldTypeAndNames() { return {
-	{ "hkUint32", { "transformSetIndex", 0, 32 } },
-	{ "hkUint32", { "transformIndex", 4, 32 } },
-	{ "hkBool", { "transferTranslationMotion", 8, 32 } },
-	{ "hkReal", { "minTranslationSpeed", 12, 32 } },
-	{ "hkReal", { "maxTranslationSpeed", 16, 32 } },
-	{ "hkReal", { "minTranslationBlend", 20, 32 } },
-	{ "hkReal", { "maxTranslationBlend", 24, 32 } },
-	{ "hkBool", { "transferRotationMotion", 28, 32 } },
-	{ "hkReal", { "minRotationSpeed", 32, 32 } },
-	{ "hkReal", { "maxRotationSpeed", 36, 32 } },
-	{ "hkReal", { "minRotationBlend", 40, 32 } },
-	{ "hkReal", { "maxRotationBlend", 44, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::LandscapeCollisionData::GetFieldTypeAndNames() { return {
-	{ "hkReal", { "landscapeRadius", 0, 32 } },
-	{ "hkBool", { "enableStuckParticleDetection", 4, 32 } },
-	{ "hkReal", { "stuckParticlesStretchFactorSq", 8, 32 } },
-	{ "hkBool", { "pinchDetectionEnabled", 12, 32 } },
-	{ "hkInt8", { "pinchDetectionPriority", 13, 32 } },
-	{ "hkReal", { "pinchDetectionRadius", 16, 32 } },
-	{ "hkReal", { "collisionTolerance", 20, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclSimClothData::CollidablePinchingData::GetFieldTypeAndNames() { return {
-	{ "hkBool", { "pinchDetectionEnabled", 0, 32 } },
-	{ "hkInt8", { "pinchDetectionPriority", 1, 32 } },
-	{ "hkReal", { "pinchDetectionRadius", 4, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclSimClothData::CollidablePinchingData::GetTemplateArgs() { return {
 }; };
 

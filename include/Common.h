@@ -13,6 +13,7 @@
 #include <corecrt_wstring.h>
 #include <chrono>
 #include <limits>
+#include <set>
 
 // Necessary for havok physics
 #include <Eigen/Dense>
@@ -22,6 +23,12 @@
 
 template <typename T>
 concept IsFlagEnum = std::is_enum_v<T> && (std::is_same_v<std::underlying_type_t<T>, uint8_t> || std::is_same_v<std::underlying_type_t<T>, uint16_t> || std::is_same_v<std::underlying_type_t<T>, uint32_t> || std::is_same_v<std::underlying_type_t<T>, uint64_t>);
+
+template <IsFlagEnum T, typename _under_lying_t = std::underlying_type_t<T>>
+_under_lying_t to_underlying(T t) {
+	return static_cast<_under_lying_t>(t);
+}
+
 
 template <IsFlagEnum T>
 uint64_t operator&(T lhs, T rhs) {

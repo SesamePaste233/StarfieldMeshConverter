@@ -1,10 +1,9 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hclBufferLayout.h"
 
 namespace hktypes{
+	class hkStringPtr;
 	class hkReferencedObject;
 	class hclBufferLayout;
 
@@ -22,9 +21,21 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclBufferDefinition"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclBufferDefinition"; };
+		inline std::string GetTranscriptId() override { return "hclBufferDefinition"; };
+		inline uint32_t GethkClassHash() override { return 1534215538; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "meshName", "hkStringPtr" },
+				{ "bufferName", "hkStringPtr" },
+				{ "type", "hkInt32" },
+				{ "subType", "hkInt32" },
+				{ "numVertices", "hkUint32" },
+				{ "numTriangles", "hkUint32" },
+				{ "bufferLayout", "hclBufferLayout" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "hkInclude.h"
+#include "hkTypeTranscriptor.h"
 #include "json.hpp"
 
 namespace hktypes {
@@ -10,11 +11,20 @@ namespace hktypes {
 
 	class hkPackedVector3 : public hkHolderBase {
 	public:
+		using BaseType = void;
 		int16_t values[4];
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkPackedVector3"; };
+		inline std::string GetTranscriptId() override { return "hkPackedVector3"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "values", "T[N]<hkInt16, 4>" },
+			};
+		};
 
 		Eigen::Vector3f ToVector3f();
 		static hkPackedVector3 FromVector3f(const Eigen::Vector3f vec);
@@ -35,6 +45,13 @@ namespace hktypes {
 
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 
 		Eigen::Vector4f ToVector4f();
 		static hkVector4Holder FromVector4f(const Eigen::Vector4f vec);
@@ -50,6 +67,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 
 		Eigen::Matrix4f ToMatrix4f();
 		static hkMatrix4Holder FromMatrix4f(const Eigen::Matrix4f mat);
@@ -64,6 +88,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 	};
 
 	template<class tStorage>
@@ -74,6 +105,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 	};
 
 	class hkBitField : public hkBitFieldBase<hkBitFieldStorage<std::vector<uint32_t>>> {
@@ -81,6 +119,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 
 		std::vector<bool> GetMask();
 		void SetMask(std::vector<bool>& mask);
@@ -88,8 +133,10 @@ namespace hktypes {
 
 	class hkRootLevelContainer : public hkHolderBase {
 	public:
+		using BaseType = void;
 		class NamedVariant : public hkHolderBase {
 		public:
+			using BaseType = void;
 			std::string name;	// Offset: 0 Unk: 0
 			std::string className;	// Offset: 8 Unk: 0
 			hkReferencedObject* variant;	// Offset: 16 Unk: 0
@@ -97,6 +144,16 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hkRootLevelContainer::NamedVariant"; };
+			inline std::string GetTranscriptId() override { return "hkRootLevelContainer::NamedVariant"; };
+			inline uint32_t GethkClassHash() override { return 2807201; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "name", "hkStringPtr" },
+					{ "className", "hkStringPtr" },
+					{ "variant", "hkRefVariant" },
+				};
+			};
 		};
 
 		std::vector<hkRootLevelContainer::NamedVariant> namedVariants;	// Offset: 0 Unk: 0
@@ -104,6 +161,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkRootLevelContainer"; };
+		inline std::string GetTranscriptId() override { return "hkRootLevelContainer"; };
+		inline uint32_t GethkClassHash() override { return 54921221; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return { {"namedVariants", "hkArray<hkRootLevelContainer::NamedVariant,hkContainerHeapAllocator>"} };
+		};
+		hkreflex::hkClassInstance* Instantiate();
 
 		hkReferencedObject* GetNamedVariantRef(std::string type_name, std::string instance_name = "");
 	};
@@ -173,11 +237,20 @@ namespace hktypes {
 	requires utils::_is_integer_t<tStorage>
 	class hkHandle : public hkHolderBase {
 	public:
+		using BaseType = void;
 		tStorage value = -1;	// Offset: 0 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkHandle"; };
+		inline std::string GetTranscriptId() override { return "hkHandle<hkUint32, 2147483647>"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "value", "hkUint32" },
+			};
+		};
 	};
 
 	template<class tStorage>

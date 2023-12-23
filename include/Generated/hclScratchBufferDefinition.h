@@ -1,13 +1,12 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclBufferDefinition.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	class hclBufferDefinition;
+	class hkBool;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclScratchBufferDefinition : public hclBufferDefinition {
 	public:
@@ -19,9 +18,17 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclScratchBufferDefinition"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclScratchBufferDefinition"; };
+		inline std::string GetTranscriptId() override { return "hclScratchBufferDefinition"; };
+		inline uint32_t GethkClassHash() override { return 387079732; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "triangleIndices", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "storeNormals", "hkBool" },
+				{ "storeTangentsAndBiTangents", "hkBool" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

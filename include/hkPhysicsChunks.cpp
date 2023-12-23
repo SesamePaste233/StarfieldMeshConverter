@@ -480,6 +480,10 @@ bool hkphysics::hkDataChunkTBDY::Decode()
 
 			hk_class->fields.clear();
 
+			if (num_properties != 0) {
+				throw std::exception("Not implemented");
+			}
+
 			for (int i = 0; i < num_fields; i++) {
 				hkreflex::hkFieldBase* field = new hkreflex::hkFieldBase;
 				field->name = ref_data->field_names[utils::readHavokVarUIntFromAccessor(_accessor, cur_pos)];
@@ -549,6 +553,8 @@ bool hkphysics::hkDataChunkTHSH::Decode()
 		auto hash = utils::readFromAccessor<uint32_t>(_accessor, cur_pos);
 
 		hk_class->hash = hash;
+
+		assert(hash != 0);
 	}
 
 	return true;

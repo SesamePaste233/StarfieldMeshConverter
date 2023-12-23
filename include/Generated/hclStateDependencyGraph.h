@@ -1,19 +1,16 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	class hkReferencedObject;
+	class hkBool;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclStateDependencyGraph : public hkReferencedObject {
 	public:
@@ -29,10 +26,18 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclStateDependencyGraph::Branch"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclStateDependencyGraph::Branch"; };
+			inline std::string GetTranscriptId() override { return "hclStateDependencyGraph::Branch"; };
+			inline uint32_t GethkClassHash() override { return 2493525897; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "branchId", "int" },
+					{ "stateOperatorIndices", "hkArray<int, hkContainerHeapAllocator>" },
+					{ "parentBranches", "hkArray<int, hkContainerHeapAllocator>" },
+					{ "childBranches", "hkArray<int, hkContainerHeapAllocator>" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkArray<hclStateDependencyGraph::Branch, hkContainerHeapAllocator> branches; // Offset: 24
@@ -44,9 +49,19 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclStateDependencyGraph"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclStateDependencyGraph"; };
+		inline std::string GetTranscriptId() override { return "hclStateDependencyGraph"; };
+		inline uint32_t GethkClassHash() override { return 2248211247; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "branches", "hkArray<hclStateDependencyGraph::Branch, hkContainerHeapAllocator>" },
+				{ "rootBranchIds", "hkArray<int, hkContainerHeapAllocator>" },
+				{ "children", "hkArray<hkArray<int, hkContainerHeapAllocator>, hkContainerHeapAllocator>" },
+				{ "parents", "hkArray<hkArray<int, hkContainerHeapAllocator>, hkContainerHeapAllocator>" },
+				{ "multiThreadable", "hkBool" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

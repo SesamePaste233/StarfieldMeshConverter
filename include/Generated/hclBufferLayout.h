@@ -3,6 +3,12 @@
 
 
 namespace hktypes{
+	template <typename tENUM, typename tSTORAGE>
+	class ;
+	template <typename tENUM, typename tSTORAGE>
+	class ;
+	template <typename tENUM, typename tSTORAGE>
+	class ;
 
 	class hclBufferLayout : public hkHolderBase {
 	public:
@@ -18,10 +24,18 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclBufferLayout::BufferElement"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclBufferLayout::BufferElement"; };
+			inline std::string GetTranscriptId() override { return "hclBufferLayout::BufferElement"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "vectorConversion", "hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>" },
+					{ "vectorSize", "hkUint8" },
+					{ "slotId", "hkUint8" },
+					{ "slotStart", "hkUint8" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class Slot : public hkHolderBase {
@@ -33,10 +47,16 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclBufferLayout::Slot"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclBufferLayout::Slot"; };
+			inline std::string GetTranscriptId() override { return "hclBufferLayout::Slot"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "flags", "hkEnum<hclBufferLayout::SlotFlags, hkUint8>" },
+					{ "stride", "hkUint8" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TriangleFormat : public hkHolderBase {
@@ -46,10 +66,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclBufferLayout::TriangleFormat"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclBufferLayout::TriangleFormat"; };
+			inline std::string GetTranscriptId() override { return "hclBufferLayout::TriangleFormat"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class SlotFlags : public hkHolderBase {
@@ -59,10 +83,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclBufferLayout::SlotFlags"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclBufferLayout::SlotFlags"; };
+			inline std::string GetTranscriptId() override { return "hclBufferLayout::SlotFlags"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		T[N]<hclBufferLayout::BufferElement, 4> elementsLayout; // Offset: 0
@@ -73,9 +101,18 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclBufferLayout"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclBufferLayout"; };
+		inline std::string GetTranscriptId() override { return "hclBufferLayout"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "elementsLayout", "T[N]<hclBufferLayout::BufferElement, 4>" },
+				{ "slots", "T[N]<hclBufferLayout::Slot, 4>" },
+				{ "numSlots", "hkUint8" },
+				{ "triangleFormat", "hkEnum<hclBufferLayout::TriangleFormat, hkUint8>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

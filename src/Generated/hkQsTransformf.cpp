@@ -1,11 +1,17 @@
 #include "Generated\hkQsTransformf.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hkQsTransformf::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hkQsTransformf") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkQsTransformf") {
 		std::cout << "hkQsTransformf::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("translation")->GetValue(translation);
 	class_instance->GetInstanceByFieldName("rotation")->GetValue(rotation);
@@ -15,10 +21,13 @@ bool hktypes::hkQsTransformf::FromInstance(const hkreflex::hkClassInstance* inst
 
 bool hktypes::hkQsTransformf::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hkQsTransformf") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkQsTransformf") {
 		std::cout << "hkQsTransformf::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("translation")->SetValue(translation);
 	class_instance->GetInstanceByFieldName("rotation")->SetValue(rotation);
@@ -26,12 +35,6 @@ bool hktypes::hkQsTransformf::ToInstance(hkreflex::hkClassInstance* instance) {
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hkQsTransformf::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hkQsTransformf::GetFieldTypeAndNames() { return {
-	{ "hkVector4f", { "translation", 0, 32 } },
-	{ "hkQuaternionf", { "rotation", 16, 32 } },
-	{ "hkVector4f", { "scale", 32, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkQsTransformf::GetTemplateArgs() { return {
 }; };
 

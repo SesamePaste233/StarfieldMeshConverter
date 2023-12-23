@@ -1,48 +1,37 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hclVirtualCollisionPointsData.h"
 
 namespace hktypes{
+	class hkStringPtr;
 	class hkReferencedObject;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
+	class hkBool;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
+	class hkVector4;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	class hclVirtualCollisionPointsData;
+	template <typename tT, typename tAllocator>
+	class ;
 
 	class hclSimClothData : public hkReferencedObject {
 	public:
@@ -56,10 +45,16 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimClothData::OverridableSimulationInfo"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimClothData::OverridableSimulationInfo"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::OverridableSimulationInfo"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "gravity", "hkVector4" },
+					{ "globalDampingPerSecond", "hkReal" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class ParticleData : public hkHolderBase {
@@ -73,10 +68,18 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimClothData::ParticleData"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimClothData::ParticleData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::ParticleData"; };
+			inline uint32_t GethkClassHash() override { return 2467200052; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "mass", "hkReal" },
+					{ "invMass", "hkReal" },
+					{ "radius", "hkReal" },
+					{ "friction", "hkReal" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class CollidableTransformMap : public hkHolderBase {
@@ -89,10 +92,17 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimClothData::CollidableTransformMap"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimClothData::CollidableTransformMap"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::CollidableTransformMap"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "transformSetIndex", "hkInt32" },
+					{ "transformIndices", "hkArray<hkUint32, hkContainerHeapAllocator>" },
+					{ "offsets", "hkArray<hkMatrix4, hkContainerHeapAllocator>" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TransferMotionData : public hkHolderBase {
@@ -114,10 +124,26 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimClothData::TransferMotionData"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimClothData::TransferMotionData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::TransferMotionData"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "transformSetIndex", "hkUint32" },
+					{ "transformIndex", "hkUint32" },
+					{ "transferTranslationMotion", "hkBool" },
+					{ "minTranslationSpeed", "hkReal" },
+					{ "maxTranslationSpeed", "hkReal" },
+					{ "minTranslationBlend", "hkReal" },
+					{ "maxTranslationBlend", "hkReal" },
+					{ "transferRotationMotion", "hkBool" },
+					{ "minRotationSpeed", "hkReal" },
+					{ "maxRotationSpeed", "hkReal" },
+					{ "minRotationBlend", "hkReal" },
+					{ "maxRotationBlend", "hkReal" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class LandscapeCollisionData : public hkHolderBase {
@@ -134,10 +160,21 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimClothData::LandscapeCollisionData"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimClothData::LandscapeCollisionData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::LandscapeCollisionData"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "landscapeRadius", "hkReal" },
+					{ "enableStuckParticleDetection", "hkBool" },
+					{ "stuckParticlesStretchFactorSq", "hkReal" },
+					{ "pinchDetectionEnabled", "hkBool" },
+					{ "pinchDetectionPriority", "hkInt8" },
+					{ "pinchDetectionRadius", "hkReal" },
+					{ "collisionTolerance", "hkReal" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class CollidablePinchingData : public hkHolderBase {
@@ -150,10 +187,17 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimClothData::CollidablePinchingData"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimClothData::CollidablePinchingData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::CollidablePinchingData"; };
+			inline uint32_t GethkClassHash() override { return 3233440473; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "pinchDetectionEnabled", "hkBool" },
+					{ "pinchDetectionPriority", "hkInt8" },
+					{ "pinchDetectionRadius", "hkReal" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkStringPtr name; // Offset: 24
@@ -189,9 +233,43 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclSimClothData"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclSimClothData"; };
+		inline std::string GetTranscriptId() override { return "hclSimClothData"; };
+		inline uint32_t GethkClassHash() override { return 10356195; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "simulationInfo", "hclSimClothData::OverridableSimulationInfo" },
+				{ "particleDatas", "hkArray<hclSimClothData::ParticleData, hkContainerHeapAllocator>" },
+				{ "fixedParticles", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "doNormals", "hkBool" },
+				{ "simOpIds", "hkArray<unsigned int, hkContainerHeapAllocator>" },
+				{ "simClothPoses", "hkArray<T*<hclSimClothPose>, hkContainerHeapAllocator>" },
+				{ "staticConstraintSets", "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>" },
+				{ "antiPinchConstraintSets", "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>" },
+				{ "collidableTransformMap", "hclSimClothData::CollidableTransformMap" },
+				{ "perInstanceCollidables", "hkArray<T*<hclCollidable>, hkContainerHeapAllocator>" },
+				{ "maxParticleRadius", "hkReal" },
+				{ "staticCollisionMasks", "hkArray<hkUint32, hkContainerHeapAllocator>" },
+				{ "actions", "hkArray<T*<hclAction>, hkContainerHeapAllocator>" },
+				{ "totalMass", "hkReal" },
+				{ "transferMotionData", "hclSimClothData::TransferMotionData" },
+				{ "transferMotionEnabled", "hkBool" },
+				{ "landscapeCollisionEnabled", "hkBool" },
+				{ "landscapeCollisionData", "hclSimClothData::LandscapeCollisionData" },
+				{ "numLandscapeCollidableParticles", "hkUint32" },
+				{ "triangleIndices", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "triangleFlips", "hkArray<hkUint8, hkContainerHeapAllocator>" },
+				{ "pinchDetectionEnabled", "hkBool" },
+				{ "perParticlePinchDetectionEnabledFlags", "hkArray<hkBool, hkContainerHeapAllocator>" },
+				{ "collidablePinchingDatas", "hkArray<hclSimClothData::CollidablePinchingData, hkContainerHeapAllocator>" },
+				{ "minPinchedParticleIndex", "hkUint16" },
+				{ "maxPinchedParticleIndex", "hkUint16" },
+				{ "maxCollisionPairs", "hkUint32" },
+				{ "virtualCollisionPointsData", "hclVirtualCollisionPointsData" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

@@ -28,6 +28,7 @@ namespace hktypes {
 
 	class hclBufferLayout : public hkHolderBase {
 	public:
+		using BaseType = void;
 		enum TriangleFormat : uint8_t {
 			TF_THREE_INT32S = 0,
 			TF_THREE_INT16S = 1,
@@ -42,6 +43,7 @@ namespace hktypes {
 
 		class BufferElement : public hkHolderBase {
 		public:
+			using BaseType = void;
 			hclRuntimeConversionInfo::VectorConversion vectorConversion;
 			uint8_t vectorSize;	// Offset: 1 Unk: 0
 			uint8_t slotId;	// Offset: 2 Unk: 0
@@ -50,16 +52,37 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclBufferLayout::BufferElement"; };
+			inline std::string GetTranscriptId() override { return "hclBufferLayout::BufferElement"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "vectorConversion", "hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>" },
+					{ "vectorSize", "hkUint8" },
+					{ "slotId", "hkUint8" },
+					{ "slotStart", "hkUint8" },
+				};
+			};
 		};
 
 		class Slot : public hkHolderBase {
 		public:
+			using BaseType = void;
 			hclBufferLayout::SlotFlags flags;	// Offset: 0 Unk: 0
 			uint8_t stride;	// Offset: 1 Unk: 0
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclBufferLayout::Slot"; };
+			inline std::string GetTranscriptId() override { return "hclBufferLayout::Slot"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "flags", "hkEnum<hclBufferLayout::SlotFlags, hkUint8>" },
+					{ "stride", "hkUint8" },
+				};
+			};
 		};
 
 		std::array<hclBufferLayout::BufferElement, 4> elementsLayout;	// Offset: 0 Unk: 0 Components: Position: 0 Normal: 1 Tangent: 2 Bitangent: 3
@@ -70,10 +93,22 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclBufferLayout"; };
+		inline std::string GetTranscriptId() override { return "hclBufferLayout"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "elementsLayout", "T[N]<hclBufferLayout::BufferElement, 4>" },
+				{ "slots", "T[N]<hclBufferLayout::Slot, 4>" },
+				{ "numSlots", "hkUint8" },
+				{ "triangleFormat", "hkEnum<hclBufferLayout::TriangleFormat, hkUint8>" },
+			};
+		};
 	};
 
 	class hclBufferDefinition : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		std::string meshName;	// Offset: 24 Unk: 0
 		std::string bufferName;	// Offset: 32 Unk: 0
 		int type;	// Offset: 40 Unk: 0
@@ -85,10 +120,25 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclBufferDefinition"; };
+		inline std::string GetTranscriptId() override { return "hclBufferDefinition"; };
+		inline uint32_t GethkClassHash() override { return 1534215538; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "meshName", "hkStringPtr" },
+				{ "bufferName", "hkStringPtr" },
+				{ "type", "hkInt32" },
+				{ "subType", "hkInt32" },
+				{ "numVertices", "hkUint32" },
+				{ "numTriangles", "hkUint32" },
+				{ "bufferLayout", "hclBufferLayout" },
+			};
+		};
 	};
 
 	class hclScratchBufferDefinition : public hclBufferDefinition {
 	public:
+		using BaseType = hclBufferDefinition;
 		std::vector<uint16_t> triangleIndices;	// Offset: 88 Unk: 0
 		bool storeNormals;	// Offset: 104 Unk: 0
 		bool storeTangentsAndBiTangents;	// Offset: 105 Unk: 0
@@ -96,10 +146,21 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclScratchBufferDefinition"; };
+		inline std::string GetTranscriptId() override { return "hclScratchBufferDefinition"; };
+		inline uint32_t GethkClassHash() override { return 387079732; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "triangleIndices", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "storeNormals", "hkBool" },
+				{ "storeTangentsAndBiTangents", "hkBool" },
+			};
+		};
 	};
 
 	class hclTransformSetDefinition : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		std::string name;	// Offset: 24 Unk: 0
 		int type;	// Offset: 32 Unk: 0
 		uint32_t numTransforms;	// Offset: 36 Unk: 0
@@ -107,10 +168,21 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclTransformSetDefinition"; };
+		inline std::string GetTranscriptId() override { return "hclTransformSetDefinition"; };
+		inline uint32_t GethkClassHash() override { return 1127359486; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "type", "hkInt32" },
+				{ "numTransforms", "hkUint32" },
+			};
+		};
 	};
 
 	class hclClothData : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		enum Platform : uint32_t
 		{
 			HCL_PLATFORM_INVALID = 0,
@@ -150,6 +222,23 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclClothData"; };
+		inline std::string GetTranscriptId() override { return "hclClothData"; };
+		inline uint32_t GethkClassHash() override { return 3195387577; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "simClothDatas", "hkArray<T*<hclSimClothData>, hkContainerHeapAllocator>" },
+				{ "bufferDefinitions", "hkArray<T*<hclBufferDefinition>, hkContainerHeapAllocator>" },
+				{ "transformSetDefinitions", "hkArray<T*<hclTransformSetDefinition>, hkContainerHeapAllocator>" },
+				{ "operators", "hkArray<T*<hclOperator>, hkContainerHeapAllocator>" },
+				{ "clothStateDatas", "hkArray<T*<hclClothState>, hkContainerHeapAllocator>" },
+				{ "stateTransitions", "hkArray<T*<hclStateTransition>, hkContainerHeapAllocator>" },
+				{ "actions", "hkArray<T*<hclAction>, hkContainerHeapAllocator>" },
+				{ "generatedAtRuntime", "hkBool" },
+				{ "targetPlatform", "hkEnum<hclClothData::Platform, hkUint32>" },
+			};
+		};
 
 		std::vector<hclBufferedMeshObj> GetBufferedMeshes();
 	};

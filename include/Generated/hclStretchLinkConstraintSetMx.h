@@ -1,16 +1,13 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclConstraintSet.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	class hclConstraintSet;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclStretchLinkConstraintSetMx : public hclConstraintSet {
 	public:
@@ -26,10 +23,18 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclStretchLinkConstraintSetMx::Batch"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx::Batch"; };
+			inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx::Batch"; };
+			inline uint32_t GethkClassHash() override { return 1860398617; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "restLengths", "T[N]<hkReal, 4>" },
+					{ "stiffnesses", "T[N]<hkReal, 4>" },
+					{ "particlesA", "T[N]<hkUint16, 4>" },
+					{ "particlesB", "T[N]<hkUint16, 4>" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class Single : public hkHolderBase {
@@ -39,10 +44,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclStretchLinkConstraintSetMx::Single"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx::Single"; };
+			inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx::Single"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator> batches; // Offset: 40
@@ -51,9 +60,16 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclStretchLinkConstraintSetMx"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx"; };
+		inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx"; };
+		inline uint32_t GethkClassHash() override { return 3791460596; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "batches", "hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator>" },
+				{ "singles", "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

@@ -206,7 +206,7 @@ bool hkphysics::hkPhysicsReflectionData::SerializeWithTypeUnchanged(std::ostream
 
 void hkphysics::hkPhysicsReflectionData::ExtractClasses()
 {
-	auto root_ctn_insts = this->GetInstancesByClassName("hkRootLevelContainer");
+	/*auto root_ctn_insts = this->GetInstancesByClassName("hkRootLevelContainer");
 	if (root_ctn_insts.size() == 1) {
 		this->root_level_container = new hktypes::hkRootLevelContainer();
 		root_ctn_insts[0]->GetValue(*this->root_level_container);
@@ -220,7 +220,7 @@ void hkphysics::hkPhysicsReflectionData::ExtractClasses()
 				skele_insts[0]->GetValue(*this->skeleton);
 			}
 		}
-	}
+	}*/
 }
 
 hkphysics::hkDataChunkPTCH* hkphysics::hkPhysicsReflectionData::GetPatchChunk() {
@@ -309,4 +309,10 @@ std::string hkphysics::hkPhysicsReflectionData::dump_root_instance()
 		return "";
 
 	return this->root_level_instance->dump(0);
+}
+
+void hkphysics::hkPhysicsReflectionData::RegisterClassesToTranscriptor() {
+	for (int i = 1; i < this->classes.size(); i++) {
+		utils::hkTypeTranscriptor::GetInstance().RegisterClass(this->classes[i], true, false);
+	}
 }

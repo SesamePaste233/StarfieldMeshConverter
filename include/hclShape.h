@@ -9,17 +9,27 @@ namespace hktypes {
 
 	class hclShape : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		int type;	// Offset: 24 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclShape"; };
+		inline std::string GetTranscriptId() override { return "hclShape"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "type", "int" },
+			};
+		};
 
 		virtual hclBufferedMeshObj ToVisualizeMeshObj() = 0;
 	};
 
 	class hclCapsuleShape : public hclShape {
 	public:
+		using BaseType = hclShape;
 		hkVector4Holder start;	// Offset: 32 Unk: 0
 		hkVector4Holder end;	// Offset: 48 Unk: 0
 		hkVector4Holder dir;	// Offset: 64 Unk: 0 (end - start).normalized()
@@ -29,6 +39,18 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclCapsuleShape"; };
+		inline std::string GetTranscriptId() override { return "hclCapsuleShape"; };
+		inline uint32_t GethkClassHash() override { return 2819961333; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "start", "hkVector4" },
+				{ "end", "hkVector4" },
+				{ "dir", "hkVector4" },
+				{ "radius", "hkReal" },
+				{ "capLenSqrdInv", "hkReal" },
+			};
+		};
 
 		hclBufferedMeshObj ToVisualizeMeshObj() override;
 	};
@@ -54,6 +76,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 
 		hclBufferedMeshObj ToVisualizeMeshObj() override;
 

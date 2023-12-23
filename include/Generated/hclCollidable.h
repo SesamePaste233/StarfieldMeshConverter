@@ -1,11 +1,13 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkReferencedObject.h"
-#include "Generated\hclShape.h"
 
 namespace hktypes{
+	class hkStringPtr;
 	class hkReferencedObject;
+	class hkBool;
+	class hkVector4;
+	class hkTransform;
 	class hclShape;
 
 	class hclCollidable : public hkReferencedObject {
@@ -26,9 +28,25 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclCollidable"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclCollidable"; };
+		inline std::string GetTranscriptId() override { return "hclCollidable"; };
+		inline uint32_t GethkClassHash() override { return 93767303; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "transform", "hkTransform" },
+				{ "linearVelocity", "hkVector4" },
+				{ "angularVelocity", "hkVector4" },
+				{ "userData", "hkUint64" },
+				{ "shape", "T*<hclShape>" },
+				{ "name", "hkStringPtr" },
+				{ "pinchDetectionRadius", "hkReal" },
+				{ "pinchDetectionPriority", "hkInt8" },
+				{ "pinchDetectionEnabled", "hkBool" },
+				{ "virtualCollisionPointCollisionEnabled", "hkBool" },
+				{ "enabled", "hkBool" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

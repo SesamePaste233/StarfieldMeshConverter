@@ -1,19 +1,17 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclOperator.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
+	class hkStringPtr;
+	class hkBool;
 	class hclOperator;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclSimulateOperator : public hclOperator {
 	public:
@@ -32,10 +30,21 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimulateOperator::Config"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimulateOperator::Config"; };
+			inline std::string GetTranscriptId() override { return "hclSimulateOperator::Config"; };
+			inline uint32_t GethkClassHash() override { return 2651451972; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "name", "hkStringPtr" },
+					{ "constraintExecution", "hkArray<hkInt32, hkContainerHeapAllocator>" },
+					{ "instanceCollidablesUsed", "hkArray<hkBool, hkContainerHeapAllocator>" },
+					{ "subSteps", "hkUint8" },
+					{ "numberOfSolveIterations", "hkUint8" },
+					{ "useAllInstanceCollidables", "hkBool" },
+					{ "adaptConstraintStiffness", "hkBool" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkUint32 simClothIndex; // Offset: 72
@@ -44,9 +53,16 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclSimulateOperator"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclSimulateOperator"; };
+		inline std::string GetTranscriptId() override { return "hclSimulateOperator"; };
+		inline uint32_t GethkClassHash() override { return 2555309371; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "simClothIndex", "hkUint32" },
+				{ "simulateOpConfigs", "hkArray<hclSimulateOperator::Config, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

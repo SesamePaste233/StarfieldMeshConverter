@@ -1,16 +1,13 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclOperator.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
 	class hclOperator;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclSimpleMeshBoneDeformOperator : public hclOperator {
 	public:
@@ -24,10 +21,16 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclSimpleMeshBoneDeformOperator::TriangleBonePair"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclSimpleMeshBoneDeformOperator::TriangleBonePair"; };
+			inline std::string GetTranscriptId() override { return "hclSimpleMeshBoneDeformOperator::TriangleBonePair"; };
+			inline uint32_t GethkClassHash() override { return 2878957036; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "boneOffset", "hkUint16" },
+					{ "triangleOffset", "hkUint16" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkUint32 inputBufferIdx; // Offset: 72
@@ -38,9 +41,18 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclSimpleMeshBoneDeformOperator"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclSimpleMeshBoneDeformOperator"; };
+		inline std::string GetTranscriptId() override { return "hclSimpleMeshBoneDeformOperator"; };
+		inline uint32_t GethkClassHash() override { return 1364889027; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "inputBufferIdx", "hkUint32" },
+				{ "outputTransformSetIdx", "hkUint32" },
+				{ "triangleBonePairs", "hkArray<hclSimpleMeshBoneDeformOperator::TriangleBonePair, hkContainerHeapAllocator>" },
+				{ "localBoneTransforms", "hkArray<hkMatrix4, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

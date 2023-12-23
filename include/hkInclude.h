@@ -11,13 +11,30 @@ namespace hktypes {
 	public:
 		virtual bool FromInstance(const hkreflex::hkClassInstance* instance) = 0;
 		virtual bool ToInstance(hkreflex::hkClassInstance* instance) = 0;
+		virtual inline std::string GethkClassName() = 0;
+		virtual inline std::string GetTranscriptId() = 0;
+		virtual inline uint32_t GethkClassHash() = 0;
+		virtual inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() = 0;
 	};
 
 	class hkReferencedObject : public hkHolderBase {
 	public:
+		using BaseType = void;
+		uint64_t sizeAndFlags; // Offset: 8
+		uint64_t refCount; // Offset: 16
+
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override { return true; };
 		bool ToInstance(hkreflex::hkClassInstance* instance) override { return true; };
+		inline std::string GethkClassName() override { return "hkReferencedObject"; };
+		inline std::string GetTranscriptId() override { return "hkReferencedObject"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "sizeAndFlags", "hkUlong" },
+				{ "refCount", "hkUlong" },
+			};
+		};
 	};
 
 	template<typename T>

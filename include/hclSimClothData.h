@@ -14,6 +14,7 @@ namespace hktypes {
 
 	class hclConstraintSet : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		std::string name;	// Offset: 24 Unk: 0
 		hkHandle<uint32_t> constraintId;	// Offset: 32 Unk: 0
 		uint32_t type;	// Offset: 36 Unk: 0
@@ -21,11 +22,24 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclConstraintSet"; };
+		inline std::string GetTranscriptId() override { return "hclConstraintSet"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "constraintId", "hkHandle<hkUint32, 2147483647>" },
+				{ "type", "unsigned int" },
+			};
+		};
 	};
 
 	class hclVolumeConstraint : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class FrameData : public hkHolderBase {
+		public:
+			using BaseType = void;
 			hkVector4Holder frameVector;	// Offset: 0 Unk: 0
 			uint16_t particleIndex;	// Offset: 16 Unk: 0
 			float weight;	// Offset: 20 Unk: 0
@@ -33,9 +47,18 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		class ApplyData : public hkHolderBase {
+		public:
+			using BaseType = void;
 			hkVector4Holder frameVector;	// Offset: 0 Unk: 0
 			uint16_t particleIndex;	// Offset: 16 Unk: 0
 			float stiffness;	// Offset: 20 Unk: 0
@@ -43,6 +66,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		std::vector<hclVolumeConstraint::FrameData> frameDatas;	// Offset: 40 Unk: 0
@@ -51,12 +81,21 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 	};
 
 	class hclBonePlanesConstraintSet : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class BonePlane : public hkHolderBase {
 		public:
+			using BaseType = void;
 			hkVector4Holder planeEquationBone;	// Offset: 0 Unk: 0
 			uint16_t particleIndex;	// Offset: 16 Unk: 0
 			uint16_t transformIndex;	// Offset: 18 Unk: 0
@@ -65,6 +104,17 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclBonePlanesConstraintSet::BonePlane"; };
+			inline std::string GetTranscriptId() override { return "hclBonePlanesConstraintSet::BonePlane"; };
+			inline uint32_t GethkClassHash() override { return 3326918113; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "planeEquationBone", "hkVector4" },
+					{ "particleIndex", "hkUint16" },
+					{ "transformIndex", "hkUint16" },
+					{ "stiffness", "hkReal" },
+				};
+			};
 		};
 		std::vector<BonePlane> bonePlanes;	// Offset: 40 Unk: 0
 		uint32_t transformSetIndex;	// Offset: 56 Unk: 0
@@ -72,6 +122,15 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclBonePlanesConstraintSet"; };
+		inline std::string GetTranscriptId() override { return "hclBonePlanesConstraintSet"; };
+		inline uint32_t GethkClassHash() override { return 2481738222; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "bonePlanes", "hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>" },
+				{ "transformSetIndex", "hkUint32" },
+			};
+		};
 	};
 
 	class hclLocalRangeConstraintSet : public hclConstraintSet {
@@ -81,6 +140,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override { return true; };
 			bool ToInstance(hkreflex::hkClassInstance* instance) override { return true; };
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		class LocalStiffnessConstraint : public hkHolderBase {
@@ -95,6 +161,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		enum ShapeType : uint32_t {
@@ -120,6 +193,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 	};
 
 	class hclCompressibleLinkConstraintSetMx : public hclConstraintSet {
@@ -136,6 +216,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		class Single : public hclConstraintSet {
@@ -150,6 +237,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		std::vector<hclCompressibleLinkConstraintSetMx::Batch> batches;	// Offset: 40 Unk: 0
@@ -158,6 +252,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 	};
 
 	class hclBendStiffnessConstraintSetMx : public hclConstraintSet {
@@ -182,6 +283,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		class Single : public hkHolderBase {
@@ -189,6 +297,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		std::vector<hclBendStiffnessConstraintSetMx::Batch> batches;	// Offset: 40 Unk: 0
@@ -200,11 +315,21 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
 	};
 
 	class hclStandardLinkConstraintSetMx : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class Batch : public hkHolderBase {
+		public:
+			using BaseType = void;
 			float restLengths[4];	// Offset: 0 Unk: 0
 			float stiffnessesA[4];	// Offset: 16 Unk: 0
 			float stiffnessesB[4];	// Offset: 32 Unk: 0
@@ -214,9 +339,18 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclStandardLinkConstraintSetMx::Batch"; };
+			inline std::string GetTranscriptId() override { return "hclStandardLinkConstraintSetMx::Batch"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		class Single : public hkHolderBase {
+		public:
+			using BaseType = void;
 			float restLength;	// Offset: 0 Unk: 0
 			float stiffnessA;	// Offset: 4 Unk: 0
 			float stiffnessB;	// Offset: 8 Unk: 0
@@ -226,6 +360,18 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclStandardLinkConstraintSetMx::Single"; };
+			inline std::string GetTranscriptId() override { return "hclStandardLinkConstraintSetMx::Single"; };
+			inline uint32_t GethkClassHash() override { return 2457992725; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "restLength", "hkReal" },
+					{ "stiffnessA", "hkReal" },
+					{ "stiffnessB", "hkReal" },
+					{ "particleA", "hkUint16" },
+					{ "particleB", "hkUint16" },
+				};
+			};
 		};
 
 		std::vector<Batch> batches;	// Offset: 40 Unk: 0
@@ -234,11 +380,23 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclStandardLinkConstraintSetMx"; };
+		inline std::string GetTranscriptId() override { return "hclStandardLinkConstraintSetMx"; };
+		inline uint32_t GethkClassHash() override { return 4021914366; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "batches", "hkArray<hclStandardLinkConstraintSetMx::Batch, hkContainerHeapAllocator>" },
+				{ "singles", "hkArray<hclStandardLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
+			};
+		};
 	};
 
 	class hclStretchLinkConstraintSetMx : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class Batch : public hkHolderBase {
+		public:
+			using BaseType = void;
 			std::array<float, 4> restLengths;	// Offset: 0 Unk: 0
 			std::array<float, 4> stiffnesses;	// Offset: 16 Unk: 0
 			std::array<uint16_t, 4> particlesA;	// Offset: 32 Unk: 0
@@ -247,9 +405,22 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx::Batch"; };
+			inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx::Batch"; };
+			inline uint32_t GethkClassHash() override { return 1860398617; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "restLengths", "T[N]<hkReal, 4>" },
+					{ "stiffnesses", "T[N]<hkReal, 4>" },
+					{ "particlesA", "T[N]<hkUint16, 4>" },
+					{ "particlesB", "T[N]<hkUint16, 4>" },
+				};
+			};
 		};
 
 		class Single : public hkHolderBase {
+		public:
+			using BaseType = void;
 			float restLength;	// Offset: 0 Unk: 0
 			float stiffness;	// Offset: 4 Unk: 0
 			uint32_t particleA;	// Offset: 8 Unk: 0
@@ -258,6 +429,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx::Single"; };
+			inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx::Single"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
 		};
 
 		std::vector<Batch> batches;	// Offset: 40 Unk: 0
@@ -266,48 +444,101 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx"; };
+		inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx"; };
+		inline uint32_t GethkClassHash() override { return 3791460596; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "batches", "hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator>" },
+				{ "singles", "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
+			};
+		};
 	};
 
 	class hclSimClothPose : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		std::string name;	// Offset: 24 Unk: 0
 		std::vector<hkVector4Holder> positions;	// Offset: 32 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclSimClothPose"; };
+		inline std::string GetTranscriptId() override { return "hclSimClothPose"; };
+		inline uint32_t GethkClassHash() override { return 2913572451; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "positions", "hkArray<hkVector4, hkContainerHeapAllocator>" },
+			};
+		};
 	};
 
 	class hclCollidable : public hkReferencedObject {
 	public:
-		std::string name;	// Offset: 24 Unk: 0
-		hkMatrix4Holder transform;
-		hkVector4Holder linearVelocity;
-		hkVector4Holder angularVelocity;
-		bool pinchDetectionEnabled;
-		int8_t pinchDetectionPriority;
+		using BaseType = hkReferencedObject;
+		hkMatrix4Holder transform;  // Offset: 32
+		hkVector4Holder linearVelocity; // Offset: 96
+		hkVector4Holder angularVelocity; // Offset: 112
+		uint64_t userData; // Offset: 128
+		hclShape* shape;  // Offset: 136
+		std::string name; // Offset: 144
 		float pinchDetectionRadius;
-		hclShape* shape;
+		int8_t pinchDetectionPriority;
+		bool pinchDetectionEnabled;
+		bool virtualCollisionPointCollisionEnabled; // Offset: 158
+		bool enabled; // Offset: 159
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclCollidable"; };
+		inline std::string GetTranscriptId() override { return "hclCollidable"; };
+		inline uint32_t GethkClassHash() override { return 93767303; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "transform", "hkTransform" },
+				{ "linearVelocity", "hkVector4" },
+				{ "angularVelocity", "hkVector4" },
+				{ "userData", "hkUint64" },
+				{ "shape", "T*<hclShape>" },
+				{ "name", "hkStringPtr" },
+				{ "pinchDetectionRadius", "hkReal" },
+				{ "pinchDetectionPriority", "hkInt8" },
+				{ "pinchDetectionEnabled", "hkBool" },
+				{ "virtualCollisionPointCollisionEnabled", "hkBool" },
+				{ "enabled", "hkBool" },
+			};
+		};
 	};
 
 	class hclSimClothData : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		class OverridableSimulationInfo : public hkHolderBase {
 		public:
+			using BaseType = void;
 			Eigen::Vector4f gravity;	// Offset: 0 Unk: 0
 			float globalDampingPerSecond;	// Offset: 16 Unk: 0
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclSimClothData::OverridableSimulationInfo"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::OverridableSimulationInfo"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "gravity", "hkVector4" },
+					{ "globalDampingPerSecond", "hkReal" },
+				};
+			};
 		};
 
 		class ParticleData : public hkHolderBase {
 		public:
+			using BaseType = void;
 			float mass = 1.000000;
 			float invMass = 1.000000;
 			float radius = 0.000000;
@@ -316,10 +547,22 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclSimClothData::ParticleData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::ParticleData"; };
+			inline uint32_t GethkClassHash() override { return 2467200052; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "mass", "hkReal" },
+					{ "invMass", "hkReal" },
+					{ "radius", "hkReal" },
+					{ "friction", "hkReal" },
+				};
+			};
 		};
 
 		class CollidableTransformMap : public hkHolderBase {
 		public:
+			using BaseType = void;
 			int transformSetIndex;
 			std::vector<uint32_t> transformIndices;
 			std::vector<hkMatrix4Holder> offsets;
@@ -327,10 +570,21 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclSimClothData::CollidableTransformMap"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::CollidableTransformMap"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "transformSetIndex", "hkInt32" },
+					{ "transformIndices", "hkArray<hkUint32, hkContainerHeapAllocator>" },
+					{ "offsets", "hkArray<hkMatrix4, hkContainerHeapAllocator>" },
+				};
+			};
 		};
 
 		class TransferMotionData : public hkHolderBase {
 		public:
+			using BaseType = void;
 			uint32_t transformSetIndex;	// Offset: 0 Unk: 0
 			uint32_t transformIndex;	// Offset: 4 Unk: 0
 			bool transferTranslationMotion;	// Offset: 8 Unk: 0
@@ -347,10 +601,30 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclSimClothData::TransferMotionData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::TransferMotionData"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "transformSetIndex", "hkUint32" },
+					{ "transformIndex", "hkUint32" },
+					{ "transferTranslationMotion", "hkBool" },
+					{ "minTranslationSpeed", "hkReal" },
+					{ "maxTranslationSpeed", "hkReal" },
+					{ "minTranslationBlend", "hkReal" },
+					{ "maxTranslationBlend", "hkReal" },
+					{ "transferRotationMotion", "hkBool" },
+					{ "minRotationSpeed", "hkReal" },
+					{ "maxRotationSpeed", "hkReal" },
+					{ "minRotationBlend", "hkReal" },
+					{ "maxRotationBlend", "hkReal" },
+				};
+			};
 		};
 
 		class LandscapeCollisionData :public hkHolderBase {
 		public:
+			using BaseType = void;
 			float landscapeRadius;	// Offset: 0 Unk: 0
 			bool enableStuckParticleDetection;	// Offset: 4 Unk: 0
 			float stuckParticlesStretchFactorSq;	// Offset: 8 Unk: 0
@@ -362,6 +636,42 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclSimClothData::LandscapeCollisionData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::LandscapeCollisionData"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "landscapeRadius", "hkReal" },
+					{ "enableStuckParticleDetection", "hkBool" },
+					{ "stuckParticlesStretchFactorSq", "hkReal" },
+					{ "pinchDetectionEnabled", "hkBool" },
+					{ "pinchDetectionPriority", "hkInt8" },
+					{ "pinchDetectionRadius", "hkReal" },
+					{ "collisionTolerance", "hkReal" },
+				};
+			};
+		};
+
+		class CollidablePinchingData : public hkHolderBase {
+		public:
+			using BaseType = void;
+			bool pinchDetectionEnabled; // Offset: 0
+			int8_t pinchDetectionPriority; // Offset: 1
+			float pinchDetectionRadius; // Offset: 4
+
+			// Extra
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclSimClothData::CollidablePinchingData"; };
+			inline std::string GetTranscriptId() override { return "hclSimClothData::CollidablePinchingData"; };
+			inline uint32_t GethkClassHash() override { return 3233440473; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "pinchDetectionEnabled", "hkBool" },
+					{ "pinchDetectionPriority", "hkInt8" },
+					{ "pinchDetectionRadius", "hkReal" },
+				};
+			};
 		};
 
 		std::string name;	// Offset: 24 Unk: 0
@@ -397,5 +707,41 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclSimClothData"; };
+		inline std::string GetTranscriptId() override { return "hclSimClothData"; };
+		inline uint32_t GethkClassHash() override { return 10356195; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "simulationInfo", "hclSimClothData::OverridableSimulationInfo" },
+				{ "particleDatas", "hkArray<hclSimClothData::ParticleData, hkContainerHeapAllocator>" },
+				{ "fixedParticles", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "doNormals", "hkBool" },
+				{ "simOpIds", "hkArray<unsigned int, hkContainerHeapAllocator>" },
+				{ "simClothPoses", "hkArray<T*<hclSimClothPose>, hkContainerHeapAllocator>" },
+				{ "staticConstraintSets", "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>" },
+				{ "antiPinchConstraintSets", "hkArray<T*<hclConstraintSet>, hkContainerHeapAllocator>" },
+				{ "collidableTransformMap", "hclSimClothData::CollidableTransformMap" },
+				{ "perInstanceCollidables", "hkArray<T*<hclCollidable>, hkContainerHeapAllocator>" },
+				{ "maxParticleRadius", "hkReal" },
+				{ "staticCollisionMasks", "hkArray<hkUint32, hkContainerHeapAllocator>" },
+				{ "actions", "hkArray<T*<hclAction>, hkContainerHeapAllocator>" },
+				{ "totalMass", "hkReal" },
+				{ "transferMotionData", "hclSimClothData::TransferMotionData" },
+				{ "transferMotionEnabled", "hkBool" },
+				{ "landscapeCollisionEnabled", "hkBool" },
+				{ "landscapeCollisionData", "hclSimClothData::LandscapeCollisionData" },
+				{ "numLandscapeCollidableParticles", "hkUint32" },
+				{ "triangleIndices", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "triangleFlips", "hkArray<hkUint8, hkContainerHeapAllocator>" },
+				{ "pinchDetectionEnabled", "hkBool" },
+				{ "perParticlePinchDetectionEnabledFlags", "hkArray<hkBool, hkContainerHeapAllocator>" },
+				{ "collidablePinchingDatas", "hkArray<hclSimClothData::CollidablePinchingData, hkContainerHeapAllocator>" },
+				{ "minPinchedParticleIndex", "hkUint16" },
+				{ "maxPinchedParticleIndex", "hkUint16" },
+				{ "maxCollisionPairs", "hkUint32" },
+				{ "virtualCollisionPointsData", "hclVirtualCollisionPointsData" },
+			};
+		};
 	};
 }

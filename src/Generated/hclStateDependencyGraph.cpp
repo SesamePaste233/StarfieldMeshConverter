@@ -1,11 +1,20 @@
 #include "Generated\hclStateDependencyGraph.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclStateDependencyGraph::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStateDependencyGraph") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph") {
 		std::cout << "hclStateDependencyGraph::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("branches")->GetValue(branches);
@@ -18,10 +27,13 @@ bool hktypes::hclStateDependencyGraph::FromInstance(const hkreflex::hkClassInsta
 
 bool hktypes::hclStateDependencyGraph::Branch::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
 		std::cout << "hclStateDependencyGraph::Branch::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("branchId")->GetValue(branchId);
 	class_instance->GetInstanceByFieldName("stateOperatorIndices")->GetValue(stateOperatorIndices);
@@ -32,10 +44,13 @@ bool hktypes::hclStateDependencyGraph::Branch::FromInstance(const hkreflex::hkCl
 
 bool hktypes::hclStateDependencyGraph::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStateDependencyGraph") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph") {
 		std::cout << "hclStateDependencyGraph::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("branches")->SetValue(branches);
@@ -48,10 +63,13 @@ bool hktypes::hclStateDependencyGraph::ToInstance(hkreflex::hkClassInstance* ins
 
 bool hktypes::hclStateDependencyGraph::Branch::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
 		std::cout << "hclStateDependencyGraph::Branch::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("branchId")->SetValue(branchId);
 	class_instance->GetInstanceByFieldName("stateOperatorIndices")->SetValue(stateOperatorIndices);
@@ -60,24 +78,9 @@ bool hktypes::hclStateDependencyGraph::Branch::ToInstance(hkreflex::hkClassInsta
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclStateDependencyGraph::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclStateDependencyGraph::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclStateDependencyGraph::Branch::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStateDependencyGraph::GetFieldTypeAndNames() { return {
-	{ "hkArray<hclStateDependencyGraph::Branch, hkContainerHeapAllocator>", { "branches", 24, 36 } },
-	{ "hkArray<int, hkContainerHeapAllocator>", { "rootBranchIds", 40, 36 } },
-	{ "hkArray<hkArray<int, hkContainerHeapAllocator>, hkContainerHeapAllocator>", { "children", 56, 36 } },
-	{ "hkArray<hkArray<int, hkContainerHeapAllocator>, hkContainerHeapAllocator>", { "parents", 72, 36 } },
-	{ "hkBool", { "multiThreadable", 88, 36 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStateDependencyGraph::Branch::GetFieldTypeAndNames() { return {
-	{ "int", { "branchId", 0, 32 } },
-	{ "hkArray<int, hkContainerHeapAllocator>", { "stateOperatorIndices", 8, 32 } },
-	{ "hkArray<int, hkContainerHeapAllocator>", { "parentBranches", 24, 32 } },
-	{ "hkArray<int, hkContainerHeapAllocator>", { "childBranches", 40, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclStateDependencyGraph::Branch::GetTemplateArgs() { return {
 }; };
 

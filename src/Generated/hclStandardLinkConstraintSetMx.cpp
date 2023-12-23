@@ -1,11 +1,18 @@
 #include "Generated\hclStandardLinkConstraintSetMx.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclStandardLinkConstraintSetMx::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
 		std::cout << "hclStandardLinkConstraintSetMx::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclConstraintSet::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("batches")->GetValue(batches);
@@ -15,20 +22,26 @@ bool hktypes::hclStandardLinkConstraintSetMx::FromInstance(const hkreflex::hkCla
 
 bool hktypes::hclStandardLinkConstraintSetMx::Batch::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
 		std::cout << "hclStandardLinkConstraintSetMx::Batch::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
 bool hktypes::hclStandardLinkConstraintSetMx::Single::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
 		std::cout << "hclStandardLinkConstraintSetMx::Single::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("restLength")->GetValue(restLength);
 	class_instance->GetInstanceByFieldName("stiffnessA")->GetValue(stiffnessA);
@@ -40,10 +53,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::FromInstance(const hkrefle
 
 bool hktypes::hclStandardLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
 		std::cout << "hclStandardLinkConstraintSetMx::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclConstraintSet::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("batches")->SetValue(batches);
@@ -53,20 +69,26 @@ bool hktypes::hclStandardLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstan
 
 bool hktypes::hclStandardLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
 		std::cout << "hclStandardLinkConstraintSetMx::Batch::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
 bool hktypes::hclStandardLinkConstraintSetMx::Single::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
 		std::cout << "hclStandardLinkConstraintSetMx::Single::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("restLength")->SetValue(restLength);
 	class_instance->GetInstanceByFieldName("stiffnessA")->SetValue(stiffnessA);
@@ -76,28 +98,12 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::ToInstance(hkreflex::hkCla
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclStandardLinkConstraintSetMx::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclStandardLinkConstraintSetMx::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclStandardLinkConstraintSetMx::Batch::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclStandardLinkConstraintSetMx::Batch::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclStandardLinkConstraintSetMx::Single::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStandardLinkConstraintSetMx::GetFieldTypeAndNames() { return {
-	{ "hkArray<hclStandardLinkConstraintSetMx::Batch, hkContainerHeapAllocator>", { "batches", 40, 32 } },
-	{ "hkArray<hclStandardLinkConstraintSetMx::Single, hkContainerHeapAllocator>", { "singles", 56, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStandardLinkConstraintSetMx::Batch::GetFieldTypeAndNames() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclStandardLinkConstraintSetMx::Single::GetFieldTypeAndNames() { return {
-	{ "hkReal", { "restLength", 0, 32 } },
-	{ "hkReal", { "stiffnessA", 4, 32 } },
-	{ "hkReal", { "stiffnessB", 8, 32 } },
-	{ "hkUint16", { "particleA", 12, 32 } },
-	{ "hkUint16", { "particleB", 14, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclStandardLinkConstraintSetMx::Single::GetTemplateArgs() { return {
 }; };
 

@@ -1,11 +1,18 @@
 #include "Generated\hclGatherAllVerticesOperator.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclGatherAllVerticesOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclGatherAllVerticesOperator") {
 		std::cout << "hclGatherAllVerticesOperator::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("vertexInputFromVertexOutput")->GetValue(vertexInputFromVertexOutput);
@@ -18,10 +25,13 @@ bool hktypes::hclGatherAllVerticesOperator::FromInstance(const hkreflex::hkClass
 
 bool hktypes::hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclGatherAllVerticesOperator") {
 		std::cout << "hclGatherAllVerticesOperator::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("vertexInputFromVertexOutput")->SetValue(vertexInputFromVertexOutput);
@@ -32,14 +42,6 @@ bool hktypes::hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclGatherAllVerticesOperator::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclGatherAllVerticesOperator::GetFieldTypeAndNames() { return {
-	{ "hkArray<hkInt16, hkContainerHeapAllocator>", { "vertexInputFromVertexOutput", 72, 32 } },
-	{ "hkUint32", { "inputBufferIdx", 88, 32 } },
-	{ "hkUint32", { "outputBufferIdx", 92, 32 } },
-	{ "hkBool", { "gatherNormals", 96, 32 } },
-	{ "hkBool", { "partialGather", 97, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclGatherAllVerticesOperator::GetTemplateArgs() { return {
 }; };
 

@@ -1,11 +1,18 @@
 #include "Generated\hclBufferDefinition.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclBufferDefinition::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferDefinition") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferDefinition") {
 		std::cout << "hclBufferDefinition::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("meshName")->GetValue(meshName);
@@ -20,10 +27,13 @@ bool hktypes::hclBufferDefinition::FromInstance(const hkreflex::hkClassInstance*
 
 bool hktypes::hclBufferDefinition::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferDefinition") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferDefinition") {
 		std::cout << "hclBufferDefinition::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("meshName")->SetValue(meshName);
@@ -36,16 +46,6 @@ bool hktypes::hclBufferDefinition::ToInstance(hkreflex::hkClassInstance* instanc
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclBufferDefinition::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferDefinition::GetFieldTypeAndNames() { return {
-	{ "hkStringPtr", { "meshName", 24, 32 } },
-	{ "hkStringPtr", { "bufferName", 32, 32 } },
-	{ "hkInt32", { "type", 40, 32 } },
-	{ "hkInt32", { "subType", 44, 32 } },
-	{ "hkUint32", { "numVertices", 48, 32 } },
-	{ "hkUint32", { "numTriangles", 52, 32 } },
-	{ "hclBufferLayout", { "bufferLayout", 56, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBufferDefinition::GetTemplateArgs() { return {
 }; };
 

@@ -1,37 +1,28 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkPackedVector3.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
+	class hkBool;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
 	class hkPackedVector3;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
-	template <typename tT, typename tAllocator>
-	class hkArray;
 
 	class hclObjectSpaceDeformer : public hkHolderBase {
 	public:
@@ -45,10 +36,16 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::LocalBlockPN"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::LocalBlockPN"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::LocalBlockPN"; };
+			inline uint32_t GethkClassHash() override { return 934674811; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "localPosition", "T[N]<hkPackedVector3, 16>" },
+					{ "localNormal", "T[N]<hkPackedVector3, 16>" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class LocalBlockUnpackedPN : public hkHolderBase {
@@ -58,10 +55,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::LocalBlockUnpackedPN"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::LocalBlockUnpackedPN"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::LocalBlockUnpackedPN"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class EightBlendEntryBlock : public hkHolderBase {
@@ -71,10 +72,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::EightBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::EightBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::EightBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class SevenBlendEntryBlock : public hkHolderBase {
@@ -84,10 +89,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::SevenBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::SevenBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::SevenBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class SixBlendEntryBlock : public hkHolderBase {
@@ -97,10 +106,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::SixBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::SixBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::SixBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class FiveBlendEntryBlock : public hkHolderBase {
@@ -110,10 +123,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::FiveBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::FiveBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::FiveBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class FourBlendEntryBlock : public hkHolderBase {
@@ -126,10 +143,17 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::FourBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::FourBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::FourBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 94201665; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "vertexIndices", "T[N]<hkUint16, 16>" },
+					{ "boneIndices", "T[N]<hkUint16, 64>" },
+					{ "boneWeights", "T[N]<hkUint8, 64>" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class ThreeBlendEntryBlock : public hkHolderBase {
@@ -139,10 +163,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::ThreeBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::ThreeBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::ThreeBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class TwoBlendEntryBlock : public hkHolderBase {
@@ -152,10 +180,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::TwoBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::TwoBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::TwoBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		class OneBlendEntryBlock : public hkHolderBase {
@@ -165,10 +197,14 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclObjectSpaceDeformer::OneBlendEntryBlock"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::OneBlendEntryBlock"; };
+			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::OneBlendEntryBlock"; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerHeapAllocator> eightBlendEntries; // Offset: 0
@@ -187,9 +223,26 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclObjectSpaceDeformer"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclObjectSpaceDeformer"; };
+		inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "eightBlendEntries", "hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "sevenBlendEntries", "hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "sixBlendEntries", "hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "fiveBlendEntries", "hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "fourBlendEntries", "hkArray<hclObjectSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "threeBlendEntries", "hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "twoBlendEntries", "hkArray<hclObjectSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "oneBlendEntries", "hkArray<hclObjectSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "controlBytes", "hkArray<hkUint8, hkContainerHeapAllocator>" },
+				{ "startVertexIndex", "hkUint16" },
+				{ "endVertexIndex", "hkUint16" },
+				{ "partialWrite", "hkBool" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

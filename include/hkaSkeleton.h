@@ -8,7 +8,7 @@ namespace hktypes {
 	class hkHolderBase;
 	class hkReferencedObject;
 
-	class hkQsTransform : public hkHolderBase {
+	class hkQsTransformf : public hkHolderBase {
 	public:
 		// From hkQsTransform
 		Eigen::Vector4f translation;
@@ -18,20 +18,47 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkQsTransformf"; };
+		inline std::string GetTranscriptId() override { return "hkQsTransformf"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "translation", "hkVector4f" },
+				{ "rotation", "hkQuaternionf" },
+				{ "scale", "hkVector4f" },
+			};
+		};
 
 		Eigen::Matrix4f getMatrix(bool force_M44_1 = false);
 
 		static Eigen::Vector4f getRotatedDir(Eigen::Vector4f& dir, Eigen::Quaternionf& rot);
-		static hkQsTransform fromMultiplied(hkQsTransform& a, hkQsTransform& b);
-		static hkQsTransform fromInverse(hkQsTransform& a);
-		static hkQsTransform fromMatrix(Eigen::Matrix4f& mat, float scale = 1);
+		static hkQsTransformf fromMultiplied(hkQsTransformf& a, hkQsTransformf& b);
+		static hkQsTransformf fromInverse(hkQsTransformf& a);
+		static hkQsTransformf fromMatrix(Eigen::Matrix4f& mat, float scale = 1);
 	};
 
-	class hkaBoneHolder : public hkReferencedObject {
+	class hkQsTransform : public hkQsTransformf {
 	public:
+		using BaseType = hkQsTransformf;
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkQsTransform"; };
+		inline std::string GetTranscriptId() override { return "hkQsTransform"; };
+		inline uint32_t GethkClassHash() override { return 973428694; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
+	};
+
+	class hkaBoneHolder : public hkHolderBase {
+	public:
+		using BaseType = void;
 		// From hkaBone
 		std::string name;
-		bool lock_translation = false;
+		bool lockTranslation = false;
 
 		// From hkaSkeleton
 		hkaBoneHolder* parent = nullptr;
@@ -40,28 +67,53 @@ namespace hktypes {
 		std::vector<hkaBoneHolder*> children;
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkaBone"; };
+		inline std::string GetTranscriptId() override { return "hkaBone"; };
+		inline uint32_t GethkClassHash() override { return 704422420; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "lockTranslation", "hkBool" },
+			};
+		};
 
-		void SetTransform(hkQsTransform& transform, bool update_world_trans = true);
+		void SetTransform(hkQsTransformf& transform, bool update_world_trans = true);
 
-		void SetWorldTransform(hkQsTransform& transform, bool update_local_trans = true);
+		void SetWorldTransform(hkQsTransformf& transform, bool update_local_trans = true);
 
-		hkQsTransform GetTransform();
+		hkQsTransformf GetTransform();
 
-		hkQsTransform GetWorldTransform();
+		hkQsTransformf GetWorldTransform();
 
 	protected:
-		hkQsTransform transform;
-		hkQsTransform world_transform;
+		hkQsTransformf transform;
+		hkQsTransformf world_transform;
 	};
 
 	class hkaSkeleton : public hkReferencedObject {
 	public:
+		using BaseType = hkReferencedObject;
 		std::string name;
 		hkaBoneHolder* root = nullptr;
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkaSkeleton"; };
+		inline std::string GetTranscriptId() override { return "hkaSkeleton"; };
+		inline uint32_t GethkClassHash() override { return 2607764882; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "name", "hkStringPtr" },
+				{ "parentIndices", "hkArray<hkInt16, hkContainerHeapAllocator>" },
+				{ "bones", "hkArray<hkaBone, hkContainerHeapAllocator>" },
+				{ "referencePose", "hkArray<hkQsTransform, hkContainerHeapAllocator>" },
+				{ "referenceFloats", "hkArray<hkReal, hkContainerHeapAllocator>" },
+				{ "floatSlots", "hkArray<hkStringPtr, hkContainerHeapAllocator>" },
+				{ "localFrames", "hkArray<hkaSkeleton::LocalFrameOnBone, hkContainerHeapAllocator>" },
+				{ "partitions", "hkArray<hkaSkeleton::Partition, hkContainerHeapAllocator>" },
+			};
+		};
 
 		void TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func = [](hkaBoneHolder*)->void {});
 

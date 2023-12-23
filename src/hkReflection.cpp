@@ -91,7 +91,7 @@ std::string hkreflex::hkClassBase::to_C_identifier()
 	return c_identifier;
 }
 
-std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent)
+std::string hkreflex::hkClassBase::to_C_class_definition(std::set<hkClassBase*>& ref_types, int indent)
 {
 	std::string indent_str = "";
 	for (int i = 0; i < indent; ++i) {
@@ -104,22 +104,46 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 
 	if (this->template_args.size() != 0) {
 		c_class_definition += indent_str;
-		c_class_definition += "template<";
-		c_class_definition += "class " + this->template_args[0]->to_arg_specifier();
-		for (int i = 1; i < this->template_args.size(); ++i) {
-			c_class_definition += ", class " + this->template_args[i]->to_arg_specifier();
-		}
-		c_class_definition += ">\n";
+		c_class_definition += "template<>\n";
 	}
 
 	c_class_definition += indent_str;
 	c_class_definition += "class ";
 	c_class_definition += this->is_nested_class ? this->nested_type_name : this->type_name;
 
+	if (this->template_args.size() != 0) {
+		c_class_definition += "<";
+		c_class_definition += this->template_args[0]->to_arg_identifier();
+		if (this->template_args[0]->template_arg_name[0] != 'v') {
+			auto sub_t = dynamic_cast<hkreflex::hkTemplateArgumentType*>(this->template_args[0])->type;
+			if ((sub_t->kind == TypeKind::Record || !hktypes::hkTypeMapper::IsMapped(sub_t))
+				&& !hktypes::hkTypeMapper::IsBasicTypes(sub_t)
+				&& std::find(this->nested_classes.begin(), this->nested_classes.end(), sub_t) == this->nested_classes.end()
+				&& std::find(ref_types.begin(), ref_types.end(), sub_t) == ref_types.end()
+				) {
+				ref_types.insert(sub_t);
+			}
+		}
+		for (int i = 1; i < this->template_args.size(); ++i) {
+			c_class_definition += ", " + this->template_args[i]->to_arg_identifier();
+			if (this->template_args[i]->template_arg_name[0] != 'v') {
+				auto sub_t = dynamic_cast<hkreflex::hkTemplateArgumentType*>(this->template_args[i])->type;
+				if ((sub_t->kind == TypeKind::Record || !hktypes::hkTypeMapper::IsMapped(sub_t))
+					&& !hktypes::hkTypeMapper::IsBasicTypes(sub_t)
+					&& std::find(this->nested_classes.begin(), this->nested_classes.end(), sub_t) == this->nested_classes.end()
+					&& std::find(ref_types.begin(), ref_types.end(), sub_t) == ref_types.end()
+					) {
+					ref_types.insert(sub_t);
+				}
+			}
+		}
+		c_class_definition += ">";
+	}
+
 	if (this->parent_class) {
 		auto parent_identifier = this->parent_class->to_C_identifier();
 		c_class_definition += " : public " + parent_identifier;
-		ref_types.push_back(this->parent_class);
+		ref_types.insert(this->parent_class);
 		type_body += indent_str + "\tusing BaseType = " + parent_identifier + ";\n";
 	}
 	else {
@@ -135,7 +159,7 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 		type_body += indent_str + "\t" + member->type->to_C_identifier() + " " + member->to_C_identifier() + "; // Offset: " + std::to_string(member->offset) + "\n";
 		
 		auto sub_t = member->type;
-		while (sub_t->kind != TypeKind::Record && sub_t->type_name != "hkArray") {
+		while (sub_t->kind != TypeKind::Record && hktypes::hkTypeMapper::IsMapped(sub_t)) {
 			if (!sub_t->sub_type) {
 				break;
 			}
@@ -146,20 +170,31 @@ std::string hkreflex::hkClassBase::to_C_class_definition(std::vector<hkClassBase
 			}
 		}
 		
-		if ((sub_t->kind == TypeKind::Record || sub_t->type_name == "hkArray")
+		if ((sub_t->kind == TypeKind::Record || !hktypes::hkTypeMapper::IsMapped(sub_t))
+			&& !hktypes::hkTypeMapper::IsBasicTypes(sub_t)
 			&& std::find(this->nested_classes.begin(), this->nested_classes.end(), sub_t) == this->nested_classes.end()
 			&& std::find(ref_types.begin(), ref_types.end(), sub_t) == ref_types.end()
 		) {
-			ref_types.push_back(sub_t);
+			ref_types.insert(sub_t);
 		}
 	}
 	type_body += "\n" + indent_str + "\t// Extra\n";
 	type_body += indent_str + "\tbool FromInstance(const hkreflex::hkClassInstance* instance) override;\n";
 	type_body += indent_str + "\tbool ToInstance(hkreflex::hkClassInstance* instance) override;\n";
-	type_body += indent_str + "\tstatic inline std::string GethkClassName() { return \"" + this->type_name + "\"; };\n";
-	type_body += indent_str + "\tstatic inline std::vector<std::string> GetTemplateArgs();\n";
-	type_body += indent_str + "\tstatic inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();\n";
-	type_body += indent_str + "\tstatic inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();\n";
+	type_body += indent_str + "\tinline std::string GethkClassName() override { return \"" + this->type_name + "\"; };\n";
+	type_body += indent_str + "\tinline std::string GetTranscriptId() override { return \"" + this->to_C_identifier() + "\"; };\n";
+	type_body += indent_str + "\tinline uint32_t GethkClassHash() override { return " + std::to_string(this->hash) + "; };\n";
+	type_body += indent_str + "\tinline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {\n";
+	type_body += indent_str + "\t\treturn {\n";
+	for (auto& member : this->fields) {
+		type_body += indent_str + "\t\t\t{ \"" + member->name + "\", \"" + member->type->to_C_identifier() + "\" },\n";
+	}
+	type_body += indent_str + "\t\t};\n";
+	type_body += indent_str + "\t};\n";
+
+	type_body += indent_str + "\tinline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();\n";
+	//type_body += indent_str + "\tstatic inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();\n";
+	//type_body += indent_str + "\tstatic inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();\n";
 
 
 	c_class_definition += " {\n" + indent_str + "public:\n" + type_body + indent_str + "};\n";
@@ -171,12 +206,22 @@ std::string hkreflex::hkClassBase::to_C_FromInstance()
 {
 	std::string c_from_instance = "";
 	if (/*this->kind == TypeKind::Record*/true) {
+		if (this->template_args.size() != 0) {
+			c_from_instance += "template<>\n";
+		}
+
 		c_from_instance += "bool hktypes::" + this->to_C_identifier() + "::FromInstance(const hkreflex::hkClassInstance* instance) {\n";
-		c_from_instance += "\tauto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);\n";
-		c_from_instance += "\tif (class_instance->type->type_name != \"" + this->type_name + "\") {\n";
+		if (this->kind == TypeKind::Array) {
+			c_from_instance += "\tauto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);\n\n";
+		}else {
+			c_from_instance += "\tauto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);\n\n";
+		}
+		c_from_instance += "#ifndef NO_HK_TYPENAME_CHECK\n";
+		c_from_instance += "\tif (class_instance && class_instance->type->type_name != \"" + this->type_name + "\") {\n";
 		c_from_instance += "\t\tstd::cout << \"" + this->type_name + "::FromInstance: Wrong type!\" << std::endl;\n";
-		c_from_instance += "\t\treturn false;\n";
-		c_from_instance += "\t}\n\n";
+		c_from_instance += "\t\tthrow;\n";
+		c_from_instance += "\t}\n";
+		c_from_instance += "#endif // NO_HK_TYPENAME_CHECK\n\n";
 
 		if (this->parent_class) {
 			c_from_instance += "\t" + this->parent_class->to_C_identifier() + "::FromInstance(class_instance->GetInstanceByFieldName(\"class_parent\"));\n";
@@ -201,12 +246,22 @@ std::string hkreflex::hkClassBase::to_C_ToInstance()
 {
 	std::string c_to_instance = "";
 	if (/*this->kind == TypeKind::Record*/true) {
+		if (this->template_args.size() != 0) {
+			c_to_instance += "template<>\n";
+		}
 		c_to_instance += "bool hktypes::" + this->to_C_identifier() + "::ToInstance(hkreflex::hkClassInstance* instance) {\n";
-		c_to_instance += "\tauto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);\n";
-		c_to_instance += "\tif (class_instance->type->type_name != \"" + this->type_name + "\") {\n";
+		if (this->kind == TypeKind::Array) {
+			c_to_instance += "\tauto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);\n\n";
+		}
+		else {
+			c_to_instance += "\tauto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);\n\n";
+		}
+		c_to_instance += "#ifndef NO_HK_TYPENAME_CHECK\n";
+		c_to_instance += "\tif (class_instance && class_instance->type->type_name != \"" + this->type_name + "\") {\n";
 		c_to_instance += "\t\tstd::cout << \"" + this->type_name + "::ToInstance: Wrong type!\" << std::endl;\n";
-		c_to_instance += "\t\treturn false;\n";
-		c_to_instance += "\t}\n\n";
+		c_to_instance += "\t\tthrow;\n";
+		c_to_instance += "\t}\n";
+		c_to_instance += "#endif // NO_HK_TYPENAME_CHECK\n\n";
 
 		if (this->parent_class) {
 			c_to_instance += "\t" + this->parent_class->to_C_identifier() + "::ToInstance(class_instance->GetInstanceByFieldName(\"class_parent\"));\n";
@@ -230,9 +285,12 @@ std::string hkreflex::hkClassBase::to_C_GetTemplateArgs()
 {
 	std::string GetTemplateArgs = "";
 	if (/*this->kind == TypeKind::Record*/true) {
-		GetTemplateArgs += "inline std::vector<std::string> hktypes::" + this->to_C_identifier() + "::GetTemplateArgs() { return {\n";
+		if (this->template_args.size() != 0) {
+			GetTemplateArgs += "template<>\n";
+		}
+		GetTemplateArgs += "inline std::vector<std::pair<std::string, std::string>> hktypes::" + this->to_C_identifier() + "::GetTemplateArgs() { return {\n";
 		for (auto& arg : this->template_args) {
-			GetTemplateArgs += "\t\"" + arg->to_arg_specifier() + "\",\n";
+			GetTemplateArgs += "\t{\"" + arg->to_arg_specifier() + "\", \"" + arg->to_arg_identifier() + "\"},\n";
 		}
 		GetTemplateArgs += "}; };\n\n";
 	}
@@ -248,6 +306,9 @@ std::string hkreflex::hkClassBase::to_C_GetFieldTypeAndNames()
 {
 	std::string GetFieldTypeAndNames = "";
 	if (/*this->kind == TypeKind::Record*/true) {
+		if (this->template_args.size() != 0) {
+			GetFieldTypeAndNames += "template<>\n";
+		}
 		GetFieldTypeAndNames += "inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::" + this->to_C_identifier() + "::GetFieldTypeAndNames() { return {\n";
 		for (auto& member : this->fields) {
 			GetFieldTypeAndNames += "\t{ \"" + member->type->to_C_identifier() + "\", { \"" + member->name + "\", " + std::to_string(member->offset) + ", " + std::to_string((uint16_t)member->flags) + " } },\n";
@@ -265,7 +326,10 @@ std::string hkreflex::hkClassBase::to_C_GetFieldTypeAndNames()
 std::string hkreflex::hkClassBase::to_C_GetPropertyBag()
 {
 	std::string GetPropertyBag = "";
-	if (this->kind == TypeKind::Record) {
+	if (/*this->kind == TypeKind::Record*/true) {
+		if (this->template_args.size() != 0) {
+			GetPropertyBag += "template<>\n";
+		}
 		GetPropertyBag += "inline hkreflex::hkClassBase::DefinitionPropertyBag hktypes::" + this->to_C_identifier() + "::GetPropertyBag() { return { \"" 
 			+ this->type_name + "\", " 
 			+ std::to_string((uint8_t)this->optionals) + ", "
@@ -408,7 +472,7 @@ std::string hkreflex::hkFieldBase::to_C_identifier()
 	return name;
 }
 
-std::string hkreflex::hkFieldBase::to_C_class_definition(std::vector<hkClassBase*>& ref_types, int indent)
+std::string hkreflex::hkFieldBase::to_C_class_definition(std::set<hkClassBase*>& ref_types, int indent)
 {
 	return std::string();
 }
@@ -1088,7 +1152,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 {
 	size_t cur_pos = 0;
 	auto element_type = type->sub_type;
-	if (type->ctype_name == "hkVector4Holder" || type->ctype_name == "Eigen::Quaternionf" || type->ctype_name == "Eigen::Quaterniond") { // Allocation
+	if (element_type->type_name == "float" && type->size == 16) { // Allocation
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 4; ++i) {
@@ -1117,7 +1181,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 
 		return data_ptr - data;
 	}
-	else if (type->ctype_name == "hkMatrix4Holder") { // Allocation
+	else if (element_type->type_name == "float" && type->size == 64) { // Allocation
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 16; ++i) {
@@ -1146,7 +1210,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 
 		return data_ptr - data;
 	}
-	else if (type->ctype_name == "Eigen::Matrix3f") { // Allocation
+	else if (element_type->type_name == "float" && type->size == 48) { // Allocation
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 12; ++i) {
@@ -1253,7 +1317,9 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		indent_str += "\t";
 	}
 
-	if (c_type == "std::vector" && type->type_name != "T[N]") {
+	auto element_type = type->sub_type;
+
+	if (type->type_name == "hkArray" || type->type_name == "hkRelArray") {
 		std::string ret = "<arr_ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + "[" + std::to_string(array_instances.size()) + "]: [\n";
 		if (!this->array_instances.empty()) {
 			int i = 0;
@@ -1283,7 +1349,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		ret += indent_str + "]";
 		return ret;
 	}
-	else if (c_type == "hkVector4Holder" || c_type == "Eigen::Quaternionf" || c_type == "Eigen::Quaterniond") {
+	else if (element_type->type_name == "float" && type->size == 16) {
 		std::string ret = "[";
 		for (int i = 0; i < 3; i++) {
 			ret += std::to_string(float_array[i]) + ", ";
@@ -1291,7 +1357,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		ret += std::to_string(float_array[3]) + "]";
 		return ret;
 	}
-	else if (c_type == "hkMatrix4Holder") {
+	else if (element_type->type_name == "float" && type->size == 64) {
 		std::string ret = c_type + "{\n";
 		for (int j = 0; j < 4; j++) {
 			ret += indent_str + "\t";
@@ -1302,7 +1368,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		}
 		return ret + indent_str + "}";
 	}
-	else if (c_type == "Eigen::Matrix3f") {
+	else if (element_type->type_name == "float" && type->size == 48) {
 		std::string ret = c_type + "{\n";
 		for (int j = 0; j < 3; j++) {
 			ret += indent_str + "\t";
@@ -1321,21 +1387,22 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, utils::SerializePool& serializer)
 {
 	size_t cur_pos = 0;
-	if (type->ctype_name == "hkVector4Holder" || type->ctype_name == "Eigen::Quaternionf" || type->ctype_name == "Eigen::Quaterniond") {
+	auto element_type = type->sub_type;
+	if (element_type->type_name == "float" && type->size == 16) {
 		for (int i = 0; i < 4; i++) {
 			auto instance = dynamic_cast<hkClassFloatInstance*>(array_instances[i]);
 			instance->Serialize(data + cur_pos, serializer);
 			cur_pos += instance->type->size;
 		}
 	}
-	else if (type->ctype_name == "hkMatrix4Holder") {
+	else if (element_type->type_name == "float" && type->size == 64) {
 		for (int i = 0; i < 16; i++) {
 			auto instance = dynamic_cast<hkClassFloatInstance*>(array_instances[i]);
 			instance->Serialize(data + cur_pos, serializer);
 			cur_pos += instance->type->size;
 		}
 	}
-	else if (type->ctype_name == "Eigen::Matrix3f") {
+	else if (element_type->type_name == "float" && type->size == 48) {
 		for (int i = 0; i < 12; i++) {
 			auto instance = dynamic_cast<hkClassFloatInstance*>(array_instances[i]);
 			instance->Serialize(data + cur_pos, serializer);
@@ -1343,8 +1410,6 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 		}
 	}
 	else {
-		auto element_type = type->sub_type;
-
 		if (type->type_name == "hkArray") {
 			uint64_t ptr = 0;
 			if (!this->array_instances.empty()) {

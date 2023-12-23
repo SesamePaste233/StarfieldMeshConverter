@@ -1,11 +1,17 @@
 #include "Generated\hclMoveParticlesOperator.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclMoveParticlesOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclMoveParticlesOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator") {
 		std::cout << "hclMoveParticlesOperator::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclOperator::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("vertexParticlePairs")->GetValue(vertexParticlePairs);
@@ -16,10 +22,13 @@ bool hktypes::hclMoveParticlesOperator::FromInstance(const hkreflex::hkClassInst
 
 bool hktypes::hclMoveParticlesOperator::VertexParticlePair::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
 		std::cout << "hclMoveParticlesOperator::VertexParticlePair::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("vertexIndex")->GetValue(vertexIndex);
 	class_instance->GetInstanceByFieldName("particleIndex")->GetValue(particleIndex);
@@ -28,10 +37,13 @@ bool hktypes::hclMoveParticlesOperator::VertexParticlePair::FromInstance(const h
 
 bool hktypes::hclMoveParticlesOperator::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclMoveParticlesOperator") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator") {
 		std::cout << "hclMoveParticlesOperator::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hclOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("vertexParticlePairs")->SetValue(vertexParticlePairs);
@@ -42,30 +54,22 @@ bool hktypes::hclMoveParticlesOperator::ToInstance(hkreflex::hkClassInstance* in
 
 bool hktypes::hclMoveParticlesOperator::VertexParticlePair::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
 		std::cout << "hclMoveParticlesOperator::VertexParticlePair::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("vertexIndex")->SetValue(vertexIndex);
 	class_instance->GetInstanceByFieldName("particleIndex")->SetValue(particleIndex);
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclMoveParticlesOperator::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclMoveParticlesOperator::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclMoveParticlesOperator::VertexParticlePair::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclMoveParticlesOperator::GetFieldTypeAndNames() { return {
-	{ "hkArray<hclMoveParticlesOperator::VertexParticlePair, hkContainerHeapAllocator>", { "vertexParticlePairs", 72, 32 } },
-	{ "hkUint32", { "simClothIndex", 88, 32 } },
-	{ "hkUint32", { "refBufferIdx", 92, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclMoveParticlesOperator::VertexParticlePair::GetFieldTypeAndNames() { return {
-	{ "hkUint16", { "vertexIndex", 0, 32 } },
-	{ "hkUint16", { "particleIndex", 2, 32 } },
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclMoveParticlesOperator::VertexParticlePair::GetTemplateArgs() { return {
 }; };
 

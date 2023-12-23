@@ -1,13 +1,11 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkBitField.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
-	class hkBitField;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
+	class hkBitField;
 
 	class hclTransformSetUsage : public hkHolderBase {
 	public:
@@ -22,10 +20,17 @@ namespace hktypes{
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			static inline std::string GethkClassName() { return "hclTransformSetUsage::TransformTracker"; };
-			static inline std::vector<std::string> GetTemplateArgs();
-			static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-			static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+			inline std::string GethkClassName() override { return "hclTransformSetUsage::TransformTracker"; };
+			inline std::string GetTranscriptId() override { return "hclTransformSetUsage::TransformTracker"; };
+			inline uint32_t GethkClassHash() override { return 51977619; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "read", "hkBitField" },
+					{ "readBeforeWrite", "hkBitField" },
+					{ "written", "hkBitField" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 		};
 
 		T[N]<hkUint8, 2> perComponentFlags; // Offset: 0
@@ -34,9 +39,16 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclTransformSetUsage"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclTransformSetUsage"; };
+		inline std::string GetTranscriptId() override { return "hclTransformSetUsage"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "perComponentFlags", "T[N]<hkUint8, 2>" },
+				{ "perComponentTransformTrackers", "hkArray<hclTransformSetUsage::TransformTracker, hkContainerHeapAllocator>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

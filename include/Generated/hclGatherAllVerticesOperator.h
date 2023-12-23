@@ -1,13 +1,12 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclOperator.h"
-#include "Generated\hkArray.h"
 
 namespace hktypes{
+	class hkBool;
 	class hclOperator;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 
 	class hclGatherAllVerticesOperator : public hclOperator {
 	public:
@@ -21,9 +20,19 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclGatherAllVerticesOperator"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclGatherAllVerticesOperator"; };
+		inline std::string GetTranscriptId() override { return "hclGatherAllVerticesOperator"; };
+		inline uint32_t GethkClassHash() override { return 2385740196; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "vertexInputFromVertexOutput", "hkArray<hkInt16, hkContainerHeapAllocator>" },
+				{ "inputBufferIdx", "hkUint32" },
+				{ "outputBufferIdx", "hkUint32" },
+				{ "gatherNormals", "hkBool" },
+				{ "partialGather", "hkBool" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

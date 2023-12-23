@@ -1,11 +1,26 @@
 #include "Generated\hclClothData.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclClothData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclClothData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclClothData") {
 		std::cout << "hclClothData::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("name")->GetValue(name);
@@ -23,20 +38,26 @@ bool hktypes::hclClothData::FromInstance(const hkreflex::hkClassInstance* instan
 
 bool hktypes::hclClothData::Platform::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclClothData::Platform") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclClothData::Platform") {
 		std::cout << "hclClothData::Platform::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
 bool hktypes::hclClothData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclClothData") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclClothData") {
 		std::cout << "hclClothData::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 	class_instance->GetInstanceByFieldName("name")->SetValue(name);
@@ -54,33 +75,20 @@ bool hktypes::hclClothData::ToInstance(hkreflex::hkClassInstance* instance) {
 
 bool hktypes::hclClothData::Platform::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclClothData::Platform") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclClothData::Platform") {
 		std::cout << "hclClothData::Platform::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclClothData::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclClothData::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclClothData::Platform::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclClothData::GetFieldTypeAndNames() { return {
-	{ "hkStringPtr", { "name", 24, 32 } },
-	{ "hkArray<T*<hclSimClothData>, hkContainerHeapAllocator>", { "simClothDatas", 32, 32 } },
-	{ "hkArray<T*<hclBufferDefinition>, hkContainerHeapAllocator>", { "bufferDefinitions", 48, 32 } },
-	{ "hkArray<T*<hclTransformSetDefinition>, hkContainerHeapAllocator>", { "transformSetDefinitions", 64, 32 } },
-	{ "hkArray<T*<hclOperator>, hkContainerHeapAllocator>", { "operators", 80, 32 } },
-	{ "hkArray<T*<hclClothState>, hkContainerHeapAllocator>", { "clothStateDatas", 96, 32 } },
-	{ "hkArray<T*<hclStateTransition>, hkContainerHeapAllocator>", { "stateTransitions", 112, 32 } },
-	{ "hkArray<T*<hclAction>, hkContainerHeapAllocator>", { "actions", 128, 32 } },
-	{ "hkBool", { "generatedAtRuntime", 144, 33 } },
-	{ "hkEnum<hclClothData::Platform, hkUint32>", { "targetPlatform", 148, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclClothData::Platform::GetFieldTypeAndNames() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclClothData::Platform::GetTemplateArgs() { return {
 }; };
 

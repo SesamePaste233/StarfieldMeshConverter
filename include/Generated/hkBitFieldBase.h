@@ -1,24 +1,31 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hkBitFieldStorage.h"
 
 namespace hktypes{
-	template<class tStorage>
-	class hkBitFieldStorage<tStorage>;
+	template <typename tStorage>
+	class ;
 
-	template<class tStorage>
-	class hkBitFieldBase : public hkHolderBase {
+	template <typename tStorage>
+	class hkBitFieldBase;
+	template<>
+	class hkBitFieldBase<hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>>> : public hkHolderBase {
 	public:
 		using BaseType = void;
-		hkBitFieldStorage<tStorage> storage; // Offset: 0
+		hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>> storage; // Offset: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hkBitFieldBase"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hkBitFieldBase"; };
+		inline std::string GetTranscriptId() override { return "hkBitFieldBase<hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>>>"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "storage", "hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>>" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }

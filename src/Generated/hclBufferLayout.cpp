@@ -1,11 +1,18 @@
 #include "Generated\hclBufferLayout.h"
 
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
 bool hktypes::hclBufferLayout::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout") {
 		std::cout << "hclBufferLayout::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("elementsLayout")->GetValue(elementsLayout);
 	class_instance->GetInstanceByFieldName("slots")->GetValue(slots);
@@ -16,10 +23,13 @@ bool hktypes::hclBufferLayout::FromInstance(const hkreflex::hkClassInstance* ins
 
 bool hktypes::hclBufferLayout::BufferElement::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::BufferElement") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::BufferElement") {
 		std::cout << "hclBufferLayout::BufferElement::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("vectorConversion")->GetValue(vectorConversion);
 	class_instance->GetInstanceByFieldName("vectorSize")->GetValue(vectorSize);
@@ -30,10 +40,13 @@ bool hktypes::hclBufferLayout::BufferElement::FromInstance(const hkreflex::hkCla
 
 bool hktypes::hclBufferLayout::Slot::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::Slot") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::Slot") {
 		std::cout << "hclBufferLayout::Slot::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("flags")->GetValue(flags);
 	class_instance->GetInstanceByFieldName("stride")->GetValue(stride);
@@ -42,30 +55,39 @@ bool hktypes::hclBufferLayout::Slot::FromInstance(const hkreflex::hkClassInstanc
 
 bool hktypes::hclBufferLayout::TriangleFormat::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
 		std::cout << "hclBufferLayout::TriangleFormat::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
 bool hktypes::hclBufferLayout::SlotFlags::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
 		std::cout << "hclBufferLayout::SlotFlags::FromInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
 bool hktypes::hclBufferLayout::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout") {
 		std::cout << "hclBufferLayout::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("elementsLayout")->SetValue(elementsLayout);
 	class_instance->GetInstanceByFieldName("slots")->SetValue(slots);
@@ -76,10 +98,13 @@ bool hktypes::hclBufferLayout::ToInstance(hkreflex::hkClassInstance* instance) {
 
 bool hktypes::hclBufferLayout::BufferElement::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::BufferElement") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::BufferElement") {
 		std::cout << "hclBufferLayout::BufferElement::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("vectorConversion")->SetValue(vectorConversion);
 	class_instance->GetInstanceByFieldName("vectorSize")->SetValue(vectorSize);
@@ -90,10 +115,13 @@ bool hktypes::hclBufferLayout::BufferElement::ToInstance(hkreflex::hkClassInstan
 
 bool hktypes::hclBufferLayout::Slot::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::Slot") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::Slot") {
 		std::cout << "hclBufferLayout::Slot::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	class_instance->GetInstanceByFieldName("flags")->SetValue(flags);
 	class_instance->GetInstanceByFieldName("stride")->SetValue(stride);
@@ -102,61 +130,42 @@ bool hktypes::hclBufferLayout::Slot::ToInstance(hkreflex::hkClassInstance* insta
 
 bool hktypes::hclBufferLayout::TriangleFormat::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
 		std::cout << "hclBufferLayout::TriangleFormat::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
 bool hktypes::hclBufferLayout::SlotFlags::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
 		std::cout << "hclBufferLayout::SlotFlags::ToInstance: Wrong type!" << std::endl;
-		return false;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
 	return true;
 }
 
-inline std::vector<std::string> hktypes::hclBufferLayout::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBufferLayout::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclBufferLayout::BufferElement::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBufferLayout::BufferElement::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclBufferLayout::Slot::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBufferLayout::Slot::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclBufferLayout::TriangleFormat::GetTemplateArgs() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBufferLayout::TriangleFormat::GetTemplateArgs() { return {
 }; };
 
-inline std::vector<std::string> hktypes::hclBufferLayout::SlotFlags::GetTemplateArgs() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::GetFieldTypeAndNames() { return {
-	{ "T[N]<hclBufferLayout::BufferElement, 4>", { "elementsLayout", 0, 32 } },
-	{ "T[N]<hclBufferLayout::Slot, 4>", { "slots", 16, 32 } },
-	{ "hkUint8", { "numSlots", 24, 32 } },
-	{ "hkEnum<hclBufferLayout::TriangleFormat, hkUint8>", { "triangleFormat", 25, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::BufferElement::GetFieldTypeAndNames() { return {
-	{ "hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>", { "vectorConversion", 0, 32 } },
-	{ "hkUint8", { "vectorSize", 1, 32 } },
-	{ "hkUint8", { "slotId", 2, 32 } },
-	{ "hkUint8", { "slotStart", 3, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::Slot::GetFieldTypeAndNames() { return {
-	{ "hkEnum<hclBufferLayout::SlotFlags, hkUint8>", { "flags", 0, 32 } },
-	{ "hkUint8", { "stride", 1, 32 } },
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::TriangleFormat::GetFieldTypeAndNames() { return {
-}; };
-
-inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> hktypes::hclBufferLayout::SlotFlags::GetFieldTypeAndNames() { return {
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBufferLayout::SlotFlags::GetTemplateArgs() { return {
 }; };
 

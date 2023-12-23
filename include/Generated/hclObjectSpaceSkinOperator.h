@@ -1,17 +1,13 @@
 #pragma once
 #include "hkInclude.h"
 
-#include "Generated\hclOperator.h"
-#include "Generated\hkArray.h"
-#include "Generated\hkArray.h"
-#include "Generated\hclObjectSpaceDeformer.h"
 
 namespace hktypes{
 	class hclOperator;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	template <typename tT, typename tAllocator>
-	class hkArray;
+	class ;
 	class hclObjectSpaceDeformer;
 
 	class hclObjectSpaceSkinOperator : public hclOperator {
@@ -26,9 +22,19 @@ namespace hktypes{
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		static inline std::string GethkClassName() { return "hclObjectSpaceSkinOperator"; };
-		static inline std::vector<std::string> GetTemplateArgs();
-		static inline std::map<std::string, hkreflex::hkFieldBase::DefinitionPropertyBag> GetFieldTypeAndNames();
-		static inline hkreflex::hkClassBase::DefinitionPropertyBag GetPropertyBag();
+		inline std::string GethkClassName() override { return "hclObjectSpaceSkinOperator"; };
+		inline std::string GetTranscriptId() override { return "hclObjectSpaceSkinOperator"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "boneFromSkinMeshTransforms", "hkArray<hkMatrix4, hkContainerHeapAllocator>" },
+				{ "transformSubset", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "outputBufferIndex", "hkUint32" },
+				{ "transformSetIndex", "hkUint32" },
+				{ "objectSpaceDeformer", "hclObjectSpaceDeformer" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
 	};
+
 }
