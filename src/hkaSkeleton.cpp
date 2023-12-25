@@ -3,7 +3,7 @@
 bool hktypes::hkQsTransformf::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hkQsTransformf") {
+	if (class_instance->type->type_name != "hkQsTransformf") {
 		std::cout << "hkQsTransform::FromInstance: type_name is not hkQsTransformf" << std::endl;
 		return false;
 	}
@@ -22,8 +22,8 @@ bool hktypes::hkQsTransformf::FromInstance(const hkreflex::hkClassInstance* inst
 bool hktypes::hkQsTransformf::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hkQsTransformf") {
-		std::cout << "hkQsTransform::FromInstance: type_name is not hkQsTransformf" << std::endl;
+	if (class_instance->type->type_name != "hkQsTransformf") {
+		std::cout << "hkQsTransform::ToInstance: type_name is not hkQsTransformf" << std::endl;
 		return false;
 	}
 
@@ -187,7 +187,7 @@ bool hktypes::hkaSkeleton::FromInstance(const hkreflex::hkClassInstance* instanc
 
 	auto bones_v = class_instance->GetArrayByFieldName<hkaBoneHolder>("bones");
 
-	auto reference_pose = class_instance->GetArrayByFieldName<hkQsTransform>("referencePose");
+	auto reference_pose = class_instance->GetArrayByFieldName<hkQsTransformf>("referencePose");
 
 	std::vector<hkaBoneHolder*> bones;
 

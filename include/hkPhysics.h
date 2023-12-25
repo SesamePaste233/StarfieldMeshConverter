@@ -6,7 +6,6 @@
 #include "DataAccessor.h"
 
 #include "hkTypesHeader.h"
-#include "hkTypeTranscriptor.h"
 
 namespace hkreflex {
 	class hkClassBase;

@@ -15,10 +15,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hclShape"; };
-		inline std::string GetTranscriptId() override { return "hclShape"; };
-		inline uint32_t GethkClassHash() override { return 0; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclShape"; };
+		inline std::string GetTranscriptId() { return "hclShape"; };
+		inline uint32_t GethkClassHash() { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "type", "int" },
 			};
@@ -39,10 +39,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hclCapsuleShape"; };
-		inline std::string GetTranscriptId() override { return "hclCapsuleShape"; };
-		inline uint32_t GethkClassHash() override { return 2819961333; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclCapsuleShape"; };
+		inline std::string GetTranscriptId() { return "hclCapsuleShape"; };
+		inline uint32_t GethkClassHash() { return 2819961333; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "start", "hkVector4" },
 				{ "end", "hkVector4" },
@@ -76,11 +76,26 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
-		inline uint32_t GethkClassHash() override { return 0; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclTaperedCapsuleShape"; };
+		inline std::string GetTranscriptId() { return "hclTaperedCapsuleShape"; };
+		inline uint32_t GethkClassHash() { return 4196181205; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
+				{ "small", "hkVector4" },
+				{ "big", "hkVector4" },
+				{ "coneApex", "hkVector4" },
+				{ "coneAxis", "hkVector4" },
+				{ "lVec", "hkVector4" },
+				{ "dVec", "hkVector4" },
+				{ "tanThetaVecNeg", "hkVector4" },
+				{ "smallRadius", "hkReal" },
+				{ "bigRadius", "hkReal" },
+				{ "l", "hkReal" },
+				{ "d", "hkReal" },
+				{ "cosTheta", "hkReal" },
+				{ "sinTheta", "hkReal" },
+				{ "tanTheta", "hkReal" },
+				{ "tanThetaSqr", "hkReal" },
 			};
 		};
 

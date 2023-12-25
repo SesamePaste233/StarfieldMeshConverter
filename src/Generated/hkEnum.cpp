@@ -1,9 +1,9 @@
 #include "Generated\hkEnum.h"
 
 #include "Generated\hclClothData.h"
-#include "Generated\hclBufferLayout.h"
-#include "Generated\hclBufferLayout.h"
 #include "Generated\hclRuntimeConversionInfo.h"
+#include "Generated\hclBufferLayout.h"
+#include "Generated\hclBufferLayout.h"
 
 template<>
 bool hktypes::hkEnum<hclClothData::Platform, hkUint32>::FromInstance(const hkreflex::hkClassInstance* instance) {

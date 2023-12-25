@@ -1,6 +1,96 @@
 #include "hkReflection.h"
 #include "hkPhysics.h"
 
+bool hkreflex::hkClassBase::equals(hkClassBase* other) {
+	if (this == other)
+		return true;
+	if (other == nullptr)
+		return false;
+	if (this->hash != other->hash)
+		return false;
+	if (this->type_name != other->type_name)
+		return false;
+	if (this->template_args.size() != other->template_args.size())
+		return false;
+	for (int i = 0; i < this->template_args.size(); i++) {
+		if (this->template_args[i]->to_literal() != other->template_args[i]->to_literal())
+			return false;
+	}
+	if (this->parent_class && !this->parent_class->equals(other->parent_class))
+		return false;
+	if (this->optionals != other->optionals)
+		return false;
+	if (this->format != other->format)
+		return false;
+	if (this->kind != other->kind)
+		return false;
+	if (this->sub_type && !this->sub_type->equals(other->sub_type))
+		return false;
+	if (this->version != other->version)
+		return false;
+	if (this->size != other->size)
+		return false;
+	if (this->alignment != other->alignment)
+		return false;
+	if (this->type_flags != other->type_flags)
+		return false;
+	if (this->fields.size() != other->fields.size())
+		return false;
+	for (int i = 0; i < this->fields.size(); i++) {
+		if (!this->fields[i]->equals(other->fields[i]))
+			return false;
+	}
+	if (this->interfaces.size() != other->interfaces.size())
+		return false;
+	for (int i = 0; i < this->interfaces.size(); i++) {
+		if (!this->interfaces[i]->type->equals(other->interfaces[i]->type))
+			return false;
+		if (this->interfaces[i]->offset != other->interfaces[i]->offset)
+			return false;
+	}
+	return true;
+}
+
+void hkreflex::hkClassBase::assert_equals(hkClassBase* other)
+{
+	assert(this != nullptr && other != nullptr);
+	assert(this->type_name == other->type_name);
+	assert(this->template_args.size() == other->template_args.size());
+	for (int i = 0; i < this->template_args.size(); i++) {
+		assert(this->template_args[i]->to_literal() == other->template_args[i]->to_literal());
+	}
+	return;
+	if (this->parent_class) {
+		this->parent_class->assert_equals(other->parent_class);
+	}
+	else {
+		assert(other->parent_class == nullptr);
+	}
+	assert(this->hash == other->hash);
+	assert(this->optionals == other->optionals);
+	assert(this->format == other->format);
+	assert(this->kind == other->kind);
+	if (this->sub_type) {
+		this->sub_type->assert_equals(other->sub_type);
+	}
+	else {
+		assert(other->sub_type == nullptr);
+	}
+	assert(this->version == other->version);
+	assert(this->size == other->size);
+	assert(this->alignment == other->alignment);
+	assert(this->type_flags == other->type_flags);
+	assert(this->fields.size() == other->fields.size());
+	for (int i = 0; i < this->fields.size(); i++) {
+		this->fields[i]->assert_equals(other->fields[i]);
+	}
+	assert(this->interfaces.size() == other->interfaces.size());
+	for (int i = 0; i < this->interfaces.size(); i++) {
+		this->interfaces[i]->type->assert_equals(other->interfaces[i]->type);
+		assert(this->interfaces[i]->offset == other->interfaces[i]->offset);
+	}
+}
+
 std::string hkreflex::hkClassBase::to_literal(bool show_class_members, bool as_plain_class, bool use_mapped_ctype)
 {
 	if (!_declared) {
@@ -459,6 +549,34 @@ hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreatePointerAndAllo
 	return block;
 }
 
+bool hkreflex::hkFieldBase::equals(hkFieldBase* other) {
+	if (this == other)
+		return true;
+	if (other == nullptr)
+		return false;
+	if (this->type->equals(other->type))
+		return false;
+	if (this->name != other->name)
+		return false;
+	if (this->offset != other->offset)
+		return false;
+	if (this->flags != other->flags)
+		return false;
+	if (this->unk_value != other->unk_value)
+		return false;
+	return true;
+}
+
+void hkreflex::hkFieldBase::assert_equals(hkFieldBase* other)
+{
+	assert(this != nullptr && other != nullptr);
+	this->type->assert_equals(other->type);
+	assert(this->name == other->name);
+	assert(this->offset == other->offset);
+	assert(this->flags == other->flags);
+	assert(this->unk_value == other->unk_value);
+}
+
 std::string hkreflex::hkFieldBase::to_literal(bool use_mapped_ctype)
 {
 	if (use_mapped_ctype) {
@@ -520,6 +638,28 @@ hkreflex::hkClassInstance* hkreflex::AllocateInstance(hkreflex::hkClassBase* typ
 		std::cout << "Unknown type kind: " << (int)type->kind << std::endl;
 		return nullptr;
 	}
+}
+
+bool hkreflex::hkClassStringInstance::equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassStringInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	return value == other_instance->value;
+}
+
+void hkreflex::hkClassStringInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassStringInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	if (value != other_instance->value)
+		throw std::exception("Value mismatch");
 }
 
 size_t hkreflex::hkClassStringInstance::Build(utils::DataAccessor& data)
@@ -629,6 +769,27 @@ uint64_t hkreflex::hkClassStringInstance::Serialize(utils::DataAccessor data, ut
 	return cur_pos;
 }
 
+bool hkreflex::hkClassBoolInstance::equals(hkClassInstance* other) {
+	auto other_instance = dynamic_cast<hkClassBoolInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	return value == other_instance->value;
+}
+
+void hkreflex::hkClassBoolInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassBoolInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	if (value != other_instance->value)
+		throw std::exception("Value mismatch");
+}
+
 size_t hkreflex::hkClassBoolInstance::Build(utils::DataAccessor& data)
 {
 	size_t cur_pos = 0;
@@ -683,6 +844,39 @@ hkreflex::hkClassIntInstance::hkClassIntInstance(hkClassBase* type, hkphysics::h
 	byte_length = (format >> 10) / 8;
 	c_type = type->ctype_name;
 	_ASSERT(byte_length == type->size);
+}
+
+bool hkreflex::hkClassIntInstance::equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassIntInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	if (is_signed) {
+		return svalue == other_instance->svalue;
+	}
+	else {
+		return value == other_instance->value;
+	}
+}
+
+void hkreflex::hkClassIntInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassIntInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	if (is_signed) {
+		if (svalue != other_instance->svalue)
+			throw std::exception("Value mismatch");
+	}
+	else {
+		if (value != other_instance->value)
+			throw std::exception("Value mismatch");
+	}
 }
 
 size_t hkreflex::hkClassIntInstance::Build(utils::DataAccessor& data)
@@ -812,6 +1006,27 @@ uint64_t hkreflex::hkClassIntInstance::Serialize(utils::DataAccessor data, utils
 	return size;
 }
 
+bool hkreflex::hkClassPointerInstance::equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassPointerInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	return ptr_instance->equals(other_instance->ptr_instance);
+}
+
+void hkreflex::hkClassPointerInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassPointerInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	ptr_instance->assert_equals(other_instance->ptr_instance);
+}
+
 size_t hkreflex::hkClassPointerInstance::Build(utils::DataAccessor& data)
 {
 	size_t cur_pos = 0;
@@ -879,6 +1094,28 @@ hkreflex::hkClassFloatInstance::hkClassFloatInstance(hkClassBase* type, hkphysic
 	bit_length = (format >> 16);
 	c_type = type->ctype_name;
 	byte_length = type->size;
+}
+
+bool hkreflex::hkClassFloatInstance::equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassFloatInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	return value == other_instance->value;
+}
+
+void hkreflex::hkClassFloatInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassFloatInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	if (value != other_instance->value)
+		throw std::exception("Value mismatch");
 }
 
 size_t hkreflex::hkClassFloatInstance::Build(utils::DataAccessor& data)
@@ -956,6 +1193,41 @@ uint64_t hkreflex::hkClassFloatInstance::Serialize(utils::DataAccessor data, uti
 	return cur_pos;
 }
 
+bool hkreflex::hkClassRecordInstance::equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassRecordInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	if (record_instances.size() != other_instance->record_instances.size())
+		return false;
+	for (int i = 0; i < record_instances.size(); ++i) {
+		if (record_instances[i].field_name != other_instance->record_instances[i].field_name)
+			return false;
+		if (!record_instances[i].instance->equals(other_instance->record_instances[i].instance))
+			return false;
+	}
+	return true;
+}
+
+void hkreflex::hkClassRecordInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassRecordInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	if (record_instances.size() != other_instance->record_instances.size())
+		throw std::exception("Size mismatch");
+	for (int i = 0; i < record_instances.size(); ++i) {
+		if (record_instances[i].field_name != other_instance->record_instances[i].field_name)
+			throw std::exception("Field name mismatch");
+		record_instances[i].instance->assert_equals(other_instance->record_instances[i].instance);
+	}
+}
+
 size_t hkreflex::hkClassRecordInstance::Build(utils::DataAccessor& data)
 {
 	utils::DataAccessor data_ptr = data;
@@ -1003,6 +1275,53 @@ size_t hkreflex::hkClassRecordInstance::Build(utils::DataAccessor& data)
 	}
 
 	return type->size == 0 ? 1 : type->size;
+}
+
+void hkreflex::hkClassRecordInstance::SetupFieldInstances()
+{
+	if (record_instances.size() != 0) {
+		return;
+	}
+
+	if (this->type->parent_class) {
+		auto hk_base_class = this->type->parent_class;
+		auto hk_base_instance = hkreflex::AllocateInstance(hk_base_class, ref_data);
+		if (hk_base_instance == nullptr) {
+			throw std::runtime_error("hkClassRecordInstance::SetupFieldInstances: unable to allocate base instance.");
+		}
+
+		if (hk_base_instance->type->kind == hkClassBase::TypeKind::Record) {
+			auto hk_base_record_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_base_instance);
+			hk_base_record_instance->SetupFieldInstances();
+		}
+
+		this->record_instances.push_back({ "class_parent", hk_base_instance, nullptr });
+	}
+
+	for (int i = 0; i < this->type->fields.size(); ++i) {
+		//auto field_name = c_instance->GethkClassMembers()[i].first;
+		//auto field_type_id = c_instance->GethkClassMembers()[i].second;
+		auto& field = this->type->fields[i];
+
+		//assert(field_name == field->name);
+
+		auto hk_field_class = field->type;
+
+		hkreflex::hkClassInstance* hk_field_instance = hkreflex::AllocateInstance(field->type, ref_data);
+
+		if (hk_field_instance->type->kind == hkClassBase::TypeKind::Record) {
+			auto hk_field_record_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_field_instance);
+			hk_field_record_instance->SetupFieldInstances();
+		}
+
+		if (hk_field_instance == nullptr) {
+			throw std::runtime_error("hkClassRecordInstance::SetupFieldInstances: unable to allocate field instance.");
+		}
+
+		this->record_instances.push_back({ field->name, hk_field_instance, field });
+	}
+
+	return;
 }
 
 std::string hkreflex::hkClassRecordInstance::dump(int indent)
@@ -1067,7 +1386,7 @@ std::string hkreflex::hkClassRecordInstance::GetStringByFieldName(const std::str
 		return "";
 	}
 
-	if (instance->type->ctype_name == "std::string") {
+	if (instance->type->type_name == "hkStringPtr") {
 		return dynamic_cast<hkreflex::hkClassStringInstance*>(instance)->value;
 	}
 	else {
@@ -1146,6 +1465,37 @@ bool hkreflex::hkClassRecordInstance::GetBoolByFieldName(const std::string& fiel
 		throw std::exception(("Field is not bool: " + field_name).c_str());
 		return false;
 	}
+}
+
+void hkreflex::hkClassArrayInstance::assert_equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassArrayInstance*>(other);
+	if (other_instance == nullptr)
+		throw std::exception("Type mismatch");
+
+	type->assert_equals(other_instance->type);
+
+	if (array_instances.size() != other_instance->array_instances.size())
+		throw std::exception("Size mismatch");
+	for (int i = 0; i < array_instances.size(); ++i) {
+		array_instances[i]->assert_equals(other_instance->array_instances[i]);
+	}
+}
+
+bool hkreflex::hkClassArrayInstance::equals(hkClassInstance* other)
+{
+	auto other_instance = dynamic_cast<hkClassArrayInstance*>(other);
+	if (other_instance == nullptr)
+		return false;
+	if (type->equals(other_instance->type))
+		return false;
+	if (array_instances.size() != other_instance->array_instances.size())
+		return false;
+	for (int i = 0; i < array_instances.size(); ++i) {
+		if (!array_instances[i]->equals(other_instance->array_instances[i]))
+			return false;
+	}
+	return true;
 }
 
 size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
@@ -1464,7 +1814,7 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 void hkreflex::hkClassArrayInstance::resize(size_t num)
 {
 	auto element_type = type->sub_type;
-	if (type->ctype_name == "Eigen::Vector4f" || type->ctype_name == "Eigen::Quaternionf" || type->ctype_name == "Eigen::Quaterniond") { // Allocation
+	if (element_type->type_name == "float" && type->size == 16) {
 		for (int i = this->array_instances.size(); i < 4; ++i) {
 			auto instance = AllocateInstance(element_type, ref_data);
 			if (!instance) {
@@ -1474,7 +1824,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 			this->array_instances.push_back(instance);
 		}
 	}
-	else if (type->ctype_name == "Eigen::Matrix4f") { // Allocation
+	else if (element_type->type_name == "float" && type->size == 64) {
 		
 		for (int i = this->array_instances.size(); i < 16; ++i) {
 			auto instance = AllocateInstance(element_type, ref_data);
@@ -1485,7 +1835,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 			this->array_instances.push_back(instance);
 		}
 	}
-	else if (type->ctype_name == "Eigen::Matrix3f") { // Allocation
+	else if (element_type->type_name == "float" && type->size == 48) {
 		for (int i = this->array_instances.size(); i < 12; ++i) {
 			auto instance = AllocateInstance(element_type, ref_data);
 			if (!instance) {
@@ -1536,11 +1886,13 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 	}
 	else if (type->type_name == "T[N]") { // Fill array with fixed number of elements defined by template argument
 		size_t compile_size = 0;
-		for (auto& arg : type->template_args) {
-			if (arg->template_arg_name == "vN") {
-				auto value_arg = dynamic_cast<hkTemplateArgumentValue*>(arg);
-				compile_size = value_arg->value;
-				break;
+		if (num != 0) {
+			for (auto& arg : type->template_args) {
+				if (arg->template_arg_name == "vN") {
+					auto value_arg = dynamic_cast<hkTemplateArgumentValue*>(arg);
+					compile_size = value_arg->value;
+					break;
+				}
 			}
 		}
 
@@ -1562,4 +1914,304 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 		throw std::exception("Unknown array type");
 	}
 	return;
+}
+
+std::string hkreflex::hkTypeTranscriptor::transcript_path = "hkTypeTranscript.json";
+
+hkreflex::hkTypeTranscriptor::TypeTranscriptProperties& hkreflex::hkTypeTranscriptor::RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive, bool update_exist)
+{
+	MapIdType map_id = hk_class->to_C_identifier();
+
+	if (!is_valid_id(map_id)) {
+		throw std::runtime_error("Invalid Map Id");
+	}
+
+	auto& properties = this->type_transcripts[map_id]; // Overwrite or create new
+
+	properties.id = map_id;
+	properties.hash = hk_class->hash;
+
+	if (hk_class->_defined == false && hk_class->_declared == false) {
+		return properties;
+	}
+
+	if (update_exist || properties.declared == false) {
+		properties.class_name = hk_class->type_name;
+		for (auto& temp_arg : hk_class->template_args) {
+			std::string arg_identifier = temp_arg->to_arg_specifier();
+			MapIdType arg_type = get_invalid_id();
+			uint32_t arg_value = 0;
+			if (temp_arg->template_arg_name[0] != 'v') {
+				auto& arg_hk_class = dynamic_cast<hkreflex::hkTemplateArgumentType*>(temp_arg)->type;
+				arg_type = arg_hk_class->to_C_identifier();
+				assert(is_valid_id(arg_type));
+				if (recursive) {
+					this->RegisterClass(arg_hk_class, recursive, update_exist);
+				}
+			}
+			else {
+				arg_value = static_cast<hkreflex::hkTemplateArgumentValue*>(temp_arg)->value;
+			}
+			properties.template_args.push_back({ arg_identifier, arg_type, arg_value });
+		}
+		properties.declared = true;
+	}
+
+	if (hk_class->_defined == false) {
+		return properties;
+	}
+
+	if (update_exist || properties.defined == false) {
+		if (hk_class->parent_class) {
+			properties.parent_class_id = hk_class->parent_class->to_C_identifier();
+			if (recursive) {
+				this->RegisterClass(hk_class->parent_class, recursive, update_exist);
+			}
+		}
+
+		properties.optionals = to_underlying(hk_class->optionals);
+		properties.format = hk_class->format;
+
+		if (hk_class->sub_type) {
+			properties.sub_type_id = hk_class->sub_type->to_C_identifier();
+			if (recursive) {
+				this->RegisterClass(hk_class->sub_type, recursive, update_exist);
+			}
+		}
+
+		properties.version = hk_class->version;
+		properties.size = hk_class->size;
+		properties.alignment = hk_class->alignment;
+		properties.type_flags = to_underlying(hk_class->type_flags);
+
+		for (auto& member : hk_class->fields) {
+			TypeTranscriptProperties::FieldTranscriptProperties field_properties;
+			field_properties.name = member->name;
+			field_properties.type_id = member->type->to_C_identifier();
+
+			assert(is_valid_id(field_properties.type_id));
+
+			if (recursive) {
+				this->RegisterClass(member->type, recursive, update_exist);
+			}
+
+			field_properties.offset = member->offset;
+			field_properties.flags = to_underlying(member->flags);
+			field_properties.unk_value = member->unk_value;
+			properties.fields.push_back(field_properties);
+		}
+
+		properties.defined = true;
+	}
+
+	return properties;
+}
+
+hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(MapIdType id)
+{
+	if (!is_valid_id(id)) {
+		return nullptr;
+	}
+
+	if (all_allocated_classes.find(id) != all_allocated_classes.end()) {
+		return all_allocated_classes[id];
+	}
+
+	if (this->type_transcripts.find(id) == this->type_transcripts.end()) {
+		throw std::runtime_error("Class not found");
+	}
+
+	hkreflex::hkClassBase* hk_class = new hkreflex::hkClassBase();
+	all_allocated_classes[id] = hk_class;
+
+	auto& properties = this->type_transcripts[id];
+	if (properties.declared) {
+		hk_class->type_name = properties.class_name;
+		hk_class->hash = properties.hash;
+
+		for (auto& temp_arg : properties.template_args) {
+			if (!is_valid_id(temp_arg.type_id) && temp_arg.name[0] == 'v') {
+				auto temp_arg_value = new hkreflex::hkTemplateArgumentValue();
+				temp_arg_value->template_arg_name = temp_arg.name;
+				temp_arg_value->value = temp_arg.value;
+				hk_class->template_args.push_back(temp_arg_value);
+			}
+			else if (is_valid_id(temp_arg.type_id) && temp_arg.name[0] != 'v') {
+				auto temp_arg_type = new hkreflex::hkTemplateArgumentType();
+				temp_arg_type->template_arg_name = temp_arg.name;
+				temp_arg_type->type = AllocateClassByUniqueId(temp_arg.type_id);
+				hk_class->template_args.push_back(temp_arg_type);
+			}
+			else {
+				throw std::runtime_error("Invalid template arg");
+			}
+		}
+
+		hk_class->_declared = true;
+	}
+
+	if (properties.defined) {
+		if (is_valid_id(properties.parent_class_id)) {
+			hk_class->parent_class = AllocateClassByUniqueId(properties.parent_class_id);
+		}
+
+		hk_class->optionals = static_cast<hkreflex::Optional>(properties.optionals);
+		auto& optional = hk_class->optionals;
+		if (optional & hkreflex::Optional::Format) { // 0b00000001
+			hk_class->format = properties.format;
+			hk_class->kind = (hkreflex::hkClassBase::TypeKind)(hk_class->format & 0x0000000F);
+		}
+		if (optional & hkreflex::Optional::SubType) { // 0b00000010
+			if (is_valid_id(properties.sub_type_id)) {
+				hk_class->sub_type = AllocateClassByUniqueId(properties.sub_type_id);
+			}
+			else {
+				throw std::runtime_error("Invalid sub type");
+			}
+		}
+		if (optional & hkreflex::Optional::Version) { // 0b00000100
+			hk_class->version = properties.version;
+		}
+		if (optional & hkreflex::Optional::SizeAlign) { // 0b00001000
+			hk_class->size = properties.size;
+			hk_class->alignment = properties.alignment;
+		}
+		if (optional & hkreflex::Optional::Flags) { // 0b00010000
+			hk_class->type_flags = (hkreflex::TypeFlags)properties.type_flags;
+		}
+		if (optional & hkreflex::Optional::Members) { // 0b00100000
+			hk_class->fields.clear();
+
+			for (auto& field_properties : properties.fields) {
+				auto field = new hkreflex::hkFieldBase();
+				field->name = field_properties.name;
+				field->type = AllocateClassByUniqueId(field_properties.type_id);
+				field->offset = field_properties.offset;
+				field->flags = (hkreflex::hkFieldBase::FieldFlags)field_properties.flags;
+				field->unk_value = field_properties.unk_value;
+				hk_class->fields.push_back(field);
+			}
+		}
+
+		hk_class->_defined = true;
+	}
+
+	return hk_class;
+}
+
+nlohmann::json hkreflex::hkTypeTranscriptor::SerializeTranscripts()
+{
+	nlohmann::json json = nlohmann::json::array();
+
+	for (auto& [id, properties] : this->type_transcripts) {
+		nlohmann::json json_properties;
+		json_properties["declared"] = (uint8_t)properties.declared;
+		json_properties["defined"] = (uint8_t)properties.defined;
+
+		if (properties.declared) {
+			json_properties["id"] = properties.id;
+			json_properties["hash"] = properties.hash;
+			json_properties["class_name"] = properties.class_name;
+			json_properties["template_args"] = nlohmann::json::array();
+
+			for (auto& arg_prop : properties.template_args) {
+				json_properties["template_args"].push_back(arg_prop.Serialize());
+			}
+		}
+
+		if (properties.defined) {
+			json_properties["fields"] = nlohmann::json::array();
+
+			for (auto& field : properties.fields) {
+				json_properties["fields"].push_back(field.Serialize());
+			}
+
+			json_properties["parent_class_id"] = properties.parent_class_id;
+			json_properties["optionals"] = properties.optionals;
+			json_properties["format"] = properties.format;
+			json_properties["sub_type_id"] = properties.sub_type_id;
+			json_properties["version"] = properties.version;
+			json_properties["size"] = properties.size;
+			json_properties["alignment"] = properties.alignment;
+			json_properties["type_flags"] = properties.type_flags;
+		}
+
+		json.push_back(json_properties);
+	}
+
+	return json;
+}
+
+void hkreflex::hkTypeTranscriptor::SerializeTranscripts(std::string path, int json_indent) {
+	std::ofstream file(path);
+	auto json = SerializeTranscripts();
+
+#ifdef _DEBUG
+	json_indent = 2;
+#endif // _DEBUG
+
+	file << json.dump(json_indent);
+	file.close();
+}
+
+void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(nlohmann::json& json)
+{
+	for (auto& json_properties : json) {
+		TypeTranscriptProperties properties;
+		properties.declared = (uint8_t)json_properties["declared"];
+		properties.defined = (uint8_t)json_properties["defined"];
+
+		if (properties.declared) {
+			properties.id = json_properties["id"];
+			properties.hash = json_properties["hash"];
+			properties.class_name = json_properties["class_name"];
+
+			properties.template_args = std::vector<TypeTranscriptProperties::TemplateArgTranscriptProperties>();
+
+			for (auto& json_arg : json_properties["template_args"]) {
+				TypeTranscriptProperties::TemplateArgTranscriptProperties arg_properties;
+				arg_properties.Deserialize(json_arg);
+				properties.template_args.push_back(arg_properties);
+			}
+		}
+
+		if (properties.defined) {
+			properties.fields = std::vector<TypeTranscriptProperties::FieldTranscriptProperties>();
+
+			for (auto& json_field : json_properties["fields"]) {
+				TypeTranscriptProperties::FieldTranscriptProperties field_properties;
+				field_properties.Deserialize(json_field);
+				properties.fields.push_back(field_properties);
+			}
+
+			properties.parent_class_id = json_properties["parent_class_id"];
+			properties.optionals = json_properties["optionals"];
+			properties.format = json_properties["format"];
+			properties.sub_type_id = json_properties["sub_type_id"];
+			properties.version = json_properties["version"];
+			properties.size = json_properties["size"];
+			properties.alignment = json_properties["alignment"];
+			properties.type_flags = json_properties["type_flags"];
+		}
+
+		this->type_transcripts[properties.id] = properties;
+	}
+}
+
+void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool throw_if_not_exist) {
+	std::ifstream file(path);
+
+	if (!file.is_open()) {
+		if (throw_if_not_exist) {
+			throw std::runtime_error("File not found: " + path);
+		}
+		std::cout << "File not found: " << path << std::endl;
+		return;
+	}
+
+	nlohmann::json json;
+	file >> json;
+	file.close();
+
+	DeserializeTranscripts(json);
 }

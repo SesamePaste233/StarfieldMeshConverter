@@ -10,6 +10,7 @@ namespace hktypes {
 
 	class hkQsTransformf : public hkHolderBase {
 	public:
+		using BaseType = void;
 		// From hkQsTransform
 		Eigen::Vector4f translation;
 		Eigen::Quaternionf rotation;
@@ -18,10 +19,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hkQsTransformf"; };
-		inline std::string GetTranscriptId() override { return "hkQsTransformf"; };
-		inline uint32_t GethkClassHash() override { return 0; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hkQsTransformf"; };
+		inline std::string GetTranscriptId() { return "hkQsTransformf"; };
+		inline uint32_t GethkClassHash() { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "translation", "hkVector4f" },
 				{ "rotation", "hkQuaternionf" },
@@ -44,10 +45,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hkQsTransform"; };
-		inline std::string GetTranscriptId() override { return "hkQsTransform"; };
-		inline uint32_t GethkClassHash() override { return 973428694; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hkQsTransform"; };
+		inline std::string GetTranscriptId() { return "hkQsTransform"; };
+		inline uint32_t GethkClassHash() { return 973428694; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 			};
 		};
@@ -67,10 +68,10 @@ namespace hktypes {
 		std::vector<hkaBoneHolder*> children;
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hkaBone"; };
-		inline std::string GetTranscriptId() override { return "hkaBone"; };
-		inline uint32_t GethkClassHash() override { return 704422420; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hkaBone"; };
+		inline std::string GetTranscriptId() { return "hkaBone"; };
+		inline uint32_t GethkClassHash() { return 704422420; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "name", "hkStringPtr" },
 				{ "lockTranslation", "hkBool" },
@@ -99,10 +100,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hkaSkeleton"; };
-		inline std::string GetTranscriptId() override { return "hkaSkeleton"; };
-		inline uint32_t GethkClassHash() override { return 2607764882; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hkaSkeleton"; };
+		inline std::string GetTranscriptId() { return "hkaSkeleton"; };
+		inline uint32_t GethkClassHash() { return 2607764882; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "name", "hkStringPtr" },
 				{ "parentIndices", "hkArray<hkInt16, hkContainerHeapAllocator>" },

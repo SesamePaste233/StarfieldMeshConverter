@@ -1,6 +1,5 @@
 #pragma once
 #include "hkInclude.h"
-#include "hkTypeTranscriptor.h"
 #include "json.hpp"
 
 namespace hktypes {
@@ -32,6 +31,7 @@ namespace hktypes {
 
 	class hkVector4Holder : public hkHolderBase {
 	public:
+		using BaseType = void;
 		float values[4];
 
 		// Extra
@@ -62,6 +62,7 @@ namespace hktypes {
 
 	class hkMatrix4Holder : public hkHolderBase {
 	public:
+		using BaseType = void;
 		float values[16];
 
 		// Extra
@@ -82,6 +83,7 @@ namespace hktypes {
 	template<class tStorage>
 	class hkBitFieldStorage : public hkHolderBase {
 	public:
+		using BaseType = void;
 		tStorage words;	// Offset: 0 Unk: 0
 		int numBits;	// Offset: 16 Unk: 0
 
@@ -100,6 +102,7 @@ namespace hktypes {
 	template<class tStorage>
 	class hkBitFieldBase : public hkHolderBase {
 	public:
+		using BaseType = void;
 		tStorage storage;	// Offset: 0 Unk: 0
 
 		// Extra
@@ -116,6 +119,7 @@ namespace hktypes {
 
 	class hkBitField : public hkBitFieldBase<hkBitFieldStorage<std::vector<uint32_t>>> {
 	public:
+		using BaseType = hkBitFieldBase<hkBitFieldStorage<std::vector<uint32_t>>>;
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
@@ -165,9 +169,8 @@ namespace hktypes {
 		inline std::string GetTranscriptId() override { return "hkRootLevelContainer"; };
 		inline uint32_t GethkClassHash() override { return 54921221; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
-			return { {"namedVariants", "hkArray<hkRootLevelContainer::NamedVariant,hkContainerHeapAllocator>"} };
+			return { {"namedVariants", "hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>"} };
 		};
-		hkreflex::hkClassInstance* Instantiate();
 
 		hkReferencedObject* GetNamedVariantRef(std::string type_name, std::string instance_name = "");
 	};

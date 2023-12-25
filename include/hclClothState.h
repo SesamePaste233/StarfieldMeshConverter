@@ -18,10 +18,10 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return "hclTransformSetUsage::TransformTracker"; };
-			inline std::string GetTranscriptId() override { return "hclTransformSetUsage::TransformTracker"; };
-			inline uint32_t GethkClassHash() override { return 51977619; };
-			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			inline std::string GethkClassName() { return "hclTransformSetUsage::TransformTracker"; };
+			inline std::string GetTranscriptId() { return "hclTransformSetUsage::TransformTracker"; };
+			inline uint32_t GethkClassHash() { return 51977619; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 				return {
 					{ "read", "hkBitField" },
 					{ "readBeforeWrite", "hkBitField" },
@@ -36,10 +36,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hclTransformSetUsage"; };
-		inline std::string GetTranscriptId() override { return "hclTransformSetUsage"; };
-		inline uint32_t GethkClassHash() override { return 0; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclTransformSetUsage"; };
+		inline std::string GetTranscriptId() { return "hclTransformSetUsage"; };
+		inline uint32_t GethkClassHash() { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "perComponentFlags", "T[N]<hkUint8, 2>" },
 				{ "perComponentTransformTrackers", "hkArray<hclTransformSetUsage::TransformTracker, hkContainerHeapAllocator>" },
@@ -56,10 +56,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hclBufferUsage"; };
-		inline std::string GetTranscriptId() override { return "hclBufferUsage"; };
-		inline uint32_t GethkClassHash() override { return 0; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclBufferUsage"; };
+		inline std::string GetTranscriptId() { return "hclBufferUsage"; };
+		inline uint32_t GethkClassHash() { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "perComponentFlags", "T[N]<hkUint8, 4>" },
 				{ "trianglesRead", "hkBool" },
@@ -81,10 +81,10 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return "hclStateDependencyGraph::Branch"; };
-			inline std::string GetTranscriptId() override { return "hclStateDependencyGraph::Branch"; };
-			inline uint32_t GethkClassHash() override { return 2493525897; };
-			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			inline std::string GethkClassName() { return "hclStateDependencyGraph::Branch"; };
+			inline std::string GetTranscriptId() { return "hclStateDependencyGraph::Branch"; };
+			inline uint32_t GethkClassHash() { return 2493525897; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 				return {
 					{ "branchId", "int" },
 					{ "stateOperatorIndices", "hkArray<int, hkContainerHeapAllocator>" },
@@ -103,10 +103,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hclStateDependencyGraph"; };
-		inline std::string GetTranscriptId() override { return "hclStateDependencyGraph"; };
-		inline uint32_t GethkClassHash() override { return 2248211247; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclStateDependencyGraph"; };
+		inline std::string GetTranscriptId() { return "hclStateDependencyGraph"; };
+		inline uint32_t GethkClassHash() { return 2248211247; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "branches", "hkArray<hclStateDependencyGraph::Branch, hkContainerHeapAllocator>" },
 				{ "rootBranchIds", "hkArray<int, hkContainerHeapAllocator>" },
@@ -130,10 +130,10 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return "hclClothState::BufferAccess"; };
-			inline std::string GetTranscriptId() override { return "hclClothState::BufferAccess"; };
-			inline uint32_t GethkClassHash() override { return 746522671; };
-			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			inline std::string GethkClassName() { return "hclClothState::BufferAccess"; };
+			inline std::string GetTranscriptId() { return "hclClothState::BufferAccess"; };
+			inline uint32_t GethkClassHash() { return 746522671; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 				return {
 					{ "bufferIndex", "hkUint32" },
 					{ "bufferUsage", "hclBufferUsage" },
@@ -150,10 +150,10 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return "hclClothState::TransformSetAccess"; };
-			inline std::string GetTranscriptId() override { return "hclClothState::TransformSetAccess"; };
-			inline uint32_t GethkClassHash() override { return 3568223325; };
-			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			inline std::string GethkClassName() { return "hclClothState::TransformSetAccess"; };
+			inline std::string GetTranscriptId() { return "hclClothState::TransformSetAccess"; };
+			inline uint32_t GethkClassHash() { return 3568223325; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 				return {
 					{ "transformSetIndex", "hkUint32" },
 					{ "transformSetUsage", "hclTransformSetUsage" },
@@ -171,10 +171,10 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hclClothState"; };
-		inline std::string GetTranscriptId() override { return "hclClothState"; };
-		inline uint32_t GethkClassHash() override { return 1309046206; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+		inline std::string GethkClassName() { return "hclClothState"; };
+		inline std::string GetTranscriptId() { return "hclClothState"; };
+		inline uint32_t GethkClassHash() { return 1309046206; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() {
 			return {
 				{ "name", "hkStringPtr" },
 				{ "operators", "hkArray<hkUint32, hkContainerHeapAllocator>" },

@@ -122,9 +122,8 @@ bool hktypes::hclObjectSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* 
 	hclOperator::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
 
 	std::vector<hkMatrix4Holder> _boneFromSkinMeshTransforms;
-	_boneFromSkinMeshTransforms.resize(boneFromSkinMeshTransforms.size());
 	for (int i = 0; i < boneFromSkinMeshTransforms.size(); i++) {
-		_boneFromSkinMeshTransforms[i].FromMatrix4f(boneFromSkinMeshTransforms[i]);
+		_boneFromSkinMeshTransforms.push_back(hktypes::hkMatrix4Holder::FromMatrix4f(boneFromSkinMeshTransforms[i]));
 	}
 	class_instance->GetInstanceByFieldName("boneFromSkinMeshTransforms")->SetValue(_boneFromSkinMeshTransforms);
 

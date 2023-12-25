@@ -4,7 +4,7 @@ bool hktypes::hclConstraintSet::FromInstance(const hkreflex::hkClassInstance* in
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclConstraintSet") {
+	if (class_instance->type->type_name != "hclConstraintSet") {
 		std::cout << "hclConstraintSet::FromInstance: type_name is not hclConstraintSet" << std::endl;
 		return false;
 	}
@@ -20,7 +20,7 @@ bool hktypes::hclConstraintSet::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclConstraintSet") {
+	if (class_instance->type->type_name != "hclConstraintSet") {
 		std::cout << "hclConstraintSet::FromInstance: type_name is not hclConstraintSet" << std::endl;
 		return false;
 	}
@@ -34,7 +34,7 @@ bool hktypes::hclConstraintSet::ToInstance(hkreflex::hkClassInstance* instance)
 
 bool hktypes::hclVolumeConstraint::FrameData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclVolumeConstraint::FrameData") {
+	if (class_instance->type->type_name != "hclVolumeConstraint::FrameData") {
 		std::cout << "hclVolumeConstraint::FrameData::FromInstance: type_name is not hclVolumeConstraint::FrameData" << std::endl;
 		return false;
 	}
@@ -48,7 +48,7 @@ bool hktypes::hclVolumeConstraint::FrameData::FromInstance(const hkreflex::hkCla
 
 bool hktypes::hclVolumeConstraint::FrameData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclVolumeConstraint::FrameData") {
+	if (class_instance->type->type_name != "hclVolumeConstraint::FrameData") {
 		std::cout << "hclVolumeConstraint::FrameData::FromInstance: type_name is not hclVolumeConstraint::FrameData" << std::endl;
 		return false;
 	}
@@ -62,7 +62,7 @@ bool hktypes::hclVolumeConstraint::FrameData::ToInstance(hkreflex::hkClassInstan
 
 bool hktypes::hclVolumeConstraint::ApplyData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclVolumeConstraint::ApplyData") {
+	if (class_instance->type->type_name != "hclVolumeConstraint::ApplyData") {
 		std::cout << "hclVolumeConstraint::ApplyData::FromInstance: type_name is not hclVolumeConstraint::ApplyData" << std::endl;
 		return false;
 	}
@@ -76,7 +76,7 @@ bool hktypes::hclVolumeConstraint::ApplyData::FromInstance(const hkreflex::hkCla
 
 bool hktypes::hclVolumeConstraint::ApplyData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclVolumeConstraint::ApplyData") {
+	if (class_instance->type->type_name != "hclVolumeConstraint::ApplyData") {
 		std::cout << "hclVolumeConstraint::ApplyData::FromInstance: type_name is not hclVolumeConstraint::ApplyData" << std::endl;
 		return false;
 	}
@@ -90,7 +90,7 @@ bool hktypes::hclVolumeConstraint::ApplyData::ToInstance(hkreflex::hkClassInstan
 
 bool hktypes::hclVolumeConstraint::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclVolumeConstraint") {
+	if (class_instance->type->type_name != "hclVolumeConstraint") {
 		std::cout << "hclVolumeConstraint::FromInstance: type_name is not hclVolumeConstraint" << std::endl;
 		return false;
 	}
@@ -105,7 +105,7 @@ bool hktypes::hclVolumeConstraint::FromInstance(const hkreflex::hkClassInstance*
 
 bool hktypes::hclVolumeConstraint::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclVolumeConstraint") {
+	if (class_instance->type->type_name != "hclVolumeConstraint") {
 		std::cout << "hclVolumeConstraint::FromInstance: type_name is not hclVolumeConstraint" << std::endl;
 		return false;
 	}
@@ -118,11 +118,47 @@ bool hktypes::hclVolumeConstraint::ToInstance(hkreflex::hkClassInstance* instanc
 	return true;
 }
 
+bool hktypes::hclLocalRangeConstraintSet::LocalConstraint::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalConstraint") {
+		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("particleIndex")->GetValue(particleIndex);
+	class_instance->GetInstanceByFieldName("referenceVertex")->GetValue(referenceVertex);
+	class_instance->GetInstanceByFieldName("maximumDistance")->GetValue(maximumDistance);
+	class_instance->GetInstanceByFieldName("maxNormalDistance")->GetValue(maxNormalDistance);
+	class_instance->GetInstanceByFieldName("minNormalDistance")->GetValue(minNormalDistance);
+	return true;
+}
+
+bool hktypes::hclLocalRangeConstraintSet::LocalConstraint::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalConstraint") {
+		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("particleIndex")->SetValue(particleIndex);
+	class_instance->GetInstanceByFieldName("referenceVertex")->SetValue(referenceVertex);
+	class_instance->GetInstanceByFieldName("maximumDistance")->SetValue(maximumDistance);
+	class_instance->GetInstanceByFieldName("maxNormalDistance")->SetValue(maxNormalDistance);
+	class_instance->GetInstanceByFieldName("minNormalDistance")->SetValue(minNormalDistance);
+	return true;
+}
+
 bool hktypes::hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
 		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance: type_name is not hclLocalRangeConstraintSet::LocalStiffnessConstraint" << std::endl;
 		return false;
 	}
@@ -141,7 +177,7 @@ bool hktypes::hclLocalRangeConstraintSet::LocalStiffnessConstraint::ToInstance(h
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
 		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance: type_name is not hclLocalRangeConstraintSet::LocalStiffnessConstraint" << std::endl;
 		return false;
 	}
@@ -160,7 +196,7 @@ bool hktypes::hclLocalRangeConstraintSet::FromInstance(const hkreflex::hkClassIn
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclLocalRangeConstraintSet") {
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet") {
 		std::cout << "hclLocalRangeConstraintSet::FromInstance: type_name is not hclLocalRangeConstraintSet" << std::endl;
 		return false;
 	}
@@ -181,7 +217,7 @@ bool hktypes::hclLocalRangeConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclLocalRangeConstraintSet") {
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet") {
 		std::cout << "hclLocalRangeConstraintSet::FromInstance: type_name is not hclLocalRangeConstraintSet" << std::endl;
 		return false;
 	}
@@ -203,7 +239,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::Batch::FromInstance(const hkre
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclCompressibleLinkConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx::Batch") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::Batch::FromInstance: type_name is not hclCompressibleLinkConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -245,7 +281,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::Batch::ToInstance(hkreflex::hk
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclCompressibleLinkConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx::Batch") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::Batch::FromInstance: type_name is not hclCompressibleLinkConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -276,7 +312,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::Single::FromInstance(const hkr
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclCompressibleLinkConstraintSetMx::Single") {
+	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx::Single") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::Single::FromInstance: type_name is not hclCompressibleLinkConstraintSetMx::Single" << std::endl;
 		return false;
 	}
@@ -295,7 +331,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::Single::ToInstance(hkreflex::h
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclCompressibleLinkConstraintSetMx::Single") {
+	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx::Single") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::Single::FromInstance: type_name is not hclCompressibleLinkConstraintSetMx::Single" << std::endl;
 		return false;
 	}
@@ -314,7 +350,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::FromInstance(const hkreflex::h
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclCompressibleLinkConstraintSetMx") {
+	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::FromInstance: type_name is not hclCompressibleLinkConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -330,7 +366,7 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::ToInstance(hkreflex::hkClassIn
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclCompressibleLinkConstraintSetMx") {
+	if (class_instance->type->type_name != "hclCompressibleLinkConstraintSetMx") {
 		std::cout << "hclCompressibleLinkConstraintSetMx::FromInstance: type_name is not hclCompressibleLinkConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -346,7 +382,7 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Batch::FromInstance(const hkrefle
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBendStiffnessConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Batch") {
 		std::cout << "hclBendStiffnessConstraintSetMx::Batch::FromInstance: type_name is not hclBendStiffnessConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -442,7 +478,7 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Batch::ToInstance(hkreflex::hkCla
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBendStiffnessConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Batch") {
 		std::cout << "hclBendStiffnessConstraintSetMx::Batch::FromInstance: type_name is not hclBendStiffnessConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -493,31 +529,57 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Batch::ToInstance(hkreflex::hkCla
 
 }
 
-bool hktypes::hclBendStiffnessConstraintSetMx::Single::FromInstance(const hkreflex::hkClassInstance* instance)
-{
+bool hktypes::hclBendStiffnessConstraintSetMx::Single::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBendStiffnessConstraintSetMx::Single") {
-		std::cout << "hclBendStiffnessConstraintSetMx::Single::FromInstance: type_name is not hclBendStiffnessConstraintSetMx::Single" << std::endl;
-		return false;
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Single") {
+		std::cout << "hclBendStiffnessConstraintSetMx::Single::FromInstance: Wrong type!" << std::endl;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
-	// TODO
-
+	class_instance->GetInstanceByFieldName("weightA")->GetValue(weightA);
+	class_instance->GetInstanceByFieldName("weightB")->GetValue(weightB);
+	class_instance->GetInstanceByFieldName("weightC")->GetValue(weightC);
+	class_instance->GetInstanceByFieldName("weightD")->GetValue(weightD);
+	class_instance->GetInstanceByFieldName("bendStiffness")->GetValue(bendStiffness);
+	class_instance->GetInstanceByFieldName("restCurvature")->GetValue(restCurvature);
+	class_instance->GetInstanceByFieldName("invMassA")->GetValue(invMassA);
+	class_instance->GetInstanceByFieldName("invMassB")->GetValue(invMassB);
+	class_instance->GetInstanceByFieldName("invMassC")->GetValue(invMassC);
+	class_instance->GetInstanceByFieldName("invMassD")->GetValue(invMassD);
+	class_instance->GetInstanceByFieldName("particleA")->GetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
+	class_instance->GetInstanceByFieldName("particleC")->GetValue(particleC);
+	class_instance->GetInstanceByFieldName("particleD")->GetValue(particleD);
 	return true;
 }
 
-bool hktypes::hclBendStiffnessConstraintSetMx::Single::ToInstance(hkreflex::hkClassInstance* instance)
-{
+bool hktypes::hclBendStiffnessConstraintSetMx::Single::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBendStiffnessConstraintSetMx::Single") {
-		std::cout << "hclBendStiffnessConstraintSetMx::Single::FromInstance: type_name is not hclBendStiffnessConstraintSetMx::Single" << std::endl;
-		return false;
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Single") {
+		std::cout << "hclBendStiffnessConstraintSetMx::Single::ToInstance: Wrong type!" << std::endl;
+		throw;
 	}
+#endif // NO_HK_TYPENAME_CHECK
 
-	// TODO
-
+	class_instance->GetInstanceByFieldName("weightA")->SetValue(weightA);
+	class_instance->GetInstanceByFieldName("weightB")->SetValue(weightB);
+	class_instance->GetInstanceByFieldName("weightC")->SetValue(weightC);
+	class_instance->GetInstanceByFieldName("weightD")->SetValue(weightD);
+	class_instance->GetInstanceByFieldName("bendStiffness")->SetValue(bendStiffness);
+	class_instance->GetInstanceByFieldName("restCurvature")->SetValue(restCurvature);
+	class_instance->GetInstanceByFieldName("invMassA")->SetValue(invMassA);
+	class_instance->GetInstanceByFieldName("invMassB")->SetValue(invMassB);
+	class_instance->GetInstanceByFieldName("invMassC")->SetValue(invMassC);
+	class_instance->GetInstanceByFieldName("invMassD")->SetValue(invMassD);
+	class_instance->GetInstanceByFieldName("particleA")->SetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
+	class_instance->GetInstanceByFieldName("particleC")->SetValue(particleC);
+	class_instance->GetInstanceByFieldName("particleD")->SetValue(particleD);
 	return true;
 }
 
@@ -525,7 +587,7 @@ bool hktypes::hclBendStiffnessConstraintSetMx::FromInstance(const hkreflex::hkCl
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBendStiffnessConstraintSetMx") {
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx") {
 		std::cout << "hclBendStiffnessConstraintSetMx::FromInstance: type_name is not hclBendStiffnessConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -544,7 +606,7 @@ bool hktypes::hclBendStiffnessConstraintSetMx::ToInstance(hkreflex::hkClassInsta
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBendStiffnessConstraintSetMx") {
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx") {
 		std::cout << "hclBendStiffnessConstraintSetMx::FromInstance: type_name is not hclBendStiffnessConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -563,7 +625,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::FromInstance(const hkreflex
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStandardLinkConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
 		std::cout << "hclStandardLinkConstraintSetMx::Batch::FromInstance: type_name is not hclStandardLinkConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -600,7 +662,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClas
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStandardLinkConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
 		std::cout << "hclStandardLinkConstraintSetMx::Batch::FromInstance: type_name is not hclStandardLinkConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -628,7 +690,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::FromInstance(const hkrefle
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStandardLinkConstraintSetMx::Single") {
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
 		std::cout << "hclStandardLinkConstraintSetMx::Single::FromInstance: type_name is not hclStandardLinkConstraintSetMx::Single" << std::endl;
 		return false;
 	}
@@ -646,7 +708,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::ToInstance(hkreflex::hkCla
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStandardLinkConstraintSetMx::Single") {
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
 		std::cout << "hclStandardLinkConstraintSetMx::Single::FromInstance: type_name is not hclStandardLinkConstraintSetMx::Single" << std::endl;
 		return false;
 	}
@@ -664,7 +726,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::FromInstance(const hkreflex::hkCla
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStandardLinkConstraintSetMx") {
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
 		std::cout << "hclStandardLinkConstraintSetMx::FromInstance: type_name is not hclStandardLinkConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -680,7 +742,7 @@ bool hktypes::hclStandardLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstan
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStandardLinkConstraintSetMx") {
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
 		std::cout << "hclStandardLinkConstraintSetMx::FromInstance: type_name is not hclStandardLinkConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -696,7 +758,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::Batch::FromInstance(const hkreflex:
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStretchLinkConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclStretchLinkConstraintSetMx::Batch") {
 		std::cout << "hclStretchLinkConstraintSetMx::Batch::FromInstance: type_name is not hclStretchLinkConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -728,7 +790,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClass
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStretchLinkConstraintSetMx::Batch") {
+	if (class_instance->type->type_name != "hclStretchLinkConstraintSetMx::Batch") {
 		std::cout << "hclStretchLinkConstraintSetMx::Batch::FromInstance: type_name is not hclStretchLinkConstraintSetMx::Batch" << std::endl;
 		return false;
 	}
@@ -736,8 +798,8 @@ bool hktypes::hclStretchLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClass
 	std::vector<float> _rest_lengths = { this->restLengths[0], this->restLengths[1], this->restLengths[2], this->restLengths[3] };
 	class_instance->GetInstanceByFieldName("restLengths")->SetValue(_rest_lengths);
 
-	std::vector<float> _stiffnesses_a = { this->stiffnesses[0], this->stiffnesses[1], this->stiffnesses[2], this->stiffnesses[3] };
-	class_instance->GetInstanceByFieldName("stiffnessesA")->SetValue(_stiffnesses_a);
+	std::vector<float> _stiffnesses = { this->stiffnesses[0], this->stiffnesses[1], this->stiffnesses[2], this->stiffnesses[3] };
+	class_instance->GetInstanceByFieldName("stiffnesses")->SetValue(_stiffnesses);
 
 	std::vector<uint16_t> _particles_a = { this->particlesA[0], this->particlesA[1], this->particlesA[2], this->particlesA[3] };
 	class_instance->GetInstanceByFieldName("particlesA")->SetValue(_particles_a);
@@ -753,7 +815,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::Single::FromInstance(const hkreflex
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStretchLinkConstraintSetMx::Single") {
+	if (class_instance->type->type_name != "hclStretchLinkConstraintSetMx::Single") {
 		std::cout << "hclStretchLinkConstraintSetMx::Single::FromInstance: type_name is not hclStretchLinkConstraintSetMx::Single" << std::endl;
 		return false;
 	}
@@ -770,7 +832,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::Single::ToInstance(hkreflex::hkClas
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStretchLinkConstraintSetMx::Single") {
+	if (class_instance->type->type_name != "hclStretchLinkConstraintSetMx::Single") {
 		std::cout << "hclStretchLinkConstraintSetMx::Single::FromInstance: type_name is not hclStretchLinkConstraintSetMx::Single" << std::endl;
 		return false;
 	}
@@ -787,7 +849,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::FromInstance(const hkreflex::hkClas
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStretchLinkConstraintSetMx") {
+	if (class_instance->type->type_name != "hclStretchLinkConstraintSetMx") {
 		std::cout << "hclStretchLinkConstraintSetMx::FromInstance: type_name is not hclStretchLinkConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -803,7 +865,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstanc
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclStretchLinkConstraintSetMx") {
+	if (class_instance->type->type_name != "hclStretchLinkConstraintSetMx") {
 		std::cout << "hclStretchLinkConstraintSetMx::FromInstance: type_name is not hclStretchLinkConstraintSetMx" << std::endl;
 		return false;
 	}
@@ -818,7 +880,7 @@ bool hktypes::hclStretchLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstanc
 bool hktypes::hclSimClothPose::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothPose") {
+	if (class_instance->type->type_name != "hclSimClothPose") {
 		std::cout << "hclSimClothPose::FromInstance: type_name is not hclSimClothPose" << std::endl;
 		return false;
 	}
@@ -833,7 +895,7 @@ bool hktypes::hclSimClothPose::FromInstance(const hkreflex::hkClassInstance* ins
 bool hktypes::hclSimClothPose::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothPose") {
+	if (class_instance->type->type_name != "hclSimClothPose") {
 		std::cout << "hclSimClothPose::FromInstance: type_name is not hclSimClothPose" << std::endl;
 		return false;
 	}
@@ -848,7 +910,7 @@ bool hktypes::hclSimClothPose::ToInstance(hkreflex::hkClassInstance* instance)
 bool hktypes::hclSimClothData::OverridableSimulationInfo::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::OverridableSimulationInfo") {
+	if (class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
 		std::cout << "hclSimClothData::OverridableSimulationInfo::FromInstance: type_name is not hclSimClothData::OverridableSimulationInfo" << std::endl;
 		return false;
 	}
@@ -866,7 +928,7 @@ bool hktypes::hclSimClothData::OverridableSimulationInfo::FromInstance(const hkr
 bool hktypes::hclSimClothData::OverridableSimulationInfo::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::OverridableSimulationInfo") {
+	if (class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
 		std::cout << "hclSimClothData::OverridableSimulationInfo::FromInstance: type_name is not hclSimClothData::OverridableSimulationInfo" << std::endl;
 		return false;
 	}
@@ -882,7 +944,7 @@ bool hktypes::hclSimClothData::OverridableSimulationInfo::ToInstance(hkreflex::h
 bool hktypes::hclSimClothData::ParticleData::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::ParticleData") {
+	if (class_instance->type->type_name != "hclSimClothData::ParticleData") {
 		std::cout << "hclSimClothData::ParticleData::FromInstance: type_name is not hclSimClothData::ParticleData" << std::endl;
 		return false;
 	}
@@ -898,7 +960,7 @@ bool hktypes::hclSimClothData::ParticleData::FromInstance(const hkreflex::hkClas
 bool hktypes::hclSimClothData::ParticleData::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::ParticleData") {
+	if (class_instance->type->type_name != "hclSimClothData::ParticleData") {
 		std::cout << "hclSimClothData::ParticleData::FromInstance: type_name is not hclSimClothData::ParticleData" << std::endl;
 		return false;
 	}
@@ -914,7 +976,7 @@ bool hktypes::hclSimClothData::ParticleData::ToInstance(hkreflex::hkClassInstanc
 bool hktypes::hclSimClothData::CollidableTransformMap::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::CollidableTransformMap") {
+	if (class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
 		std::cout << "hclSimClothData::CollidableTransformMap::FromInstance: type_name is not hclSimClothData::CollidableTransformMap" << std::endl;
 		return false;
 	}
@@ -929,7 +991,7 @@ bool hktypes::hclSimClothData::CollidableTransformMap::FromInstance(const hkrefl
 bool hktypes::hclSimClothData::CollidableTransformMap::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::CollidableTransformMap") {
+	if (class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
 		std::cout << "hclSimClothData::CollidableTransformMap::FromInstance: type_name is not hclSimClothData::CollidableTransformMap" << std::endl;
 		return false;
 	}
@@ -944,37 +1006,40 @@ bool hktypes::hclSimClothData::CollidableTransformMap::ToInstance(hkreflex::hkCl
 bool hktypes::hclSimClothData::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData") {
+	if (class_instance->type->type_name != "hclSimClothData") {
 		std::cout << "hclSimClothData::FromInstance: type_name is not hclSimClothData" << std::endl;
 		return false;
 	}
 
-	this->name = class_instance->GetStringByFieldName("name");
-	class_instance->GetInstanceByFieldName("simulationInfo")->GetValue(this->simulationInfo);
-	this->particleDatas = class_instance->GetArrayByFieldName<ParticleData>("particleDatas");
-	this->fixedParticles = class_instance->GetArrayByFieldName<uint16_t>("fixedParticles");
-	this->doNormals = class_instance->GetBoolByFieldName("doNormals");
-	this->simOpIds = class_instance->GetArrayByFieldName<uint32_t>("simOpIds");
-	this->simClothPoses = class_instance->GetArrayOfPointersByFieldName<hclSimClothPose>("simClothPoses");
-	this->staticConstraintSets = class_instance->GetArrayOfPointersByFieldName<hclConstraintSet>("staticConstraintSets");
-	this->antiPinchConstraintSets = class_instance->GetArrayOfPointersByFieldName<hclConstraintSet>("antiPinchConstraintSets");
-	class_instance->GetInstanceByFieldName("collidableTransformMap")->GetValue(this->collidableTransformMap);
-	this->perInstanceCollidables = class_instance->GetArrayOfPointersByFieldName<hclCollidable>("perInstanceCollidables");
-	this->maxParticleRadius = class_instance->GetFloatByFieldName("maxParticleRadius");
-	this->staticCollisionMasks = class_instance->GetArrayByFieldName<uint32_t>("staticCollisionMasks");
-	this->totalMass = class_instance->GetFloatByFieldName("totalMass");
-	class_instance->GetInstanceByFieldName("transferMotionData")->GetValue(this->transferMotionData);
-	this->transferMotionEnabled = class_instance->GetBoolByFieldName("transferMotionEnabled");
-	this->landscapeCollisionEnabled = class_instance->GetBoolByFieldName("landscapeCollisionEnabled");
-	class_instance->GetInstanceByFieldName("landscapeCollisionData")->GetValue(this->landscapeCollisionData);
-	this->numLandscapeCollidableParticles = class_instance->GetUIntByFieldName("numLandscapeCollidableParticles");
-	this->triangleIndices = class_instance->GetArrayByFieldName<uint16_t>("triangleIndices");
-	this->triangleFlips = class_instance->GetArrayByFieldName<uint8_t>("triangleFlips");
-	this->pinchDetectionEnabled = class_instance->GetBoolByFieldName("pinchDetectionEnabled");
-	this->perParticlePinchDetectionEnabledFlags = class_instance->GetArrayByFieldName<bool>("perParticlePinchDetectionEnabledFlags");
-	this->minPinchedParticleIndex = class_instance->GetUIntByFieldName("minPinchedParticleIndex");
-	this->maxPinchedParticleIndex = class_instance->GetUIntByFieldName("maxPinchedParticleIndex");
-	this->maxCollisionPairs = class_instance->GetUIntByFieldName("maxCollisionPairs");
+	class_instance->GetInstanceByFieldName("name")->GetValue(name);
+	class_instance->GetInstanceByFieldName("simulationInfo")->GetValue(simulationInfo);
+	class_instance->GetInstanceByFieldName("particleDatas")->GetValue(particleDatas);
+	class_instance->GetInstanceByFieldName("fixedParticles")->GetValue(fixedParticles);
+	class_instance->GetInstanceByFieldName("doNormals")->GetValue(doNormals);
+	class_instance->GetInstanceByFieldName("simOpIds")->GetValue(simOpIds);
+	class_instance->GetInstanceByFieldName("simClothPoses")->GetValue(simClothPoses);
+	class_instance->GetInstanceByFieldName("staticConstraintSets")->GetValue(staticConstraintSets);
+	class_instance->GetInstanceByFieldName("antiPinchConstraintSets")->GetValue(antiPinchConstraintSets);
+	class_instance->GetInstanceByFieldName("collidableTransformMap")->GetValue(collidableTransformMap);
+	class_instance->GetInstanceByFieldName("perInstanceCollidables")->GetValue(perInstanceCollidables);
+	class_instance->GetInstanceByFieldName("maxParticleRadius")->GetValue(maxParticleRadius);
+	class_instance->GetInstanceByFieldName("staticCollisionMasks")->GetValue(staticCollisionMasks);
+	//class_instance->GetInstanceByFieldName("actions")->GetValue(actions);
+	class_instance->GetInstanceByFieldName("totalMass")->GetValue(totalMass);
+	class_instance->GetInstanceByFieldName("transferMotionData")->GetValue(transferMotionData);
+	class_instance->GetInstanceByFieldName("transferMotionEnabled")->GetValue(transferMotionEnabled);
+	class_instance->GetInstanceByFieldName("landscapeCollisionEnabled")->GetValue(landscapeCollisionEnabled);
+	class_instance->GetInstanceByFieldName("landscapeCollisionData")->GetValue(landscapeCollisionData);
+	class_instance->GetInstanceByFieldName("numLandscapeCollidableParticles")->GetValue(numLandscapeCollidableParticles);
+	class_instance->GetInstanceByFieldName("triangleIndices")->GetValue(triangleIndices);
+	class_instance->GetInstanceByFieldName("triangleFlips")->GetValue(triangleFlips);
+	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->GetValue(pinchDetectionEnabled);
+	class_instance->GetInstanceByFieldName("perParticlePinchDetectionEnabledFlags")->GetValue(perParticlePinchDetectionEnabledFlags);
+	class_instance->GetInstanceByFieldName("collidablePinchingDatas")->GetValue(collidablePinchingDatas);
+	class_instance->GetInstanceByFieldName("minPinchedParticleIndex")->GetValue(minPinchedParticleIndex);
+	class_instance->GetInstanceByFieldName("maxPinchedParticleIndex")->GetValue(maxPinchedParticleIndex);
+	class_instance->GetInstanceByFieldName("maxCollisionPairs")->GetValue(maxCollisionPairs);
+	//class_instance->GetInstanceByFieldName("virtualCollisionPointsData")->GetValue(virtualCollisionPointsData);
 
 	return true;
 }
@@ -982,58 +1047,40 @@ bool hktypes::hclSimClothData::FromInstance(const hkreflex::hkClassInstance* ins
 bool hktypes::hclSimClothData::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData") {
+	if (class_instance->type->type_name != "hclSimClothData") {
 		std::cout << "hclSimClothData::FromInstance: type_name is not hclSimClothData" << std::endl;
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("name")->SetValue(this->name);
-	class_instance->GetInstanceByFieldName("simulationInfo")->SetValue(this->simulationInfo);
-	class_instance->GetInstanceByFieldName("particleDatas")->SetValue(this->particleDatas);
-	class_instance->GetInstanceByFieldName("fixedParticles")->SetValue(this->fixedParticles);
-	class_instance->GetInstanceByFieldName("doNormals")->SetValue(this->doNormals);
-	class_instance->GetInstanceByFieldName("simOpIds")->SetValue(this->simOpIds);
-	std::vector<hclSimClothPose> _sim_cloth_poses;
-	for (int i = 0; i < this->simClothPoses.size(); ++i) {
-		_sim_cloth_poses.push_back(*this->simClothPoses[i]);
-	}
-	class_instance->GetInstanceByFieldName("simClothPoses")->SetValue(_sim_cloth_poses);
-
-	std::vector<hclConstraintSet> _static_constraint_sets;
-	for (int i = 0; i < this->staticConstraintSets.size(); ++i) {
-		_static_constraint_sets.push_back(*this->staticConstraintSets[i]);
-	}
-	class_instance->GetInstanceByFieldName("staticConstraintSets")->SetValue(_static_constraint_sets);
-
-	std::vector<hclConstraintSet> _anti_pinch_constraint_sets;
-	for (int i = 0; i < this->antiPinchConstraintSets.size(); ++i) {
-		_anti_pinch_constraint_sets.push_back(*this->antiPinchConstraintSets[i]);
-	}
-	class_instance->GetInstanceByFieldName("antiPinchConstraintSets")->SetValue(_anti_pinch_constraint_sets);
-
-	class_instance->GetInstanceByFieldName("collidableTransformMap")->SetValue(this->collidableTransformMap);
-
-	std::vector<hclCollidable> _per_instance_collidables;
-	for (int i = 0; i < this->perInstanceCollidables.size(); ++i) {
-		_per_instance_collidables.push_back(*this->perInstanceCollidables[i]);
-	}
-	class_instance->GetInstanceByFieldName("perInstanceCollidables")->SetValue(_per_instance_collidables);
-
-	class_instance->GetInstanceByFieldName("maxParticleRadius")->SetValue(this->maxParticleRadius);
-	class_instance->GetInstanceByFieldName("staticCollisionMasks")->SetValue(this->staticCollisionMasks);
-	class_instance->GetInstanceByFieldName("totalMass")->SetValue(this->totalMass);
-	class_instance->GetInstanceByFieldName("transferMotionData")->SetValue(this->transferMotionData);
-	class_instance->GetInstanceByFieldName("transferMotionEnabled")->SetValue(this->transferMotionEnabled);
-	class_instance->GetInstanceByFieldName("landscapeCollisionEnabled")->SetValue(this->landscapeCollisionEnabled);
-	class_instance->GetInstanceByFieldName("landscapeCollisionData")->SetValue(this->landscapeCollisionData);
-	class_instance->GetInstanceByFieldName("numLandscapeCollidableParticles")->SetValue(this->numLandscapeCollidableParticles);
-	class_instance->GetInstanceByFieldName("triangleIndices")->SetValue(this->triangleIndices);
-	class_instance->GetInstanceByFieldName("triangleFlips")->SetValue(this->triangleFlips);
-	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(this->pinchDetectionEnabled);
-	class_instance->GetInstanceByFieldName("perParticlePinchDetectionEnabledFlags")->SetValue(this->perParticlePinchDetectionEnabledFlags);
-	class_instance->GetInstanceByFieldName("minPinchedParticleIndex")->SetValue(this->minPinchedParticleIndex);
-	class_instance->GetInstanceByFieldName("maxPinchedParticleIndex")->SetValue(this->maxPinchedParticleIndex);
-	class_instance->GetInstanceByFieldName("maxCollisionPairs")->SetValue(this->maxCollisionPairs);
+	class_instance->GetInstanceByFieldName("name")->SetValue(name);
+	class_instance->GetInstanceByFieldName("simulationInfo")->SetValue(simulationInfo);
+	class_instance->GetInstanceByFieldName("particleDatas")->SetValue(particleDatas);
+	class_instance->GetInstanceByFieldName("fixedParticles")->SetValue(fixedParticles);
+	class_instance->GetInstanceByFieldName("doNormals")->SetValue(doNormals);
+	class_instance->GetInstanceByFieldName("simOpIds")->SetValue(simOpIds);
+	class_instance->GetInstanceByFieldName("simClothPoses")->SetValue(simClothPoses);
+	class_instance->GetInstanceByFieldName("staticConstraintSets")->SetValue(staticConstraintSets);
+	class_instance->GetInstanceByFieldName("antiPinchConstraintSets")->SetValue(antiPinchConstraintSets);
+	class_instance->GetInstanceByFieldName("collidableTransformMap")->SetValue(collidableTransformMap);
+	class_instance->GetInstanceByFieldName("perInstanceCollidables")->SetValue(perInstanceCollidables);
+	class_instance->GetInstanceByFieldName("maxParticleRadius")->SetValue(maxParticleRadius);
+	class_instance->GetInstanceByFieldName("staticCollisionMasks")->SetValue(staticCollisionMasks);
+	//class_instance->GetInstanceByFieldName("actions")->SetValue(actions);
+	class_instance->GetInstanceByFieldName("totalMass")->SetValue(totalMass);
+	class_instance->GetInstanceByFieldName("transferMotionData")->SetValue(transferMotionData);
+	class_instance->GetInstanceByFieldName("transferMotionEnabled")->SetValue(transferMotionEnabled);
+	class_instance->GetInstanceByFieldName("landscapeCollisionEnabled")->SetValue(landscapeCollisionEnabled);
+	class_instance->GetInstanceByFieldName("landscapeCollisionData")->SetValue(landscapeCollisionData);
+	class_instance->GetInstanceByFieldName("numLandscapeCollidableParticles")->SetValue(numLandscapeCollidableParticles);
+	class_instance->GetInstanceByFieldName("triangleIndices")->SetValue(triangleIndices);
+	class_instance->GetInstanceByFieldName("triangleFlips")->SetValue(triangleFlips);
+	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(pinchDetectionEnabled);
+	class_instance->GetInstanceByFieldName("perParticlePinchDetectionEnabledFlags")->SetValue(perParticlePinchDetectionEnabledFlags);
+	class_instance->GetInstanceByFieldName("collidablePinchingDatas")->SetValue(collidablePinchingDatas);
+	class_instance->GetInstanceByFieldName("minPinchedParticleIndex")->SetValue(minPinchedParticleIndex);
+	class_instance->GetInstanceByFieldName("maxPinchedParticleIndex")->SetValue(maxPinchedParticleIndex);
+	class_instance->GetInstanceByFieldName("maxCollisionPairs")->SetValue(maxCollisionPairs);
+	//class_instance->GetInstanceByFieldName("virtualCollisionPointsData")->SetValue(virtualCollisionPointsData);
 
 	return true;
 }
@@ -1041,19 +1088,22 @@ bool hktypes::hclSimClothData::ToInstance(hkreflex::hkClassInstance* instance)
 bool hktypes::hclCollidable::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclCollidable") {
+	if (class_instance->type->type_name != "hclCollidable") {
 		std::cout << "hclCollidable::FromInstance: type_name is not hclCollidable" << std::endl;
 		return false;
 	}
 
-	this->name = class_instance->GetStringByFieldName("name");
-	class_instance->GetInstanceByFieldName("transform")->GetValue(this->transform);
-	class_instance->GetInstanceByFieldName("linearVelocity")->GetValue(this->linearVelocity);
-	class_instance->GetInstanceByFieldName("angularVelocity")->GetValue(this->angularVelocity);
-	this->pinchDetectionEnabled = class_instance->GetBoolByFieldName("pinchDetectionEnabled");
-	this->pinchDetectionRadius = class_instance->GetFloatByFieldName("pinchDetectionRadius");
-	this->pinchDetectionPriority = class_instance->GetIntByFieldName("pinchDetectionPriority");
-	class_instance->GetInstanceByFieldName("shape")->GetValue(this->shape);
+	class_instance->GetInstanceByFieldName("transform")->GetValue(transform);
+	class_instance->GetInstanceByFieldName("linearVelocity")->GetValue(linearVelocity);
+	class_instance->GetInstanceByFieldName("angularVelocity")->GetValue(angularVelocity);
+	class_instance->GetInstanceByFieldName("userData")->GetValue(userData);
+	class_instance->GetInstanceByFieldName("shape")->GetValue(shape);
+	class_instance->GetInstanceByFieldName("name")->GetValue(name);
+	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->GetValue(pinchDetectionRadius);
+	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->GetValue(pinchDetectionPriority);
+	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->GetValue(pinchDetectionEnabled);
+	class_instance->GetInstanceByFieldName("virtualCollisionPointCollisionEnabled")->GetValue(virtualCollisionPointCollisionEnabled);
+	class_instance->GetInstanceByFieldName("enabled")->GetValue(enabled);
 
 	return true;
 }
@@ -1061,19 +1111,22 @@ bool hktypes::hclCollidable::FromInstance(const hkreflex::hkClassInstance* insta
 bool hktypes::hclCollidable::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclCollidable") {
+	if (class_instance->type->type_name != "hclCollidable") {
 		std::cout << "hclCollidable::FromInstance: type_name is not hclCollidable" << std::endl;
 		return false;
 	}
 
-	class_instance->GetInstanceByFieldName("name")->SetValue(this->name);
-	class_instance->GetInstanceByFieldName("transform")->SetValue(this->transform);
-	class_instance->GetInstanceByFieldName("linearVelocity")->SetValue(this->linearVelocity);
-	class_instance->GetInstanceByFieldName("angularVelocity")->SetValue(this->angularVelocity);
-	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(this->pinchDetectionEnabled);
-	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->SetValue(this->pinchDetectionRadius);
-	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->SetValue(this->pinchDetectionPriority);
-	class_instance->GetInstanceByFieldName("shape")->SetValue(this->shape);
+	class_instance->GetInstanceByFieldName("transform")->SetValue(transform);
+	class_instance->GetInstanceByFieldName("linearVelocity")->SetValue(linearVelocity);
+	class_instance->GetInstanceByFieldName("angularVelocity")->SetValue(angularVelocity);
+	class_instance->GetInstanceByFieldName("userData")->SetValue(userData);
+	class_instance->GetInstanceByFieldName("shape")->SetValue(shape);
+	class_instance->GetInstanceByFieldName("name")->SetValue(name);
+	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->SetValue(pinchDetectionRadius);
+	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->SetValue(pinchDetectionPriority);
+	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(pinchDetectionEnabled);
+	class_instance->GetInstanceByFieldName("virtualCollisionPointCollisionEnabled")->SetValue(virtualCollisionPointCollisionEnabled);
+	class_instance->GetInstanceByFieldName("enabled")->SetValue(enabled);
 
 	return true;
 }
@@ -1081,7 +1134,7 @@ bool hktypes::hclCollidable::ToInstance(hkreflex::hkClassInstance* instance)
 bool hktypes::hclSimClothData::TransferMotionData::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::TransferMotionData") {
+	if (class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
 		std::cout << "hclSimClothData::TransferMotionData::FromInstance: type_name is not hclSimClothData::TransferMotionData" << std::endl;
 		return false;
 	}
@@ -1105,7 +1158,7 @@ bool hktypes::hclSimClothData::TransferMotionData::FromInstance(const hkreflex::
 bool hktypes::hclSimClothData::TransferMotionData::ToInstance(hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::TransferMotionData") {
+	if (class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
 		std::cout << "hclSimClothData::TransferMotionData::FromInstance: type_name is not hclSimClothData::TransferMotionData" << std::endl;
 		return false;
 	}
@@ -1129,7 +1182,7 @@ bool hktypes::hclSimClothData::TransferMotionData::ToInstance(hkreflex::hkClassI
 bool hktypes::hclSimClothData::LandscapeCollisionData::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclSimClothData::LandscapeCollisionData") {
+	if (class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
 		std::cout << "hclSimClothData::LandscapeCollisionData::FromInstance: type_name is not hclSimClothData::LandscapeCollisionData" << std::endl;
 		return false;
 	}
@@ -1149,7 +1202,7 @@ bool hktypes::hclSimClothData::LandscapeCollisionData::ToInstance(hkreflex::hkCl
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclSimClothData::LandscapeCollisionData") {
+	if (class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
 		std::cout << "hclSimClothData::LandscapeCollisionData::FromInstance: type_name is not hclSimClothData::LandscapeCollisionData" << std::endl;
 		return false;
 	}
@@ -1168,7 +1221,7 @@ bool hktypes::hclSimClothData::LandscapeCollisionData::ToInstance(hkreflex::hkCl
 bool hktypes::hclBonePlanesConstraintSet::BonePlane::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclBonePlanesConstraintSet::BonePlane") {
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
 		std::cout << "hclBonePlanesConstraintSet::BonePlane::FromInstance: type_name is not hclBonePlanesConstraintSet::BonePlane" << std::endl;
 		return false;
 	}
@@ -1185,7 +1238,7 @@ bool hktypes::hclBonePlanesConstraintSet::BonePlane::ToInstance(hkreflex::hkClas
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBonePlanesConstraintSet::BonePlane") {
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
 		std::cout << "hclBonePlanesConstraintSet::BonePlane::FromInstance: type_name is not hclBonePlanesConstraintSet::BonePlane" << std::endl;
 		return false;
 	}
@@ -1201,7 +1254,7 @@ bool hktypes::hclBonePlanesConstraintSet::BonePlane::ToInstance(hkreflex::hkClas
 bool hktypes::hclBonePlanesConstraintSet::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclBonePlanesConstraintSet") {
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet") {
 		std::cout << "hclBonePlanesConstraintSet::FromInstance: type_name is not hclBonePlanesConstraintSet" << std::endl;
 		return false;
 	}
@@ -1218,7 +1271,7 @@ bool hktypes::hclBonePlanesConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclBonePlanesConstraintSet") {
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet") {
 		std::cout << "hclBonePlanesConstraintSet::FromInstance: type_name is not hclBonePlanesConstraintSet" << std::endl;
 		return false;
 	}

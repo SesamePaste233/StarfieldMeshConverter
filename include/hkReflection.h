@@ -3,6 +3,7 @@
 #include "hkUtils.h"
 #include "hkTypeMapper.h"
 
+#include "json.hpp"
 #include "hkInclude.h"
 
 namespace hkphysics {
@@ -82,6 +83,10 @@ namespace hkreflex {
 		FieldFlags flags;
 		uint8_t unk_value;
 
+		bool equals(hkFieldBase* other);
+
+		void assert_equals(hkFieldBase* other);
+
 		virtual std::string to_literal(bool use_mapped_ctype = false);
 
 		std::string to_C_identifier() override;
@@ -105,6 +110,8 @@ namespace hkreflex {
 		hkphysics::hkPhysicsReflectionData* ref_data;
 
 		hkClassInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : type(type), ref_data(ref_data) {};
+		virtual bool equals(hkClassInstance* other) = 0;
+		virtual void assert_equals(hkClassInstance* other) = 0;
 		virtual size_t Build(utils::DataAccessor& data) = 0;
 		virtual std::string dump(int indent = 0) = 0;
 		virtual hkClassInstance* make_copy() = 0;
@@ -121,12 +128,20 @@ namespace hkreflex {
 		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool GetValue(std::vector<elem_t> & container) const;
 
+		template<typename elem_t, typename sub_t = std::remove_pointer_t<elem_t>>
+		requires std::is_pointer_v<elem_t> && (hktypes::_is_hk_holder_t<sub_t>)
+		bool GetValue(std::vector<elem_t> &container) const;
+
 		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
 		requires std::is_pointer_v<ptr_t> /*&& (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)*/
 		bool GetValue(ptr_t &container) const;
 
 		template<typename T>
-		requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
+		requires utils::_is_string_t<T>
+		bool SetValue(T & container);
+
+		template<typename T>
+		requires hktypes::_is_hk_holder_t<T>
 		bool SetValue(T & container);
 
 		template<typename arithmetic_t>
@@ -134,13 +149,24 @@ namespace hkreflex {
 		bool SetValue(arithmetic_t & container);
 
 		template<typename elem_t>
-		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool SetValue(std::vector<elem_t> & container);
 
+		template<typename elem_t>
+		requires hktypes::_is_hk_holder_t<elem_t>
+		bool SetValue(std::vector<elem_t> &container);
+
+		template<typename elem_t, typename sub_t = std::remove_pointer_t<elem_t>>
+		requires std::is_pointer_v<elem_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+		bool SetValue(std::vector<elem_t> &container);
+
 		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
-		requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+		requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t>)
 		bool SetValue(ptr_t & container);
-	
+
+		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
+		requires std::is_pointer_v<ptr_t> && (hktypes::_is_hk_holder_t<sub_t>)
+		bool SetValue(ptr_t& container);
 	};
 
 	class hkIndexedDataBlock : public utils::SerializableBase {
@@ -186,6 +212,10 @@ namespace hkreflex {
 		hkClassBoolInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
 		};
 
+		bool equals(hkClassInstance* other) override;
+
+		void assert_equals(hkClassInstance* other) override;
+
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
@@ -205,6 +235,10 @@ namespace hkreflex {
 
 		hkClassStringInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
 		};
+
+		bool equals(hkClassInstance* other) override;
+
+		void assert_equals(hkClassInstance* other) override;
 
 		size_t Build(utils::DataAccessor& data) override;
 
@@ -229,6 +263,10 @@ namespace hkreflex {
 
 		hkClassIntInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data);
 
+		bool equals(hkClassInstance* other) override;
+
+		void assert_equals(hkClassInstance* other) override;
+
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
@@ -249,6 +287,10 @@ namespace hkreflex {
 		double value = 0;
 
 		hkClassFloatInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data);
+
+		bool equals(hkClassInstance* other) override;
+
+		void assert_equals(hkClassInstance* other) override;
 
 		size_t Build(utils::DataAccessor& data) override;
 
@@ -296,6 +338,10 @@ namespace hkreflex {
 		hkIndexedDataBlock* data_block = nullptr; // Reference
 
 		hkClassInstance* ptr_instance = nullptr; // With ownership
+
+		bool equals(hkClassInstance* other) override;
+
+		void assert_equals(hkClassInstance* other) override;
 
 		size_t Build(utils::DataAccessor& data) override;
 
@@ -348,7 +394,13 @@ namespace hkreflex {
 
 		std::vector<Record> record_instances; // With ownership
 
+		bool equals(hkClassInstance* other) override;
+
+		void assert_equals(hkClassInstance* other) override;
+
 		size_t Build(utils::DataAccessor& data) override;
+
+		void SetupFieldInstances();
 
 		std::string dump(int indent = 0) override;
 
@@ -432,6 +484,10 @@ namespace hkreflex {
 
 		float float_array[16] = { 0 };
 
+		void assert_equals(hkClassInstance* other) override;
+
+		bool equals(hkClassInstance* other) override;
+
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
@@ -511,6 +567,10 @@ namespace hkreflex {
 		bool _declared = false;
 
 		bool _defined = false;
+
+		bool equals(hkClassBase* other);
+
+		void assert_equals(hkClassBase* other);
 
 		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false, bool use_mapped_ctype = false);
 
@@ -602,8 +662,156 @@ namespace hkreflex {
 		}
 	};
 
-
 	hkClassInstance* AllocateInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* data);
+
+	class hkTypeTranscriptor {
+	public:
+		using MapIdType = std::string;
+
+		static inline bool is_valid_id(MapIdType id) {
+			return !id.empty();
+		}
+
+		static inline MapIdType get_invalid_id() {
+			return std::string();
+		}
+
+		class TypeTranscriptProperties {
+		public:
+			class FieldTranscriptProperties {
+			public:
+				std::string name;
+				MapIdType type_id;
+				uint32_t offset;
+				uint16_t flags;
+				uint8_t unk_value;
+
+				nlohmann::json Serialize() {
+					nlohmann::json json;
+					json["name"] = name;
+					json["type_id"] = type_id;
+					json["offset"] = offset;
+					json["flags"] = flags;
+					json["unk_value"] = unk_value;
+					return json;
+				}
+
+				void Deserialize(nlohmann::json& json) {
+					name = json["name"];
+					type_id = json["type_id"];
+					offset = json["offset"];
+					flags = json["flags"];
+					unk_value = json["unk_value"];
+				}
+			};
+
+			class TemplateArgTranscriptProperties {
+			public:
+				std::string name;
+				MapIdType type_id;
+				uint32_t value;
+
+				nlohmann::json Serialize() {
+					nlohmann::json json;
+					json["name"] = name;
+					json["type_id"] = type_id;
+					json["value"] = value;
+					return json;
+				}
+
+				void Deserialize(nlohmann::json& json) {
+					name = json["name"];
+					type_id = json["type_id"];
+					value = json["value"];
+				}
+			};
+
+			MapIdType id;
+			uint32_t hash;
+			std::string class_name;
+			std::vector<TemplateArgTranscriptProperties> template_args;
+			std::vector<FieldTranscriptProperties> fields;
+			MapIdType parent_class_id = get_invalid_id();
+			uint8_t optionals;
+			uint32_t format;
+			MapIdType sub_type_id = get_invalid_id();
+			uint32_t version;
+			uint32_t size;
+			uint32_t alignment;
+			uint8_t type_flags;
+
+			bool declared = false;
+			bool defined = false;
+		};
+
+		std::unordered_map<MapIdType, TypeTranscriptProperties> type_transcripts;
+
+		std::unordered_map<MapIdType, hkreflex::hkClassBase*> all_allocated_classes;
+
+		static std::string transcript_path;
+
+		static hkTypeTranscriptor& GetInstance() {
+			static hkTypeTranscriptor instance;
+			return instance;
+		}
+
+		static inline void SetTranscriptPath(std::string path) {
+			transcript_path = path;
+		}
+
+		TypeTranscriptProperties& RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive = true, bool update_exist = true);
+
+		hkreflex::hkClassBase* AllocateClassByUniqueId(MapIdType id);
+
+		template<typename T>
+		requires hktypes::_is_hk_holder_t<T>
+		inline hkreflex::hkClassInstance* Instantiate(T& c_instance, hkphysics::hkPhysicsReflectionData* ref_data);
+
+		nlohmann::json SerializeTranscripts();
+
+		void SerializeTranscripts(std::string path, int json_indent = -1);
+
+		void DeserializeTranscripts(nlohmann::json& json);
+
+		void DeserializeTranscripts(std::string path, bool throw_if_not_exist = false);
+
+	private:
+		hkTypeTranscriptor() {
+			if (transcript_path.empty()) {
+				transcript_path = "hkTypeTranscript.json";
+			}
+			DeserializeTranscripts(transcript_path);
+		}
+		~hkTypeTranscriptor() {
+			SerializeTranscripts(transcript_path);
+		}
+	};
+
+	template<typename T>
+	requires hktypes::_is_hk_holder_t<T>
+	inline hkreflex::hkClassInstance* hkTypeTranscriptor::Instantiate(T& c_instance_obj, hkphysics::hkPhysicsReflectionData* ref_data)
+	{
+		T* c_instance = &c_instance_obj;
+		MapIdType id = c_instance->GetTranscriptId();
+		auto hk_this_class = AllocateClassByUniqueId(id);
+		if (hk_this_class == nullptr) {
+			throw std::runtime_error("hkTypeTranscriptor::Instantiate: unable to load class. Id: " + id);
+		}
+
+		auto hk_this_instance = hkreflex::AllocateInstance(hk_this_class, ref_data);
+		if (hk_this_instance == nullptr) {
+			throw std::runtime_error("hkTypeTranscriptor::Instantiate: unable to allocate instance.");
+		}
+
+		auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_this_instance);
+		if (class_instance == nullptr) {
+			throw std::runtime_error("hkTypeTranscriptor::Instantiate: unable to cast to hkClassRecordInstance.");
+		}
+
+		class_instance->SetupFieldInstances();
+
+		return hk_this_instance;
+	}
 
 	template<typename T>
 	requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
@@ -681,6 +889,30 @@ namespace hkreflex {
 		return false;
 	}
 
+	template<typename elem_t, typename sub_t>
+	requires std::is_pointer_v<elem_t> && (hktypes::_is_hk_holder_t<sub_t>)
+	bool hkClassInstance::GetValue(std::vector<elem_t>& container) const {
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto array_instance = dynamic_cast<const hkClassArrayInstance*>(this);
+			container.clear();
+			for (auto& instance : array_instance->array_instances) {
+				hkClassPointerInstance* ptr_instance = dynamic_cast<hkClassPointerInstance*>(instance);
+
+				if (ptr_instance == nullptr) {
+					std::cout << "Instance is not array of pointers" << std::endl;
+					return false;
+				}
+
+				sub_t* elem_container = static_cast<sub_t*>(hktypes::AllocateHolder(ptr_instance->ptr_instance));
+				if (ptr_instance->ptr_instance->GetValue(*elem_container)) {
+					container.push_back(elem_container);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
 	template<typename ptr_t, typename sub_t>
 	requires std::is_pointer_v<ptr_t> /*&& (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)*/
 	inline bool hkClassInstance::GetValue(ptr_t& container) const
@@ -697,16 +929,30 @@ namespace hkreflex {
 	}
 
 	template<typename T>
-	requires utils::_is_string_t<T>  || hktypes::_is_hk_holder_t<T>
-	inline bool hkClassInstance::SetValue(T& container)
+	requires utils::_is_string_t<T>
+	inline bool hkClassInstance::SetValue(T & container)
 	{
-		if (utils::_is_string_t<T> && type->kind == hkClassBase::TypeKind::String) {
+		if (type->kind == hkClassBase::TypeKind::String) {
 			auto string_type = dynamic_cast<hkClassStringInstance*>(this);
 			string_type->value = *reinterpret_cast<std::string*>(&container);
 			return true;
 		}
-		else if (hktypes::_is_hk_holder_t<T> && type->kind == hkClassBase::TypeKind::Record) {
-			reinterpret_cast<hktypes::hkHolderBase*>(&container)->ToInstance(this);
+		
+		return false;
+	}
+
+	template<typename T>
+	requires hktypes::_is_hk_holder_t<T>
+	inline bool hkClassInstance::SetValue(T & container)
+	{
+		if (type->kind == hkClassBase::TypeKind::Record) {
+			auto hk_holder = dynamic_cast<hktypes::hkHolderBase*>(&container);
+			hk_holder->ToInstance(this);
+			return true;
+		}
+		if (type->kind == hkClassBase::TypeKind::Array) { // hkVector4f, which is weird why they use array for this
+			auto hk_holder = dynamic_cast<hktypes::hkHolderBase*>(&container);
+			hk_holder->ToInstance(this);
 			return true;
 		}
 		
@@ -752,7 +998,7 @@ namespace hkreflex {
 	}
 
 	template<typename elem_t>
-	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 	inline bool hkClassInstance::SetValue(std::vector<elem_t>& container)
 	{
 		if (type->kind == hkClassBase::TypeKind::Array) {
@@ -779,15 +1025,146 @@ namespace hkreflex {
 		return false;
 	}
 
+	template<typename elem_t>
+	requires hktypes::_is_hk_holder_t<elem_t>
+	inline bool hkClassInstance::SetValue(std::vector<elem_t>& container) {
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+
+			auto array_instance_copied = *array_instance;
+			array_instance_copied.resize(0);
+
+			for (size_t i = 0; i < container.size(); i++) {
+				elem_t elem_container = container[i];
+
+				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_data);
+				if (hk_this_instance == nullptr) {
+					throw std::runtime_error("hkClassInstance::SetValue: unable to allocate instance.");
+				}
+				
+				if (hk_this_instance->type->kind == hkClassBase::TypeKind::Record) {
+					auto instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_this_instance);
+					if (instance == nullptr) {
+						throw std::runtime_error("hkClassInstance::SetValue: unable to cast to hkClassRecordInstance.");
+					}
+
+					instance->SetupFieldInstances();
+				}else if (hk_this_instance->type->kind == hkClassBase::TypeKind::Array) {
+					auto instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(hk_this_instance);
+					if (instance == nullptr) {
+						throw std::runtime_error("hkClassInstance::SetValue: unable to cast to hkClassArrayInstance.");
+					}
+				}
+				else {
+					throw std::runtime_error("hkClassInstance::SetValue: unsupported type.");
+				}
+
+				if (!hk_this_instance->SetValue(elem_container)) {
+					std::cout << "hkClassInstance::SetValue: Failed to set value of array instance." << std::endl;
+					return false;
+				}
+				array_instance_copied.array_instances.push_back(hk_this_instance);
+			}
+
+			array_instance_copied.update_view();
+
+			*array_instance = array_instance_copied;
+
+			return true;
+		}
+		return false;
+	}
+
+	template<typename elem_t, typename sub_t>
+	requires std::is_pointer_v<elem_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+	bool hkClassInstance::SetValue(std::vector<elem_t>& container) {
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+
+			auto array_instance_copied = *array_instance;
+			array_instance_copied.resize(0);
+
+			for (size_t i = 0; i < container.size(); i++) {
+				elem_t elem_container = container[i];
+
+				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_data);
+				if (hk_this_instance == nullptr) {
+					throw std::runtime_error("hkClassInstance::SetValue: unable to allocate instance.");
+				}
+
+				auto instance = dynamic_cast<hkreflex::hkClassPointerInstance*>(hk_this_instance);
+				if (instance == nullptr) {
+					throw std::runtime_error("hkClassInstance::SetValue: unable to cast to hkClassPointerInstance.");
+				}
+
+				if (!instance->SetValue(elem_container)) {
+					std::cout << "hkClassInstance::SetValue: Failed to set value of array instance." << std::endl;
+					return false;
+				}
+				array_instance_copied.array_instances.push_back(instance);
+			}
+
+			array_instance_copied.update_view();
+
+			*array_instance = array_instance_copied;
+
+			return true;
+		}
+		return false;
+	}
+
 	template<typename ptr_t, typename sub_t>
-	requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+	requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t>)
 	inline bool hkClassInstance::SetValue(ptr_t & container) {
 		if (type->kind == hkClassBase::TypeKind::Pointer) {
-			auto ptr_instance = dynamic_cast<hkClassPointerInstance*>(this);
-			if (ptr_instance->ptr_instance->SetValue(*container)) {
+			auto& ptr_instance = dynamic_cast<hkClassPointerInstance*>(this)->ptr_instance;
+
+			if (ptr_instance == nullptr) {
+				ptr_instance = AllocateInstance(type->sub_type, nullptr);
+			}
+
+			if (ptr_instance->SetValue(*container)) {
+				return true;
+			}
+			return false;
+		}
+		return false;
+	}
+
+	template<typename ptr_t, typename sub_t>
+	requires std::is_pointer_v<ptr_t> && (hktypes::_is_hk_holder_t<sub_t>)
+	inline bool hkClassInstance::SetValue(ptr_t& container) {
+		if (type->kind == hkClassBase::TypeKind::Pointer) {
+			auto& ptr_instance = dynamic_cast<hkClassPointerInstance*>(this)->ptr_instance;
+			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+
+			if (ptr_instance == nullptr) {
+				ptr_instance = transcriptor.Instantiate(*container, ref_data);
+
+				if (ptr_instance->SetValue(*container)) {
+					return true;
+				}
 				return false;
 			}
-			return true;
+			else if (ptr_instance->type->to_C_identifier() != container->GetTranscriptId()){
+				delete ptr_instance;
+				ptr_instance = nullptr;
+
+				ptr_instance = transcriptor.Instantiate(*container, ref_data);
+
+				if (ptr_instance->SetValue(*container)) {
+					return true;
+				}
+				return false;
+			}
+			else {
+				if (ptr_instance->SetValue(*container)) {
+					return true;
+				}
+				return false;
+			}
 		}
 		return false;
 	}

@@ -11,10 +11,10 @@ namespace hktypes {
 	public:
 		virtual bool FromInstance(const hkreflex::hkClassInstance* instance) = 0;
 		virtual bool ToInstance(hkreflex::hkClassInstance* instance) = 0;
-		virtual inline std::string GethkClassName() = 0;
-		virtual inline std::string GetTranscriptId() = 0;
-		virtual inline uint32_t GethkClassHash() = 0;
-		virtual inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() = 0;
+		virtual std::string GethkClassName() = 0;
+		virtual std::string GetTranscriptId() = 0;
+		virtual uint32_t GethkClassHash() = 0;
+		virtual std::vector<std::pair<std::string, std::string>> GethkClassMembers() = 0;
 	};
 
 	class hkReferencedObject : public hkHolderBase {

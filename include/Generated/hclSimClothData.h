@@ -29,9 +29,9 @@ namespace hktypes{
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	class hclVirtualCollisionPointsData;
 	template <typename tT, typename tAllocator>
 	class ;
+	class hclVirtualCollisionPointsData;
 
 	class hclSimClothData : public hkReferencedObject {
 	public:

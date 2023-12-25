@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkVector4f;
 	class hkQuaternionf;
+	class hkVector4f;
 
 	class hkQsTransformf : public hkHolderBase {
 	public:

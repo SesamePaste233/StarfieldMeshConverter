@@ -135,22 +135,36 @@ namespace hktypes {
 
 	class hclLocalRangeConstraintSet : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class LocalConstraint : public hkHolderBase {
 		public:
+			using BaseType = void;
+			uint16_t particleIndex; // Offset: 0
+			uint16_t referenceVertex; // Offset: 2
+			float maximumDistance; // Offset: 4
+			float maxNormalDistance; // Offset: 8
+			float minNormalDistance; // Offset: 12
+
 			// Extra
-			bool FromInstance(const hkreflex::hkClassInstance* instance) override { return true; };
-			bool ToInstance(hkreflex::hkClassInstance* instance) override { return true; };
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclLocalRangeConstraintSet::LocalConstraint"; };
+			inline std::string GetTranscriptId() override { return "hclLocalRangeConstraintSet::LocalConstraint"; };
+			inline uint32_t GethkClassHash() override { return 2381122027; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "particleIndex", "hkUint16" },
+					{ "referenceVertex", "hkUint16" },
+					{ "maximumDistance", "hkReal" },
+					{ "maxNormalDistance", "hkReal" },
+					{ "minNormalDistance", "hkReal" },
 				};
 			};
 		};
 
 		class LocalStiffnessConstraint : public hkHolderBase {
 		public:
+			using BaseType = void;
 			uint16_t particleIndex;	// Offset: 0 Unk: 0
 			uint16_t referenceVertex;	// Offset: 2 Unk: 0
 			float maximumDistance;	// Offset: 4 Unk: 0
@@ -161,11 +175,17 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclLocalRangeConstraintSet::LocalStiffnessConstraint"; };
+			inline std::string GetTranscriptId() override { return "hclLocalRangeConstraintSet::LocalStiffnessConstraint"; };
+			inline uint32_t GethkClassHash() override { return 2634299948; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "particleIndex", "hkUint16" },
+					{ "referenceVertex", "hkUint16" },
+					{ "maximumDistance", "hkReal" },
+					{ "maxNormalDistance", "hkReal" },
+					{ "minNormalDistance", "hkReal" },
+					{ "stiffness", "hkReal" },
 				};
 			};
 		};
@@ -193,19 +213,27 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::string GethkClassName() override { return "hclLocalRangeConstraintSet"; };
+		inline std::string GetTranscriptId() override { return "hclLocalRangeConstraintSet"; };
+		inline uint32_t GethkClassHash() override { return 3785704016; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "localConstraints", "hkArray<hclLocalRangeConstraintSet::LocalConstraint, hkContainerHeapAllocator>" },
+				{ "localStiffnessConstraints", "hkArray<hclLocalRangeConstraintSet::LocalStiffnessConstraint, hkContainerHeapAllocator>" },
+				{ "referenceMeshBufferIdx", "hkUint32" },
+				{ "stiffness", "hkReal" },
+				{ "shapeType", "hkEnum<hclLocalRangeConstraintSet::ShapeType, hkUint32>" },
+				{ "applyNormalComponent", "hkBool" },
 			};
 		};
 	};
 
 	class hclCompressibleLinkConstraintSetMx : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class Batch : public hkHolderBase {
 		public:
+			using BaseType = void;
 			std::array<float, 4> restLengths;	// Offset: 0 Unk: 0
 			std::array<float, 4> compressionLengths;	// Offset: 16 Unk: 0
 			std::array<float, 4> stiffnessesA;	// Offset: 32 Unk: 0
@@ -216,17 +244,24 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclCompressibleLinkConstraintSetMx::Batch"; };
+			inline std::string GetTranscriptId() override { return "hclCompressibleLinkConstraintSetMx::Batch"; };
+			inline uint32_t GethkClassHash() override { return 4253223837; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "restLengths", "T[N]<hkReal, 4>" },
+					{ "compressionLengths", "T[N]<hkReal, 4>" },
+					{ "stiffnessesA", "T[N]<hkReal, 4>" },
+					{ "stiffnessesB", "T[N]<hkReal, 4>" },
+					{ "particlesA", "T[N]<hkUint16, 4>" },
+					{ "particlesB", "T[N]<hkUint16, 4>" },
 				};
 			};
 		};
 
 		class Single : public hclConstraintSet {
 		public:
+			using BaseType = void;
 			float restLength;	// Offset: 0 Unk: 0
 			float compressionLength;	// Offset: 4 Unk: 0
 			float stiffnessA;	// Offset: 8 Unk: 0
@@ -237,11 +272,17 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclCompressibleLinkConstraintSetMx::Single"; };
+			inline std::string GetTranscriptId() override { return "hclCompressibleLinkConstraintSetMx::Single"; };
+			inline uint32_t GethkClassHash() override { return 523401191; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "restLength", "hkReal" },
+					{ "compressionLength", "hkReal" },
+					{ "stiffnessA", "hkReal" },
+					{ "stiffnessB", "hkReal" },
+					{ "particleA", "hkUint16" },
+					{ "particleB", "hkUint16" },
 				};
 			};
 		};
@@ -252,19 +293,23 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::string GethkClassName() override { return "hclCompressibleLinkConstraintSetMx"; };
+		inline std::string GetTranscriptId() override { return "hclCompressibleLinkConstraintSetMx"; };
+		inline uint32_t GethkClassHash() override { return 3230409386; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "batches", "hkArray<hclCompressibleLinkConstraintSetMx::Batch, hkContainerHeapAllocator>" },
+				{ "singles", "hkArray<hclCompressibleLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
 			};
 		};
 	};
 
 	class hclBendStiffnessConstraintSetMx : public hclConstraintSet {
 	public:
+		using BaseType = hclConstraintSet;
 		class Batch : public hkHolderBase {
 		public:
+			using BaseType = void;
 			std::array<float, 4> weightsA;	// Offset: 0 Unk: 0
 			std::array<float, 4> weightsB;	// Offset: 16 Unk: 0
 			std::array<float, 4> weightsC;	// Offset: 32 Unk: 0
@@ -283,25 +328,68 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclBendStiffnessConstraintSetMx::Batch"; };
+			inline std::string GetTranscriptId() override { return "hclBendStiffnessConstraintSetMx::Batch"; };
+			inline uint32_t GethkClassHash() override { return 1314719274; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "weightsA", "T[N]<hkReal, 4>" },
+					{ "weightsB", "T[N]<hkReal, 4>" },
+					{ "weightsC", "T[N]<hkReal, 4>" },
+					{ "weightsD", "T[N]<hkReal, 4>" },
+					{ "bendStiffnesses", "T[N]<hkReal, 4>" },
+					{ "restCurvatures", "T[N]<hkReal, 4>" },
+					{ "invMassesA", "T[N]<hkReal, 4>" },
+					{ "invMassesB", "T[N]<hkReal, 4>" },
+					{ "invMassesC", "T[N]<hkReal, 4>" },
+					{ "invMassesD", "T[N]<hkReal, 4>" },
+					{ "particlesA", "T[N]<hkUint16, 4>" },
+					{ "particlesB", "T[N]<hkUint16, 4>" },
+					{ "particlesC", "T[N]<hkUint16, 4>" },
+					{ "particlesD", "T[N]<hkUint16, 4>" },
 				};
 			};
 		};
 
 		class Single : public hkHolderBase {
 		public:
+			using BaseType = void;
+			float weightA; // Offset: 0
+			float weightB; // Offset: 4
+			float weightC; // Offset: 8
+			float weightD; // Offset: 12
+			float bendStiffness; // Offset: 16
+			float restCurvature; // Offset: 20
+			float invMassA; // Offset: 24
+			float invMassB; // Offset: 28
+			float invMassC; // Offset: 32
+			float invMassD; // Offset: 36
+			uint16_t particleA; // Offset: 40
+			uint16_t particleB; // Offset: 42
+			uint16_t particleC; // Offset: 44
+			uint16_t particleD; // Offset: 46
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclBendStiffnessConstraintSetMx::Single"; };
+			inline std::string GetTranscriptId() override { return "hclBendStiffnessConstraintSetMx::Single"; };
+			inline uint32_t GethkClassHash() override { return 535526491; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "weightA", "hkReal" },
+					{ "weightB", "hkReal" },
+					{ "weightC", "hkReal" },
+					{ "weightD", "hkReal" },
+					{ "bendStiffness", "hkReal" },
+					{ "restCurvature", "hkReal" },
+					{ "invMassA", "hkReal" },
+					{ "invMassB", "hkReal" },
+					{ "invMassC", "hkReal" },
+					{ "invMassD", "hkReal" },
+					{ "particleA", "hkUint16" },
+					{ "particleB", "hkUint16" },
+					{ "particleC", "hkUint16" },
+					{ "particleD", "hkUint16" },
 				};
 			};
 		};
@@ -315,11 +403,16 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::string GethkClassName() override { return "hclBendStiffnessConstraintSetMx"; };
+		inline std::string GetTranscriptId() override { return "hclBendStiffnessConstraintSetMx"; };
+		inline uint32_t GethkClassHash() override { return 111263749; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "batches", "hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator>" },
+				{ "singles", "hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator>" },
+				{ "maxRestPoseHeightSq", "hkReal" },
+				{ "clampBendStiffness", "hkBool" },
+				{ "useRestPoseConfig", "hkBool" },
 			};
 		};
 	};
@@ -698,7 +791,7 @@ namespace hktypes {
 		std::vector<uint8_t> triangleFlips;	// Offset: 368 Unk: 0
 		bool pinchDetectionEnabled;	// Offset: 384 Unk: 0
 		std::vector<bool> perParticlePinchDetectionEnabledFlags;	// Offset: 392 Unk: 0
-		//std::vector<hclSimClothData::CollidablePinchingData> collidablePinchingDatas;	// Offset: 408 Unk: 0
+		std::vector<hclSimClothData::CollidablePinchingData> collidablePinchingDatas;	// Offset: 408 Unk: 0
 		uint16_t minPinchedParticleIndex;	// Offset: 424 Unk: 0
 		uint16_t maxPinchedParticleIndex;	// Offset: 426 Unk: 0
 		uint32_t maxCollisionPairs;	// Offset: 428 Unk: 0

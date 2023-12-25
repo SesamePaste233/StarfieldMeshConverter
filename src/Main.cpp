@@ -285,9 +285,9 @@ void pmain() {
 
 	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth.bin");
 
-	auto literals = data.classes_to_literal(true, true, true);
+	/*auto literals = data.classes_to_literal(true, true, true);
 
-	auto instances = data.dump_root_instance();
+	auto instances = data.dump_root_instance();*/
 
 	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
 	data.SerializeWithTypeUnchanged(file0);
@@ -296,6 +296,8 @@ void pmain() {
 	hkphysics::hkPhysicsReflectionData data1;
 
 	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
+	
+	data.root_level_instance->assert_equals(data1.root_level_instance);
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -304,13 +306,13 @@ void pmain() {
 		});
 
 	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated_cloth.h");
+	/*std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated_cloth.h");
 	file << literals;
 	file.close();
 
 	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances_cloth.txt");
 	file1 << instances;
-	file1.close();
+	file1.close();*/
 	return;
 }
 
@@ -443,6 +445,17 @@ void main() {
 	auto instances = data->dump_root_instance();
 
 	data->RegisterClassesToTranscriptor();
+
+	auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+
+	auto rl_instance = transcriptor.Instantiate(*data->root_level_container, data);
+	data->root_level_container->ToInstance(rl_instance);
+
+	data->root_level_instance->assert_equals(rl_instance);
+
+	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
+	data->SerializeWithTypeUnchanged(file0);
+	file0.close();
 
 	//auto json = nlohmann::json::array();
 	//auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(data->root_level_container->GetNamedVariantRef("hclClothData"));

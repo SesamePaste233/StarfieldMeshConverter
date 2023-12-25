@@ -166,7 +166,7 @@ bool hktypes::hclScratchBufferDefinition::FromInstance(const hkreflex::hkClassIn
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclScratchBufferDefinition") {
+	if (class_instance->type->type_name != "hclScratchBufferDefinition") {
 		std::cout << "hclScratchBufferDefinition::FromInstance: type_name is not hclScratchBufferDefinition" << std::endl;
 		return false;
 	}
@@ -184,8 +184,8 @@ bool hktypes::hclScratchBufferDefinition::ToInstance(hkreflex::hkClassInstance* 
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclScratchBufferDefinition") {
-		std::cout << "hclScratchBufferDefinition::FromInstance: type_name is not hclScratchBufferDefinition" << std::endl;
+	if (class_instance->type->type_name != "hclScratchBufferDefinition") {
+		std::cout << "hclScratchBufferDefinition::ToInstance: type_name is not hclScratchBufferDefinition" << std::endl;
 		return false;
 	}
 
@@ -201,7 +201,7 @@ bool hktypes::hclScratchBufferDefinition::ToInstance(hkreflex::hkClassInstance* 
 bool hktypes::hclTransformSetDefinition::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-	if (class_instance->type->ctype_name != "hclTransformSetDefinition") {
+	if (class_instance->type->type_name != "hclTransformSetDefinition") {
 		std::cout << "hclTransformSetDefinition::FromInstance: type_name is not hclTransformSetDefinition" << std::endl;
 		return false;
 	}
@@ -217,7 +217,7 @@ bool hktypes::hclTransformSetDefinition::ToInstance(hkreflex::hkClassInstance* i
 {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
-	if (class_instance->type->ctype_name != "hclTransformSetDefinition") {
+	if (class_instance->type->type_name != "hclTransformSetDefinition") {
 		std::cout << "hclTransformSetDefinition::FromInstance: type_name is not hclTransformSetDefinition" << std::endl;
 		return false;
 	}
@@ -259,36 +259,11 @@ bool hktypes::hclClothData::ToInstance(hkreflex::hkClassInstance* instance)
 	}
 
 	class_instance->GetInstanceByFieldName("name")->SetValue(this->name);
-	std::vector<hclSimClothData> _simClothDatas;
-	for (auto& simClothData : this->simClothDatas) {
-		_simClothDatas.push_back(*simClothData);
-	}
-	class_instance->GetInstanceByFieldName("simClothDatas")->SetValue(_simClothDatas);
-
-	std::vector<hclBufferDefinition> _bufferDefinitions;
-	for (auto& bufferDefinition : this->bufferDefinitions) {
-		_bufferDefinitions.push_back(*bufferDefinition);
-	}
-	class_instance->GetInstanceByFieldName("bufferDefinitions")->SetValue(_bufferDefinitions);
-
-	std::vector<hclTransformSetDefinition> _transformSetDefinitions;
-	for (auto& transformSetDefinition : this->transformSetDefinitions) {
-		_transformSetDefinitions.push_back(*transformSetDefinition);
-	}
-	class_instance->GetInstanceByFieldName("transformSetDefinitions")->SetValue(_transformSetDefinitions);
-
-	std::vector<hclOperator> _operators;
-	for (auto& op : this->operators) {
-		_operators.push_back(*op);
-	}
-	class_instance->GetInstanceByFieldName("operators")->SetValue(_operators);
-
-	std::vector<hclClothState> _clothStateDatas;
-	for (auto& clothStateData : this->clothStateDatas) {
-		_clothStateDatas.push_back(*clothStateData);
-	}
-	class_instance->GetInstanceByFieldName("clothStateDatas")->SetValue(_clothStateDatas);
-	
+	class_instance->GetInstanceByFieldName("simClothDatas")->SetValue(simClothDatas);
+	class_instance->GetInstanceByFieldName("bufferDefinitions")->SetValue(bufferDefinitions);
+	class_instance->GetInstanceByFieldName("transformSetDefinitions")->SetValue(transformSetDefinitions);
+	class_instance->GetInstanceByFieldName("operators")->SetValue(operators);
+	class_instance->GetInstanceByFieldName("clothStateDatas")->SetValue(clothStateDatas);
 	class_instance->GetInstanceByFieldName("generatedAtRuntime")->SetValue(this->generatedAtRuntime);
 	uint32_t _target_platform = (uint32_t)this->targetPlatform;
 	class_instance->GetInstanceByFieldName("targetPlatform")->SetValue(_target_platform);
