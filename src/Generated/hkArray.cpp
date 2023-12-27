@@ -6,12 +6,12 @@
 #include "Generated\.h"
 #include "Generated\hkaSkeleton.h"
 #include "Generated\.h"
-#include "Generated\.h"
 #include "Generated\hkaSkeleton.h"
-#include "Generated\hclSimClothData.h"
 #include "Generated\.h"
 #include "Generated\hclSimClothData.h"
 #include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\hclSimClothData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
@@ -21,30 +21,29 @@
 #include "Generated\hclVirtualCollisionPointsData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
-#include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclClothState.h"
-#include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclClothState.h"
+#include "Generated\hclObjectSpaceDeformer.h"
+#include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclObjectSpaceDeformer.h"
 #include "Generated\hclTransformSetUsage.h"
-#include "Generated\hclStretchLinkConstraintSetMx.h"
-#include "Generated\hclBendStiffnessConstraintSetMx.h"
-#include "Generated\hclBendStiffnessConstraintSetMx.h"
+#include "Generated\hclMoveParticlesOperator.h"
 #include "Generated\hclSimpleMeshBoneDeformOperator.h"
 #include "Generated\hclSimulateOperator.h"
-#include "Generated\hclStandardLinkConstraintSetMx.h"
-#include "Generated\hclMoveParticlesOperator.h"
-#include "Generated\hclStandardLinkConstraintSetMx.h"
 #include "Generated\hclStretchLinkConstraintSetMx.h"
-#include "Generated\hclStateDependencyGraph.h"
+#include "Generated\hclStretchLinkConstraintSetMx.h"
+#include "Generated\hclBonePlanesConstraintSet.h"
+#include "Generated\hclStandardLinkConstraintSetMx.h"
+#include "Generated\hclStandardLinkConstraintSetMx.h"
 #include "Generated\.h"
+#include "Generated\hclStateDependencyGraph.h"
 
 template<>
 bool hktypes::hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
@@ -2327,7 +2326,7 @@ inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclStre
 }; };
 
 template<>
-bool hktypes::hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -2344,7 +2343,7 @@ bool hktypes::hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAll
 }
 
 template<>
-bool hktypes::hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -2361,48 +2360,8 @@ bool hktypes::hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAll
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclBendStiffnessConstraintSetMx::Batch"},
-	{"tAllocator", "hkContainerHeapAllocator"},
-}; };
-
-template<>
-bool hktypes::hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::FromInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->GetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->GetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->GetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-bool hktypes::hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::ToInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->SetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->SetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->SetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclBendStiffnessConstraintSetMx::Single"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBonePlanesConstraintSet::BonePlane"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 

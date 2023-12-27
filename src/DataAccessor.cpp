@@ -241,6 +241,36 @@ namespace utils{
 		return rtn;
 	}
 
+	DataAccessor DataAccessor::AppendAll(const std::vector<utils::DataAccessor>& accessors)
+	{
+		if (accessors.size() == 0) {
+			return DataAccessor();
+		}
+		if (!accessors[0].is_valid()) {
+			return DataAccessor();
+		}
+		if (!accessors[0]._is_owner) {
+			throw std::exception("Cannot weld to non-owner");
+		}
+		if (!this->_is_owner) {
+			throw std::exception("Cannot weld to non-owner");
+		}
+		// Allocate new buffer
+		size_t total_size = this->size;
+		for (auto& accessor : accessors) {
+			total_size += accessor.size;
+		}
+		auto new_buffer = new uint8_t[total_size];
+		std::memcpy(new_buffer, this->data, this->size);
+		size_t offset = this->size;
+		for (auto& accessor : accessors) {
+			std::memcpy(new_buffer + offset, accessor.data, accessor.size);
+			offset += accessor.size;
+		}
+		auto rtn = DataAccessor::Create(new_buffer, total_size, true, uint8_t(accessors[0]._options));
+		return rtn;
+	}
+
 	/*uint64_t DataAccessor::get_offset() const
 	{
 		return data - start;

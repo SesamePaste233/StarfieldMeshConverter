@@ -283,7 +283,7 @@ void test_main() {
 void pmain() {
 	hkphysics::hkReflDataDeserializer data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
 
 	/*auto literals = data.classes_to_literal(true, true, true);
 
@@ -313,7 +313,7 @@ void pmain() {
 
 void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_colonist_adventurous_01_poncho_f.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.nif");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -437,15 +437,15 @@ void main() {
 
 	auto literals = data->classes_to_literal(true, false, true);
 
-	data->RegisterClassesToTranscriptor();
+	//data->RegisterClassesToTranscriptor();
 
-	auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+	hkphysics::hkReflDataSerializer serializer;
+	serializer.root_level_container = data->root_level_container;
 
-	auto rl_instance = transcriptor.Instantiate(*data->root_level_container, data);
-	data->root_level_container->ToInstance(rl_instance);
+	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
 
-	std::vector<hkreflex::hkClassBase*> serialize_classes;
-	rl_instance->CollectSerializeClasses(serialize_classes);
+	serializer.Serialize(file0);
+	file0.close();
 
 	std::vector<std::string> data_classes_identifiers;
 	for (auto& hk_class : data->classes) {
@@ -455,37 +455,41 @@ void main() {
 		}
 	}
 	std::vector<std::string> serialize_classes_identifiers;
-	for (auto& hk_class : serialize_classes) {
-		serialize_classes_identifiers.push_back(hk_class->to_C_identifier());
+	for (auto& hk_class : serializer.classes) {
+		auto id = hk_class->to_C_identifier();
+		if (id != "") {
+			serialize_classes_identifiers.push_back(id);
+		}
 	}
 	int size = data_classes_identifiers.size() < serialize_classes_identifiers.size() ? data_classes_identifiers.size() : serialize_classes_identifiers.size();
 	for (int i = 0; i < size; i++) {
 		std::cout << data_classes_identifiers[i] << " <-> " << serialize_classes_identifiers[i] << std::endl;
 	}
+	bool missing_classes = false;
 	for (auto& data_id : data_classes_identifiers) {
 		if (std::find(serialize_classes_identifiers.begin(), serialize_classes_identifiers.end(), data_id) == serialize_classes_identifiers.end()) {
 			std::cout << data_id << " is not in serialize classes" << std::endl;
+			missing_classes = true;
 		}
 	}
+	assert(!missing_classes);
 
-	/*std::set<hkreflex::hkClassBase*> data_block_types;
+	/*std::set<hkreflex::hkClassBase*> hashed_types;
 	for (auto data_block : data->indexed_blocks) {
 		auto block_type = data_block->m_data_type;
-		data_block_types.insert(block_type);
-		if (block_type->kind == hkreflex::hkClassBase::TypeKind::Record) {
-			for (auto& field : block_type->fields) {
-				if (field->type->kind == hkreflex::hkClassBase::TypeKind::Record) {
-					data_block_types.insert(field->type);
-				}
-			}
-		}
-	}*/
+		hashed_types.insert(block_type);
+	}
 
-	/*for (auto cls : data->classes) {
+	for (auto patch : data->patches) {
+		auto patch_type = patch.type;
+		hashed_types.insert(patch_type);
+	}
+
+	for (auto cls : data->classes) {
 		if (cls->type_name == "") {
 			continue;
 		}
-		if (data_block_types.find(cls) == data_block_types.end()) {
+		if (hashed_types.find(cls) == hashed_types.end()) {
 			assert(cls->hash == 0);
 		}
 		else {
@@ -493,7 +497,17 @@ void main() {
 		}
 	}*/
 
-	data->root_level_instance->assert_equals(rl_instance);
+	data->root_level_instance->assert_equals(serializer.root_level_instance);
+
+	hkphysics::hkReflDataDeserializer data1;
+
+	std::ifstream file1("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
+	size_t data_size = utils::read<uint32_t>(file1, 1, true)[0];
+	file1.seekg(0, std::ios::beg);
+	data1.Deserialize(file1, data_size);
+	file1.close();
+
+	data1.root_level_instance->assert_equals(data->root_level_instance);
 
 	//auto json = nlohmann::json::array();
 	//auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(data->root_level_container->GetNamedVariantRef("hclClothData"));

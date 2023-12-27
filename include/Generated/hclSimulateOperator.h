@@ -4,8 +4,8 @@
 
 namespace hktypes{
 	class hkStringPtr;
-	class hclOperator;
 	class hkBool;
+	class hclOperator;
 	template <typename tT, typename tAllocator>
 	class ;
 	template <typename tT, typename tAllocator>

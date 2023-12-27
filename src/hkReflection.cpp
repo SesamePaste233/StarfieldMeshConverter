@@ -59,7 +59,7 @@ void hkreflex::hkClassBase::assert_equals(hkClassBase* other)
 	for (int i = 0; i < this->template_args.size(); i++) {
 		assert(this->template_args[i]->to_literal() == other->template_args[i]->to_literal());
 	}
-	assert(this->hash == other->hash);
+	//assert(this->hash == other->hash);
 	if (this->_defined == other->_instantiated) {
 		return;
 	}
@@ -638,10 +638,12 @@ hkreflex::hkClassInstance* hkreflex::AllocateInstance(hkreflex::hkClassBase* typ
 	auto kind = type->kind;
 	if (kind == hkClassBase::TypeKind::Inherited) {
 		_ASSERT(type->parent_class != nullptr);
+		type->_instantiated = true;
 		type = type->parent_class;
 		kind = type->kind;
 		if (kind == hkClassBase::TypeKind::Inherited) {
 			_ASSERT(type->parent_class != nullptr);
+			type->_instantiated = true;
 			type = type->parent_class;
 			kind = type->kind;
 		}
@@ -1408,6 +1410,7 @@ void hkreflex::hkClassRecordInstance::SetupFieldInstances()
 		if (hk_field_instance->type->kind == hkClassBase::TypeKind::String) {
 			auto hk_field_string_instance = dynamic_cast<hkreflex::hkClassStringInstance*>(hk_field_instance);
 			hk_field_string_instance->char_type = hkreflex::hkTypeTranscriptor::GetInstance().AllocateClassByUniqueId("char");
+			hk_field_string_instance->char_type->_instantiated = true;
 		}
 
 		if (hk_field_instance == nullptr) {

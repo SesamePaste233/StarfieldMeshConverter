@@ -191,7 +191,7 @@ uint64_t hkphysics::hkDataChunkTAG0::DistributeAndSerialize(utils::DataAccessor&
 	utils::writeToAccessor(chunk_header, cur_pos, chunk_sizeAndFlags, true);
 	utils::writeStringToAccessor(chunk_header, cur_pos, std::string(type_name));
 
-	out = chunk_header.WeldAll(child_accessors);
+	out = chunk_header.AppendAll(child_accessors);
 	return chunk_size;
 }
 
@@ -254,8 +254,8 @@ uint64_t hkphysics::hkDataChunkTST1::Serialize(utils::DataAccessor& out, bool us
 	for (auto& type_name : ref_data->type_names) {
 		size += type_name.size() + 1;
 	}
-	if (size % 8 != 0) {
-		size += 8 - (size % 8);
+	if (size % 4 != 0) {
+		size += 4 - (size % 4);
 	}
 	utils::DataAccessor out_accessor = utils::DataAccessor::Alloc(size, 0xFF);
 
@@ -311,8 +311,8 @@ uint64_t hkphysics::hkDataChunkFST1::Serialize(utils::DataAccessor& out, bool us
 	for (auto& member_name : ref_data->field_names) {
 		size += member_name.size() + 1;
 	}
-	if (size % 8 != 0) {
-		size += 8 - (size % 8);
+	if (size % 4 != 0) {
+		size += 4 - (size % 4);
 	}
 	utils::DataAccessor out_accessor = utils::DataAccessor::Alloc(size, 0xFF);
 
@@ -362,8 +362,8 @@ bool hkphysics::hkDataChunkTNA1::Decode()
 
 		auto template_arg_number = utils::readHavokVarUIntFromAccessor(_accessor, cur_pos);
 
-		if (cur_pos >= GetBufferSize()) {
-			std::cout << "Error: cur_pos >= GetBufferSize()" << std::endl;
+		if (cur_pos > GetBufferSize()) {
+			std::cout << "Error: cur_pos > GetBufferSize()" << std::endl;
 			return false;
 		}
 
@@ -477,6 +477,8 @@ uint64_t hkphysics::hkDataChunkTNA1::Serialize(utils::DataAccessor& out, bool us
 	while (cur_pos % 4 != 0) {
 		utils::writeToAccessor(out_accessor, cur_pos, (uint8_t)0x00, true);
 	}
+
+	out_accessor.size = cur_pos;
 
 	cur_pos = 0;
 	uint32_t chunk_size = out_accessor.size + 8;
@@ -699,6 +701,7 @@ uint64_t hkphysics::hkDataChunkTBDY::Serialize(utils::DataAccessor& out, bool us
 		utils::writeToAccessor(out_accessor, cur_pos, (uint8_t)0x00, true);
 	}
 
+	out_accessor.size = cur_pos;
 
 	cur_pos = 0;
 	uint32_t chunk_size = out_accessor.size + 8;
@@ -745,14 +748,19 @@ uint64_t hkphysics::hkDataChunkTHSH::Serialize(utils::DataAccessor& out, bool us
 		return rtn;
 	}
 
-	size_t size = 8;
-	uint64_t num_hash = 0;
-	for (auto& hk_class : ref_data->classes) {
-		if (hk_class->hash) {
-			size += 12;
-			num_hash++;
-		}
+	std::set<hkreflex::hkClassBase*> hashed_types;
+	for (auto data_block_iter = ref_data->indexed_blocks.begin() + 1; data_block_iter != ref_data->indexed_blocks.end(); data_block_iter++ ) {
+		auto block_type = (*data_block_iter)->m_data_type;
+		hashed_types.insert(block_type);
 	}
+
+	for (auto patch : ref_data->patches) {
+		auto patch_type = patch.type;
+		hashed_types.insert(patch_type);
+	}
+
+	size_t size = 8 + 12 * hashed_types.size();
+	uint64_t num_hash = hashed_types.size();
 
 	auto out_accessor = utils::DataAccessor::Alloc(size);
 
@@ -760,12 +768,14 @@ uint64_t hkphysics::hkDataChunkTHSH::Serialize(utils::DataAccessor& out, bool us
 
 	utils::writeHavokVarUIntToAccessor(out_accessor, cur_pos, num_hash);
 
-	for (auto& hk_class : ref_data->classes) {
-		if (hk_class->hash) {
-			utils::writeHavokVarUIntToAccessor(out_accessor, cur_pos, ref_data->GetClassIndex(hk_class));
-			utils::writeToAccessor(out_accessor, cur_pos, hk_class->hash);
-		}
+
+	for (auto hk_class : hashed_types) {
+		utils::writeHavokVarUIntToAccessor(out_accessor, cur_pos, ref_data->GetClassIndex(hk_class));
+		utils::writeToAccessor(out_accessor, cur_pos, hk_class->hash);
+		assert(hk_class->hash != 0);
 	}
+
+	out_accessor.size = cur_pos;
 
 	cur_pos = 0;
 	uint32_t chunk_size = out_accessor.size + 8;

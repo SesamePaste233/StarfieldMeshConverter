@@ -44,7 +44,7 @@ namespace hkphysics {
 		std::vector<hkreflex::hkClassBase*> classes; // References
 		std::vector<hkreflex::hkIndexedDataBlock*> indexed_blocks; // Owned by this class
 		std::vector<Patch> patches;
-		std::string sdk_version;
+		std::string sdk_version = "20190200";
 
 		hkreflex::hkClassInstance* root_level_instance = nullptr;
 
@@ -109,6 +109,8 @@ namespace hkphysics {
 
 	protected:
 		utils::DataAccessor AllocateSerializeData(uint32_t size);
+
+		void SetTrueAllocSize(size_t size);
 	};
 
 	class hkReflDataDeserializer : public hkReflDataSerializeContext {
@@ -125,9 +127,9 @@ namespace hkphysics {
 
 		bool Deserialize(const std::string filename);
 
-		bool Deserialize(std::istream& data_stream);
+		bool Deserialize(std::istream& data_stream, size_t data_size);
 
-		bool Deserialize(const uint8_t* data);
+		bool Deserialize(const uint8_t* data, size_t data_size);
 
 		void ExtractClasses();
 	};
@@ -140,9 +142,9 @@ namespace hkphysics {
 		}
 
 		std::unordered_map<std::string, uint64_t> serialize_string_table;
-		hktypes::hkReferencedObject* root_level_container = nullptr;
+		hktypes::hkHolderBase* root_level_container = nullptr;
 
-		bool Serialize(std::ostream& data_stream);
+		size_t Serialize(std::ostream& data_stream);
 	
 	};
 }

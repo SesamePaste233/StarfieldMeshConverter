@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkStringPtr;
 	class hkReferencedObject;
+	class hkStringPtr;
 	template <typename tTYPE, typename vINVALID_VALUE>
 	class ;
 

@@ -498,7 +498,9 @@ void nif::BSClothExtraData::Deserialize(std::istream& file)
 {
 	this->data = new hkphysics::hkReflDataDeserializer();
 	try {
-		this->data->Deserialize(file);
+		this->data_length = utils::read<uint32_t>(file)[0];
+		assert(this->binary_bytes == this->data_length + 4);
+		this->data->Deserialize(file, this->data_length);
 	}
 	catch (std::exception& e) {
 		std::cout << "Failed to deserialize BSClothExtraData." << std::endl;
@@ -515,7 +517,9 @@ void nif::bhkPhysicsSystem::Deserialize(std::istream& file)
 {
 	this->data = new hkphysics::hkReflDataDeserializer();
 	try {
-		this->data->Deserialize(file);
+		this->data_length = utils::read<uint32_t>(file)[0];
+		assert(this->binary_bytes == this->data_length + 4);
+		this->data->Deserialize(file, this->data_length);
 	}
 	catch (std::exception& e) {
 		std::cout << "Failed to deserialize bhkPhysicsSystem." << std::endl;

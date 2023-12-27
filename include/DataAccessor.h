@@ -90,6 +90,8 @@ namespace utils {
 
 		static DataAccessor WeldAll(const std::vector<utils::DataAccessor>& accessors);
 
+		DataAccessor AppendAll(const std::vector<utils::DataAccessor>& accessors);
+
 		//uint64_t get_offset() const;
 
 		DataAccessor deep_copy(size_t size = -1) const;

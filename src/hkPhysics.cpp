@@ -9,18 +9,74 @@ bool hkphysics::hkReflDataDeserializer::Deserialize(const std::string filename)
 
 	uint32_t size = utils::read<uint32_t>(file)[0];
 
-	return this->Deserialize(file);
+	return this->Deserialize(file, size);
 }
 
-bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream)
+bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream, size_t data_size)
+{
+	const uint8_t* _file_buffer = utils::readBytes(data_stream, data_size);
+
+	return Deserialize(_file_buffer, data_size);
+
+	//utils::DataAccessor _accessor = utils::DataAccessor::Create(_file_buffer, this->data_size, true);
+
+	//hkDataChunkTAG0* chunk = new hkDataChunkTAG0(this);
+
+	//chunk->SetBuffer(_accessor.make_reference());
+
+	//size_t cur_pos = 0;
+	//uint32_t sizeAndFlags = utils::readFromAccessor<uint32_t>(_accessor, cur_pos, true); // Size and flags
+	//chunk->chunk_decorator = sizeAndFlags >> 24; // Decorator
+	//chunk->data_size = sizeAndFlags & 0x00FFFFFF; // Data size
+
+	//std::string type_name = utils::readStringFromAccessor(_accessor, cur_pos, 4); // Type name
+	//chunk->SetName(type_name);
+
+	//chunk->DistributeAndDecode();
+
+	//chunk->Traverse([this](hkDataChunkBase* chunk) {
+	//	this->data_chunks[chunk->GetType()] = chunk;
+	//	if (std::string(chunk->type_name) == "TYPE") {
+	//		chunk->OwnBuffer();
+	//	}
+	//	});
+
+	//for (auto type = this->classes.begin() + 1; type != this->classes.end(); type++) {
+	//	(*type)->ctype_name = hktypes::hkTypeMapper::GetSingleton().GetCType((*type));
+	//}
+
+	//// Root level instance
+	//auto suc = this->indexed_blocks[1]->BuildInstances();
+	//if (!suc) {
+	//	std::cout << "Warning: root level instance build failed." << std::endl;
+	//	return false;
+	//}
+
+	//for (auto block = this->indexed_blocks.begin() + 1; block != this->indexed_blocks.end(); block++) {
+	//	if((*block)->_built)
+	//		continue;
+	//	std::cout << "Warning: bogus block detected." << std::endl;
+	//	return false;
+	//}
+
+	//if (this->indexed_blocks[1]->m_instances.size() != 1) {
+	//	std::cout << "Warning: root level instance count is not 1." << std::endl;
+	//	return false;
+	//}
+
+	//this->root_level_instance = this->indexed_blocks[1]->m_instances[0];
+
+	//ExtractClasses();
+	//return true;
+}
+
+bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data, size_t data_size)
 {
 	this->Clear();
 
-	this->data_size = utils::read<uint32_t>(data_stream)[0];
+	this->data_size = data_size;
 
-	const uint8_t* _file_buffer = utils::readBytes(data_stream, this->data_size);
-
-	utils::DataAccessor _accessor = utils::DataAccessor::Create(_file_buffer, this->data_size, true);
+	utils::DataAccessor _accessor = utils::DataAccessor::Create(data, this->data_size, true);
 
 	hkDataChunkTAG0* chunk = new hkDataChunkTAG0(this);
 
@@ -56,64 +112,6 @@ bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream)
 
 	for (auto block = this->indexed_blocks.begin() + 1; block != this->indexed_blocks.end(); block++) {
 		if((*block)->_built)
-			continue;
-		std::cout << "Warning: bogus block detected." << std::endl;
-		return false;
-	}
-
-	if (this->indexed_blocks[1]->m_instances.size() != 1) {
-		std::cout << "Warning: root level instance count is not 1." << std::endl;
-		return false;
-	}
-
-	this->root_level_instance = this->indexed_blocks[1]->m_instances[0];
-
-	ExtractClasses();
-	return true;
-}
-
-bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data)
-{
-	this->Clear();
-
-	size_t cur_pos = 0;
-
-	this->data_size = utils::readFromBuffer<uint32_t>(data, cur_pos);
-
-	const uint8_t* _file_buffer = data + cur_pos;
-
-	utils::DataAccessor _accessor = utils::DataAccessor::Create(_file_buffer, this->data_size, true);
-
-	hkDataChunkTAG0* chunk = new hkDataChunkTAG0(this);
-
-	chunk->SetBuffer(_accessor);
-
-	cur_pos = 0;
-	chunk->chunk_decorator = utils::readFromAccessor<uint16_t>(_accessor, cur_pos, true); // Decorator
-	chunk->data_size = utils::readFromAccessor<uint16_t>(_accessor, cur_pos, true); // Data size
-
-	std::string type_name = utils::readStringFromAccessor(_accessor, cur_pos, 4); // Type name
-	chunk->SetName(type_name);
-
-	chunk->DistributeAndDecode();
-
-	chunk->Traverse([this](hkDataChunkBase* chunk) {
-		this->data_chunks[chunk->GetType()] = chunk;
-		});
-
-	for (auto type = this->classes.begin() + 1; type != this->classes.end(); type++) {
-		(*type)->ctype_name = hktypes::hkTypeMapper::GetSingleton().GetCType((*type));
-	}
-
-	// Root level instance
-	auto suc = this->indexed_blocks[1]->BuildInstances();
-	if (!suc) {
-		std::cout << "Warning: root level instance build failed." << std::endl;
-		return false;
-	}
-
-	for (auto block = this->indexed_blocks.begin() + 1; block != this->indexed_blocks.end(); block++) {
-		if ((*block)->_built)
 			continue;
 		std::cout << "Warning: bogus block detected." << std::endl;
 		return false;
@@ -226,6 +224,11 @@ utils::DataAccessor hkphysics::hkReflDataSerializeContext::GetDataPtr(uint32_t o
 
 utils::DataAccessor hkphysics::hkReflDataSerializeContext::AllocateSerializeData(uint32_t size){
 	return dynamic_cast<hkDataChunkDATA*>(this->data_chunks[ChunkType::DATA])->AllocateSerializeData(size);
+}
+
+void hkphysics::hkReflDataSerializeContext::SetTrueAllocSize(size_t size)
+{
+	return dynamic_cast<hkDataChunkDATA*>(this->data_chunks[ChunkType::DATA])->SetTrueAllocatedSize(size);
 }
 
 utils::DataAccessor hkphysics::hkReflDataSerializeContext::GetSerializeDataPtr(uint32_t offset){
@@ -344,7 +347,7 @@ void hkphysics::hkReflDataSerializeContext::RegisterClassesToTranscriptor() {
 	}
 }
 
-bool hkphysics::hkReflDataSerializer::Serialize(std::ostream& data_stream)
+size_t hkphysics::hkReflDataSerializer::Serialize(std::ostream& data_stream)
 {
 	this->Clear();
 
@@ -390,7 +393,7 @@ bool hkphysics::hkReflDataSerializer::Serialize(std::ostream& data_stream)
 	
 	uint64_t cur_block_index = 0;
 	
-	size_t alloc_size = this->root_level_instance->GetSerializeSize() * 1.5;
+	size_t alloc_size = this->root_level_instance->GetSerializeSize() * 4;
 	
 	auto out_accessor = this->AllocateSerializeData(alloc_size);
 	
@@ -407,7 +410,7 @@ bool hkphysics::hkReflDataSerializer::Serialize(std::ostream& data_stream)
 		this->indexed_blocks.push_back(dynamic_cast<hkreflex::hkIndexedDataBlock*>(block));
 	}
 
-	out_accessor.size = true_alloc;
+	this->SetTrueAllocSize(true_alloc);
 
 	auto tag0 = dynamic_cast<hkDataChunkTAG0*>(this->data_chunks[ChunkType::TAG0]);
 
@@ -416,5 +419,5 @@ bool hkphysics::hkReflDataSerializer::Serialize(std::ostream& data_stream)
 
 	data_stream.write((const char*)result.data, result.size);
 
-	return true;
+	return size;
 }

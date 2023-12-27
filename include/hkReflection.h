@@ -1155,7 +1155,7 @@ namespace hkreflex {
 			auto& ptr_instance = dynamic_cast<hkClassPointerInstance*>(this)->ptr_instance;
 
 			if (ptr_instance == nullptr) {
-				ptr_instance = AllocateInstance(type->sub_type, nullptr);
+				ptr_instance = AllocateInstance(type->sub_type, this->ref_context);
 			}
 
 			if (ptr_instance->SetValue(*container)) {

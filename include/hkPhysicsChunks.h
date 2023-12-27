@@ -178,9 +178,13 @@ namespace hkphysics {
 
 		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 
-		utils::DataAccessor& AllocateSerializeData(size_t out_size) {
+		utils::DataAccessor AllocateSerializeData(size_t out_size) {
 			_data_out_accessor = utils::DataAccessor::Alloc(out_size);
-			return _data_out_accessor;
+			return _data_out_accessor.make_reference();
+		}
+
+		void SetTrueAllocatedSize(size_t size) {
+			_data_out_accessor.size = size;
 		}
 
 	private:
