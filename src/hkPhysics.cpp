@@ -1,20 +1,6 @@
 #include "hkPhysics.h"
 
-hkphysics::hkPhysicsReflectionData::~hkPhysicsReflectionData() {
-	for (auto& block : indexed_blocks) {
-		delete block;
-	}
-
-	for (auto& cls : classes) {
-		delete cls;
-	}
-
-	for (auto& chunk : data_chunks) {
-		delete chunk.second;
-	}
-}
-
-bool hkphysics::hkPhysicsReflectionData::Deserialize(const std::string filename)
+bool hkphysics::hkReflDataDeserializer::Deserialize(const std::string filename)
 {
 	std::ifstream file(filename, std::ios::binary);
 	if (!file.is_open()) {
@@ -26,7 +12,7 @@ bool hkphysics::hkPhysicsReflectionData::Deserialize(const std::string filename)
 	return this->Deserialize(file);
 }
 
-bool hkphysics::hkPhysicsReflectionData::Deserialize(std::istream& data_stream)
+bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream)
 {
 	this->Clear();
 
@@ -86,7 +72,7 @@ bool hkphysics::hkPhysicsReflectionData::Deserialize(std::istream& data_stream)
 	return true;
 }
 
-bool hkphysics::hkPhysicsReflectionData::Deserialize(const uint8_t* data)
+bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data)
 {
 	this->Clear();
 
@@ -144,67 +130,62 @@ bool hkphysics::hkPhysicsReflectionData::Deserialize(const uint8_t* data)
 	return true;
 }
 
-bool hkphysics::hkPhysicsReflectionData::SerializeWithTypeUnchanged(std::ostream& data_stream)
-{
-	if (!this->_is_type_unchanged)
-		return false;
+//bool hkphysics::hkReflDataSerializer::SerializeWithTypeUnchanged(std::ostream& data_stream)
+//{
+//	auto patch_chunk = this->GetPatchChunk();
+//	if (patch_chunk) {
+//		patch_chunk->patches.clear();
+//	}
+//	else {
+//		throw std::exception("Not implemented");
+//	}
+//
+//	uint64_t cur_block_index = 0;
+//
+//	size_t alloc_size = 0;
+//	for (auto block : this->indexed_blocks) {
+//		alloc_size += ((uint64_t)block->m_data_type->size + block->m_data_type->alignment + 2) * block->m_num_instances;
+//	}
+//
+//	auto out_accessor = this->AllocateSerializeData(alloc_size);
+//
+//	size_t true_alloc = 0;
+//
+//	hkreflex::hkIndexedDataBlock* root_block = hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(this, this->root_level_instance->type, this->root_level_instance);
+//	
+//	utils::SerializePool serializer(1);
+//	serializer.QueueSerialization(root_block, true);
+//	cur_block_index = serializer.Resolve(out_accessor.make_reference(), true_alloc);
+//	
+//	this->indexed_blocks.push_back(new hkreflex::hkIndexedDataBlock(this));
+//	for (auto block : serializer.serialized_objects) {
+//		this->indexed_blocks.push_back(dynamic_cast<hkreflex::hkIndexedDataBlock*>(block));
+//	}
+///*
+//#ifdef _DEBUG
+//	auto map1 = utils::count_element<hkreflex::hkIndexedDataBlock*, std::string>(this->indexed_blocks_out, [](hkreflex::hkIndexedDataBlock* block) {
+//		return block->m_data_type ? block->m_data_type->type_name : "";
+//		});
+//
+//	auto map2 = utils::count_element<hkreflex::hkIndexedDataBlock*, std::string>(this->indexed_blocks, [](hkreflex::hkIndexedDataBlock* block) {
+//		return block->m_data_type ? block->m_data_type->type_name : "";
+//		});
+//	_ASSERT(this->indexed_blocks_out.size() == this->indexed_blocks.size());
+//#endif*/
+//
+//	out_accessor.size = true_alloc;
+//
+//	auto tag0 = dynamic_cast<hkDataChunkTAG0*>(this->data_chunks[ChunkType::TAG0]);
+//
+//	utils::DataAccessor result;
+//	auto size = (uint32_t)tag0->DistributeAndSerialize(result, true);
+//
+//	data_stream.write((const char*)result.data, result.size);
+//
+//	return true;
+//}
 
-	auto patch_chunk = this->GetPatchChunk();
-	if (patch_chunk) {
-		patch_chunk->patches.clear();
-	}
-	else {
-		throw std::exception("Not implemented");
-	}
-
-	uint64_t cur_block_index = 0;
-
-	size_t alloc_size = 0;
-	for (auto block : this->indexed_blocks) {
-		alloc_size += ((uint64_t)block->m_data_type->size + block->m_data_type->alignment + 2) * block->m_num_instances;
-	}
-
-	auto out_accessor = this->AllocateSerializeData(alloc_size);
-
-	size_t true_alloc = 0;
-
-	hkreflex::hkIndexedDataBlock* root_block = hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(this, this->root_level_instance->type, this->root_level_instance);
-	
-	utils::SerializePool serializer(1);
-	serializer.QueueSerialization(root_block, true);
-	cur_block_index = serializer.Resolve(out_accessor.make_reference(), true_alloc);
-	
-	this->indexed_blocks_out.push_back(new hkreflex::hkIndexedDataBlock(this));
-	for (auto block : serializer.serialized_objects) {
-		this->indexed_blocks_out.push_back(dynamic_cast<hkreflex::hkIndexedDataBlock*>(block));
-	}
-
-#ifdef _DEBUG
-	auto map1 = utils::count_element<hkreflex::hkIndexedDataBlock*, std::string>(this->indexed_blocks_out, [](hkreflex::hkIndexedDataBlock* block) {
-		return block->m_data_type ? block->m_data_type->type_name : "";
-		});
-
-	auto map2 = utils::count_element<hkreflex::hkIndexedDataBlock*, std::string>(this->indexed_blocks, [](hkreflex::hkIndexedDataBlock* block) {
-		return block->m_data_type ? block->m_data_type->type_name : "";
-		});
-	_ASSERT(this->indexed_blocks_out.size() == this->indexed_blocks.size());
-#endif
-
-	out_accessor.size = true_alloc;
-
-	auto tag0 = dynamic_cast<hkDataChunkTAG0*>(this->data_chunks[ChunkType::TAG0]);
-
-	utils::DataAccessor result;
-	auto size = (uint32_t)tag0->DistributeAndSerialize(result, true);
-
-	//utils::writeAsHex(data_stream, size);
-	//utils::writeAsHex(data_stream, size);
-	data_stream.write((const char*)result.data, result.size);
-
-	return true;
-}
-
-void hkphysics::hkPhysicsReflectionData::ExtractClasses()
+void hkphysics::hkReflDataDeserializer::ExtractClasses()
 {
 	auto root_ctn_insts = this->GetInstancesByClassName("hkRootLevelContainer");
 	if (root_ctn_insts.size() == 1) {
@@ -223,23 +204,77 @@ void hkphysics::hkPhysicsReflectionData::ExtractClasses()
 	}
 }
 
-hkphysics::hkDataChunkPTCH* hkphysics::hkPhysicsReflectionData::GetPatchChunk() {
-	return dynamic_cast<hkDataChunkPTCH*>(data_chunks[ChunkType::PTCH]);
+bool hkphysics::hkReflDataSerializeContext::RegisterPatch(hkreflex::hkClassBase* type, uint32_t patch_offset)
+{
+	for (auto& patch : this->patches) {
+		if (patch.type == type) {
+			patch.patch_offsets.push_back(patch_offset);
+			return true;
+		}
+	}
+
+	Patch patch;
+	patch.type = type;
+	patch.patch_offsets.push_back(patch_offset);
+	this->patches.push_back(patch);
+	return true;
 }
 
-utils::DataAccessor hkphysics::hkPhysicsReflectionData::GetDataPtr(uint32_t offset){
+utils::DataAccessor hkphysics::hkReflDataSerializeContext::GetDataPtr(uint32_t offset){
 	return dynamic_cast<hkDataChunkDATA*>(this->data_chunks[ChunkType::DATA])->GetData() + offset;
 }
 
-utils::DataAccessor hkphysics::hkPhysicsReflectionData::AllocateSerializeData(uint32_t size){
+utils::DataAccessor hkphysics::hkReflDataSerializeContext::AllocateSerializeData(uint32_t size){
 	return dynamic_cast<hkDataChunkDATA*>(this->data_chunks[ChunkType::DATA])->AllocateSerializeData(size);
 }
 
-utils::DataAccessor hkphysics::hkPhysicsReflectionData::GetSerializeDataPtr(uint32_t offset){
+utils::DataAccessor hkphysics::hkReflDataSerializeContext::GetSerializeDataPtr(uint32_t offset){
 	return dynamic_cast<hkDataChunkDATA*>(this->data_chunks[ChunkType::DATA])->GetSerializeData() + offset;
 }
 
-std::vector<hkreflex::hkClassBase*> hkphysics::hkPhysicsReflectionData::GetClassByName(const std::string& name)
+void hkphysics::hkReflDataSerializeContext::_build_data_chunks()
+{
+	for (auto& chunk : data_chunks) {
+		delete chunk.second;
+		chunk.second = nullptr;
+	}
+	data_chunks.clear();
+	this->data_chunks.emplace(ChunkType::TAG0, new hkDataChunkTAG0(this));
+	this->data_chunks.emplace(ChunkType::SDKV, new hkDataChunkSDKV(this));
+	this->data_chunks.emplace(ChunkType::DATA, new hkDataChunkDATA(this));
+	this->data_chunks.emplace(ChunkType::TYPE, new hkDataChunkTYPE(this));
+	this->data_chunks.emplace(ChunkType::TPTR, new hkDataChunkTPTR(this));
+	this->data_chunks.emplace(ChunkType::TST1, new hkDataChunkTST1(this));
+	this->data_chunks.emplace(ChunkType::TNA1, new hkDataChunkTNA1(this));
+	this->data_chunks.emplace(ChunkType::FST1, new hkDataChunkFST1(this));
+	this->data_chunks.emplace(ChunkType::TBDY, new hkDataChunkTBDY(this));
+	this->data_chunks.emplace(ChunkType::THSH, new hkDataChunkTHSH(this));
+	this->data_chunks.emplace(ChunkType::TPAD, new hkDataChunkTPAD(this));
+	this->data_chunks.emplace(ChunkType::INDX, new hkDataChunkINDX(this));
+	this->data_chunks.emplace(ChunkType::ITEM, new hkDataChunkITEM(this));
+	this->data_chunks.emplace(ChunkType::PTCH, new hkDataChunkPTCH(this));
+	this->data_chunks[ChunkType::TAG0]->children = {
+		this->data_chunks[ChunkType::SDKV],
+		this->data_chunks[ChunkType::DATA],
+		this->data_chunks[ChunkType::TYPE],
+		this->data_chunks[ChunkType::INDX],
+	};
+	this->data_chunks[ChunkType::TYPE]->children = {
+		this->data_chunks[ChunkType::TPTR],
+		this->data_chunks[ChunkType::TST1],
+		this->data_chunks[ChunkType::TNA1],
+		this->data_chunks[ChunkType::FST1],
+		this->data_chunks[ChunkType::TBDY],
+		this->data_chunks[ChunkType::THSH],
+		this->data_chunks[ChunkType::TPAD],
+	};
+	this->data_chunks[ChunkType::INDX]->children = {
+		this->data_chunks[ChunkType::ITEM],
+		this->data_chunks[ChunkType::PTCH],
+	};
+}
+
+std::vector<hkreflex::hkClassBase*> hkphysics::hkReflDataSerializeContext::GetClassByName(const std::string& name)
 {
 	std::vector<hkreflex::hkClassBase*> ret;
 	for (auto it = classes.begin() + 1; it != classes.end(); ++it) {
@@ -250,7 +285,7 @@ std::vector<hkreflex::hkClassBase*> hkphysics::hkPhysicsReflectionData::GetClass
 	return ret;
 }
 
-std::string hkphysics::hkPhysicsReflectionData::classes_to_literal(bool show_members, bool use_mapped_ctype, bool inverse_order)
+std::string hkphysics::hkReflDataSerializeContext::classes_to_literal(bool show_members, bool use_mapped_ctype, bool inverse_order)
 {
 	std::string ret = "";
 	ret = "#pragma once\n\n";
@@ -276,7 +311,7 @@ std::string hkphysics::hkPhysicsReflectionData::classes_to_literal(bool show_mem
 	return ret;
 }
 
-std::string hkphysics::hkPhysicsReflectionData::dump_indexed_blocks()
+std::string hkphysics::hkReflDataSerializeContext::dump_indexed_blocks()
 {
 	/*for (auto it = indexed_blocks.begin() + 1; it != indexed_blocks.end(); ++it) {
 		(*it)->_dumped = false;
@@ -290,7 +325,7 @@ std::string hkphysics::hkPhysicsReflectionData::dump_indexed_blocks()
 	return ret;
 }
 
-std::vector<hkreflex::hkClassInstance*> hkphysics::hkPhysicsReflectionData::GetInstancesByClassName(const std::string& name)
+std::vector<hkreflex::hkClassInstance*> hkphysics::hkReflDataSerializeContext::GetInstancesByClassName(const std::string& name)
 {
 	std::vector<hkreflex::hkClassInstance*> ret;
 	for (auto it = indexed_blocks.begin() + 1; it != indexed_blocks.end(); ++it) {
@@ -303,16 +338,83 @@ std::vector<hkreflex::hkClassInstance*> hkphysics::hkPhysicsReflectionData::GetI
 	return ret;
 }
 
-std::string hkphysics::hkPhysicsReflectionData::dump_root_instance()
-{
-	if (this->root_level_instance == nullptr)
-		return "";
-
-	return this->root_level_instance->dump(0);
-}
-
-void hkphysics::hkPhysicsReflectionData::RegisterClassesToTranscriptor() {
+void hkphysics::hkReflDataSerializeContext::RegisterClassesToTranscriptor() {
 	for (int i = 1; i < this->classes.size(); i++) {
 		hkreflex::hkTypeTranscriptor::GetInstance().RegisterClass(this->classes[i], true, false);
 	}
+}
+
+bool hkphysics::hkReflDataSerializer::Serialize(std::ostream& data_stream)
+{
+	this->Clear();
+
+	this->_build_data_chunks();
+
+	auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+
+	this->root_level_instance = transcriptor.Instantiate(*this->root_level_container, this);
+
+	if (!this->root_level_instance) {
+		std::cout << "Warning: root level container instantiation failed." << std::endl;
+		return false;
+	}
+
+	if (!this->root_level_container->ToInstance(this->root_level_instance)) {
+		std::cout << "Warning: root level instance build failed." << std::endl;
+		return false;
+	}
+
+	this->classes.push_back(new hkreflex::hkClassBase());
+	this->root_level_instance->CollectSerializeClasses(this->classes);
+
+	for (auto type = this->classes.begin() + 1; type != this->classes.end(); type++) {
+		auto& t_name = (*type)->type_name;
+		if (std::find(this->type_names.begin(), this->type_names.end(), t_name) == this->type_names.end()) {
+			this->type_names.push_back(t_name);
+		}
+
+		for (auto template_type = (*type)->template_args.begin(); template_type != (*type)->template_args.end(); template_type++) {
+			auto& tt_name = (*template_type)->template_arg_name;
+			if (std::find(this->type_names.begin(), this->type_names.end(), tt_name) == this->type_names.end()) {
+				this->type_names.push_back(tt_name);
+			}
+		}
+
+		for (auto field = (*type)->fields.begin(); field != (*type)->fields.end(); field++) {
+			auto& f_name = (*field)->name;
+			if (std::find(this->field_names.begin(), this->field_names.end(), f_name) == this->field_names.end()) {
+				this->field_names.push_back(f_name);
+			}
+		}
+	}
+	
+	uint64_t cur_block_index = 0;
+	
+	size_t alloc_size = this->root_level_instance->GetSerializeSize() * 1.5;
+	
+	auto out_accessor = this->AllocateSerializeData(alloc_size);
+	
+	size_t true_alloc = 0;
+	
+	hkreflex::hkIndexedDataBlock* root_block = hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(this, this->root_level_instance->type, this->root_level_instance);
+		
+	utils::SerializePool serializer(1);
+	serializer.QueueSerialization(root_block, true);
+	cur_block_index = serializer.Resolve(out_accessor.make_reference(), true_alloc);
+		
+	this->indexed_blocks.push_back(new hkreflex::hkIndexedDataBlock(this));
+	for (auto block : serializer.serialized_objects) {
+		this->indexed_blocks.push_back(dynamic_cast<hkreflex::hkIndexedDataBlock*>(block));
+	}
+
+	out_accessor.size = true_alloc;
+
+	auto tag0 = dynamic_cast<hkDataChunkTAG0*>(this->data_chunks[ChunkType::TAG0]);
+
+	utils::DataAccessor result;
+	auto size = (uint32_t)tag0->DistributeAndSerialize(result, true);
+
+	data_stream.write((const char*)result.data, result.size);
+
+	return true;
 }

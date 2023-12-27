@@ -50,7 +50,7 @@ namespace utils {
 		DataAccessor() {};
 		~DataAccessor();
 
-		static DataAccessor Alloc(size_t size, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
+		static DataAccessor Alloc(size_t size, uint8_t default_value = 0, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
 
 		static DataAccessor Create(const uint8_t* data, size_t size, bool is_owner = false, uint8_t options = AccessOptions::Profiler | AccessOptions::NoOverread | AccessOptions::NoOverwrite);
 

@@ -9,24 +9,24 @@ namespace hkreflex {
 }
 
 namespace hkphysics {
-	class hkPhysicsReflectionData;
+	class hkReflDataSerializeContext;
 
 	enum class ChunkType {
 		Unknown = -1,
-		TAG0, // Major data chunk
-		SDKV, // SDK version
-		DATA, // Data
-		TYPE, // Types
-		TPTR, // Type pointer
-		TST1, // Type names
-		TNA1, // Unknown type info
-		FST1, // Field names
-		TBDY, // Type body
-		THSH, // Type hash
-		TPAD, // Type padding
-		INDX, // Index
-		ITEM, // Item
-		PTCH, // Patch
+		TAG0, // Major data chunk					IO
+			SDKV, // SDK version					IO, Has data
+			DATA, // Data							IO, Has data
+			TYPE, // Types							IO
+				TPTR, // Type pointer				IO, 8 * num_types, all 0
+				TST1, // Type names					IO, Has data
+				TNA1, // Type And Template Args		IO, Has data
+				FST1, // Field names				IO, Has data
+				TBDY, // Type body					IO, Has data
+				THSH, // Type hash					IO, Has data
+				TPAD, // Type padding				IO, 4 bytes all 0
+			INDX, // Index							IO
+				ITEM, // Item						IO, Has data
+				PTCH, // Patch						IO, Has data
 	};
 
 	std::string_view GetChunkTypeName(ChunkType type);
@@ -35,11 +35,11 @@ namespace hkphysics {
 
 	class hkDataChunkBase {
 	public:
-		hkDataChunkBase(hkPhysicsReflectionData* owner): ref_data(owner) {
+		hkDataChunkBase(hkReflDataSerializeContext* owner): ref_data(owner) {
 		}
-		~hkDataChunkBase() {
+		virtual ~hkDataChunkBase() {
 		}
-		hkPhysicsReflectionData* ref_data = nullptr;
+		hkReflDataSerializeContext* ref_data = nullptr;
 		uint8_t chunk_decorator = -1;
 		uint32_t data_size = 0;
 		char type_name[4] = { 0 };
@@ -102,7 +102,12 @@ namespace hkphysics {
 
 	class hkDataChunkTAG0 :public hkDataChunkBase {
 	public:
-		hkDataChunkTAG0(hkPhysicsReflectionData* owner) : hkDataChunkBase(owner) {
+		hkDataChunkTAG0(hkReflDataSerializeContext* owner) : hkDataChunkBase(owner) {
+			chunk_decorator = 0x00;
+			type_name[0] = 'T';
+			type_name[1] = 'A';
+			type_name[2] = 'G';
+			type_name[3] = '0';
 		}
 		~hkDataChunkTAG0() {
 		}
@@ -123,7 +128,12 @@ namespace hkphysics {
 
 	class hkDataChunkSDKV : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkSDKV(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkSDKV(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'S';
+			type_name[1] = 'D';
+			type_name[2] = 'K';
+			type_name[3] = 'V';
 		}
 		~hkDataChunkSDKV() {
 		}
@@ -139,7 +149,12 @@ namespace hkphysics {
 
 	class hkDataChunkDATA : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkDATA(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkDATA(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'D';
+			type_name[1] = 'A';
+			type_name[2] = 'T';
+			type_name[3] = 'A';
 		}
 		~hkDataChunkDATA() {
 		}
@@ -175,7 +190,12 @@ namespace hkphysics {
 
 	class hkDataChunkTYPE : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTYPE(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTYPE(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = 0x00;
+			type_name[0] = 'T';
+			type_name[1] = 'Y';
+			type_name[2] = 'P';
+			type_name[3] = 'E';
 		}
 		~hkDataChunkTYPE() {
 		}
@@ -193,7 +213,12 @@ namespace hkphysics {
 
 	class hkDataChunkTPTR : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTPTR(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTPTR(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'T';
+			type_name[1] = 'P';
+			type_name[2] = 'T';
+			type_name[3] = 'R';
 		}
 		~hkDataChunkTPTR() {
 		}
@@ -205,11 +230,18 @@ namespace hkphysics {
 		bool Decode() override {
 			return true;
 		}
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTST1 : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTST1(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTST1(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'T';
+			type_name[1] = 'S';
+			type_name[2] = 'T';
+			type_name[3] = '1';
 		}
 		~hkDataChunkTST1() {
 		}
@@ -219,11 +251,18 @@ namespace hkphysics {
 		}
 
 		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTNA1 : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTNA1(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTNA1(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'T';
+			type_name[1] = 'N';
+			type_name[2] = 'A';
+			type_name[3] = '1';
 		}
 		~hkDataChunkTNA1() {
 		}
@@ -233,11 +272,18 @@ namespace hkphysics {
 		}
 
 		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkFST1 : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkFST1(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkFST1(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'F';
+			type_name[1] = 'S';
+			type_name[2] = 'T';
+			type_name[3] = '1';
 		}
 		~hkDataChunkFST1() {
 		}
@@ -247,11 +293,18 @@ namespace hkphysics {
 		}
 
 		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTBDY : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTBDY(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTBDY(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'T';
+			type_name[1] = 'B';
+			type_name[2] = 'D';
+			type_name[3] = 'Y';
 		}
 		~hkDataChunkTBDY() {
 		}
@@ -261,11 +314,18 @@ namespace hkphysics {
 		}
 
 		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTHSH : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTHSH(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTHSH(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'T';
+			type_name[1] = 'H';
+			type_name[2] = 'S';
+			type_name[3] = 'H';
 		}
 		~hkDataChunkTHSH() {
 		}
@@ -275,11 +335,18 @@ namespace hkphysics {
 		}
 
 		bool Decode() override;
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkTPAD : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkTPAD(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkTPAD(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'T';
+			type_name[1] = 'P';
+			type_name[2] = 'A';
+			type_name[3] = 'D';
 		}
 		~hkDataChunkTPAD() {
 		}
@@ -291,11 +358,18 @@ namespace hkphysics {
 		bool Decode() override {
 			return true;
 		}
+
+		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
 	class hkDataChunkINDX : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkINDX(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkINDX(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = 0x00;
+			type_name[0] = 'I';
+			type_name[1] = 'N';
+			type_name[2] = 'D';
+			type_name[3] = 'X';
 		}
 		~hkDataChunkINDX() {
 		}
@@ -311,7 +385,12 @@ namespace hkphysics {
 
 	class hkDataChunkITEM : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkITEM(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkITEM(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'I';
+			type_name[1] = 'T';
+			type_name[2] = 'E';
+			type_name[3] = 'M';
 		}
 		~hkDataChunkITEM() {
 		}
@@ -329,19 +408,15 @@ namespace hkphysics {
 
 	class hkDataChunkPTCH : public hkDataChunkTAG0 {
 	public:
-		hkDataChunkPTCH(hkPhysicsReflectionData* owner) : hkDataChunkTAG0(owner) {
+		hkDataChunkPTCH(hkReflDataSerializeContext* owner) : hkDataChunkTAG0(owner) {
+			chunk_decorator = _leaf_decorator;
+			type_name[0] = 'P';
+			type_name[1] = 'T';
+			type_name[2] = 'C';
+			type_name[3] = 'H';
 		}
 		~hkDataChunkPTCH() {
 		}
-
-		struct Patch {
-			hkreflex::hkClassBase* type;
-			std::vector<uint32_t> patch_offsets;
-		};
-
-		std::vector<Patch> patches;
-
-		bool RegisterPatch(hkreflex::hkClassBase* type_index, uint32_t patch_offset);
 
 		ChunkType GetType() override {
 			return ChunkType::PTCH;
@@ -352,5 +427,5 @@ namespace hkphysics {
 		uint64_t Serialize(utils::DataAccessor& out, bool use_cached = false) override;
 	};
 
-	hkDataChunkBase* AllocateChunk(ChunkType type, hkPhysicsReflectionData* ref_data);
+	hkDataChunkBase* AllocateChunk(ChunkType type, hkReflDataSerializeContext* ref_data);
 }

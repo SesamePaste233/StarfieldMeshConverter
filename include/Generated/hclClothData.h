@@ -17,11 +17,11 @@ namespace hktypes{
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	template <typename tT, typename tAllocator>
-	class ;
-	template <typename tT, typename tAllocator>
-	class ;
 	class hkBool;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
 
 	class hclClothData : public hkReferencedObject {
 	public:

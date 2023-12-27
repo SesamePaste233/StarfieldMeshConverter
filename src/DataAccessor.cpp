@@ -86,12 +86,12 @@ namespace utils{
 		Destroy();
 	}
 
-	DataAccessor DataAccessor::Alloc(size_t size, uint8_t options)
+	DataAccessor DataAccessor::Alloc(size_t size, uint8_t default_value, uint8_t options)
 	{
 		DataAccessor result;
 		result.data = new uint8_t[size];
 		result.start = result.data;
-		std::memset(result.data, 0, size);
+		std::memset(result.data, default_value, size);
 		result.size = size;
 		result._options = (AccessOptions)options;
 		if (result._options & AccessOptions::Profiler) {

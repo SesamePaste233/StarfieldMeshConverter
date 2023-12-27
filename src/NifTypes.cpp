@@ -496,7 +496,7 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 
 void nif::BSClothExtraData::Deserialize(std::istream& file)
 {
-	this->data = new hkphysics::hkPhysicsReflectionData();
+	this->data = new hkphysics::hkReflDataDeserializer();
 	try {
 		this->data->Deserialize(file);
 	}
@@ -513,7 +513,7 @@ void nif::BSClothExtraData::Serialize(std::ostream& file)
 
 void nif::bhkPhysicsSystem::Deserialize(std::istream& file)
 {
-	this->data = new hkphysics::hkPhysicsReflectionData();
+	this->data = new hkphysics::hkReflDataDeserializer();
 	try {
 		this->data->Deserialize(file);
 	}

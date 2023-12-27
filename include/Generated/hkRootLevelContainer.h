@@ -3,10 +3,10 @@
 
 
 namespace hktypes{
-	class hkStringPtr;
-	class hkRefVariant;
 	template <typename tT, typename tAllocator>
 	class ;
+	class hkStringPtr;
+	class hkRefVariant;
 
 	class hkRootLevelContainer : public hkHolderBase {
 	public:

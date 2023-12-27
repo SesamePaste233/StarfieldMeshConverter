@@ -40,15 +40,23 @@ namespace hktypes{
 		class Single : public hkHolderBase {
 		public:
 			using BaseType = void;
+			hkReal restLength; // Offset: 0
+			hkReal stiffness; // Offset: 4
+			hkUint32 particleA; // Offset: 8
+			hkUint32 particleB; // Offset: 12
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclStretchLinkConstraintSetMx::Single"; };
 			inline std::string GetTranscriptId() override { return "hclStretchLinkConstraintSetMx::Single"; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline uint32_t GethkClassHash() override { return 514057270; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "restLength", "hkReal" },
+					{ "stiffness", "hkReal" },
+					{ "particleA", "hkUint32" },
+					{ "particleB", "hkUint32" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

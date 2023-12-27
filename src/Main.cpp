@@ -252,7 +252,7 @@ void amain() {
 }
 
 void test_main() {
-	hkphysics::hkPhysicsReflectionData data;
+	hkphysics::hkReflDataDeserializer data;
 
 	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
 
@@ -281,19 +281,14 @@ void test_main() {
 	return;
 }
 void pmain() {
-	hkphysics::hkPhysicsReflectionData data;
+	hkphysics::hkReflDataDeserializer data;
 
 	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth.bin");
 
 	/*auto literals = data.classes_to_literal(true, true, true);
 
 	auto instances = data.dump_root_instance();*/
-
-	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
-	data.SerializeWithTypeUnchanged(file0);
-	file0.close();
-
-	hkphysics::hkPhysicsReflectionData data1;
+	hkphysics::hkReflDataDeserializer data1;
 
 	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
 	
@@ -318,7 +313,7 @@ void pmain() {
 
 void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_colonist_adventurous_01_poncho_f.nif");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -442,8 +437,6 @@ void main() {
 
 	auto literals = data->classes_to_literal(true, false, true);
 
-	auto instances = data->dump_root_instance();
-
 	data->RegisterClassesToTranscriptor();
 
 	auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
@@ -451,11 +444,56 @@ void main() {
 	auto rl_instance = transcriptor.Instantiate(*data->root_level_container, data);
 	data->root_level_container->ToInstance(rl_instance);
 
-	data->root_level_instance->assert_equals(rl_instance);
+	std::vector<hkreflex::hkClassBase*> serialize_classes;
+	rl_instance->CollectSerializeClasses(serialize_classes);
 
-	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
-	data->SerializeWithTypeUnchanged(file0);
-	file0.close();
+	std::vector<std::string> data_classes_identifiers;
+	for (auto& hk_class : data->classes) {
+		auto id = hk_class->to_C_identifier();
+		if (id != "") {
+			data_classes_identifiers.push_back(id);
+		}
+	}
+	std::vector<std::string> serialize_classes_identifiers;
+	for (auto& hk_class : serialize_classes) {
+		serialize_classes_identifiers.push_back(hk_class->to_C_identifier());
+	}
+	int size = data_classes_identifiers.size() < serialize_classes_identifiers.size() ? data_classes_identifiers.size() : serialize_classes_identifiers.size();
+	for (int i = 0; i < size; i++) {
+		std::cout << data_classes_identifiers[i] << " <-> " << serialize_classes_identifiers[i] << std::endl;
+	}
+	for (auto& data_id : data_classes_identifiers) {
+		if (std::find(serialize_classes_identifiers.begin(), serialize_classes_identifiers.end(), data_id) == serialize_classes_identifiers.end()) {
+			std::cout << data_id << " is not in serialize classes" << std::endl;
+		}
+	}
+
+	/*std::set<hkreflex::hkClassBase*> data_block_types;
+	for (auto data_block : data->indexed_blocks) {
+		auto block_type = data_block->m_data_type;
+		data_block_types.insert(block_type);
+		if (block_type->kind == hkreflex::hkClassBase::TypeKind::Record) {
+			for (auto& field : block_type->fields) {
+				if (field->type->kind == hkreflex::hkClassBase::TypeKind::Record) {
+					data_block_types.insert(field->type);
+				}
+			}
+		}
+	}*/
+
+	/*for (auto cls : data->classes) {
+		if (cls->type_name == "") {
+			continue;
+		}
+		if (data_block_types.find(cls) == data_block_types.end()) {
+			assert(cls->hash == 0);
+		}
+		else {
+			assert(cls->hash != 0);
+		}
+	}*/
+
+	data->root_level_instance->assert_equals(rl_instance);
 
 	//auto json = nlohmann::json::array();
 	//auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(data->root_level_container->GetNamedVariantRef("hclClothData"));
@@ -475,10 +513,6 @@ void main() {
 	std::ofstream file("C:\\repo\\MeshConverter\\UnkBlocks\\hkGenerated.h");
 	file << literals;
 	file.close();
-
-	std::ofstream file1("C:\\repo\\MeshConverter\\UnkBlocks\\Instances.txt");
-	file1 << instances;
-	file1.close();
 }
 
 int retmain() {

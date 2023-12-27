@@ -7,7 +7,7 @@
 #include "hkInclude.h"
 
 namespace hkphysics {
-	class hkPhysicsReflectionData;
+	class hkReflDataSerializeContext;
 }
 
 namespace hkreflex {
@@ -107,14 +107,18 @@ namespace hkreflex {
 	class hkClassInstance : public utils::SerializableBase {
 	public:
 		hkClassBase* type;
-		hkphysics::hkPhysicsReflectionData* ref_data;
+		hkphysics::hkReflDataSerializeContext* ref_context;
 
-		hkClassInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : type(type), ref_data(ref_data) {};
+		hkClassInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : type(type), ref_context(ref_data) {};
+		virtual ~hkClassInstance() {};
+
 		virtual bool equals(hkClassInstance* other) = 0;
 		virtual void assert_equals(hkClassInstance* other) = 0;
 		virtual size_t Build(utils::DataAccessor& data) = 0;
 		virtual std::string dump(int indent = 0) = 0;
+		virtual void CollectSerializeClasses(std::vector<hkClassBase*>& classes);
 		virtual hkClassInstance* make_copy() = 0;
+		virtual uint64_t GetSerializeSize() = 0;
 
 		template<typename T>
 		requires utils::_is_string_t<T> || hktypes::_is_hk_holder_t<T>
@@ -177,7 +181,7 @@ namespace hkreflex {
 			Array = 2,
 		};
 
-		hkIndexedDataBlock(hkphysics::hkPhysicsReflectionData* ref_data) : ref_data(ref_data) {};
+		hkIndexedDataBlock(hkphysics::hkReflDataSerializeContext* ref_data) : ref_data(ref_data) {};
 
 		~hkIndexedDataBlock() {
 		}
@@ -189,7 +193,7 @@ namespace hkreflex {
 
 		std::vector<hkClassInstance*> m_instances; // Reference
 
-		hkphysics::hkPhysicsReflectionData* ref_data = nullptr;
+		hkphysics::hkReflDataSerializeContext* ref_data = nullptr;
 
 		bool _built = false;
 		bool BuildInstances();
@@ -199,9 +203,9 @@ namespace hkreflex {
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 
-		static hkIndexedDataBlock* CreateArrayAndAlloc(hkphysics::hkPhysicsReflectionData* ref_data, hkClassBase* type, std::vector<hkClassInstance*> instances);
+		static hkIndexedDataBlock* CreateArrayAndAlloc(hkphysics::hkReflDataSerializeContext* ref_data, hkClassBase* type, std::vector<hkClassInstance*> instances);
 		
-		static hkIndexedDataBlock* CreatePointerAndAlloc(hkphysics::hkPhysicsReflectionData* ref_data, hkClassBase* type, hkClassInstance* instances);
+		static hkIndexedDataBlock* CreatePointerAndAlloc(hkphysics::hkReflDataSerializeContext* ref_data, hkClassBase* type, hkClassInstance* instances);
 	};
 
 	class hkClassBoolInstance : public hkClassInstance {
@@ -209,7 +213,7 @@ namespace hkreflex {
 		std::string c_type = "bool";
 		bool value = false;
 
-		hkClassBoolInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		hkClassBoolInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 		};
 
 		bool equals(hkClassInstance* other) override;
@@ -221,6 +225,8 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		uint64_t GetSerializeSize() override;
 
 		hkClassInstance* make_copy() override {
 			return new hkClassBoolInstance(*this);
@@ -231,20 +237,25 @@ namespace hkreflex {
 	public:
 		std::string c_type = "std::string";
 		std::string value;
+		hkClassBase* char_type = nullptr; // optional
 		hkreflex::hkIndexedDataBlock* data_block = nullptr; // optional
 
-		hkClassStringInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		hkClassStringInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 		};
 
 		bool equals(hkClassInstance* other) override;
 
 		void assert_equals(hkClassInstance* other) override;
 
+		void CollectSerializeClasses(std::vector<hkClassBase*>& classes);
+
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		uint64_t GetSerializeSize() override;
 
 		hkClassInstance* make_copy() override {
 			return new hkClassStringInstance(*this);
@@ -261,7 +272,7 @@ namespace hkreflex {
 		uint64_t value = 0;
 		int64_t svalue = 0;
 
-		hkClassIntInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data);
+		hkClassIntInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data);
 
 		bool equals(hkClassInstance* other) override;
 
@@ -272,6 +283,8 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		uint64_t GetSerializeSize() override;
 
 		hkClassInstance* make_copy() override {
 			return new hkClassIntInstance(*this);
@@ -286,7 +299,7 @@ namespace hkreflex {
 		size_t byte_length = 0;
 		double value = 0;
 
-		hkClassFloatInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data);
+		hkClassFloatInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data);
 
 		bool equals(hkClassInstance* other) override;
 
@@ -298,6 +311,8 @@ namespace hkreflex {
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
 
+		uint64_t GetSerializeSize() override;
+
 		hkClassInstance* make_copy() override {
 			return new hkClassFloatInstance(*this);
 		}
@@ -305,7 +320,7 @@ namespace hkreflex {
 
 	class hkClassPointerInstance : public hkClassInstance {
 	public:
-		hkClassPointerInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		hkClassPointerInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 		};
 		// Delete instance in destructor
 		~hkClassPointerInstance() {
@@ -343,11 +358,15 @@ namespace hkreflex {
 
 		void assert_equals(hkClassInstance* other) override;
 
+		void CollectSerializeClasses(std::vector<hkClassBase*>& classes);
+
 		size_t Build(utils::DataAccessor& data) override;
 
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		uint64_t GetSerializeSize() override;
 
 		hkClassInstance* make_copy() override {
 			return new hkClassPointerInstance(*this);
@@ -361,7 +380,7 @@ namespace hkreflex {
 			hkClassInstance* instance = nullptr;
 			hkFieldBase* field = nullptr;
 		};
-		hkClassRecordInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		hkClassRecordInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 		};
 
 		~hkClassRecordInstance() {
@@ -398,6 +417,8 @@ namespace hkreflex {
 
 		void assert_equals(hkClassInstance* other) override;
 
+		void CollectSerializeClasses(std::vector<hkClassBase*>& classes);
+
 		size_t Build(utils::DataAccessor& data) override;
 
 		void SetupFieldInstances();
@@ -405,6 +426,8 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		uint64_t GetSerializeSize() override;
 
 		hkClassInstance* make_copy() override {
 			return new hkClassRecordInstance(*this);
@@ -439,7 +462,7 @@ namespace hkreflex {
 
 	class hkClassArrayInstance : public hkClassInstance {
 	public:
-		hkClassArrayInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+		hkClassArrayInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 		};
 
 		~hkClassArrayInstance() {
@@ -486,6 +509,8 @@ namespace hkreflex {
 
 		void assert_equals(hkClassInstance* other) override;
 
+		void CollectSerializeClasses(std::vector<hkClassBase*>& classes);
+
 		bool equals(hkClassInstance* other) override;
 
 		size_t Build(utils::DataAccessor& data) override;
@@ -493,6 +518,8 @@ namespace hkreflex {
 		std::string dump(int indent = 0) override;
 
 		uint64_t Serialize(utils::DataAccessor data, utils::SerializePool& serializer) override;
+
+		uint64_t GetSerializeSize() override;
 
 		hkClassInstance* make_copy() override {
 			return new hkClassArrayInstance(*this);
@@ -506,7 +533,7 @@ namespace hkreflex {
 				auto float_instance = dynamic_cast<hkClassFloatInstance*>(array_instances[i]);
 				if (float_instance == nullptr)
 					return;
-				float_array[i] = float_instance->value;
+				float_array[i] = (float)float_instance->value;
 			}
 #endif
 			return;
@@ -568,9 +595,13 @@ namespace hkreflex {
 
 		bool _defined = false;
 
+		bool _instantiated = false;
+
 		bool equals(hkClassBase* other);
 
 		void assert_equals(hkClassBase* other);
+
+		void CollectSerializeClasses(std::vector<hkClassBase*>& classes, bool include_definition = true);
 
 		virtual std::string to_literal(bool show_class_members = false, bool as_plain_class = false, bool use_mapped_ctype = false);
 
@@ -662,7 +693,7 @@ namespace hkreflex {
 		}
 	};
 
-	hkClassInstance* AllocateInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* data);
+	hkClassInstance* AllocateInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* data);
 
 	class hkTypeTranscriptor {
 	public:
@@ -748,6 +779,8 @@ namespace hkreflex {
 
 		std::unordered_map<MapIdType, hkreflex::hkClassBase*> all_allocated_classes;
 
+		std::vector<hkreflex::hkClassBase*> all_allocated_classes_list;
+
 		static std::string transcript_path;
 
 		static hkTypeTranscriptor& GetInstance() {
@@ -761,11 +794,11 @@ namespace hkreflex {
 
 		TypeTranscriptProperties& RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive = true, bool update_exist = true);
 
-		hkreflex::hkClassBase* AllocateClassByUniqueId(MapIdType id);
+		hkreflex::hkClassBase* AllocateClassByUniqueId(MapIdType id, bool include_definition = true);
 
 		template<typename T>
 		requires hktypes::_is_hk_holder_t<T>
-		inline hkreflex::hkClassInstance* Instantiate(T& c_instance, hkphysics::hkPhysicsReflectionData* ref_data);
+		inline hkreflex::hkClassInstance* Instantiate(T& c_instance, hkphysics::hkReflDataSerializeContext* ref_data);
 
 		nlohmann::json SerializeTranscripts();
 
@@ -789,7 +822,7 @@ namespace hkreflex {
 
 	template<typename T>
 	requires hktypes::_is_hk_holder_t<T>
-	inline hkreflex::hkClassInstance* hkTypeTranscriptor::Instantiate(T& c_instance_obj, hkphysics::hkPhysicsReflectionData* ref_data)
+	inline hkreflex::hkClassInstance* hkTypeTranscriptor::Instantiate(T& c_instance_obj, hkphysics::hkReflDataSerializeContext* ref_data)
 	{
 		T* c_instance = &c_instance_obj;
 		MapIdType id = c_instance->GetTranscriptId();
@@ -1038,7 +1071,7 @@ namespace hkreflex {
 			for (size_t i = 0; i < container.size(); i++) {
 				elem_t elem_container = container[i];
 
-				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_data);
+				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_context);
 				if (hk_this_instance == nullptr) {
 					throw std::runtime_error("hkClassInstance::SetValue: unable to allocate instance.");
 				}
@@ -1089,7 +1122,7 @@ namespace hkreflex {
 			for (size_t i = 0; i < container.size(); i++) {
 				elem_t elem_container = container[i];
 
-				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_data);
+				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_context);
 				if (hk_this_instance == nullptr) {
 					throw std::runtime_error("hkClassInstance::SetValue: unable to allocate instance.");
 				}
@@ -1141,7 +1174,7 @@ namespace hkreflex {
 			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
 
 			if (ptr_instance == nullptr) {
-				ptr_instance = transcriptor.Instantiate(*container, ref_data);
+				ptr_instance = transcriptor.Instantiate(*container, ref_context);
 
 				if (ptr_instance->SetValue(*container)) {
 					return true;
@@ -1152,7 +1185,7 @@ namespace hkreflex {
 				delete ptr_instance;
 				ptr_instance = nullptr;
 
-				ptr_instance = transcriptor.Instantiate(*container, ref_data);
+				ptr_instance = transcriptor.Instantiate(*container, ref_context);
 
 				if (ptr_instance->SetValue(*container)) {
 					return true;

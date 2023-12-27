@@ -30,6 +30,11 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::FromInstance(const hkreflex
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("restLengths")->GetValue(restLengths);
+	class_instance->GetInstanceByFieldName("stiffnessesA")->GetValue(stiffnessesA);
+	class_instance->GetInstanceByFieldName("stiffnessesB")->GetValue(stiffnessesB);
+	class_instance->GetInstanceByFieldName("particlesA")->GetValue(particlesA);
+	class_instance->GetInstanceByFieldName("particlesB")->GetValue(particlesB);
 	return true;
 }
 
@@ -77,6 +82,11 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClas
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("restLengths")->SetValue(restLengths);
+	class_instance->GetInstanceByFieldName("stiffnessesA")->SetValue(stiffnessesA);
+	class_instance->GetInstanceByFieldName("stiffnessesB")->SetValue(stiffnessesB);
+	class_instance->GetInstanceByFieldName("particlesA")->SetValue(particlesA);
+	class_instance->GetInstanceByFieldName("particlesB")->SetValue(particlesB);
 	return true;
 }
 

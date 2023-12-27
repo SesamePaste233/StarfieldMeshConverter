@@ -159,15 +159,21 @@ namespace hktypes{
 		class ThreeBlendEntryBlock : public hkHolderBase {
 		public:
 			using BaseType = void;
+			T[N]<hkUint16, 16> vertexIndices; // Offset: 0
+			T[N]<hkUint16, 48> boneIndices; // Offset: 32
+			T[N]<hkUint8, 48> boneWeights; // Offset: 128
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclObjectSpaceDeformer::ThreeBlendEntryBlock"; };
 			inline std::string GetTranscriptId() override { return "hclObjectSpaceDeformer::ThreeBlendEntryBlock"; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline uint32_t GethkClassHash() override { return 3839925180; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "vertexIndices", "T[N]<hkUint16, 16>" },
+					{ "boneIndices", "T[N]<hkUint16, 48>" },
+					{ "boneWeights", "T[N]<hkUint8, 48>" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

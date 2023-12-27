@@ -7,47 +7,48 @@ namespace hktypes{
 	class hkContainerHeapAllocator;
 	class hkStringPtr;
 	class hkBool;
-	class hkaBone;
-	class hkQsTransform;
 	class hkaSkeleton::Partition;
+	class hkQsTransform;
+	class hkaBone;
 	class hkaSkeleton::LocalFrameOnBone;
 	class hclSimClothData::ParticleData;
 	class hkVector4;
+	class hclSimClothData::CollidablePinchingData;
+	class hkMatrix4;
 	class hclVirtualCollisionPointsData::Block;
 	class hclVirtualCollisionPointsData::BarycentricDictionaryEntry;
-	class hkMatrix4;
-	class hclSimClothData::CollidablePinchingData;
 	class hclVirtualCollisionPointsData::EdgeFanLandscape;
-	class hclVirtualCollisionPointsData::BarycentricPair;
-	class hclVirtualCollisionPointsData::TriangleFanLandscape;
 	class hclVirtualCollisionPointsData::TriangleFanSection;
 	class hclVirtualCollisionPointsData::EdgeFanSection;
-	class hclVirtualCollisionPointsData::TriangleFan;
 	class hclVirtualCollisionPointsData::EdgeFan;
+	class hclVirtualCollisionPointsData::TriangleFan;
+	class hclVirtualCollisionPointsData::TriangleFanLandscape;
+	class hclVirtualCollisionPointsData::BarycentricPair;
 	class hclObjectSpaceDeformer::LocalBlockUnpackedPN;
 	class hclObjectSpaceDeformer::LocalBlockPN;
-	class hclObjectSpaceDeformer::FiveBlendEntryBlock;
-	class hclObjectSpaceDeformer::SixBlendEntryBlock;
-	class hclObjectSpaceDeformer::FourBlendEntryBlock;
 	class hclObjectSpaceDeformer::ThreeBlendEntryBlock;
+	class hclObjectSpaceDeformer::FourBlendEntryBlock;
 	class hclClothState::TransformSetAccess;
-	class hclObjectSpaceDeformer::SevenBlendEntryBlock;
-	class hclClothState::BufferAccess;
 	class hclObjectSpaceDeformer::EightBlendEntryBlock;
-	class hclObjectSpaceDeformer::OneBlendEntryBlock;
+	class hclClothState::BufferAccess;
+	class hclObjectSpaceDeformer::SevenBlendEntryBlock;
+	class hclObjectSpaceDeformer::SixBlendEntryBlock;
+	class hclObjectSpaceDeformer::FiveBlendEntryBlock;
 	class hclObjectSpaceDeformer::TwoBlendEntryBlock;
+	class hclObjectSpaceDeformer::OneBlendEntryBlock;
 	class hclTransformSetUsage::TransformTracker;
+	class hclStretchLinkConstraintSetMx::Single;
+	class hclBendStiffnessConstraintSetMx::Batch;
+	class hclBendStiffnessConstraintSetMx::Single;
+	class hclSimpleMeshBoneDeformOperator::TriangleBonePair;
+	class hclSimulateOperator::Config;
 	class hclStandardLinkConstraintSetMx::Batch;
 	class hclMoveParticlesOperator::VertexParticlePair;
-	class hclStretchLinkConstraintSetMx::Batch;
-	class hclSimpleMeshBoneDeformOperator::TriangleBonePair;
-	class hclStretchLinkConstraintSetMx::Single;
-	class hclSimulateOperator::Config;
-	class hclBonePlanesConstraintSet::BonePlane;
 	class hclStandardLinkConstraintSetMx::Single;
+	class hclStretchLinkConstraintSetMx::Batch;
+	class hclStateDependencyGraph::Branch;
 	template <typename tT, typename tAllocator>
 	class ;
-	class hclStateDependencyGraph::Branch;
 
 	template <typename tT, typename tAllocator>
 	class hkArray;
@@ -1120,7 +1121,7 @@ namespace hktypes{
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkArray"; };
 		inline std::string GetTranscriptId() override { return "hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>"; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline uint32_t GethkClassHash() override { return 2388791410; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
 				{ "m_data", "T*<void>" },
@@ -1336,7 +1337,7 @@ namespace hktypes{
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkArray"; };
 		inline std::string GetTranscriptId() override { return "hkArray<hclStandardLinkConstraintSetMx::Batch, hkContainerHeapAllocator>"; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline uint32_t GethkClassHash() override { return 2672618667; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
 				{ "m_data", "T*<void>" },
@@ -1408,7 +1409,7 @@ namespace hktypes{
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkArray"; };
 		inline std::string GetTranscriptId() override { return "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>"; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline uint32_t GethkClassHash() override { return 2747523813; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
 				{ "m_data", "T*<void>" },
@@ -1420,7 +1421,7 @@ namespace hktypes{
 	};
 
 	template<>
-	class hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator> : public hkHolderBase {
+	class hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator> : public hkHolderBase {
 	public:
 		using BaseType = void;
 		T*<void> m_data; // Offset: 0
@@ -1431,8 +1432,32 @@ namespace hktypes{
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkArray"; };
-		inline std::string GetTranscriptId() override { return "hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>"; };
-		inline uint32_t GethkClassHash() override { return 1255195120; };
+		inline std::string GetTranscriptId() override { return "hkArray<hclBendStiffnessConstraintSetMx::Batch, hkContainerHeapAllocator>"; };
+		inline uint32_t GethkClassHash() override { return 1255241861; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "m_data", "T*<void>" },
+				{ "m_size", "int" },
+				{ "m_capacityAndFlags", "int" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+	};
+
+	template<>
+	class hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator> : public hkHolderBase {
+	public:
+		using BaseType = void;
+		T*<void> m_data; // Offset: 0
+		int m_size; // Offset: 8
+		int m_capacityAndFlags; // Offset: 12
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkArray"; };
+		inline std::string GetTranscriptId() override { return "hkArray<hclBendStiffnessConstraintSetMx::Single, hkContainerHeapAllocator>"; };
+		inline uint32_t GethkClassHash() override { return 3861955652; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
 				{ "m_data", "T*<void>" },

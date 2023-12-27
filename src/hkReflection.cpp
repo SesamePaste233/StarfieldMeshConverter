@@ -59,7 +59,13 @@ void hkreflex::hkClassBase::assert_equals(hkClassBase* other)
 	for (int i = 0; i < this->template_args.size(); i++) {
 		assert(this->template_args[i]->to_literal() == other->template_args[i]->to_literal());
 	}
-	return;
+	assert(this->hash == other->hash);
+	if (this->_defined == other->_instantiated) {
+		return;
+	}
+	else {
+		throw std::exception("Class definition and instantiation mismatch!");
+	}
 	if (this->parent_class) {
 		this->parent_class->assert_equals(other->parent_class);
 	}
@@ -88,6 +94,28 @@ void hkreflex::hkClassBase::assert_equals(hkClassBase* other)
 	for (int i = 0; i < this->interfaces.size(); i++) {
 		this->interfaces[i]->type->assert_equals(other->interfaces[i]->type);
 		assert(this->interfaces[i]->offset == other->interfaces[i]->offset);
+	}
+}
+
+void hkreflex::hkClassBase::CollectSerializeClasses(std::vector<hkClassBase*>& classes, bool include_definition)
+{
+	if (this->parent_class) {
+		this->parent_class->CollectSerializeClasses(classes, false);
+	}
+	if (std::find(classes.begin(), classes.end(), this) == classes.end()) {
+		classes.push_back(this);
+	}
+	for (auto arg : this->template_args) {
+		if (arg->GetArgumentType() == hkTemplateArgumentBase::ArgumentType::TYPE) {
+			auto type_arg = dynamic_cast<hkTemplateArgumentType*>(arg);
+			type_arg->type->CollectSerializeClasses(classes, false);
+		}
+	}
+
+	if (include_definition) {
+		for (auto field : this->fields) {
+			field->type->CollectSerializeClasses(classes, false);
+		}
 	}
 }
 
@@ -529,7 +557,7 @@ uint64_t hkreflex::hkIndexedDataBlock::Serialize(utils::DataAccessor data, utils
 	return cur_pos;
 }
 
-hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreateArrayAndAlloc(hkphysics::hkPhysicsReflectionData* ref_data, hkClassBase* type, std::vector<hkClassInstance*> instances)
+hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreateArrayAndAlloc(hkphysics::hkReflDataSerializeContext* ref_data, hkClassBase* type, std::vector<hkClassInstance*> instances)
 {
 	hkIndexedDataBlock* block = new hkIndexedDataBlock(ref_data);
 	block->m_block_type = hkIndexedDataBlock::Type::Array;
@@ -539,7 +567,7 @@ hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreateArrayAndAlloc(
 	return block;
 }
 
-hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(hkphysics::hkPhysicsReflectionData* ref_data, hkClassBase* type, hkClassInstance* instances)
+hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(hkphysics::hkReflDataSerializeContext* ref_data, hkClassBase* type, hkClassInstance* instances)
 {
 	hkIndexedDataBlock* block = new hkIndexedDataBlock(ref_data);
 	block->m_block_type = hkIndexedDataBlock::Type::Pointer;
@@ -605,7 +633,7 @@ std::string hkreflex::hkFieldBase::to_C_ToInstance()
 	return std::string();
 }
 
-hkreflex::hkClassInstance* hkreflex::AllocateInstance(hkreflex::hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data)
+hkreflex::hkClassInstance* hkreflex::AllocateInstance(hkreflex::hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data)
 {
 	auto kind = type->kind;
 	if (kind == hkClassBase::TypeKind::Inherited) {
@@ -618,7 +646,7 @@ hkreflex::hkClassInstance* hkreflex::AllocateInstance(hkreflex::hkClassBase* typ
 			kind = type->kind;
 		}
 	}
-
+	type->_instantiated = true;
 	switch (kind) {
 	case hkClassBase::TypeKind::Array:
 		return new hkClassArrayInstance(type, ref_data);
@@ -662,20 +690,34 @@ void hkreflex::hkClassStringInstance::assert_equals(hkClassInstance* other)
 		throw std::exception("Value mismatch");
 }
 
+void hkreflex::hkClassStringInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes)
+{
+	hkClassInstance::CollectSerializeClasses(classes);
+	auto char_class = char_type;
+
+	if (std::find(classes.begin(), classes.end(), char_class) == classes.end()) {
+		classes.push_back(char_class);
+	}
+}
+
 size_t hkreflex::hkClassStringInstance::Build(utils::DataAccessor& data)
 {
 	size_t cur_pos = 0;
 	if (this->type->format & 0x10) {
 		value = utils::readStringFromAccessor(data, cur_pos, this->type->format >> 16);
 
-		std::cout << std::hex << data - ref_data->GetDataPtr() << std::endl;
+		std::cout << std::hex << data - ref_context->GetDataPtr() << std::endl;
 		return cur_pos;
 	}
 	else {
 		uint64_t ptr = utils::readFromAccessor<uint64_t>(data, cur_pos);
 		value = "";
 		if (ptr) {
-			this->data_block = ref_data->indexed_blocks[ptr];
+			auto char_classes = ref_context->GetClassByName("char");
+			_ASSERT(char_classes.size() == 1);
+			char_type = char_classes[0];
+
+			this->data_block = ref_context->indexed_blocks[ptr];
 			this->data_block->BuildInstances();
 			for (auto instance : this->data_block->m_instances) {
 				auto int_instance = dynamic_cast<hkClassIntInstance*>(instance);
@@ -696,6 +738,7 @@ std::string hkreflex::hkClassStringInstance::dump(int indent)
 
 uint64_t hkreflex::hkClassStringInstance::Serialize(utils::DataAccessor data, utils::SerializePool& serializer)
 {
+	hkphysics::hkReflDataSerializer* ref_data = dynamic_cast<hkphysics::hkReflDataSerializer*>(ref_context);
 	size_t cur_pos = 0;
 	if (this->type->format & 0x10) {
 		_ASSERT(value.size() == (this->type->format >> 16));
@@ -705,18 +748,13 @@ uint64_t hkreflex::hkClassStringInstance::Serialize(utils::DataAccessor data, ut
 		if (!value.empty()) {
 			auto rtn = ref_data->serialize_string_table.find(value);
 			if (rtn != ref_data->serialize_string_table.end()) {
-				ref_data->GetPatchChunk()->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
+				ref_data->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
 				utils::writeToAccessor(data, cur_pos, (*rtn).second);
 			}
 			else {
-				ref_data->GetPatchChunk()->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
+				ref_data->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
 
-				auto char_classes = ref_data->GetClassByName("char");
-
-				_ASSERT(char_classes.size() == 1);
-				_ASSERT(this->data_block->m_num_instances == value.size() + 1);
-
-				auto char_class = char_classes[0];
+				auto char_class = char_type;
 
 				hkIndexedDataBlock* block = new hkIndexedDataBlock(ref_data);
 				block->m_block_type = hkIndexedDataBlock::Type::Array;
@@ -769,6 +807,16 @@ uint64_t hkreflex::hkClassStringInstance::Serialize(utils::DataAccessor data, ut
 	return cur_pos;
 }
 
+uint64_t hkreflex::hkClassStringInstance::GetSerializeSize()
+{
+	if (this->type->format & 0x10) {
+		return this->type->format >> 16;
+	}
+	else {
+		return 8;
+	}
+}
+
 bool hkreflex::hkClassBoolInstance::equals(hkClassInstance* other) {
 	auto other_instance = dynamic_cast<hkClassBoolInstance*>(other);
 	if (other_instance == nullptr)
@@ -806,7 +854,7 @@ size_t hkreflex::hkClassBoolInstance::Build(utils::DataAccessor& data)
 		value = utils::readFromAccessor<uint32_t>(data, cur_pos, is_big_endian);
 	}
 	else {
-		throw std::exception(("Unknown bool size at offset: " + std::to_string(data - ref_data->GetDataPtr())).c_str());
+		throw std::exception(("Unknown bool size at offset: " + std::to_string(data - ref_context->GetDataPtr())).c_str());
 	}
 
 	return cur_pos;
@@ -837,7 +885,12 @@ uint64_t hkreflex::hkClassBoolInstance::Serialize(utils::DataAccessor data, util
 	return size;
 }
 
-hkreflex::hkClassIntInstance::hkClassIntInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+uint64_t hkreflex::hkClassBoolInstance::GetSerializeSize()
+{
+	return type->size;
+}
+
+hkreflex::hkClassIntInstance::hkClassIntInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 	auto format = type->format;
 	is_big_endian = (format & 0x100);
 	is_signed = (format & 0x200);
@@ -1006,6 +1059,11 @@ uint64_t hkreflex::hkClassIntInstance::Serialize(utils::DataAccessor data, utils
 	return size;
 }
 
+uint64_t hkreflex::hkClassIntInstance::GetSerializeSize()
+{
+	return byte_length;
+}
+
 bool hkreflex::hkClassPointerInstance::equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassPointerInstance*>(other);
@@ -1027,17 +1085,25 @@ void hkreflex::hkClassPointerInstance::assert_equals(hkClassInstance* other)
 	ptr_instance->assert_equals(other_instance->ptr_instance);
 }
 
+void hkreflex::hkClassPointerInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes)
+{
+	hkClassInstance::CollectSerializeClasses(classes);
+	if (this->ptr_instance) {
+		this->ptr_instance->CollectSerializeClasses(classes);
+	}
+}
+
 size_t hkreflex::hkClassPointerInstance::Build(utils::DataAccessor& data)
 {
 	size_t cur_pos = 0;
 	in_document_ptr = utils::readFromAccessor<uint64_t>(data, cur_pos, false);
 
 	if (in_document_ptr != 0) {
-		if (in_document_ptr > ref_data->indexed_blocks.size()) {
+		if (in_document_ptr > ref_context->indexed_blocks.size()) {
 			std::cout << "Warning: Out of bounds" << std::endl;
 		}
 		else {
-			this->data_block = ref_data->indexed_blocks[in_document_ptr];
+			this->data_block = ref_context->indexed_blocks[in_document_ptr];
 			_ASSERT(this->data_block->m_block_type == hkIndexedDataBlock::Type::Pointer);
 			_ASSERT(this->data_block->m_num_instances == 1);
 			//_ASSERT(this->type->is_parent_of(this->data_block->m_data_type));
@@ -1058,7 +1124,7 @@ std::string hkreflex::hkClassPointerInstance::dump(int indent)
 
 	std::string ret = "<ptr_ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + ": {\n";
 	if (in_document_ptr != 0) {
-		if (in_document_ptr > ref_data->indexed_blocks.size()) {
+		if (in_document_ptr > ref_context->indexed_blocks.size()) {
 			ret += indent_str + "\t// Error: Out of bounds\n";
 		}
 		else if(this->ptr_instance) {
@@ -1076,9 +1142,9 @@ uint64_t hkreflex::hkClassPointerInstance::Serialize(utils::DataAccessor data, u
 {
 	size_t cur_pos = 0;
 	if (this->ptr_instance) {
-		ref_data->GetPatchChunk()->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
+		ref_context->RegisterPatch(this->type, data - ref_context->GetSerializeDataPtr() + cur_pos);
 
-		auto block = hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(ref_data, this->ptr_instance->type, this->ptr_instance);
+		auto block = hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(ref_context, this->ptr_instance->type, this->ptr_instance);
 
 		utils::writeToAccessor(data, cur_pos, serializer.QueueSerialization(block, true));
 	}
@@ -1088,7 +1154,17 @@ uint64_t hkreflex::hkClassPointerInstance::Serialize(utils::DataAccessor data, u
 	return cur_pos;
 }
 
-hkreflex::hkClassFloatInstance::hkClassFloatInstance(hkClassBase* type, hkphysics::hkPhysicsReflectionData* ref_data) : hkClassInstance(type, ref_data) {
+uint64_t hkreflex::hkClassPointerInstance::GetSerializeSize()
+{
+	if (this->ptr_instance) {
+		return 8 + this->ptr_instance->GetSerializeSize();
+	}
+	else {
+		return 8;
+	}
+}
+
+hkreflex::hkClassFloatInstance::hkClassFloatInstance(hkClassBase* type, hkphysics::hkReflDataSerializeContext* ref_data) : hkClassInstance(type, ref_data) {
 	auto format = type->format;
 	is_big_endian = (format & 0x100);
 	bit_length = (format >> 16);
@@ -1193,6 +1269,11 @@ uint64_t hkreflex::hkClassFloatInstance::Serialize(utils::DataAccessor data, uti
 	return cur_pos;
 }
 
+uint64_t hkreflex::hkClassFloatInstance::GetSerializeSize()
+{
+	return byte_length;
+}
+
 bool hkreflex::hkClassRecordInstance::equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassRecordInstance*>(other);
@@ -1228,12 +1309,22 @@ void hkreflex::hkClassRecordInstance::assert_equals(hkClassInstance* other)
 	}
 }
 
+void hkreflex::hkClassRecordInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes)
+{
+	hkClassInstance::CollectSerializeClasses(classes);
+	for (auto& record : record_instances) {
+		if (record.instance) {
+			record.instance->CollectSerializeClasses(classes);
+		}
+	}
+}
+
 size_t hkreflex::hkClassRecordInstance::Build(utils::DataAccessor& data)
 {
 	utils::DataAccessor data_ptr = data;
 	// The first field is always parent class
 	if (type->parent_class) {
-		hkreflex::hkClassInstance* instance = AllocateInstance(type->parent_class, ref_data);
+		hkreflex::hkClassInstance* instance = AllocateInstance(type->parent_class, ref_context);
 		if (!instance) {
 			return 0;
 		}
@@ -1249,7 +1340,7 @@ size_t hkreflex::hkClassRecordInstance::Build(utils::DataAccessor& data)
 	for (hkreflex::hkFieldBase*& field : type->fields) {
 		utils::DataAccessor instance_data_ptr = data_ptr + field->offset;
 
-		hkreflex::hkClassInstance* instance = AllocateInstance(field->type, ref_data);
+		hkreflex::hkClassInstance* instance = AllocateInstance(field->type, ref_context);
 		if (!instance) {
 			return 0;
 		}
@@ -1285,7 +1376,7 @@ void hkreflex::hkClassRecordInstance::SetupFieldInstances()
 
 	if (this->type->parent_class) {
 		auto hk_base_class = this->type->parent_class;
-		auto hk_base_instance = hkreflex::AllocateInstance(hk_base_class, ref_data);
+		auto hk_base_instance = hkreflex::AllocateInstance(hk_base_class, ref_context);
 		if (hk_base_instance == nullptr) {
 			throw std::runtime_error("hkClassRecordInstance::SetupFieldInstances: unable to allocate base instance.");
 		}
@@ -1307,11 +1398,16 @@ void hkreflex::hkClassRecordInstance::SetupFieldInstances()
 
 		auto hk_field_class = field->type;
 
-		hkreflex::hkClassInstance* hk_field_instance = hkreflex::AllocateInstance(field->type, ref_data);
+		hkreflex::hkClassInstance* hk_field_instance = hkreflex::AllocateInstance(field->type, ref_context);
 
 		if (hk_field_instance->type->kind == hkClassBase::TypeKind::Record) {
 			auto hk_field_record_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_field_instance);
 			hk_field_record_instance->SetupFieldInstances();
+		}
+
+		if (hk_field_instance->type->kind == hkClassBase::TypeKind::String) {
+			auto hk_field_string_instance = dynamic_cast<hkreflex::hkClassStringInstance*>(hk_field_instance);
+			hk_field_string_instance->char_type = hkreflex::hkTypeTranscriptor::GetInstance().AllocateClassByUniqueId("char");
 		}
 
 		if (hk_field_instance == nullptr) {
@@ -1356,6 +1452,15 @@ uint64_t hkreflex::hkClassRecordInstance::Serialize(utils::DataAccessor data, ut
 		cur_pos += record.instance->Serialize(field_data, serializer);
 	}
 	return type->size;
+}
+
+uint64_t hkreflex::hkClassRecordInstance::GetSerializeSize()
+{
+	uint64_t size = 0;
+	for (auto& record : record_instances) {
+		size += record.instance->GetSerializeSize();
+	}
+	return size;
 }
 
 hkreflex::hkClassInstance* hkreflex::hkClassRecordInstance::GetParentInstance()
@@ -1482,6 +1587,16 @@ void hkreflex::hkClassArrayInstance::assert_equals(hkClassInstance* other)
 	}
 }
 
+void hkreflex::hkClassArrayInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes)
+{
+	hkClassInstance::CollectSerializeClasses(classes);
+	for (auto& instance : array_instances) {
+		if (instance) {
+			instance->CollectSerializeClasses(classes);
+		}
+	}
+}
+
 bool hkreflex::hkClassArrayInstance::equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassArrayInstance*>(other);
@@ -1506,7 +1621,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 4; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return false;
 			}
@@ -1535,7 +1650,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 16; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return false;
 			}
@@ -1564,7 +1679,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 		utils::DataAccessor data_ptr = data;
 
 		for (int i = 0; i < 12; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return false;
 			}
@@ -1599,11 +1714,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 		}
 
 		if (in_document_ptr) {
-			if (in_document_ptr >= ref_data->indexed_blocks.size()) {
-				std::cout << "Warning: Out of bounds. In document ptr: " << in_document_ptr << " Indexed blocks size: " << ref_data->indexed_blocks.size() << std::endl;
+			if (in_document_ptr >= ref_context->indexed_blocks.size()) {
+				std::cout << "Warning: Out of bounds. In document ptr: " << in_document_ptr << " Indexed blocks size: " << ref_context->indexed_blocks.size() << std::endl;
 				return cur_pos;
 			}
-			data_block = ref_data->indexed_blocks[in_document_ptr];
+			data_block = ref_context->indexed_blocks[in_document_ptr];
 			if (data_block->m_data_type != element_type) {
 				std::cout << "Warning: Array type mismatch. Data type: " << data_block->m_data_type->type_name << " Expected type: " << element_type->type_name << std::endl;
 				return cur_pos;
@@ -1620,7 +1735,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 	else if (type->type_name == "hkRelArray") { // Reference
 		in_document_ptr = utils::readFromAccessor<uint32_t>(data, cur_pos);
 		if (in_document_ptr) {
-			data_block = ref_data->indexed_blocks[in_document_ptr];
+			data_block = ref_context->indexed_blocks[in_document_ptr];
 			_ASSERT(data_block->m_data_type == element_type);
 			data_block->BuildInstances();
 			array_instances = data_block->m_instances;
@@ -1639,7 +1754,7 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 		}
 		utils::DataAccessor data_ptr = data;
 		for (int i = 0; i < compile_size; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return false;
 			}
@@ -1680,7 +1795,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		else if (in_document_ptr == 0) {
 			ret += indent_str + "\t// Empty\n";
 		}
-		else if (in_document_ptr > 0 && in_document_ptr < ref_data->indexed_blocks.size() && this->data_block == 0) {
+		else if (in_document_ptr > 0 && in_document_ptr < ref_context->indexed_blocks.size() && this->data_block == 0) {
 			ret += indent_str + "\t// Element type mismatch\n";
 		}
 		else {
@@ -1763,9 +1878,9 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 		if (type->type_name == "hkArray") {
 			uint64_t ptr = 0;
 			if (!this->array_instances.empty()) {
-				ref_data->GetPatchChunk()->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
+				ref_context->RegisterPatch(this->type, data - ref_context->GetSerializeDataPtr() + cur_pos);
 
-				auto block = hkIndexedDataBlock::CreateArrayAndAlloc(ref_data, element_type, array_instances);
+				auto block = hkIndexedDataBlock::CreateArrayAndAlloc(ref_context, element_type, array_instances);
 
 				ptr = serializer.QueueSerialization(block, true);
 			}
@@ -1779,9 +1894,9 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 		else if (type->type_name == "hkRelArray") {
 			uint32_t ptr = 0;
 			if (!this->array_instances.empty()) {
-				ref_data->GetPatchChunk()->RegisterPatch(this->type, data - ref_data->GetSerializeDataPtr() + cur_pos);
+				ref_context->RegisterPatch(this->type, data - ref_context->GetSerializeDataPtr() + cur_pos);
 
-				auto block = hkIndexedDataBlock::CreateArrayAndAlloc(ref_data, element_type, array_instances);
+				auto block = hkIndexedDataBlock::CreateArrayAndAlloc(ref_context, element_type, array_instances);
 
 				ptr = serializer.QueueSerialization(block, true);
 			}
@@ -1811,12 +1926,21 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 	return cur_pos;
 }
 
+uint64_t hkreflex::hkClassArrayInstance::GetSerializeSize()
+{
+	uint64_t size = 0;
+	for (auto& instance : array_instances) {
+		size += instance->GetSerializeSize();
+	}
+	return size;
+}
+
 void hkreflex::hkClassArrayInstance::resize(size_t num)
 {
 	auto element_type = type->sub_type;
 	if (element_type->type_name == "float" && type->size == 16) {
 		for (int i = this->array_instances.size(); i < 4; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
 			}
@@ -1827,7 +1951,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 	else if (element_type->type_name == "float" && type->size == 64) {
 		
 		for (int i = this->array_instances.size(); i < 16; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
 			}
@@ -1837,7 +1961,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 	}
 	else if (element_type->type_name == "float" && type->size == 48) {
 		for (int i = this->array_instances.size(); i < 12; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
 			}
@@ -1857,7 +1981,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 		}
 
 		for (int i = this->array_instances.size(); i < num; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
 			}
@@ -1876,7 +2000,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 		}
 
 		for (int i = this->array_instances.size(); i < num; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
 			}
@@ -1902,7 +2026,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 		}
 
 		for (int i = this->array_instances.size(); i < compile_size; ++i) {
-			auto instance = AllocateInstance(element_type, ref_data);
+			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
 			}
@@ -2007,7 +2131,7 @@ hkreflex::hkTypeTranscriptor::TypeTranscriptProperties& hkreflex::hkTypeTranscri
 	return properties;
 }
 
-hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(MapIdType id)
+hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(MapIdType id, bool include_definition)
 {
 	if (!is_valid_id(id)) {
 		return nullptr;
@@ -2023,6 +2147,7 @@ hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(Map
 
 	hkreflex::hkClassBase* hk_class = new hkreflex::hkClassBase();
 	all_allocated_classes[id] = hk_class;
+	all_allocated_classes_list.push_back(hk_class);
 
 	auto& properties = this->type_transcripts[id];
 	if (properties.declared) {
@@ -2050,7 +2175,7 @@ hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(Map
 		hk_class->_declared = true;
 	}
 
-	if (properties.defined) {
+	if (include_definition && properties.defined) {
 		if (is_valid_id(properties.parent_class_id)) {
 			hk_class->parent_class = AllocateClassByUniqueId(properties.parent_class_id);
 		}
@@ -2214,4 +2339,8 @@ void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool
 	file.close();
 
 	DeserializeTranscripts(json);
+}
+
+void hkreflex::hkClassInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes) {
+	type->CollectSerializeClasses(classes);
 }

@@ -3,9 +3,9 @@
 
 
 namespace hktypes{
+	class hkBitField;
 	template <typename tT, typename tAllocator>
 	class ;
-	class hkBitField;
 
 	class hclTransformSetUsage : public hkHolderBase {
 	public:

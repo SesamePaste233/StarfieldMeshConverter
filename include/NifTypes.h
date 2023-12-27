@@ -495,7 +495,7 @@ namespace nif {
 		~BSClothExtraData() = default;
 
 		uint64_t data_length = 0;
-		hkphysics::hkPhysicsReflectionData* data = nullptr;
+		hkphysics::hkReflDataDeserializer* data = nullptr;
 
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;
@@ -516,7 +516,7 @@ namespace nif {
 		~bhkPhysicsSystem() = default;
 
 		uint64_t data_length = 0;
-		hkphysics::hkPhysicsReflectionData* data = nullptr;
+		hkphysics::hkReflDataDeserializer* data = nullptr;
 
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;
