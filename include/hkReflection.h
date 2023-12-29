@@ -717,7 +717,7 @@ namespace hkreflex {
 				uint16_t flags;
 				uint8_t unk_value;
 
-				nlohmann::json Serialize() {
+				nlohmann::json Serialize() const {
 					nlohmann::json json;
 					json["name"] = name;
 					json["type_id"] = type_id;
@@ -742,7 +742,7 @@ namespace hkreflex {
 				MapIdType type_id;
 				uint32_t value;
 
-				nlohmann::json Serialize() {
+				nlohmann::json Serialize() const {
 					nlohmann::json json;
 					json["name"] = name;
 					json["type_id"] = type_id;
@@ -777,6 +777,8 @@ namespace hkreflex {
 
 		std::unordered_map<MapIdType, TypeTranscriptProperties> type_transcripts;
 
+		std::unordered_map<MapIdType, bool> entry_updated;
+
 		std::unordered_map<MapIdType, hkreflex::hkClassBase*> all_allocated_classes;
 
 		std::vector<hkreflex::hkClassBase*> all_allocated_classes_list;
@@ -792,7 +794,7 @@ namespace hkreflex {
 			transcript_path = path;
 		}
 
-		TypeTranscriptProperties& RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive = true, bool update_exist = true);
+		bool RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive = true, bool update_exist = true);
 
 		hkreflex::hkClassBase* AllocateClassByUniqueId(MapIdType id, bool include_definition = true);
 
@@ -800,13 +802,30 @@ namespace hkreflex {
 		requires hktypes::_is_hk_holder_t<T>
 		inline hkreflex::hkClassInstance* Instantiate(T& c_instance, hkphysics::hkReflDataSerializeContext* ref_data);
 
-		nlohmann::json SerializeTranscripts();
+		nlohmann::json SerializeTranscripts() const;
 
-		void SerializeTranscripts(std::string path, int json_indent = -1);
+		void SerializeTranscripts(std::string path, int json_indent = -1) const;
 
 		void DeserializeTranscripts(nlohmann::json& json);
 
 		void DeserializeTranscripts(std::string path, bool throw_if_not_exist = false);
+
+		inline bool TranscriptEntryUpdated(MapIdType id) const {
+			if (entry_updated.find(id) == entry_updated.end())
+				throw std::runtime_error("hkTypeTranscriptor::TranscriptUpdated: id not found. Id: " + id);
+			return entry_updated.at(id);
+		}
+
+		inline bool TranscriptUpdated() const {
+			bool updated = false;
+			for (auto& entry : entry_updated) {
+				if (entry.second) {
+					updated = true;
+					break;
+				}
+			}
+			return updated;
+		}
 
 	private:
 		hkTypeTranscriptor() {
@@ -816,7 +835,13 @@ namespace hkreflex {
 			DeserializeTranscripts(transcript_path);
 		}
 		~hkTypeTranscriptor() {
-			SerializeTranscripts(transcript_path);
+			if (TranscriptUpdated()) {
+				std::cout << "hkTypeTranscriptor: transcript updated. Saving to " << transcript_path << std::endl;
+				SerializeTranscripts(transcript_path);
+			}
+			else {
+				std::cout << "hkTypeTranscriptor: transcript not updated. Skipping save." << std::endl;
+			}
 		}
 	};
 

@@ -17,7 +17,7 @@ namespace hktypes {
 
 		std::string GetCType(hkreflex::hkClassBase* type);
 
-		std::string GetCType(std::string_view type);
+		//std::string GetCType(std::string_view type);
 
 		static bool IsMapped(hkreflex::hkClassBase* type);
 
@@ -26,7 +26,7 @@ namespace hktypes {
 	protected:
 		hkTypeMapper() = default;
 
-		const std::unordered_map<std::string_view, std::string_view> _map{
+		/*const std::unordered_map<std::string_view, std::string_view> _map{
 			{ "hkMatrix4Impl<float>", "hkMatrix4Holder"},
 			{ "hkQuaternion", "Eigen::Quaternionf" },
 			{ "T*<hkbStateMachine::EventPropertyArray>", "hkbStateMachine::EventPropertyArray" },
@@ -2245,7 +2245,7 @@ namespace hktypes {
 			{ "hkBool32Le", "bool" },
 			{ "hkBool8Be", "bool" },
 			{ "hkBool", "bool" },
-		};
+		};*/
 
 	};
 }

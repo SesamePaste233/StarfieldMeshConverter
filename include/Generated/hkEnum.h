@@ -4,9 +4,9 @@
 
 namespace hktypes{
 	class hclClothData::Platform;
-	class hclBufferLayout::TriangleFormat;
-	class hclRuntimeConversionInfo::VectorConversion;
 	class hclBufferLayout::SlotFlags;
+	class hclRuntimeConversionInfo::VectorConversion;
+	class hclBufferLayout::TriangleFormat;
 
 	template <typename tENUM, typename tSTORAGE>
 	class hkEnum;

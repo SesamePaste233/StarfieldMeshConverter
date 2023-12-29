@@ -61,14 +61,14 @@ std::string hktypes::hkTypeMapper::GetCType(hkreflex::hkClassBase* type)
 	}*/
 }
 
-std::string hktypes::hkTypeMapper::GetCType(std::string_view type)
-{
-	auto it = _map.find(type);
-	if (it != _map.end()) {
-		return it->second.data();
-	}
-	return type.data();
-}
+//std::string hktypes::hkTypeMapper::GetCType(std::string_view type)
+//{
+//	auto it = _map.find(type);
+//	if (it != _map.end()) {
+//		return it->second.data();
+//	}
+//	return type.data();
+//}
 
 bool hktypes::hkTypeMapper::IsMapped(hkreflex::hkClassBase* type)
 {

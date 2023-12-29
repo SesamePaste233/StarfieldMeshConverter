@@ -1356,9 +1356,18 @@ nif::ni_template::RTTI nif::ni_template::NiArmatureTemplate::FromNif(const NifIO
 
 	if (bscloth.size() == 1) {
 		auto cloth = dynamic_cast<nif::BSClothExtraData*>(bscloth[0]);
-		if (cloth->data) {
-			this->havok_skeleton = cloth->data->skeleton;
-			this->havok_root_lvl_container = cloth->data->root_level_container;
+		if (cloth->root_level_container) {
+			auto root_lvl_container = dynamic_cast<hktypes::hkRootLevelContainer*>(cloth->root_level_container);
+			if (root_lvl_container) {
+				this->havok_root_lvl_container = root_lvl_container;
+				auto hkaskele = root_lvl_container->GetNamedVariantRef("hkaSkeleton");
+				if (hkaskele) {
+					auto skeleton = dynamic_cast<hktypes::hkaSkeleton*>(hkaskele);
+					if (skeleton) {
+						this->havok_skeleton = skeleton;
+					}
+				}
+			}
 		}
 	}
 

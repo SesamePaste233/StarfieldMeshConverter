@@ -234,6 +234,7 @@ namespace hktypes {
 		hclBufferedMeshObj& FromBoneSpaceSkinPNOperator(hclBoneSpaceSkinPNOperator* skinOperator);
 
 		nlohmann::json ToJson();
+		hclBufferedMeshObj& FromJson(nlohmann::json& json);
 	};
 
 	template<class tStorage>

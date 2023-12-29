@@ -495,7 +495,7 @@ namespace nif {
 		~BSClothExtraData() = default;
 
 		uint64_t data_length = 0;
-		hkphysics::hkReflDataDeserializer* data = nullptr;
+		hktypes::hkHolderBase* root_level_container = nullptr;
 
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;
@@ -508,6 +508,18 @@ namespace nif {
 		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
+
+		hkphysics::hkReflDataDeserializer* GetDataDeserializer() {
+			return data;
+		};
+
+		hkphysics::hkReflDataSerializer* GetDataSerializer() {
+			return data_serializer;
+		};
+
+	protected:
+		hkphysics::hkReflDataDeserializer* data = nullptr;
+		hkphysics::hkReflDataSerializer* data_serializer = nullptr;
 	};
 
 	class bhkPhysicsSystem : public BinaryBlock {
@@ -516,7 +528,7 @@ namespace nif {
 		~bhkPhysicsSystem() = default;
 
 		uint64_t data_length = 0;
-		hkphysics::hkReflDataDeserializer* data = nullptr;
+		hktypes::hkHolderBase* root_level_container = nullptr;
 
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;
@@ -529,6 +541,18 @@ namespace nif {
 		std::vector<uint32_t> GetBlockReference() const override {
 			return std::vector<uint32_t>();
 		};
+
+		hkphysics::hkReflDataDeserializer* GetDataDeserializer() {
+			return data;
+		};
+
+		hkphysics::hkReflDataSerializer* GetDataSerializer() {
+			return data_serializer;
+		};
+
+	protected:
+		hkphysics::hkReflDataDeserializer* data = nullptr;
+		hkphysics::hkReflDataSerializer* data_serializer = nullptr;
 	};
 
 	class BSBound : public NiNodeBase {
@@ -555,8 +579,8 @@ namespace nif {
 		
 		static BSBound _human_bsbound_prefab() {
 			BSBound bound;
-			float _center[3] = {0, 0, 0.9};
-			float _dimensions[3] = {0.31, 0.31, 0.9};
+			float _center[3] = {0, 0, 0.9f};
+			float _dimensions[3] = {0.31f, 0.31f, 0.9f};
 			memcpy(bound.center, _center, sizeof(float) * 3);
 			memcpy(bound.dimensions, _dimensions, sizeof(float) * 3);
 			return bound;
@@ -604,8 +628,8 @@ namespace nif {
 			cp.connect_points.push_back({
 				"C_Head",
 				"p-AttachLight",
-				{3.11183E-08,0.711903,0.702277,-3.06975E-08},
-				{0.149805,0.126082,-8.60542E-09},
+				{3.11183E-08f,0.711903f,0.702277f,-3.06975E-08f},
+				{0.149805f,0.126082f,-8.60542E-09f},
 				1.f
 				});
 			return cp;

@@ -679,3 +679,69 @@ nlohmann::json hktypes::hclBufferedMeshObj::ToJson()
 
 	return ret;
 }
+
+hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromJson(nlohmann::json& json)
+{
+	this->name = json["name"];
+
+	this->shapeType = (ShapeType)json["type"];
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; j++) {
+			this->localFrame(i, j) = json["localFrame"][i][j];
+		}
+	}
+
+	if (this->shapeType == ShapeType::Capsule) {
+		this->capsuleStart = json["capsuleStart"];
+		this->capsuleEnd = json["capsuleEnd"];
+		this->capsuleBigRadius = json["capsuleBigRadius"];
+		this->capsuleSmallRadius = json["capsuleSmallRadius"];
+
+		return *this;
+	}
+
+	this->positions = json["positions"];
+	this->normals = json["normals"];
+	this->boneWeights = json["boneWeights"];
+	this->triangleIndices = json["triangleIndices"];
+
+	if (json.find("extraDataList") != json.end()) {
+		for (int i = 0; i < this->positions.size(); ++i) {
+			auto& extra_data_list_json = json["extraDataList"][i];
+			for (auto& extra_data_json : extra_data_list_json) {
+				if (extra_data_json.find("particleDatas") != extra_data_json.end()) {
+					auto particle_data = make_extra_data("particleDatas", hclSimClothData::ParticleData());
+					particle_data->data.mass = extra_data_json["particleDatas"]["mass"];
+					particle_data->data.invMass = extra_data_json["particleDatas"]["invMass"];
+					particle_data->data.radius = extra_data_json["particleDatas"]["radius"];
+					particle_data->data.friction = extra_data_json["particleDatas"]["friction"];
+					this->extraDataList[i].push_back(particle_data);
+				}
+				else if (extra_data_json.find("fixedParticles") != extra_data_json.end()) {
+					bool fixed_particles_v = extra_data_json["fixedParticles"];
+					auto fixed_particles = make_extra_data("fixedParticles", fixed_particles_v);
+					this->extraDataList[i].push_back(fixed_particles);
+				}
+				else if (extra_data_json.find("staticCollisionMasks") != extra_data_json.end()) {
+					uint32_t static_collision_masks_v = extra_data_json["staticCollisionMasks"];
+					auto static_collision_masks = make_extra_data("staticCollisionMasks", static_collision_masks_v);
+					this->extraDataList[i].push_back(static_collision_masks);
+				}
+				else if (extra_data_json.find("perParticlePinchDetectionEnabledFlags") != extra_data_json.end()) {
+					bool per_particle_pinch_detection_enabled_flags_v = extra_data_json["perParticlePinchDetectionEnabledFlags"];
+					auto per_particle_pinch_detection_enabled_flags = make_extra_data("perParticlePinchDetectionEnabledFlags", per_particle_pinch_detection_enabled_flags_v);
+					this->extraDataList[i].push_back(per_particle_pinch_detection_enabled_flags);
+				}
+			}
+		}
+	}
+
+	if (json.find("extraShapes") != json.end()) {
+		for (auto& extra_shape_json : json["extraShapes"]) {
+			auto extra_shape = hclBufferedMeshObj();
+			extra_shape.FromJson(extra_shape_json);
+			this->extraShapes.push_back(extra_shape);
+		}
+	}
+}

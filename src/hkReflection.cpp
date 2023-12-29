@@ -480,7 +480,7 @@ bool hkreflex::hkIndexedDataBlock::BuildInstances()
 	data_ptr.mark_read(0);
 #endif
 
-	for (int i = 0; i < this->m_num_instances; ++i) {
+	for (uint32_t i = 0; i < this->m_num_instances; ++i) {
 		auto instance = AllocateInstance(this->m_data_type, ref_data);
 		if (!instance) {
 			return false;
@@ -548,8 +548,8 @@ uint64_t hkreflex::hkIndexedDataBlock::Serialize(utils::DataAccessor data, utils
 		offset += padding;
 	}
 
-	this->m_offset = offset;
-	this->m_num_instances = m_instances.size();
+	this->m_offset = (uint32_t)offset;
+	this->m_num_instances = (uint32_t)m_instances.size();
 
 	for (auto& instance : m_instances) {
 		cur_pos += instance->Serialize(data + cur_pos, serializer);
@@ -562,7 +562,7 @@ hkreflex::hkIndexedDataBlock* hkreflex::hkIndexedDataBlock::CreateArrayAndAlloc(
 	hkIndexedDataBlock* block = new hkIndexedDataBlock(ref_data);
 	block->m_block_type = hkIndexedDataBlock::Type::Array;
 	block->m_data_type = type;
-	block->m_num_instances = instances.size();
+	block->m_num_instances = (uint32_t)instances.size();
 	block->m_instances = instances;
 	return block;
 }
@@ -2045,7 +2045,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 
 std::string hkreflex::hkTypeTranscriptor::transcript_path = "hkTypeTranscript.json";
 
-hkreflex::hkTypeTranscriptor::TypeTranscriptProperties& hkreflex::hkTypeTranscriptor::RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive, bool update_exist)
+bool hkreflex::hkTypeTranscriptor::RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive, bool update_exist)
 {
 	MapIdType map_id = hk_class->to_C_identifier();
 
@@ -2054,12 +2054,16 @@ hkreflex::hkTypeTranscriptor::TypeTranscriptProperties& hkreflex::hkTypeTranscri
 	}
 
 	auto& properties = this->type_transcripts[map_id]; // Overwrite or create new
+	bool& updated = this->entry_updated[map_id];
 
 	properties.id = map_id;
-	properties.hash = hk_class->hash;
+	if (update_exist || (properties.hash == 0 && hk_class->hash != 0)) {
+		properties.hash = hk_class->hash;
+		updated = true;
+	}
 
 	if (hk_class->_defined == false && hk_class->_declared == false) {
-		return properties;
+		return updated;
 	}
 
 	if (update_exist || properties.declared == false) {
@@ -2082,10 +2086,11 @@ hkreflex::hkTypeTranscriptor::TypeTranscriptProperties& hkreflex::hkTypeTranscri
 			properties.template_args.push_back({ arg_identifier, arg_type, arg_value });
 		}
 		properties.declared = true;
+		updated = true;
 	}
 
 	if (hk_class->_defined == false) {
-		return properties;
+		return updated;
 	}
 
 	if (update_exist || properties.defined == false) {
@@ -2129,9 +2134,10 @@ hkreflex::hkTypeTranscriptor::TypeTranscriptProperties& hkreflex::hkTypeTranscri
 		}
 
 		properties.defined = true;
+		updated = true;
 	}
 
-	return properties;
+	return updated;
 }
 
 hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(MapIdType id, bool include_definition)
@@ -2227,7 +2233,7 @@ hkreflex::hkClassBase* hkreflex::hkTypeTranscriptor::AllocateClassByUniqueId(Map
 	return hk_class;
 }
 
-nlohmann::json hkreflex::hkTypeTranscriptor::SerializeTranscripts()
+nlohmann::json hkreflex::hkTypeTranscriptor::SerializeTranscripts() const
 {
 	nlohmann::json json = nlohmann::json::array();
 
@@ -2270,7 +2276,7 @@ nlohmann::json hkreflex::hkTypeTranscriptor::SerializeTranscripts()
 	return json;
 }
 
-void hkreflex::hkTypeTranscriptor::SerializeTranscripts(std::string path, int json_indent) {
+void hkreflex::hkTypeTranscriptor::SerializeTranscripts(std::string path, int json_indent) const {
 	std::ofstream file(path);
 	auto json = SerializeTranscripts();
 
@@ -2323,17 +2329,25 @@ void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(nlohmann::json& json)
 		}
 
 		this->type_transcripts[properties.id] = properties;
+		this->entry_updated[properties.id] = false;
 	}
 }
 
 void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool throw_if_not_exist) {
 	std::ifstream file(path);
 
+	std::filesystem::path currentPath = std::filesystem::current_path();
+
+	std::filesystem::path absolutePath = currentPath / path;
+
+	std::cout << "Loading transcript at: " << absolutePath.string() << std::endl;
+
 	if (!file.is_open()) {
+
 		if (throw_if_not_exist) {
-			throw std::runtime_error("File not found: " + path);
+			throw std::runtime_error("File not found.");
 		}
-		std::cout << "File not found: " << path << std::endl;
+		std::cout << "Warning: File not found." << std::endl;
 		return;
 	}
 

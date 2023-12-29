@@ -43,11 +43,13 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclBoneSpaceDeformer::LocalBlockPN"; };
+			inline std::string GetTranscriptId() override { return "hclBoneSpaceDeformer::LocalBlockPN"; };
+			inline uint32_t GethkClassHash() override { return 1262607835; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "localPosition", "T[N]<hkVector4, 16>" },
+					{ "localNormal", "T[N]<hkPackedVector3, 16>" },
 				};
 			};
 		};
@@ -58,8 +60,8 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override { return true; };
 			bool ToInstance(hkreflex::hkClassInstance* instance) override { return true; };
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
+			inline std::string GethkClassName() override { return "hclBoneSpaceDeformer::LocalBlockUnpackedPN"; };
+			inline std::string GetTranscriptId() override { return "hclBoneSpaceDeformer::LocalBlockUnpackedPN"; };
 			inline uint32_t GethkClassHash() override { return 0; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
@@ -219,11 +221,19 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
+		inline std::string GethkClassName() override { return "hclBoneSpaceDeformer"; };
+		inline std::string GetTranscriptId() override { return "hclBoneSpaceDeformer"; };
 		inline uint32_t GethkClassHash() override { return 0; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "fourBlendEntries", "hkArray<hclBoneSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "threeBlendEntries", "hkArray<hclBoneSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "twoBlendEntries", "hkArray<hclBoneSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "oneBlendEntries", "hkArray<hclBoneSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>" },
+				{ "controlBytes", "hkArray<hkUint8, hkContainerHeapAllocator>" },
+				{ "startVertexIndex", "hkUint16" },
+				{ "endVertexIndex", "hkUint16" },
+				{ "partialWrite", "hkBool" },
 			};
 		};
 	};
@@ -239,11 +249,15 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
+		inline std::string GethkClassName() override { return "hclBoneSpaceSkinOperator"; };
+		inline std::string GetTranscriptId() override { return "hclBoneSpaceSkinOperator"; };
 		inline uint32_t GethkClassHash() override { return 0; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "transformSubset", "hkArray<hkUint16, hkContainerHeapAllocator>" },
+				{ "outputBufferIndex", "hkUint32" },
+				{ "transformSetIndex", "hkUint32" },
+				{ "boneSpaceDeformer", "hclBoneSpaceDeformer" },
 			};
 		};
 	};
@@ -257,11 +271,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::string GethkClassName() override { return "hclBoneSpaceSkinPNOperator"; };
+		inline std::string GetTranscriptId() override { return "hclBoneSpaceSkinPNOperator"; };
+		inline uint32_t GethkClassHash() override { return 2804828730; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "localPNs", "hkArray<hclBoneSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>" },
+				{ "localUnpackedPNs", "hkArray<hclBoneSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>" },
 			};
 		};
 	};

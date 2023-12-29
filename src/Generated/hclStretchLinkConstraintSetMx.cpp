@@ -47,6 +47,10 @@ bool hktypes::hclStretchLinkConstraintSetMx::Single::FromInstance(const hkreflex
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("restLength")->GetValue(restLength);
+	class_instance->GetInstanceByFieldName("stiffness")->GetValue(stiffness);
+	class_instance->GetInstanceByFieldName("particleA")->GetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
 	return true;
 }
 
@@ -93,6 +97,10 @@ bool hktypes::hclStretchLinkConstraintSetMx::Single::ToInstance(hkreflex::hkClas
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("restLength")->SetValue(restLength);
+	class_instance->GetInstanceByFieldName("stiffness")->SetValue(stiffness);
+	class_instance->GetInstanceByFieldName("particleA")->SetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
 	return true;
 }
 

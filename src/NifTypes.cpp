@@ -5,7 +5,7 @@ void nif::NiNode::Deserialize(std::istream& file)
 	NiObject::Deserialize(file);
 
 	this->num_children = utils::read<uint32_t>(file)[0];
-	for (int j = 0; j < this->num_children; j++)
+	for (uint32_t j = 0; j < this->num_children; j++)
 		this->children.push_back(utils::read<uint32_t>(file)[0]);
 }
 
@@ -14,7 +14,7 @@ void nif::NiNode::Serialize(std::ostream& file)
 	NiObject::Serialize(file);
 
 	utils::writeAsHex(file, this->num_children);
-	for (int j = 0; j < this->num_children; j++)
+	for (uint32_t j = 0; j < this->num_children; j++)
 		utils::writeAsHex(file, this->children[j]);
 }
 
@@ -45,7 +45,7 @@ void nif::NiObject::Deserialize(std::istream& file)
 	this->name_index = utils::read<uint32_t>(file)[0];
 
 	this->num_extra_data = utils::read<uint32_t>(file)[0];
-	for (int j = 0; j < this->num_extra_data; j++)
+	for (uint32_t j = 0; j < this->num_extra_data; j++)
 		this->extra_data.push_back(utils::read<uint32_t>(file)[0]);
 
 	this->controller_index = utils::read<uint32_t>(file)[0];
@@ -67,7 +67,7 @@ void nif::NiObject::Serialize(std::ostream& file)
 	utils::writeAsHex(file, this->name_index);
 
 	utils::writeAsHex(file, this->num_extra_data);
-	for (int j = 0; j < this->num_extra_data; j++)
+	for (uint32_t j = 0; j < this->num_extra_data; j++)
 		utils::writeAsHex(file, this->extra_data[j]);
 
 	utils::writeAsHex(file, this->controller_index);
@@ -153,7 +153,7 @@ void nif::BSGeometry::Serialize(std::ostream& file)
 			utils::writeAsHex(file, this->meshes[i].num_indices);
 			utils::writeAsHex(file, this->meshes[i].num_vertices);
 			utils::writeAsHex(file, this->meshes[i].flags);
-			this->meshes[i].path_length = this->meshes[i].mesh_path.length();
+			this->meshes[i].path_length = (uint32_t)this->meshes[i].mesh_path.length();
 			utils::writeAsHex(file, this->meshes[i].path_length);
 			utils::writeString(file, this->meshes[i].mesh_path);
 		}
@@ -195,7 +195,7 @@ void nif::SkinAttach::Deserialize(std::istream& file)
 	this->name_index = utils::read<uint32_t>(file)[0];
 	this->num_bone_names = utils::read<uint32_t>(file)[0];
 
-	for (int i = 0; i < this->num_bone_names; i++) {
+	for (uint32_t i = 0; i < this->num_bone_names; i++) {
 		auto length = utils::read<uint32_t>(file)[0];
 		this->bone_names.push_back(utils::readString(file, length));
 	}
@@ -206,8 +206,8 @@ void nif::SkinAttach::Serialize(std::ostream& file)
 	utils::writeAsHex(file, this->name_index);
 	utils::writeAsHex(file, this->num_bone_names);
 
-	for (int i = 0; i < this->num_bone_names; i++) {
-		uint32_t length = this->bone_names[i].length();
+	for (uint32_t i = 0; i < this->num_bone_names; i++) {
+		uint32_t length = (uint32_t)this->bone_names[i].length();
 		utils::writeAsHex(file, length);
 		utils::writeString(file, this->bone_names[i]);
 	}
@@ -228,12 +228,12 @@ void nif::BSSkin::Instance::Deserialize(std::istream& file)
 	this->bone_data = utils::read<uint32_t>(file)[0];
 
 	this->num_bone_attachs = utils::read<uint32_t>(file)[0];
-	for (int i = 0; i < this->num_bone_attachs; ++i) {
+	for (uint32_t i = 0; i < this->num_bone_attachs; ++i) {
 		this->bone_attach_refs.push_back(utils::read<uint32_t>(file)[0]);
 	}
 
 	this->num_bone_scales = utils::read<uint32_t>(file)[0];
-	for (int i = 0; i < this->num_bone_scales; ++i) {
+	for (uint32_t i = 0; i < this->num_bone_scales; ++i) {
 		this->bone_scales.push_back(utils::read<float>(file)[0]);
 	}
 
@@ -245,12 +245,12 @@ void nif::BSSkin::Instance::Serialize(std::ostream& file)
 	utils::writeAsHex(file, this->bone_data);
 
 	utils::writeAsHex(file, this->num_bone_attachs);
-	for (int i = 0; i < this->num_bone_attachs; ++i) {
+	for (uint32_t i = 0; i < this->num_bone_attachs; ++i) {
 		utils::writeAsHex(file, this->bone_attach_refs[i]);
 	}
 
 	utils::writeAsHex(file, this->num_bone_scales);
-	for (int i = 0; i < this->num_bone_scales; ++i) {
+	for (uint32_t i = 0; i < this->num_bone_scales; ++i) {
 		utils::writeAsHex(file, this->bone_scales[i]);
 	}
 
@@ -265,7 +265,7 @@ void nif::BSLightingShaderProperty::Deserialize(std::istream& file)
 {
 	this->name_index = utils::read<uint32_t>(file)[0];
 	this->num_extra_data = utils::read<uint32_t>(file)[0];
-	for (int i = 0; i < this->num_extra_data; ++i) {
+	for (uint32_t i = 0; i < this->num_extra_data; ++i) {
 		this->extra_data.push_back(utils::read<uint32_t>(file)[0]);
 	}
 
@@ -276,7 +276,7 @@ void nif::BSLightingShaderProperty::Serialize(std::ostream& file)
 {
 	utils::writeAsHex(file, this->name_index);
 	utils::writeAsHex(file, this->num_extra_data);
-	for (int i = 0; i < this->num_extra_data; ++i) {
+	for (uint32_t i = 0; i < this->num_extra_data; ++i) {
 		utils::writeAsHex(file, this->extra_data[i]);
 	}
 
@@ -291,7 +291,7 @@ size_t nif::BSLightingShaderProperty::GetSize()
 void nif::BSSkin::BoneData::Deserialize(std::istream& file)
 {
 	this->num_bone_infos = utils::read<uint32_t>(file)[0];
-	for (int i = 0; i < this->num_bone_infos; ++i) {
+	for (uint32_t i = 0; i < this->num_bone_infos; ++i) {
 		BoneInfo bone_info;
 		std::memcpy(&bone_info, utils::read<float>(file, 17).data(), 17 * sizeof(float));
 		this->bone_infos.push_back(bone_info);
@@ -301,7 +301,7 @@ void nif::BSSkin::BoneData::Deserialize(std::istream& file)
 void nif::BSSkin::BoneData::Serialize(std::ostream& file)
 {
 	utils::writeAsHex(file, this->num_bone_infos);
-	for (int i = 0; i < this->num_bone_infos; ++i) {
+	for (uint32_t i = 0; i < this->num_bone_infos; ++i) {
 		utils::writeStream(file, &this->bone_infos[i], 17 * sizeof(float));
 	}
 }
@@ -316,7 +316,7 @@ void nif::BoneTranslations::Deserialize(std::istream& file)
 	this->name_index = utils::read<uint32_t>(file)[0];
 	this->num_translations = utils::read<uint32_t>(file)[0];
 
-	for (int i = 0; i < this->num_translations; ++i) {
+	for (uint32_t i = 0; i < this->num_translations; ++i) {
 		uint32_t name_l = utils::read<uint32_t>(file)[0];
 		this->bone_translations[i].bone_name = utils::readString(file, name_l);
 		std::memcpy(this->bone_translations[i].translation, utils::read<float>(file, 3).data(), 3 * sizeof(float));
@@ -328,8 +328,8 @@ void nif::BoneTranslations::Serialize(std::ostream& file)
 	utils::writeAsHex(file, this->name_index);
 	utils::writeAsHex(file, this->num_translations);
 
-	for (int i = 0; i < this->num_translations; ++i) {
-		uint32_t name_l = this->bone_translations[i].bone_name.length();
+	for (uint32_t i = 0; i < this->num_translations; ++i) {
+		uint32_t name_l = (uint32_t)this->bone_translations[i].bone_name.length();
 		utils::writeAsHex(file, name_l);
 		utils::writeString(file, this->bone_translations[i].bone_name);
 		utils::writeStream(file, this->bone_translations[i].translation, 3 * sizeof(float));
@@ -386,7 +386,7 @@ void nif::NiIntegersExtraData::Deserialize(std::istream& file)
 {
 	this->name_index = utils::read<uint32_t>(file)[0];
 	this->num_integers = utils::read<uint32_t>(file)[0];
-	for (int i = 0; i < this->num_integers; ++i) {
+	for (uint32_t i = 0; i < this->num_integers; ++i) {
 		this->integers.push_back(utils::read<uint32_t>(file)[0]);
 	}
 }
@@ -395,7 +395,7 @@ void nif::NiIntegersExtraData::Serialize(std::ostream& file)
 {
 	utils::writeAsHex(file, this->name_index);
 	utils::writeAsHex(file, this->num_integers);
-	for (int i = 0; i < this->num_integers; ++i) {
+	for (uint32_t i = 0; i < this->num_integers; ++i) {
 		utils::writeAsHex(file, this->integers[i]);
 	}
 }
@@ -501,6 +501,7 @@ void nif::BSClothExtraData::Deserialize(std::istream& file)
 		this->data_length = utils::read<uint32_t>(file)[0];
 		assert(this->binary_bytes == this->data_length + 4);
 		this->data->Deserialize(file, this->data_length);
+		root_level_container = this->data->root_level_container;
 	}
 	catch (std::exception& e) {
 		std::cout << "Failed to deserialize BSClothExtraData." << std::endl;
@@ -520,6 +521,7 @@ void nif::bhkPhysicsSystem::Deserialize(std::istream& file)
 		this->data_length = utils::read<uint32_t>(file)[0];
 		assert(this->binary_bytes == this->data_length + 4);
 		this->data->Deserialize(file, this->data_length);
+		root_level_container = this->data->root_level_container;
 	}
 	catch (std::exception& e) {
 		std::cout << "Failed to deserialize bhkPhysicsSystem." << std::endl;
@@ -581,7 +583,7 @@ void nif::BSConnectPointParents::Deserialize(std::istream& file)
 {
 	this->name_index = utils::read<uint32_t>(file)[0];
 	this->num_parents = utils::read<uint32_t>(file)[0];
-	for (int i = 0; i < this->num_parents; ++i) {
+	for (uint32_t i = 0; i < this->num_parents; ++i) {
 		auto length = utils::read<uint32_t>(file)[0];
 		auto parent_name = utils::readString(file, length);
 		auto child_length = utils::read<uint32_t>(file)[0];
@@ -602,11 +604,11 @@ void nif::BSConnectPointParents::Serialize(std::ostream& file)
 {
 	utils::writeAsHex(file, this->name_index);
 	utils::writeAsHex(file, this->num_parents);
-	for (int i = 0; i < this->num_parents; ++i) {
-		uint32_t length = this->connect_points[i].parent_name.length();
+	for (uint32_t i = 0; i < this->num_parents; ++i) {
+		uint32_t length = (uint32_t)this->connect_points[i].parent_name.length();
 		utils::writeAsHex(file, length);
 		utils::writeString(file, this->connect_points[i].parent_name);
-		uint32_t child_length = this->connect_points[i].child_name.length();
+		uint32_t child_length = (uint32_t)this->connect_points[i].child_name.length();
 		utils::writeAsHex(file, child_length);
 		utils::writeString(file, this->connect_points[i].child_name);
 		utils::writeAsHex(file, this->connect_points[i].rot_quat[0]);

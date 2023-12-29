@@ -47,11 +47,14 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclVolumeConstraint::FrameData"; };
+			inline std::string GetTranscriptId() override { return "hclVolumeConstraint::FrameData"; };
+			inline uint32_t GethkClassHash() override { return 216840356; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "frameVector", "hkVector4" },
+					{ "particleIndex", "hkUint16" },
+					{ "weight", "hkReal" },
 				};
 			};
 		};
@@ -66,11 +69,14 @@ namespace hktypes {
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
-			inline std::string GethkClassName() override { return ""; };
-			inline std::string GetTranscriptId() override { return ""; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::string GethkClassName() override { return "hclVolumeConstraint::ApplyData"; };
+			inline std::string GetTranscriptId() override { return "hclVolumeConstraint::ApplyData"; };
+			inline uint32_t GethkClassHash() override { return 504243264; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "frameVector", "hkVector4" },
+					{ "particleIndex", "hkUint16" },
+					{ "stiffness", "hkReal" },
 				};
 			};
 		};
@@ -81,11 +87,13 @@ namespace hktypes {
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return ""; };
-		inline std::string GetTranscriptId() override { return ""; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::string GethkClassName() override { return "hclVolumeConstraint"; };
+		inline std::string GetTranscriptId() override { return "hclVolumeConstraint"; };
+		inline uint32_t GethkClassHash() override { return 600065596; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
+				{ "frameDatas", "hkArray<hclVolumeConstraint::FrameData, hkContainerHeapAllocator>" },
+				{ "applyDatas", "hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>" },
 			};
 		};
 	};

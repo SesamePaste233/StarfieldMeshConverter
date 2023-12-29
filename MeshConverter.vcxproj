@@ -65,6 +65,7 @@
     <ClInclude Include="include\hclSimClothData.h" />
     <ClInclude Include="include\hkaSkeleton.h" />
     <ClInclude Include="include\hkInclude.h" />
+    <ClInclude Include="include\hkReflDataSerializeContext.h" />
     <ClInclude Include="include\hkTypes.h" />
     <ClInclude Include="include\hkPhysics.h" />
     <ClInclude Include="include\hkPhysicsChunks.h" />
@@ -83,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Common.cpp" />
+    <ClCompile Include="include\hkPhysics.cpp" />
     <ClCompile Include="include\hkPhysicsChunks.cpp" />
     <ClCompile Include="src\BSArchive.cpp" />
     <ClCompile Include="src\DataAccessor.cpp" />
@@ -93,7 +95,7 @@
     <ClCompile Include="src\hclSimClothData.cpp" />
     <ClCompile Include="src\hkaSkeleton.cpp" />
     <ClCompile Include="src\hkInclude.cpp" />
-    <ClCompile Include="src\hkPhysics.cpp" />
+    <ClCompile Include="src\hkReflDataSerializeContext.cpp" />
     <ClCompile Include="src\hkReflection.cpp" />
     <ClCompile Include="src\hkTypeMapper.cpp" />
     <ClCompile Include="src\hkTypes.cpp" />

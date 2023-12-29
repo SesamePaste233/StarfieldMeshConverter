@@ -321,181 +321,33 @@ void main() {
 		profiler->dump(file);
 	});
 
-	auto data = dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->data;
+	auto data = dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->GetDataDeserializer();
 
-	std::map<std::string, std::string> header_strings;
-	std::map<std::string, std::vector<std::string>> header_template_args;
-	std::map<std::string, std::string> source_strings;
-	std::map<std::string, std::set<hkreflex::hkClassBase*>> extra_includes;
+	auto updated_transcript = data->RegisterClassesToTranscriptor();
 
-	for (auto& hk_class : data->classes) {
-		if (hk_class->_defined == false) {
-			// No undeclared classes
-			continue;
-		}
-		if (hk_class->is_nested_class) {
-			// No nested classes
-			continue;
-		}
-		//if (hk_class->template_args.size() != 0) {
-		//	// No template classes
-		//	continue;
-		//}
-		if (hk_class->kind != hkreflex::hkClassBase::TypeKind::Record 
-			&& hktypes::hkTypeMapper::IsMapped(hk_class)
-			) {
-			// Record classes only
-			continue;
-		}
-		if (hktypes::hkTypeMapper::IsBasicTypes(hk_class)) {
-			// No basic types
-			continue;
-		}
-		std::string hk_class_definition = "";
-		std::set<hkreflex::hkClassBase*> ref_types;
+	if (updated_transcript) {
+		data->SaveToCxxCode();
 
-		auto def_str = hk_class->to_C_class_definition(ref_types, 1);
-		header_strings[hk_class->type_name] += def_str + "\n";
-		auto& lst = extra_includes[hk_class->type_name];
-		lst.insert(ref_types.begin(), ref_types.end());
+		auto literals = data->classes_to_literal(true, true, true);
 
-		std::vector<std::string> h_template_args;
-		for (auto& template_arg : hk_class->template_args) {
-			h_template_args.push_back(template_arg->template_arg_name);
-		}
+		// Save the string into a file
+		std::ofstream file_l("C:\\repo\\MeshConverter\\hkGenerated.h");
+		file_l << literals;
+		file_l.close();
 
-		header_template_args[hk_class->type_name] = h_template_args;
-
-		std::string hk_class_definition_cpp = "";
-		hk_class_definition_cpp += hk_class->to_C_FromInstance();
-		hk_class_definition_cpp += hk_class->to_C_ToInstance();
-		hk_class_definition_cpp += hk_class->to_C_GetTemplateArgs();
-		//hk_class_definition_cpp += hk_class->to_C_GetFieldTypeAndNames();
-		//hk_class_definition_cpp += hk_class->to_C_GetPropertyBag();
-
-		source_strings[hk_class->type_name] += hk_class_definition_cpp;
 	}
 
-	auto header_strings_iter = header_strings.begin();
-	auto source_strings_iter = source_strings.begin();
-	for (int i = 0; i < header_strings.size(); ++i) {
-		auto& header = *(header_strings_iter++);
-		auto& source = *(source_strings_iter++);
-		auto& ref_types = extra_includes[header.first];
-		auto& header_t_args = header_template_args[header.first];
-
-		std::string hk_class_definition = "";
-		hk_class_definition += "#pragma once\n";
-		hk_class_definition += "#include \"hkInclude.h\"\n\n";
-		hk_class_definition += "\nnamespace hktypes{\n";
-		for (auto& ref_type : ref_types) {
-			if (ref_type->template_args.size() == 0) {
-				hk_class_definition += "\tclass " + ref_type->to_C_identifier() + ";\n";
-			}
-			else {
-				hk_class_definition += "\ttemplate <";
-				for (int i = 0; i < ref_type->template_args.size(); i++) {
-					hk_class_definition += "typename " + ref_type->template_args[i]->template_arg_name;
-					if (i != ref_type->template_args.size() - 1) {
-						hk_class_definition += ", ";
-					}
-				}
-				hk_class_definition += ">\n";
-				hk_class_definition += "\tclass " + ref_type->nested_parent_type_name + ";\n";
-			}
-		}
-		hk_class_definition += "\n";
-
-		if (!header_t_args.empty()) {
-			hk_class_definition += "\ttemplate <";
-			for (int i = 0; i < header_t_args.size(); i++) {
-				hk_class_definition += "typename " + header_t_args[i];
-				if (i != header_t_args.size() - 1) {
-					hk_class_definition += ", ";
-				}
-			}
-			hk_class_definition += ">\n";
-			hk_class_definition += "\tclass " + header.first + ";\n";
-		}
-
-		hk_class_definition += header.second;
-		hk_class_definition += "}\n";
-		std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\" + header.first + ".h");
-		file << hk_class_definition;
-		file.close();
-
-		std::string hk_class_definition_cpp = "";
-		hk_class_definition_cpp += "#include \"Generated\\" + source.first + ".h\"\n\n";
-		for (auto& ref_type : ref_types) {
-			hk_class_definition_cpp += "#include \"Generated\\" + ref_type->nested_parent_type_name + ".h\"\n";
-		}
-		hk_class_definition_cpp += "\n" + source.second;
-		std::ofstream file1("C:\\repo\\MeshConverter\\src\\Generated\\" + source.first + ".cpp");
-		file1 << hk_class_definition_cpp;
-		file1.close();
-	}
-
-	auto literals = data->classes_to_literal(true, false, true);
-
-	//data->RegisterClassesToTranscriptor();
+	auto instances = data->root_level_instance->dump();
+	std::ofstream file_i("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.txt");
+	file_i << instances;
+	file_i.close();
 
 	hkphysics::hkReflDataSerializer serializer;
 	serializer.root_level_container = data->root_level_container;
 
 	std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
-
 	serializer.Serialize(file0);
 	file0.close();
-
-	std::vector<std::string> data_classes_identifiers;
-	for (auto& hk_class : data->classes) {
-		auto id = hk_class->to_C_identifier();
-		if (id != "") {
-			data_classes_identifiers.push_back(id);
-		}
-	}
-	std::vector<std::string> serialize_classes_identifiers;
-	for (auto& hk_class : serializer.classes) {
-		auto id = hk_class->to_C_identifier();
-		if (id != "") {
-			serialize_classes_identifiers.push_back(id);
-		}
-	}
-	int size = data_classes_identifiers.size() < serialize_classes_identifiers.size() ? data_classes_identifiers.size() : serialize_classes_identifiers.size();
-	for (int i = 0; i < size; i++) {
-		std::cout << data_classes_identifiers[i] << " <-> " << serialize_classes_identifiers[i] << std::endl;
-	}
-	bool missing_classes = false;
-	for (auto& data_id : data_classes_identifiers) {
-		if (std::find(serialize_classes_identifiers.begin(), serialize_classes_identifiers.end(), data_id) == serialize_classes_identifiers.end()) {
-			std::cout << data_id << " is not in serialize classes" << std::endl;
-			missing_classes = true;
-		}
-	}
-	assert(!missing_classes);
-
-	/*std::set<hkreflex::hkClassBase*> hashed_types;
-	for (auto data_block : data->indexed_blocks) {
-		auto block_type = data_block->m_data_type;
-		hashed_types.insert(block_type);
-	}
-
-	for (auto patch : data->patches) {
-		auto patch_type = patch.type;
-		hashed_types.insert(patch_type);
-	}
-
-	for (auto cls : data->classes) {
-		if (cls->type_name == "") {
-			continue;
-		}
-		if (hashed_types.find(cls) == hashed_types.end()) {
-			assert(cls->hash == 0);
-		}
-		else {
-			assert(cls->hash != 0);
-		}
-	}*/
 
 	data->root_level_instance->assert_equals(serializer.root_level_instance);
 
@@ -517,16 +369,6 @@ void main() {
 	//		json.push_back(mesh.ToJson());
 	//	}
 	//}
-
-	//// Save json to file
-	//std::ofstream file2("C:\\repo\\MeshConverter\\test.json");
-	//file2 << json;
-	//file2.close();
-
-	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\UnkBlocks\\hkGenerated.h");
-	file << literals;
-	file.close();
 }
 
 int retmain() {

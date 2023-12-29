@@ -5,9 +5,9 @@
 #include "Generated\.h"
 #include "Generated\.h"
 #include "Generated\hkaSkeleton.h"
-#include "Generated\.h"
 #include "Generated\hkaSkeleton.h"
 #include "Generated\.h"
+#include "Generated\.h"
 #include "Generated\hclSimClothData.h"
 #include "Generated\.h"
 #include "Generated\.h"
@@ -21,29 +21,26 @@
 #include "Generated\hclVirtualCollisionPointsData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
 #include "Generated\hclVirtualCollisionPointsData.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclClothState.h"
-#include "Generated\hclClothState.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
-#include "Generated\hclObjectSpaceDeformer.h"
+#include "Generated\hclBoneSpaceDeformer.h"
+#include "Generated\hclBoneSpaceDeformer.h"
 #include "Generated\hclTransformSetUsage.h"
+#include "Generated\hclBoneSpaceDeformer.h"
+#include "Generated\hclClothState.h"
+#include "Generated\hclBoneSpaceDeformer.h"
+#include "Generated\hclBoneSpaceDeformer.h"
+#include "Generated\hclBoneSpaceDeformer.h"
+#include "Generated\hclClothState.h"
 #include "Generated\hclMoveParticlesOperator.h"
-#include "Generated\hclSimpleMeshBoneDeformOperator.h"
 #include "Generated\hclSimulateOperator.h"
-#include "Generated\hclStretchLinkConstraintSetMx.h"
-#include "Generated\hclStretchLinkConstraintSetMx.h"
-#include "Generated\hclBonePlanesConstraintSet.h"
+#include "Generated\hclSimpleMeshBoneDeformOperator.h"
 #include "Generated\hclStandardLinkConstraintSetMx.h"
-#include "Generated\hclStandardLinkConstraintSetMx.h"
-#include "Generated\.h"
+#include "Generated\hclStretchLinkConstraintSetMx.h"
+#include "Generated\hclVolumeConstraint.h"
+#include "Generated\hclVolumeConstraint.h"
 #include "Generated\hclStateDependencyGraph.h"
+#include "Generated\hclStandardLinkConstraintSetMx.h"
+#include "Generated\hclStretchLinkConstraintSetMx.h"
+#include "Generated\.h"
 
 template<>
 bool hktypes::hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
@@ -1446,7 +1443,7 @@ inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclVirt
 }; };
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1463,7 +1460,7 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAlloc
 }
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1480,13 +1477,13 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAlloc
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::LocalBlockPN"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBoneSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBoneSpaceDeformer::LocalBlockPN"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1503,7 +1500,7 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerH
 }
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1520,8 +1517,8 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerH
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::LocalBlockUnpackedPN"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBoneSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBoneSpaceDeformer::LocalBlockUnpackedPN"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
@@ -1606,7 +1603,7 @@ inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclClot
 }; };
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1623,7 +1620,7 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerH
 }
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1640,13 +1637,13 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerH
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::EightBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::EightBlendEntryBlock"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBoneSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBoneSpaceDeformer::FourBlendEntryBlock"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1663,7 +1660,7 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerH
 }
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1680,13 +1677,13 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerH
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::SevenBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::SevenBlendEntryBlock"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBoneSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBoneSpaceDeformer::ThreeBlendEntryBlock"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1703,7 +1700,7 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHea
 }
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1720,13 +1717,13 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHea
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::SixBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::SixBlendEntryBlock"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBoneSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBoneSpaceDeformer::TwoBlendEntryBlock"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1743,7 +1740,7 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHe
 }
 
 template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclBoneSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -1760,168 +1757,8 @@ bool hktypes::hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHe
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::FiveBlendEntryBlock"},
-	{"tAllocator", "hkContainerHeapAllocator"},
-}; };
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::FromInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->GetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->GetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->GetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::ToInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->SetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->SetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->SetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::FourBlendEntryBlock"},
-	{"tAllocator", "hkContainerHeapAllocator"},
-}; };
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::FromInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->GetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->GetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->GetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::ToInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->SetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->SetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->SetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::ThreeBlendEntryBlock"},
-	{"tAllocator", "hkContainerHeapAllocator"},
-}; };
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::FromInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->GetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->GetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->GetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::ToInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->SetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->SetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->SetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::TwoBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::TwoBlendEntryBlock"},
-	{"tAllocator", "hkContainerHeapAllocator"},
-}; };
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::FromInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->GetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->GetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->GetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-bool hktypes::hkArray<hclObjectSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkArray") {
-		std::cout << "hkArray::ToInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("m_data")->SetValue(m_data);
-	class_instance->GetInstanceByFieldName("m_size")->SetValue(m_size);
-	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->SetValue(m_capacityAndFlags);
-	return true;
-}
-
-template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclObjectSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclObjectSpaceDeformer::OneBlendEntryBlock"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBoneSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclBoneSpaceDeformer::OneBlendEntryBlock"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
@@ -2326,7 +2163,7 @@ inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclStre
 }; };
 
 template<>
-bool hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclVolumeConstraint::FrameData, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -2343,7 +2180,7 @@ bool hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllo
 }
 
 template<>
-bool hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkArray<hclVolumeConstraint::FrameData, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -2360,8 +2197,48 @@ bool hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllo
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>::GetTemplateArgs() { return {
-	{"tT", "hclBonePlanesConstraintSet::BonePlane"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclVolumeConstraint::FrameData, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclVolumeConstraint::FrameData"},
+	{"tAllocator", "hkContainerHeapAllocator"},
+}; };
+
+template<>
+bool hktypes::hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkArray") {
+		std::cout << "hkArray::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("m_data")->GetValue(m_data);
+	class_instance->GetInstanceByFieldName("m_size")->GetValue(m_size);
+	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->GetValue(m_capacityAndFlags);
+	return true;
+}
+
+template<>
+bool hktypes::hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkArray") {
+		std::cout << "hkArray::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("m_data")->SetValue(m_data);
+	class_instance->GetInstanceByFieldName("m_size")->SetValue(m_size);
+	class_instance->GetInstanceByFieldName("m_capacityAndFlags")->SetValue(m_capacityAndFlags);
+	return true;
+}
+
+template<>
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>::GetTemplateArgs() { return {
+	{"tT", "hclVolumeConstraint::ApplyData"},
 	{"tAllocator", "hkContainerHeapAllocator"},
 }; };
 
