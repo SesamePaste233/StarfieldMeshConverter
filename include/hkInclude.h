@@ -9,6 +9,7 @@ namespace hkreflex {
 namespace hktypes {
 	class hkHolderBase {
 	public:
+		virtual ~hkHolderBase() {};
 		virtual bool FromInstance(const hkreflex::hkClassInstance* instance) = 0;
 		virtual bool ToInstance(hkreflex::hkClassInstance* instance) = 0;
 		virtual std::string GethkClassName() = 0;

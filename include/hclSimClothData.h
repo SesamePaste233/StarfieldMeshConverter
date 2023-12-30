@@ -664,7 +664,7 @@ namespace hktypes {
 		class CollidableTransformMap : public hkHolderBase {
 		public:
 			using BaseType = void;
-			int transformSetIndex;
+			int transformSetIndex = -1;
 			std::vector<uint32_t> transformIndices;
 			std::vector<hkMatrix4Holder> offsets;
 
@@ -686,18 +686,18 @@ namespace hktypes {
 		class TransferMotionData : public hkHolderBase {
 		public:
 			using BaseType = void;
-			uint32_t transformSetIndex;	// Offset: 0 Unk: 0
+			uint32_t transformSetIndex = 0;	// Offset: 0 Unk: 0
 			uint32_t transformIndex;	// Offset: 4 Unk: 0
-			bool transferTranslationMotion;	// Offset: 8 Unk: 0
-			float minTranslationSpeed;	// Offset: 12 Unk: 0
-			float maxTranslationSpeed;	// Offset: 16 Unk: 0
-			float minTranslationBlend;	// Offset: 20 Unk: 0
-			float maxTranslationBlend;	// Offset: 24 Unk: 0
-			bool transferRotationMotion;	// Offset: 28 Unk: 0
-			float minRotationSpeed;	// Offset: 32 Unk: 0
-			float maxRotationSpeed;	// Offset: 36 Unk: 0
-			float minRotationBlend;	// Offset: 40 Unk: 0
-			float maxRotationBlend;	// Offset: 44 Unk: 0
+			bool transferTranslationMotion = true;	// Offset: 8 Unk: 0
+			float minTranslationSpeed = 0.0f;	// Offset: 12 Unk: 0
+			float maxTranslationSpeed = 10.0f;	// Offset: 16 Unk: 0
+			float minTranslationBlend = 0.6f;	// Offset: 20 Unk: 0
+			float maxTranslationBlend = 0.6f;	// Offset: 24 Unk: 0
+			bool transferRotationMotion = true;	// Offset: 28 Unk: 0
+			float minRotationSpeed = 30.f;	// Offset: 32 Unk: 0
+			float maxRotationSpeed = 90.f;	// Offset: 36 Unk: 0
+			float minRotationBlend = 0.0f;	// Offset: 40 Unk: 0
+			float maxRotationBlend = 0.6f;	// Offset: 44 Unk: 0
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;

@@ -243,6 +243,22 @@ void hktypes::hkBitField::SetMask(std::vector<bool>& mask)
 	}
 }
 
+hktypes::hkBitField& hktypes::hkBitField::operator|(const hkBitField& other)
+{
+	hkBitField ret;
+	auto& storage = ret.storage;
+	auto& other_storage = other.storage;
+	if (storage.numBits != other_storage.numBits) {
+		std::cout << "hkBitField::operator|: numBits is not equal" << std::endl;
+		throw std::runtime_error("hkBitField::operator|: numBits is not equal");
+		return ret;
+	}
+	for (int i = 0; i < storage.words.size(); i++) {
+		storage.words[i] |= other_storage.words[i];
+	}
+	return ret;
+}
+
 bool hktypes::hkRootLevelContainer::NamedVariant::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
@@ -307,6 +323,16 @@ hktypes::hkReferencedObject* hktypes::hkRootLevelContainer::GetNamedVariantRef(s
 		}
 	}
 	return nullptr;
+}
+
+hktypes::hkRootLevelContainer::NamedVariant& hktypes::hkRootLevelContainer::GetNamedVariant(std::string type_name, std::string instance_name)
+{
+	for (auto& namedVariant : this->namedVariants) {
+		if (namedVariant.className == type_name && (instance_name.empty() || instance_name == namedVariant.name)) {
+			return namedVariant;
+		}
+	}
+	throw std::runtime_error("NamedVariant not found");
 }
 
 hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromSimClothData(hclSimClothData* simClothData)

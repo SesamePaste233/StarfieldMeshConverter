@@ -189,8 +189,6 @@ bool hktypes::hkaSkeleton::FromInstance(const hkreflex::hkClassInstance* instanc
 
 	auto reference_pose = class_instance->GetArrayByFieldName<hkQsTransformf>("referencePose");
 
-	std::vector<hkaBoneHolder*> bones;
-
 	for (int i = 0; i < bones_v.size(); i++) {
 		auto b_ptr = new hkaBoneHolder(bones_v[i]);
 		bones.push_back(b_ptr);
@@ -222,41 +220,37 @@ bool hktypes::hkaSkeleton::ToInstance(hkreflex::hkClassInstance* instance)
 	}
 
 	std::vector<int16_t> parent_indices;
-	std::vector<hkaBoneHolder*> bones_ptr;
 	std::vector<hkQsTransformf> reference_pose;
 
-	this->TraverseBones([&](hkaBoneHolder* bone) {
-		if (bone->parent) {
-			parent_indices.push_back(std::distance(bones_ptr.begin(), std::find(bones_ptr.begin(), bones_ptr.end(), bone->parent)));
-		}
-		else {
-			parent_indices.push_back(-1);
-		}
-		bones_ptr.push_back(bone);
+	std::vector<hkaBoneHolder> _bones;
+	for (auto bone : this->bones) {
+		_bones.push_back(*bone);
+		parent_indices.push_back(bone->parent ? std::distance(this->bones.begin(), std::find(this->bones.begin(), this->bones.end(), bone->parent)) : -1);
 		reference_pose.push_back(bone->GetTransform());
-		});
-
-	std::vector<hkaBoneHolder> bones;
-	for (auto bone : bones_ptr) {
-		bones.push_back(*bone);
 	}
 
 	class_instance->GetInstanceByFieldName("name")->SetValue(this->name);
 	class_instance->GetInstanceByFieldName("parentIndices")->SetValue(parent_indices);
-	class_instance->GetInstanceByFieldName("bones")->SetValue(bones);
+	class_instance->GetInstanceByFieldName("bones")->SetValue(_bones);
 	class_instance->GetInstanceByFieldName("referencePose")->SetValue(reference_pose);
 
 	return true;
 }
 
-void hktypes::hkaSkeleton::TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func)
+void hktypes::hkaSkeleton::TraverseBones(std::function<bool(hkaBoneHolder*)> pre_order_func, std::function<bool(hkaBoneHolder*)> post_order_func)
 {
 	std::function<void(hkaBoneHolder*)> traverse = [&](hkaBoneHolder* bone) {
-		pre_order_func(bone);
+		bool pre_rtn = pre_order_func(bone);
+		if (!pre_rtn) {
+			return;
+		}
 		for (auto child : bone->children) {
 			traverse(child);
 		}
-		post_order_func(bone);
+		bool post_rtn = post_order_func(bone);
+		if (!post_rtn) {
+			return;
+		}
 		};
 
 	traverse(this->root);
@@ -301,8 +295,11 @@ nlohmann::json hktypes::hkaSkeleton::ToJson(hkaBoneHolder* cur_bone)
 
 void hktypes::hkaSkeleton::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
 {
+	bool calc_num_bones = false;
 	if (bone == nullptr) {
+		this->root = new hkaBoneHolder();
 		bone = this->root;
+		calc_num_bones = true;
 	}
 
 	bone->name = json["name"];
@@ -325,6 +322,52 @@ void hktypes::hkaSkeleton::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
 		bone->children.push_back(child_bone);
 		this->FromJson(child, child_bone);
 	}
+
+	if (calc_num_bones) {
+		this->CalculateBoneList();
+	}
+}
+
+uint16_t hktypes::hkaSkeleton::GetBoneIndex(std::string bone_name)
+{
+	uint16_t index = uint16_t(-1);
+	for (int i = 0; i < this->bones.size(); ++i) {
+		if (this->bones[i]->name == bone_name) {
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
+hktypes::hkaBoneHolder* hktypes::hkaSkeleton::GetBone(std::string bone_name)
+{
+	hkaBoneHolder* bone = nullptr;
+	for (int i = 0; i < this->bones.size(); ++i) {
+		if (this->bones[i]->name == bone_name) {
+			bone = this->bones[i];
+			break;
+		}
+	}
+	return bone;
+}
+
+hktypes::hkaSkeleton* hktypes::hkaSkeleton::Clone()
+{
+	hkaSkeleton* clone = new hkaSkeleton();
+	clone->name = this->name;
+	auto json_serialization = this->ToJson();
+	clone->FromJson(json_serialization);
+	return clone;
+}
+
+void hktypes::hkaSkeleton::CalculateBoneList()
+{
+	this->bones.clear();
+	this->TraverseBones([&](hkaBoneHolder* bone) {
+		bones.push_back(bone);
+		return true;
+		});
 }
 
 bool hktypes::hkQsTransform::FromInstance(const hkreflex::hkClassInstance* instance) {

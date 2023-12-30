@@ -96,6 +96,7 @@ namespace hktypes {
 		using BaseType = hkReferencedObject;
 		std::string name;
 		hkaBoneHolder* root = nullptr;
+		std::vector<hkaBoneHolder*> bones;
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -116,10 +117,19 @@ namespace hktypes {
 			};
 		};
 
-		void TraverseBones(std::function<void(hkaBoneHolder*)> pre_order_func, std::function<void(hkaBoneHolder*)> post_order_func = [](hkaBoneHolder*)->void {});
+		void TraverseBones(std::function<bool(hkaBoneHolder*)> pre_order_func, std::function<bool(hkaBoneHolder*)> post_order_func = [](hkaBoneHolder*)->bool { return true; });
 
 		nlohmann::json ToJson(hkaBoneHolder* bone = nullptr);
 
 		void FromJson(nlohmann::json& json, hkaBoneHolder* bone = nullptr);
+
+		uint16_t GetBoneIndex(std::string bone_name);
+
+		hkaBoneHolder* GetBone(std::string bone_name);
+
+		hkaSkeleton* Clone();
+
+	protected:
+		void CalculateBoneList();
 	};
 }

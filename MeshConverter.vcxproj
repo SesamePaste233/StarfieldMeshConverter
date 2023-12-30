@@ -86,6 +86,7 @@
     <ClCompile Include="include\Common.cpp" />
     <ClCompile Include="include\hkPhysics.cpp" />
     <ClCompile Include="include\hkPhysicsChunks.cpp" />
+    <ClCompile Include="include\hkTypesHeader.cpp" />
     <ClCompile Include="src\BSArchive.cpp" />
     <ClCompile Include="src\DataAccessor.cpp" />
     <ClCompile Include="src\hclClothData.cpp" />

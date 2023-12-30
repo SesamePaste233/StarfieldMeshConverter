@@ -133,6 +133,7 @@ namespace hktypes {
 
 		std::vector<bool> GetMask();
 		void SetMask(std::vector<bool>& mask);
+		hkBitField& operator|(const hkBitField& other);
 	};
 
 	class hkRootLevelContainer : public hkHolderBase {
@@ -173,6 +174,7 @@ namespace hktypes {
 		};
 
 		hkReferencedObject* GetNamedVariantRef(std::string type_name, std::string instance_name = "");
+		NamedVariant& GetNamedVariant(std::string type_name, std::string instance_name = "");
 	};
 
 	class hclBufferedMeshObj {
@@ -204,7 +206,7 @@ namespace hktypes {
 
 		// Per-vertex data
 		std::vector<std::array<float, 3>> positions;
-		std::vector<std::array<float,3>> normals;
+		std::vector<std::array<float, 3>> normals;
 		std::vector<BoneWeightList> boneWeights;
 		std::vector<std::vector<ExtraDataBase*>> extraDataList;
 
