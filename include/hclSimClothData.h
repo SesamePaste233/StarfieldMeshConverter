@@ -642,7 +642,7 @@ namespace hktypes {
 			using BaseType = void;
 			float mass = 1.000000;
 			float invMass = 1.000000;
-			float radius = 0.000000;
+			float radius = 0.020000;
 			float friction = 0.500000;
 
 			// Extra
@@ -659,6 +659,14 @@ namespace hktypes {
 					{ "friction", "hkReal" },
 				};
 			};
+
+			inline void SetMass(float mass) {
+				this->mass = mass;
+				if (mass != 0)
+					this->invMass = 1.0f / mass;
+				else
+					this->invMass = 0;
+			}
 		};
 
 		class CollidableTransformMap : public hkHolderBase {
@@ -726,13 +734,13 @@ namespace hktypes {
 		class LandscapeCollisionData :public hkHolderBase {
 		public:
 			using BaseType = void;
-			float landscapeRadius;	// Offset: 0 Unk: 0
-			bool enableStuckParticleDetection;	// Offset: 4 Unk: 0
-			float stuckParticlesStretchFactorSq;	// Offset: 8 Unk: 0
-			bool pinchDetectionEnabled;	// Offset: 12 Unk: 0
-			int8_t pinchDetectionPriority;	// Offset: 13 Unk: 0
-			float pinchDetectionRadius;	// Offset: 16 Unk: 0
-			float collisionTolerance;	// Offset: 20 Unk: 0
+			float landscapeRadius = 0.05f;	// Offset: 0 Unk: 0
+			bool enableStuckParticleDetection = false;	// Offset: 4 Unk: 0
+			float stuckParticlesStretchFactorSq = 9.f;	// Offset: 8 Unk: 0
+			bool pinchDetectionEnabled = false;	// Offset: 12 Unk: 0
+			int8_t pinchDetectionPriority = 0;	// Offset: 13 Unk: 0
+			float pinchDetectionRadius = 0.f;	// Offset: 16 Unk: 0
+			float collisionTolerance = 0.2f;	// Offset: 20 Unk: 0
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -779,30 +787,30 @@ namespace hktypes {
 		OverridableSimulationInfo simulationInfo;	// Offset: 32 Unk: 0
 		std::vector<ParticleData> particleDatas;	// Offset: 64 Unk: 0
 		std::vector<uint16_t> fixedParticles;	// Offset: 80 Unk: 0
-		bool doNormals;	// Offset: 96 Unk: 0
+		bool doNormals = true;	// Offset: 96 Unk: 0
 		std::vector<uint32_t> simOpIds;	// Offset: 104 Unk: 0
 		std::vector<hclSimClothPose*> simClothPoses;	// Offset: 120 Unk: 0
 		std::vector<hclConstraintSet*> staticConstraintSets;	// Offset: 136 Unk: 0
 		std::vector<hclConstraintSet*> antiPinchConstraintSets;	// Offset: 152 Unk: 0
 		CollidableTransformMap collidableTransformMap;	// Offset: 168 Unk: 0
 		std::vector<hclCollidable*> perInstanceCollidables;	// Offset: 208 Unk: 0
-		float maxParticleRadius;	// Offset: 224 Unk: 0
+		float maxParticleRadius = 0.02f;	// Offset: 224 Unk: 0
 		std::vector<uint32_t> staticCollisionMasks;	// Offset: 232 Unk: 0
 		//std::vector<hclAction*> actions;	// Offset: 248 Unk: 0
-		float totalMass;	// Offset: 264 Unk: 0
+		float totalMass = 0.f;	// Offset: 264 Unk: 0
 		TransferMotionData transferMotionData;	// Offset: 268 Unk: 0
-		bool transferMotionEnabled;	// Offset: 316 Unk: 0
-		bool landscapeCollisionEnabled;	// Offset: 317 Unk: 0
+		bool transferMotionEnabled = true;	// Offset: 316 Unk: 0
+		bool landscapeCollisionEnabled = false;	// Offset: 317 Unk: 0
 		LandscapeCollisionData landscapeCollisionData;	// Offset: 320 Unk: 0
-		uint32_t numLandscapeCollidableParticles;	// Offset: 344 Unk: 0
+		uint32_t numLandscapeCollidableParticles = 0;	// Offset: 344 Unk: 0
 		std::vector<uint16_t> triangleIndices;	// Offset: 352 Unk: 0
 		std::vector<uint8_t> triangleFlips;	// Offset: 368 Unk: 0
-		bool pinchDetectionEnabled;	// Offset: 384 Unk: 0
+		bool pinchDetectionEnabled = false;	// Offset: 384 Unk: 0
 		std::vector<bool> perParticlePinchDetectionEnabledFlags;	// Offset: 392 Unk: 0
 		std::vector<hclSimClothData::CollidablePinchingData> collidablePinchingDatas;	// Offset: 408 Unk: 0
-		uint16_t minPinchedParticleIndex;	// Offset: 424 Unk: 0
-		uint16_t maxPinchedParticleIndex;	// Offset: 426 Unk: 0
-		uint32_t maxCollisionPairs;	// Offset: 428 Unk: 0
+		uint16_t minPinchedParticleIndex = 0;	// Offset: 424 Unk: 0
+		uint16_t maxPinchedParticleIndex = 0;	// Offset: 426 Unk: 0
+		uint32_t maxCollisionPairs = 0;	// Offset: 428 Unk: 0
 		//hclVirtualCollisionPointsData virtualCollisionPointsData;	// Offset: 432 Unk: 0
 
 		// Extra
@@ -844,5 +852,77 @@ namespace hktypes {
 				{ "virtualCollisionPointsData", "hclVirtualCollisionPointsData" },
 			};
 		};
+
+		inline void SetDefaultPoses(hclBufferedMeshObj* mesh) {
+			mesh->ToSimClothData(this);
+		}
+
+		inline void SetRadius(uint16_t particle_id, float radius) {
+			this->particleDatas[particle_id].radius = radius;
+			if (radius > this->maxParticleRadius) {
+				this->maxParticleRadius = radius;
+			}
+		}
+
+		inline void SetFriction(uint16_t particle_id, float friction) {
+			this->particleDatas[particle_id].friction = friction;
+		}
+
+		inline void DistributeMass(float total_mass) {
+			uint32_t num_moving_particles = this->simClothPoses[0]->positions.size() - this->fixedParticles.size();
+			float mass = total_mass / num_moving_particles;
+			for (uint16_t p_id = 0; p_id < this->particleDatas.size(); ++p_id) {
+				this->particleDatas[p_id].SetMass(mass);
+			}
+			for (uint16_t p_id : this->fixedParticles) {
+				this->particleDatas[p_id].SetMass(0);
+			}
+			this->totalMass = mass * num_moving_particles;
+		}
+
+		inline void RedistributeMass() {
+			uint32_t num_moving_particles = this->simClothPoses[0]->positions.size() - this->fixedParticles.size();
+			float mass = this->totalMass / num_moving_particles;
+			for (uint16_t p_id = 0; p_id < this->particleDatas.size(); ++p_id) {
+				this->particleDatas[p_id].SetMass(mass);
+			}
+			for (uint16_t p_id : this->fixedParticles) {
+				this->particleDatas[p_id].SetMass(0);
+			}
+			this->totalMass = mass * num_moving_particles;
+		}
+
+		inline void SetFixedParticles(std::vector<uint16_t> fixed_particles) {
+			this->fixedParticles = fixed_particles;
+			this->RedistributeMass();
+		}
+
+		inline void SetStaticCollisionMasks(uint8_t collidable_id, std::vector<uint16_t> collidable_particles) {
+			if (collidable_id >= 32 || collidable_id >= this->perInstanceCollidables.size()) {
+				std::cout << "Invalid collidable id: " << collidable_id << std::endl;
+				throw std::runtime_error("Invalid collidable id");
+			}
+
+			for (auto p_id : collidable_particles) {
+				this->staticCollisionMasks[p_id] |= (uint32_t)1 << collidable_id;
+			}
+		}
+
+		inline void SetTransferMotionBone(uint32_t bone_id) {
+			this->transferMotionData.transformIndex = bone_id;
+		}
+
+		inline void Finalize() {
+			this->RedistributeMass();
+			for (auto& p_id : this->fixedParticles) {
+				this->staticCollisionMasks[p_id] = 0;
+			}
+			this->maxParticleRadius = 0;
+			for (auto& p_data : this->particleDatas) {
+				if (p_data.radius > this->maxParticleRadius) {
+					this->maxParticleRadius = p_data.radius;
+				}
+			}
+		}
 	};
 }

@@ -320,6 +320,7 @@ namespace nif {
 				sub_template = other.sub_template;
 				havok_skeleton = other.havok_skeleton;
 				havok_root_lvl_container = other.havok_root_lvl_container;
+				connection_points_parent = other.connection_points_parent;
 			};
 
 			NiArmatureTemplate& operator=(const NiArmatureTemplate& other) {
@@ -329,6 +330,7 @@ namespace nif {
 				sub_template = other.sub_template;
 				havok_skeleton = other.havok_skeleton;
 				havok_root_lvl_container = other.havok_root_lvl_container;
+				connection_points_parent = other.connection_points_parent;
 				return *this;
 			};
 
@@ -341,6 +343,8 @@ namespace nif {
 			};
 
 			std::vector<NodeInfo> bones;
+
+			std::vector<BSConnectPointParents::ConnectPoint> connection_points_parent;
 
 			hktypes::hkaSkeleton* havok_skeleton = nullptr;
 
@@ -370,6 +374,14 @@ namespace nif {
 
 				json_data["skeleton_mode"] = skeleton_mode;
 
+				if (!connection_points_parent.empty()) {
+					json_data["connection_points_p"] = nlohmann::json::array();
+					for (auto& cp : connection_points_parent) {
+						std::cout << "CPA: " << cp.parent_name << " -> " << cp.child_name << std::endl;
+						json_data["connection_points_p"].push_back(cp.ToJson());
+					}
+				}
+
 				if (havok_skeleton != nullptr) {
 					nlohmann::json havok_skeleton_json = havok_skeleton->ToJson();
 
@@ -395,6 +407,14 @@ namespace nif {
 				this->bones.push_back(NodeInfo());
 				if (data.is_null()) {
 					return RTTI::None;
+				}
+
+				if (data.contains("connection_points_p")) {
+					for (auto& cp : data["connection_points_p"]) {
+						BSConnectPointParents::ConnectPoint new_cp;
+						new_cp.FromJson(cp);
+						connection_points_parent.push_back(new_cp);
+					}
 				}
 
 				if (data.find("skeleton_mode") != data.end())

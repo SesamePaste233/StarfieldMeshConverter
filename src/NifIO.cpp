@@ -1330,13 +1330,13 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 		std::memcpy(bsbound->dimensions, BBX_prefab.dimensions, 3 * sizeof(float));
 
 		root_node->AddExtraData(nif.block_manager.FindBlock(bsbound));
+	}
 
+	if (this->connection_points_parent.size() > 0) {
 		auto bsconnectpointparents = dynamic_cast<nif::BSConnectPointParents*>(nif.AddBlock(nif::NiRTTI::BSConnectPointParents, "CPA"));
 
-		auto CPA_prefab = nif::BSConnectPointParents::_human_head_attachlight_cp_prefab();
-
-		bsconnectpointparents->num_parents = CPA_prefab.num_parents;
-		bsconnectpointparents->connect_points = CPA_prefab.connect_points;
+		bsconnectpointparents->num_parents = this->connection_points_parent.size();
+		bsconnectpointparents->connect_points = this->connection_points_parent;
 
 		root_node->AddExtraData(nif.block_manager.FindBlock(bsconnectpointparents));
 	}
@@ -1438,6 +1438,13 @@ nif::ni_template::RTTI nif::ni_template::NiArmatureTemplate::FromNif(const NifIO
 				nodeStack.push(std::make_pair(child, child_index));
 			}
 		}
+	}
+
+	auto connect_point_parents = nif.GetReferencedBlocks(_root, nif::NiRTTI::BSConnectPointParents, true, "CPA");
+
+	for (auto& cpp : connect_point_parents) {
+		auto bsconnectpointparents = dynamic_cast<nif::BSConnectPointParents*>(cpp);
+		this->connection_points_parent.insert(this->connection_points_parent.end(), bsconnectpointparents->connect_points.begin(), bsconnectpointparents->connect_points.end());
 	}
 
 	return nif::ni_template::RTTI::NiArmature;

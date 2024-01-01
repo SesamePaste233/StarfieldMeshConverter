@@ -35,6 +35,24 @@ bool hkphysics::hkPhysicsDataBuilder::CheckValid(std::underlying_type_t<BuildTar
 	return true;
 }
 
+
+void hkphysics::hkPhysicsDataBuilder::SetGenericClothSimGravity(float x, float y, float z)
+{
+	CheckValid(BuildTarget_GenericClothSim);
+
+	this->hcl_sim_cloth_data->simulationInfo.gravity.x() = x;
+	this->hcl_sim_cloth_data->simulationInfo.gravity.y() = y;
+	this->hcl_sim_cloth_data->simulationInfo.gravity.z() = z;
+	this->hcl_sim_cloth_data->simulationInfo.gravity.w() = 1.f;
+}
+
+void hkphysics::hkPhysicsDataBuilder::SetGenericClothSimGlobalDamping(float damping)
+{
+	CheckValid(BuildTarget_GenericClothSim);
+
+	this->hcl_sim_cloth_data->simulationInfo.globalDampingPerSecond = damping;
+}
+
 void hkphysics::hkPhysicsDataBuilder::SetSkeleton(hktypes::hkaSkeleton& skeleton)
 {
 	using namespace hktypes;
@@ -52,6 +70,70 @@ void hkphysics::hkPhysicsDataBuilder::SetSkeleton(hktypes::hkaSkeleton& skeleton
 	this->hka_skeleton->name = "Root";
 	this->hcl_cloth_data->transformSetDefinitions[0]->numTransforms = this->hka_skeleton->bones.size();
 	skeleton_var.variant = this->hka_skeleton;
+}
+
+void hkphysics::hkPhysicsDataBuilder::SetSimClothDefaultMesh(hktypes::hclBufferedMeshObj& mesh) {
+	CheckValid(BuildTarget_GenericClothSim);
+	hcl_sim_cloth_data->SetDefaultPoses(&mesh);
+}
+
+void hkphysics::hkPhysicsDataBuilder::SetSimClothAttrsFromJson(nlohmann::json& json)
+{
+	using namespace hktypes;
+
+	CheckValid(BuildTarget_GenericClothSim);
+
+	auto& sim_cloth_data = this->hcl_sim_cloth_data;
+
+	if (json.contains("gravity")) {
+		auto& gravity = json["gravity"];
+		SetGenericClothSimGravity(gravity[0], gravity[1], gravity[2]);
+	}
+
+	if (json.contains("globalDamping")) {
+		SetGenericClothSimGlobalDamping(json["globalDamping"]);
+	}
+
+	if (json.contains("fixedParticles")) {
+		std::vector<uint16_t> fixed_particles;
+		for (auto& fixed_particle : json["fixedParticles"]) {
+			fixed_particles.push_back(fixed_particle);
+		}
+		sim_cloth_data->SetFixedParticles(fixed_particles);
+	}
+
+	if (json.contains("totalMass")) {
+		sim_cloth_data->DistributeMass(json["totalMass"]);
+	}
+
+	if (json.contains("transferMotionBone")) {
+		std::string bone_name = json["transferMotionBone"];
+		auto bone_id = this->hka_skeleton->GetBoneIndex(bone_name);
+		if (bone_id != uint16_t(-1)) {
+			sim_cloth_data->SetTransferMotionBone(bone_id);
+		}
+		else {
+			std::cout << "Warning: Invalid skeleton or bone name: "<< bone_name << std::endl;
+			throw std::runtime_error("Invalid skeleton or bone name");
+		}
+	}
+
+	if (json.contains("customRadius")) {
+		for (auto& custom_radius : json["customRadius"]) {
+			uint16_t p_id = custom_radius["particle"];
+			float r = custom_radius["radius"];
+			sim_cloth_data->SetRadius(p_id, r);
+		}
+	}
+
+	if (json.contains("customFriction")) {
+		for (auto& custom_fric : json["customFriction"]) {
+			uint16_t p_id = custom_fric["particle"];
+			float f = custom_fric["friction"];
+			sim_cloth_data->SetFriction(p_id, f);
+		}
+	}
+
 }
 
 void hkphysics::hkPhysicsDataBuilder::InitializeGenericClothSim_Impl()
@@ -126,5 +208,5 @@ void hkphysics::hkPhysicsDataBuilder::InitializeGenericClothSim_Impl()
 	hcl_cloth_state_animate->usedSimCloths.push_back(0);
 
 	hcl_cloth_data->generatedAtRuntime = false;
-	hcl_cloth_data->targetPlatform = this->build_target_platform;
+	hcl_cloth_data->targetPlatform = hktypes::hclClothData::Platform(this->build_target_platform);
 }

@@ -232,7 +232,7 @@ void amain() {
 	// Create a MeshIO object
 	nif::NifIO reader;
 
-	reader.Deserialize("C:\\repo\\MeshConverter\\skeleton.nif");
+	reader.Deserialize("C:\\repo\\MeshConverter\\ar99_barrel_long.nif");
 
 	auto armature = dynamic_cast<nif::ni_template::NiArmatureTemplate*>(reader.ToTemplate<nif::ni_template::NiArmatureTemplate>());
 
@@ -246,7 +246,7 @@ void amain() {
 	nif::NifIO writer;
 	writer.FromTemplate(armature2);
 
-	writer.Serialize("C:\\repo\\MeshConverter\\skeleton2.nif");
+	writer.Serialize("C:\\repo\\MeshConverter\\ar99_barrel_long.nif");
 
 	return;
 }
@@ -311,7 +311,7 @@ void pmain() {
 	return;
 }
 
-void main() {
+void asdmain() {
 	nif::NifIO nif;
 	nif.Deserialize("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.nif");
 
@@ -371,9 +371,9 @@ void main() {
 	//}
 }
 
-int retmain() {
+int main() {
 	nif::NifIO nif;
-	nif.SetAssetsPath("C:\\repo\\MeshConverter");
+	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
 	std::ifstream file("C:\\repo\\MeshConverter\\skeleton.nif.json");

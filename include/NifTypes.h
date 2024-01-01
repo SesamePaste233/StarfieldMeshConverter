@@ -600,6 +600,28 @@ namespace nif {
 			size_t GetSize() {
 				return parent_name.length() + child_name.length() + 40;
 			}
+
+			nlohmann::json ToJson() const {
+				nlohmann::json j;
+				j["parent_name"] = parent_name;
+				j["child_name"] = child_name;
+				j["rot_quat"] = { rot_quat[0], rot_quat[1], rot_quat[2], rot_quat[3] };
+				j["translation"] = { translation[0], translation[1], translation[2] };
+				j["scale"] = scale;
+				return j;
+			}
+
+			void FromJson(nlohmann::json& json) {
+				parent_name = json["parent_name"].get<std::string>();
+				child_name = json["child_name"].get<std::string>();
+				auto rot = json["rot_quat"].get<std::vector<float>>();
+				memcpy(rot_quat, rot.data(), sizeof(float) * 4);
+
+				auto trans = json["translation"].get<std::vector<float>>();
+				memcpy(translation, trans.data(), sizeof(float) * 3);
+
+				scale = json["scale"].get<float>();
+			}
 		};
 
 		BSConnectPointParents() = default;

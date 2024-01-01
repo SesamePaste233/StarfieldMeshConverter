@@ -183,13 +183,13 @@ Eigen::Vector3f hktypes::hkVector4Holder::ToVector3f()
 	return Eigen::Vector3f(values[0], values[1], values[2]);
 }
 
-hktypes::hkVector4Holder hktypes::hkVector4Holder::FromVector3f(const Eigen::Vector3f vec)
+hktypes::hkVector4Holder hktypes::hkVector4Holder::FromVector3f(const Eigen::Vector3f vec, const float w)
 {
 	hkVector4Holder result;
 	result.values[0] = vec.x();
 	result.values[1] = vec.y();
 	result.values[2] = vec.z();
-	result.values[3] = 0;
+	result.values[3] = w;
 	return result;
 }
 
@@ -640,6 +640,69 @@ hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromBoneSpaceSkinPNOpe
 	}
 
 	return ret;
+}
+
+bool hktypes::hclBufferedMeshObj::ToSimClothData(hclSimClothData* simClothData)
+{
+	if (simClothData == nullptr) {
+		return false;
+	}
+
+	simClothData->name = this->name;
+
+	hclSimClothPose* pose = new hclSimClothPose();
+	pose->name = "DefaultClothPose";
+
+	auto num_particles = this->positions.size();
+	auto num_triangles = this->triangleIndices.size();
+
+	for (auto& old_p: simClothData->simClothPoses) {
+		if (old_p) {
+			delete old_p;
+		}
+	}
+	simClothData->simClothPoses.clear();
+
+	for (auto& p : this->positions) {
+		auto pos = hkVector4Holder::FromVector3f(Eigen::Vector3f(p[0], p[1], p[2]), 1.f);
+		pose->positions.push_back(pos);
+	}
+
+	simClothData->simClothPoses.push_back(pose);
+
+	simClothData->triangleIndices.clear();
+	for (auto& tri : this->triangleIndices) {
+		simClothData->triangleIndices.push_back(tri[0]);
+		simClothData->triangleIndices.push_back(tri[1]);
+		simClothData->triangleIndices.push_back(tri[2]);
+	}
+
+	simClothData->triangleFlips.clear();
+	for (size_t i = 0; i * 8 < num_triangles; i++) {
+		simClothData->triangleFlips.push_back(0);
+	}
+
+	simClothData->particleDatas.clear();
+	simClothData->fixedParticles.clear();
+	simClothData->staticCollisionMasks.clear();
+	simClothData->perParticlePinchDetectionEnabledFlags.clear();
+	for (uint32_t i = 0; i < num_particles; i++) {
+		simClothData->particleDatas.push_back(hclSimClothData::ParticleData());
+		simClothData->staticCollisionMasks.push_back(0);
+		simClothData->perParticlePinchDetectionEnabledFlags.push_back(false);
+	}
+
+	return true;
+}
+
+bool hktypes::hclBufferedMeshObj::ToObjectSpaceSkinPNOperator(hclObjectSpaceSkinPNOperator* skinOperator)
+{
+	return false;
+}
+
+bool hktypes::hclBufferedMeshObj::ToBoneSpaceSkinPNOperator(hclBoneSpaceSkinPNOperator* skinOperator)
+{
+	return false;
 }
 
 nlohmann::json hktypes::hclBufferedMeshObj::ToJson()

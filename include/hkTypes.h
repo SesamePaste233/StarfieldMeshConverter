@@ -57,7 +57,7 @@ namespace hktypes {
 		static hkVector4Holder FromVector4f(const Eigen::Vector4f vec);
 
 		Eigen::Vector3f ToVector3f();
-		static hkVector4Holder FromVector3f(const Eigen::Vector3f vec);
+		static hkVector4Holder FromVector3f(const Eigen::Vector3f vec, const float w = 0);
 	};
 
 	class hkMatrix4Holder : public hkHolderBase {
@@ -234,6 +234,10 @@ namespace hktypes {
 		hclBufferedMeshObj& FromSimClothData(hclSimClothData* simClothData);
 		hclBufferedMeshObj& FromObjectSpaceSkinPNOperator(hclObjectSpaceSkinPNOperator* skinOperator);
 		hclBufferedMeshObj& FromBoneSpaceSkinPNOperator(hclBoneSpaceSkinPNOperator* skinOperator);
+
+		bool ToSimClothData(hclSimClothData* simClothData);
+		bool ToObjectSpaceSkinPNOperator(hclObjectSpaceSkinPNOperator* skinOperator);
+		bool ToBoneSpaceSkinPNOperator(hclBoneSpaceSkinPNOperator* skinOperator);
 
 		nlohmann::json ToJson();
 		hclBufferedMeshObj& FromJson(nlohmann::json& json);
