@@ -67,11 +67,11 @@ namespace utils {
 	template<class _elem_t>
 	void stack_elems(std::vector<_elem_t>& from, std::vector<_elem_t>& to, size_t num_elems) {
 		if (num_elems > from.size()) {
-			std::copy(from.front(), from.end(), to.back());
+			std::copy(from.begin(), from.end(), std::back_inserter(to));
 			from.clear();
 		}
 		else {
-			std::copy(from.front(), from.front() + num_elems, to.back());
+			std::copy(from.begin(), from.begin() + num_elems, std::back_inserter(to));
 			from.erase(from.begin(), from.begin() + num_elems);
 		}
 	}
@@ -79,10 +79,10 @@ namespace utils {
 	template<class _elem_t>
 	void stack_elems_const(const std::vector<_elem_t>& from, std::vector<_elem_t>& to, size_t num_elems) {
 		if (num_elems > from.size()) {
-			std::copy(from.front(), from.end(), to.back());
+			std::copy(from.begin(), from.end(), std::back_inserter(to));
 		}
 		else {
-			std::copy(from.front(), from.front() + num_elems, to.back());
+			std::copy(from.begin(), from.begin() + num_elems, std::back_inserter(to));
 		}
 	}
 
