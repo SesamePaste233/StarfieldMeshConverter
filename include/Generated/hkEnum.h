@@ -7,6 +7,7 @@ namespace hktypes{
 	class hclBufferLayout::SlotFlags;
 	class hclRuntimeConversionInfo::VectorConversion;
 	class hclBufferLayout::TriangleFormat;
+	class hclLocalRangeConstraintSet::ShapeType;
 
 	template <typename tENUM, typename tSTORAGE>
 	class hkEnum;
@@ -85,6 +86,26 @@ namespace hktypes{
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
 				{ "storage", "hkUint8" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+	};
+
+	template<>
+	class hkEnum<hclLocalRangeConstraintSet::ShapeType, hkUint32> : public hkHolderBase {
+	public:
+		using BaseType = void;
+		hkUint32 storage; // Offset: 0
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkEnum"; };
+		inline std::string GetTranscriptId() override { return "hkEnum<hclLocalRangeConstraintSet::ShapeType, hkUint32>"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "storage", "hkUint32" },
 			};
 		};
 		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

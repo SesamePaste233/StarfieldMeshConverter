@@ -754,6 +754,29 @@ bool hktypes::hclStandardLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstan
 	return true;
 }
 
+void hktypes::hclStandardLinkConstraintSetMx::AddDefaultLink(hclSimClothData* cloth_data, uint16_t particleA, uint16_t particleB, float stiffness)
+{
+	auto posA = cloth_data->simClothPoses[0]->positions[particleA].ToVector3f();
+	auto posB = cloth_data->simClothPoses[0]->positions[particleB].ToVector3f();
+	float restLength = (posA - posB).norm();
+	float stiffnessA = 0.5f * stiffness;
+	float stiffnessB = -0.5f * stiffness;
+	bool is_A_fixed = cloth_data->IsFixedParticle(particleA);
+	bool is_B_fixed = cloth_data->IsFixedParticle(particleB);
+	if (is_A_fixed && is_B_fixed) {
+		return;
+	}
+	else if (is_A_fixed) {
+		stiffnessA = 0;
+		stiffnessB = -stiffness;
+	}
+	else if (is_B_fixed) {
+		stiffnessA = stiffness;
+		stiffnessB = 0;
+	}
+	AddLinkImpl(particleA, particleB, stiffnessA, stiffnessB, restLength);
+}
+
 bool hktypes::hclStretchLinkConstraintSetMx::Batch::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

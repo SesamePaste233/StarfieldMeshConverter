@@ -5,8 +5,8 @@
 namespace hktypes{
 	template <typename tT, typename tAllocator>
 	class ;
-	class hkStringPtr;
 	class hkRefVariant;
+	class hkStringPtr;
 
 	class hkRootLevelContainer : public hkHolderBase {
 	public:

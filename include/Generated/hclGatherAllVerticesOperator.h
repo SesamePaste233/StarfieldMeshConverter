@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkBool;
 	class hclOperator;
+	class hkBool;
 	template <typename tT, typename tAllocator>
 	class ;
 

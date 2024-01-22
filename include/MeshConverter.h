@@ -2,6 +2,7 @@
 #include "MeshIO.h"
 #include "MorphIO.h"
 #include "NifIO.h"
+#include "hkPhysics.h"
 #include "Common.h"
 
 //#define _DLLEXPORT
@@ -31,4 +32,6 @@ extern "C" {
 	DLL uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder);
 
 	DLL const char* ImportNif(const char* input_file);
+
+	DLL uint32_t ComposePhysicsData(const char* json_data, const char* output_file);
 }

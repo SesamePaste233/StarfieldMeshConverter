@@ -113,8 +113,8 @@ namespace hktypes {
 		std::string bufferName;	// Offset: 32 Unk: 0
 		int type;	// Offset: 40 Unk: 0
 		int subType;	// Offset: 44 Unk: 0
-		uint32_t numVertices;	// Offset: 48 Unk: 0
-		uint32_t numTriangles;	// Offset: 52 Unk: 0
+		uint32_t numVertices = 0;	// Offset: 48 Unk: 0
+		uint32_t numTriangles = 0;	// Offset: 52 Unk: 0
 		hclBufferLayout bufferLayout;	// Offset: 56 Unk: 0
 
 		// Extra

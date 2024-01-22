@@ -11,7 +11,7 @@ namespace hktypes {
 	class hkPackedVector3 : public hkHolderBase {
 	public:
 		using BaseType = void;
-		int16_t values[4];
+		int16_t values[4] = { 0,0,0,0 };
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -32,7 +32,7 @@ namespace hktypes {
 	class hkVector4Holder : public hkHolderBase {
 	public:
 		using BaseType = void;
-		float values[4];
+		float values[4] = { 0,0,0,0 };
 
 		// Extra
 		hkVector4Holder() = default;
@@ -63,7 +63,7 @@ namespace hktypes {
 	class hkMatrix4Holder : public hkHolderBase {
 	public:
 		using BaseType = void;
-		float values[16];
+		float values[16] = { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -85,7 +85,7 @@ namespace hktypes {
 	public:
 		using BaseType = void;
 		tStorage words;	// Offset: 0 Unk: 0
-		int numBits;	// Offset: 16 Unk: 0
+		int numBits = 0;	// Offset: 16 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -131,9 +131,29 @@ namespace hktypes {
 			};
 		};
 
+		hkBitField() = default;
+		hkBitField(std::vector<bool>& mask, int num_bits) {
+			FromMask(mask, num_bits);
+		}
+		hkBitField(std::vector<uint32_t>& ids, int num_bits) {
+			FromMaskedIds(ids, num_bits);
+		}
+
+		hkBitField FromMask(std::vector<bool>& mask, int num_bits);
+		hkBitField FromMaskedIds(std::vector<uint32_t>& ids, int num_bits);
+
 		std::vector<bool> GetMask();
+		std::vector<uint32_t> GetMaskedIds();
 		void SetMask(std::vector<bool>& mask);
-		hkBitField& operator|(const hkBitField& other);
+		void SetMaskedIds(std::vector<uint32_t>& ids);
+		inline void SetNumBits(int num_bits) {
+			storage.numBits = num_bits;
+		}
+		inline int GetNumBits() {
+			return storage.numBits;
+		}
+
+		hkBitField& operator|(const hkBitField& other) const;
 	};
 
 	class hkRootLevelContainer : public hkHolderBase {

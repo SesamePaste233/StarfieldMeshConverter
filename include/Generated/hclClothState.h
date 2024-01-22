@@ -11,8 +11,8 @@ namespace hktypes{
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	class hclBufferUsage;
 	class hclTransformSetUsage;
+	class hclBufferUsage;
 	class hclStateDependencyGraph;
 
 	class hclClothState : public hkReferencedObject {

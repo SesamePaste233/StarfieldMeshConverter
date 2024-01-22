@@ -217,6 +217,20 @@ bool hktypes::hkBitField::ToInstance(hkreflex::hkClassInstance* instance)
 	return true;
 }
 
+hktypes::hkBitField hktypes::hkBitField::FromMask(std::vector<bool>& mask, int num_bits)
+{
+	this->SetNumBits(num_bits);
+	this->SetMask(mask);
+	return *this;
+}
+
+hktypes::hkBitField hktypes::hkBitField::FromMaskedIds(std::vector<uint32_t>& ids, int num_bits)
+{
+	this->SetNumBits(num_bits);
+	this->SetMaskedIds(ids);
+	return *this;
+}
+
 std::vector<bool> hktypes::hkBitField::GetMask()
 {
 	size_t word_size = sizeof(decltype(this->storage.words)::value_type) * 8;
@@ -228,6 +242,17 @@ std::vector<bool> hktypes::hkBitField::GetMask()
 	}
 	mask.resize(this->storage.numBits);
 	return mask;
+}
+
+std::vector<uint32_t> hktypes::hkBitField::GetMaskedIds() {
+	std::vector<uint32_t> ids;
+	auto mask = this->GetMask();
+	for (int i = 0; i < mask.size(); ++i) {
+		if (mask[i]) {
+			ids.push_back(i);
+		}
+	}
+	return ids;
 }
 
 void hktypes::hkBitField::SetMask(std::vector<bool>& mask)
@@ -243,7 +268,17 @@ void hktypes::hkBitField::SetMask(std::vector<bool>& mask)
 	}
 }
 
-hktypes::hkBitField& hktypes::hkBitField::operator|(const hkBitField& other)
+void hktypes::hkBitField::SetMaskedIds(std::vector<uint32_t>& ids)
+{
+	std::vector<bool> mask;
+	mask.resize(this->storage.numBits);
+	for (auto& id : ids) {
+		mask[id] = true;
+	}
+	this->SetMask(mask);
+}
+
+hktypes::hkBitField& hktypes::hkBitField::operator|(const hkBitField& other) const
 {
 	hkBitField ret;
 	auto& storage = ret.storage;
@@ -414,148 +449,69 @@ hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromObjectSpaceSkinPNO
 
 	auto& transformSubSet = skinOperator->transformSubset;
 
-	int num_verts = skinOperator->objectSpaceDeformer.endVertexIndex + 1;
+	auto& deformer = skinOperator->objectSpaceDeformer;
+
+	auto& PNs = skinOperator->localPNs;
+
+	int num_verts = deformer.endVertexIndex + 1;
 
 	ret.positions.resize(num_verts);
 	ret.normals.resize(num_verts);
 	ret.boneWeights.resize(num_verts);
 	ret.extraDataList.resize(num_verts);
 
-	int i = 0;
-	for (auto& block : skinOperator->objectSpaceDeformer.eightBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
+	using _block_t = hclObjectSpaceDeformer::EntryBlockBase;
+	std::vector<std::vector<_block_t*>> blocks;
+	blocks.push_back(utils::make_references<_block_t*>(deformer.eightBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.sevenBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.sixBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.fiveBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.fourBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.threeBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.twoBlendEntries));
+	blocks.push_back(utils::make_references<_block_t*>(deformer.oneBlendEntries));
 
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+	blocks.erase(std::remove_if(blocks.begin(), blocks.end(), [](auto& block) {return block.empty(); }), blocks.end());
+
+	std::vector<uint8_t> control_bytes = deformer.controlBytes;
+
+	std::vector<std::queue<std::array<uint16_t, 16>>> vert_ids;
+
+	for (auto& block_list : blocks) {
+		std::queue<std::array<uint16_t, 16>> _vert_id_list;
+		for (auto& block : block_list) {
+			auto& vert_id_list = block->vertexIndices;
+			auto bone_weight_pairs = block->GetBoneIndicesAndWeights(transformSubSet);
+
+			for (int j = 0; j < 16; ++j) {
+				ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
+			}
+
+			_vert_id_list.push(utils::make_array(vert_id_list));
 		}
-
-		i++;
+		vert_ids.push_back(_vert_id_list);
 	}
 
-	for (auto& block : skinOperator->objectSpaceDeformer.sevenBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
+	// TODO: there could be another indexing scheme for control bytes
+	// four: 4 (index 0)
+	// three: 2 (index 1)
+	// two: 0 (index 2 or null)
+	// one: 1 (index 3 or 2)
+	// control_bytes: 0,0,0,0,1,1,3 (whereas currently: 0,0,0,0,1,1,2)
+	for (int i = 0; i < PNs.size(); ++i) {
+		auto& localPositions = PNs[i].localPosition;
+		auto& localNormals = PNs[i].localNormal;
+
+		auto& vert_id_block = vert_ids[control_bytes[i]];
+		auto& vert_id_list = vert_id_block.front();
+		vert_id_block.pop();
 
 		for (int j = 0; j < 16; ++j) {
 			auto p = localPositions[j].ToVector3f();
 			auto n = localNormals[j].ToVector3f();
 			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
 			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
 		}
-
-		i++;
-	}
-
-	for (auto& block : skinOperator->objectSpaceDeformer.sixBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
-
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
-		}
-
-		i++;
-	}
-
-	for (auto& block : skinOperator->objectSpaceDeformer.fiveBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
-
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
-		}
-
-		i++;
-	}
-
-	for (auto& block : skinOperator->objectSpaceDeformer.fourBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
-
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
-		}
-
-		i++;
-	}
-
-	for (auto& block : skinOperator->objectSpaceDeformer.threeBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
-
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
-		}
-
-		i++;
-	}
-
-	for (auto& block : skinOperator->objectSpaceDeformer.twoBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
-
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
-		}
-
-		i++;
-	}
-
-	for (auto& block : skinOperator->objectSpaceDeformer.oneBlendEntries) {
-		auto& vert_id_list = block.vertexIndices;
-		auto bone_weight_pairs = block.GetBoneIndicesAndWeights(transformSubSet);
-		auto localPositions = skinOperator->localPNs[i].localPosition;
-		auto localNormals = skinOperator->localPNs[i].localNormal;
-
-		for (int j = 0; j < 16; ++j) {
-			auto p = localPositions[j].ToVector3f();
-			auto n = localNormals[j].ToVector3f();
-			ret.positions[vert_id_list[j]] = { p.x(), p.y(), p.z() };
-			ret.normals[vert_id_list[j]] = { n.x(), n.y(), n.z() };
-			ret.boneWeights[vert_id_list[j]] = bone_weight_pairs[j];
-		}
-
-		i++;
 	}
 
 	return ret;
@@ -775,10 +731,15 @@ hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromJson(nlohmann::jso
 
 	this->shapeType = (ShapeType)json["type"];
 
-	for (int i = 0; i < 4; ++i) {
-		for (int j = 0; j < 4; j++) {
-			this->localFrame(i, j) = json["localFrame"][i][j];
+	if (json.contains("localFrame")) {
+		for (int i = 0; i < 4; ++i) {
+			for (int j = 0; j < 4; j++) {
+				this->localFrame(i, j) = json["localFrame"][i][j];
+			}
 		}
+	}
+	else {
+		this->localFrame = Eigen::Matrix4f::Identity();
 	}
 
 	if (this->shapeType == ShapeType::Capsule) {

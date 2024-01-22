@@ -311,9 +311,9 @@ void pmain() {
 	return;
 }
 
-void asdmain() {
+void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_dress_sari_lowerbody_f.nif");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -338,7 +338,7 @@ void asdmain() {
 	}
 
 	auto instances = data->root_level_instance->dump();
-	std::ofstream file_i("C:\\repo\\MeshConverter\\spacesuit_recon_lowerbody_01_f.txt");
+	std::ofstream file_i("C:\\repo\\MeshConverter\\outfit_dress_sari_lowerbody_f.txt");
 	file_i << instances;
 	file_i.close();
 
@@ -371,7 +371,7 @@ void asdmain() {
 	//}
 }
 
-int main() {
+int asdmain() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();

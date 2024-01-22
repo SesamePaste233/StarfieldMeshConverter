@@ -3,12 +3,15 @@
 namespace hktypes {
 	class hclBufferedMeshObj;
 	class hclClothData;
+	class hclClothState;
 	class hclSimClothData;
 	class hclSimClothPose;
 	class hkaSkeleton;
 	class hclBufferDefinition;
 	class hclTransformSetDefinition;
 	class hkHolderBase;
+	class hclConstraintSet;
+	class hclOperator;
 }
 
 namespace hkphysics {
@@ -48,6 +51,7 @@ namespace hkphysics {
 		hktypes::hkHolderBase* target_instance = nullptr;
 		BuildTarget build_target = BuildTarget_None;
 		bool build_target_initialized = false;
+		bool build_target_finished = false;
 		Platform build_target_platform = HCL_PLATFORM_X64;
 
 		// Components
@@ -73,6 +77,8 @@ namespace hkphysics {
 
 		void Initialize(BuildTarget build_type);
 
+		bool ParseJson(nlohmann::json& json);
+
 		// Generic Cloth Sim Only
 		void SetGenericClothSimGravity(float x, float y, float z);
 		inline void SetGenericClothSimGravity(std::array<float, 3> gravity) {
@@ -81,7 +87,10 @@ namespace hkphysics {
 		void SetGenericClothSimGlobalDamping(float damping);
 		void SetSkeleton(hktypes::hkaSkeleton& skeleton);
 		void SetSimClothDefaultMesh(hktypes::hclBufferedMeshObj& mesh);
-		void SetSimClothAttrsFromJson(nlohmann::json& json);
+		void SetSimClothDefaultMesh(std::vector<std::vector<float>>& positions, std::vector<uint16_t>& triangleIndices);
+		void AddSimClothCollisionMesh(hktypes::hclBufferedMeshObj& mesh, std::string bind_bone_name);
+		hktypes::hclConstraintSet* AddConstraintSet(std::string type, std::string name);
+		void AddOperator(hktypes::hclOperator* physics_operator);
 
 	protected:
 		// References
@@ -91,6 +100,8 @@ namespace hkphysics {
 		hktypes::hkaSkeleton* hka_skeleton = nullptr;
 		std::vector<hktypes::hclBufferDefinition*> hcl_buffer_definitions;
 		hktypes::hclTransformSetDefinition* hcl_transform_set_definition = nullptr;
+		hktypes::hclClothState* simulate_cloth_state = nullptr;
+		hktypes::hclClothState* animate_cloth_state = nullptr;
 
 		void InitializeGenericClothSim_Impl();
 	};

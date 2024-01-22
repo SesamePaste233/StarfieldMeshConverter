@@ -186,3 +186,10 @@ const char* ImportNif(const char* input_file)
 	
 	return utils::make_copy(jsondata.dump());
 }
+
+uint32_t ComposePhysicsData(const char* json_data, const char* output_file)
+{
+	nlohmann::json jsonData = nlohmann::json::parse(json_data);
+
+	return 0;
+}

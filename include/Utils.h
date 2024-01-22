@@ -36,6 +36,91 @@ namespace utils {
 	template<typename T, typename Elem_T = std::remove_reference_t<T>::value_type>
 	concept _is_array_t = std::is_array_v<T> && (_is_integer_t<Elem_T> || _is_float_t<Elem_T> || _is_bool_t<Elem_T> || _is_string_t<Elem_T>);
 
+	template<class _Ty, size_t _Size>
+	std::array<_Ty, _Size> make_array(_Ty(&cArray)[_Size]) {
+		std::array<_Ty, _Size> stdArray;
+		std::copy(std::begin(cArray), std::end(cArray), stdArray.begin());
+		return stdArray;
+	}
+
+	template<class _base_t, class _elem_t>
+	std::vector<_base_t> cast_vector(const std::vector<_elem_t>& vec) {
+		std::vector<_base_t> result;
+		result.reserve(vec.size());
+		for (const _elem_t& elem : vec) {
+			result.push_back(static_cast<_base_t>(elem));
+		}
+		return result;
+	}
+
+	template<class _base_t, class _elem_t>
+	requires std::is_pointer_v<_base_t> && (!std::is_pointer_v<_elem_t>) && std::is_base_of<std::remove_pointer_t<_base_t>, _elem_t>::value
+	std::vector<_base_t> make_references(const std::vector<_elem_t>& vec) {
+		std::vector<_base_t> result;
+		result.reserve(vec.size());
+		for (const _elem_t& elem : vec) {
+			result.push_back((_base_t)&elem);
+		}
+		return result;
+	}
+
+	template<class _elem_t>
+	void stack_elems(std::vector<_elem_t>& from, std::vector<_elem_t>& to, size_t num_elems) {
+		if (num_elems > from.size()) {
+			std::copy(from.front(), from.end(), to.back());
+			from.clear();
+		}
+		else {
+			std::copy(from.front(), from.front() + num_elems, to.back());
+			from.erase(from.begin(), from.begin() + num_elems);
+		}
+	}
+
+	template<class _elem_t>
+	void stack_elems_const(const std::vector<_elem_t>& from, std::vector<_elem_t>& to, size_t num_elems) {
+		if (num_elems > from.size()) {
+			std::copy(from.front(), from.end(), to.back());
+		}
+		else {
+			std::copy(from.front(), from.front() + num_elems, to.back());
+		}
+	}
+
+	template<class _elem_t>
+	std::vector<std::vector<_elem_t>> split_vector(const std::vector<_elem_t>& vec, size_t num_elems) {
+		std::vector<std::vector<_elem_t>> result;
+		std::vector<_elem_t> _vec = vec;
+		result.reserve(_vec.size() / num_elems);
+		while (!_vec.empty()) {
+			result.push_back(std::vector<_elem_t>());
+			stack_elems(_vec, result.back(), num_elems);
+		}
+		return result;
+	}
+
+	template<class _result_t, class _elem_t>
+	std::vector<_result_t> group_and_calc(const std::vector<_elem_t>& vec, std::function<bool(const _elem_t&, const _elem_t&)> group_func, std::function<_result_t(const std::vector<_elem_t>&)> calc_func) {
+		std::vector<_result_t> result;
+		size_t num_elems = vec.size();
+		int* group_ids = new int[num_elems];
+		std::memset(group_ids, -1, num_elems * sizeof(int));
+		for (size_t i = 0; i < num_elems; ++i) {
+			if (group_ids[i] == -1) {
+				std::vector<_elem_t> group_elems;
+				group_elems.push_back(vec[i]);
+				group_ids[i] = result.size();
+				for (size_t j = i; j < num_elems; ++j) {
+					if (group_func(vec[i], vec[j])) {
+						group_ids[j] = group_ids[i];
+						group_elems.push_back(vec[j]);
+					}
+				}
+				result.push_back(calc_func(group_elems));
+			}
+		}
+		return result;
+	}
+
 	const wchar_t* charToWchar(const char* c);
 
 	size_t getFilePaths(std::string _dir, std::vector<std::string>& _output, std::string extension);

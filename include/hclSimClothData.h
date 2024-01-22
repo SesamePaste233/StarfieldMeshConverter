@@ -7,6 +7,7 @@ namespace hktypes {
 	class hkMatrix4Holder;
 	class hkVector4Holder;
 	class hclShape;
+	class hclSimClothData;
 
 	template<class tStorage>
 	requires utils::_is_integer_t<tStorage>
@@ -17,7 +18,7 @@ namespace hktypes {
 		using BaseType = hkReferencedObject;
 		std::string name;	// Offset: 24 Unk: 0
 		hkHandle<uint32_t> constraintId;	// Offset: 32 Unk: 0
-		uint32_t type;	// Offset: 36 Unk: 0
+		uint32_t type = 0;	// Offset: 36 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -32,6 +33,9 @@ namespace hktypes {
 				{ "type", "unsigned int" },
 			};
 		};
+
+		virtual void CollectBoneUsage(std::vector<uint32_t> bone_indices) {};
+		virtual int ConstraintPriority() { return 0; };
 	};
 
 	class hclVolumeConstraint : public hclConstraintSet {
@@ -139,6 +143,16 @@ namespace hktypes {
 				{ "transformSetIndex", "hkUint32" },
 			};
 		};
+
+		inline void CollectBoneUsage(std::vector<uint32_t> bone_indices) override {
+			for (auto& bone_plane : bonePlanes) {
+				bone_indices.push_back(bone_plane.transformIndex);
+			}
+		}
+
+		inline int ConstraintPriority() override {
+			return 5;
+		}
 	};
 
 	class hclLocalRangeConstraintSet : public hclConstraintSet {
@@ -234,6 +248,10 @@ namespace hktypes {
 				{ "applyNormalComponent", "hkBool" },
 			};
 		};
+
+		inline int ConstraintPriority() override {
+			return 6;
+		}
 	};
 
 	class hclCompressibleLinkConstraintSetMx : public hclConstraintSet {
@@ -310,6 +328,10 @@ namespace hktypes {
 				{ "singles", "hkArray<hclCompressibleLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
 			};
 		};
+
+		inline int ConstraintPriority() override {
+			return 1;
+		}
 	};
 
 	class hclBendStiffnessConstraintSetMx : public hclConstraintSet {
@@ -423,6 +445,10 @@ namespace hktypes {
 				{ "useRestPoseConfig", "hkBool" },
 			};
 		};
+
+		inline int ConstraintPriority() override {
+			return 2;
+		}
 	};
 
 	class hclStandardLinkConstraintSetMx : public hclConstraintSet {
@@ -490,6 +516,41 @@ namespace hktypes {
 				{ "singles", "hkArray<hclStandardLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
 			};
 		};
+
+		inline int ConstraintPriority() override {
+			return 3;
+		}
+
+		inline void MergeSingles() {
+			uint16_t fours = singles.size() / 4;
+			uint16_t i = 0;
+			for (; i < fours; ++i) {
+				Batch batch;
+				for (uint16_t j = 0; j < 4; ++j) {
+					batch.restLengths[j] = singles[i * 4 + j].restLength;
+					batch.stiffnessesA[j] = singles[i * 4 + j].stiffnessA;
+					batch.stiffnessesB[j] = singles[i * 4 + j].stiffnessB;
+					batch.particlesA[j] = singles[i * 4 + j].particleA;
+					batch.particlesB[j] = singles[i * 4 + j].particleB;
+				}
+				batches.push_back(batch);
+			}
+			if (fours > 0) {
+				singles.erase(singles.begin(), singles.begin() + fours * 4);
+			}
+		}
+
+		inline void AddLinkImpl(uint16_t particleA, uint16_t particleB, float stiffnessA, float stiffnessB, float restLength) {
+			hclStandardLinkConstraintSetMx::Single link;
+			link.particleA = particleA;
+			link.particleB = particleB;
+			link.stiffnessA = stiffnessA;
+			link.stiffnessB = stiffnessB;
+			link.restLength = restLength;
+			singles.push_back(link);
+		}
+
+		void AddDefaultLink(hclSimClothData* cloth_data, uint16_t particleA, uint16_t particleB, float stiffness);
 	};
 
 	class hclStretchLinkConstraintSetMx : public hclConstraintSet {
@@ -554,6 +615,10 @@ namespace hktypes {
 				{ "singles", "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>" },
 			};
 		};
+
+		inline int ConstraintPriority() override {
+			return 1;
+		}
 	};
 
 	class hclSimClothPose : public hkReferencedObject {
@@ -582,14 +647,14 @@ namespace hktypes {
 		hkMatrix4Holder transform;  // Offset: 32
 		hkVector4Holder linearVelocity; // Offset: 96
 		hkVector4Holder angularVelocity; // Offset: 112
-		uint64_t userData; // Offset: 128
+		uint64_t userData = 0; // Offset: 128
 		hclShape* shape;  // Offset: 136
 		std::string name; // Offset: 144
-		float pinchDetectionRadius;
-		int8_t pinchDetectionPriority;
-		bool pinchDetectionEnabled;
-		bool virtualCollisionPointCollisionEnabled; // Offset: 158
-		bool enabled; // Offset: 159
+		float pinchDetectionRadius = 0.01f;
+		int8_t pinchDetectionPriority = 0;
+		bool pinchDetectionEnabled = false;
+		bool virtualCollisionPointCollisionEnabled = false; // Offset: 158
+		bool enabled = true; // Offset: 159
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -783,7 +848,7 @@ namespace hktypes {
 			};
 		};
 
-		std::string name;	// Offset: 24 Unk: 0
+		std::string name = "DefaultSimCloth";	// Offset: 24 Unk: 0
 		OverridableSimulationInfo simulationInfo;	// Offset: 32 Unk: 0
 		std::vector<ParticleData> particleDatas;	// Offset: 64 Unk: 0
 		std::vector<uint16_t> fixedParticles;	// Offset: 80 Unk: 0
@@ -857,6 +922,62 @@ namespace hktypes {
 			mesh->ToSimClothData(this);
 		}
 
+		inline void SetDefaultPoses(std::vector<std::vector<float>> positions, std::vector<uint16_t> triangleIndices) {
+			hclSimClothPose* pose = new hclSimClothPose();
+			pose->name = "DefaultClothPose";
+
+			auto num_particles = positions.size();
+
+			assert(triangleIndices.size() % 3 == 0);
+			auto num_triangles = triangleIndices.size() / 3;
+
+			for (auto& old_p : this->simClothPoses) {
+				if (old_p) {
+					delete old_p;
+				}
+			}
+			this->simClothPoses.clear();
+
+			for (auto& p : positions) {
+				auto pos = hkVector4Holder::FromVector3f(Eigen::Vector3f(p[0], p[1], p[2]), 1.f);
+				pose->positions.push_back(pos);
+			}
+
+			this->simClothPoses.push_back(pose);
+
+			this->triangleIndices = triangleIndices;
+
+			this->triangleFlips.clear();
+			for (size_t i = 0; i * 8 < num_triangles; i++) {
+				this->triangleFlips.push_back(0);
+			}
+
+			this->particleDatas.clear();
+			this->fixedParticles.clear();
+			this->staticCollisionMasks.clear();
+			this->perParticlePinchDetectionEnabledFlags.clear();
+			for (uint32_t i = 0; i < num_particles; i++) {
+				this->particleDatas.push_back(hclSimClothData::ParticleData());
+				this->staticCollisionMasks.push_back(0);
+				this->perParticlePinchDetectionEnabledFlags.push_back(false);
+			}
+
+			return;
+		}
+
+		inline void AddConstraintSet(hclConstraintSet* constraint_set) {
+			constraint_set->constraintId.value = this->staticConstraintSets.size();
+			this->staticConstraintSets.push_back(constraint_set);
+		}
+
+		inline bool IsFixedParticle(uint16_t particle_id) {
+			return std::find(this->fixedParticles.begin(), this->fixedParticles.end(), particle_id) != this->fixedParticles.end();
+		}
+
+		inline void SetMassUnsafe(uint16_t particle_id, float mass) {
+			this->particleDatas[particle_id].SetMass(mass);
+		}
+
 		inline void SetRadius(uint16_t particle_id, float radius) {
 			this->particleDatas[particle_id].radius = radius;
 			if (radius > this->maxParticleRadius) {
@@ -902,10 +1023,31 @@ namespace hktypes {
 				std::cout << "Invalid collidable id: " << collidable_id << std::endl;
 				throw std::runtime_error("Invalid collidable id");
 			}
-
-			for (auto p_id : collidable_particles) {
-				this->staticCollisionMasks[p_id] |= (uint32_t)1 << collidable_id;
+			uint32_t collidable_bit = (uint32_t)1 << collidable_id;
+			for (uint16_t p_id = 0; p_id < this->particleDatas.size(); ++p_id) {
+				this->staticCollisionMasks[p_id] &= ~(collidable_bit);
 			}
+			for (auto p_id : collidable_particles) {
+				this->staticCollisionMasks[p_id] |= collidable_bit;
+			}
+		}
+
+		inline void SetStaticCollisionMasks(std::string collidable_name, std::vector<uint16_t> collidable_particles) {
+			uint8_t collidable_id = this->GetCollidableId(collidable_name);
+			if (collidable_id == uint8_t(-1)) {
+				std::cout << "Invalid collidable name: " << collidable_name << std::endl;
+				throw std::runtime_error("Invalid collidable name");
+			}
+			this->SetStaticCollisionMasks(collidable_id, collidable_particles);
+		}
+
+		inline uint8_t GetCollidableId(std::string collidable_name) {
+			for (uint8_t i = 0; i < this->perInstanceCollidables.size(); ++i) {
+				if (this->perInstanceCollidables[i]->name == collidable_name) {
+					return i;
+				}
+			}
+			return uint8_t(-1);
 		}
 
 		inline void SetTransferMotionBone(uint32_t bone_id) {
@@ -913,7 +1055,19 @@ namespace hktypes {
 		}
 
 		inline void Finalize() {
-			this->RedistributeMass();
+			for (uint16_t p_id : this->fixedParticles) {
+				this->particleDatas[p_id].SetMass(0);
+			}
+			this->fixedParticles.clear();
+			this->totalMass = 0;
+			for (uint16_t p_id = 0; p_id < this->particleDatas.size(); ++p_id) {
+				if (this->particleDatas[p_id].mass == 0) {
+					this->fixedParticles.push_back(p_id);
+				}
+				else {
+					this->totalMass += this->particleDatas[p_id].mass;
+				}
+			}
 			for (auto& p_id : this->fixedParticles) {
 				this->staticCollisionMasks[p_id] = 0;
 			}

@@ -36,11 +36,6 @@ bool hktypes::hclLocalRangeConstraintSet::LocalConstraint::FromInstance(const hk
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("particleIndex")->GetValue(particleIndex);
-	class_instance->GetInstanceByFieldName("referenceVertex")->GetValue(referenceVertex);
-	class_instance->GetInstanceByFieldName("maximumDistance")->GetValue(maximumDistance);
-	class_instance->GetInstanceByFieldName("maxNormalDistance")->GetValue(maxNormalDistance);
-	class_instance->GetInstanceByFieldName("minNormalDistance")->GetValue(minNormalDistance);
 	return true;
 }
 
@@ -54,6 +49,12 @@ bool hktypes::hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("particleIndex")->GetValue(particleIndex);
+	class_instance->GetInstanceByFieldName("referenceVertex")->GetValue(referenceVertex);
+	class_instance->GetInstanceByFieldName("maximumDistance")->GetValue(maximumDistance);
+	class_instance->GetInstanceByFieldName("maxNormalDistance")->GetValue(maxNormalDistance);
+	class_instance->GetInstanceByFieldName("minNormalDistance")->GetValue(minNormalDistance);
+	class_instance->GetInstanceByFieldName("stiffness")->GetValue(stiffness);
 	return true;
 }
 
@@ -100,11 +101,6 @@ bool hktypes::hclLocalRangeConstraintSet::LocalConstraint::ToInstance(hkreflex::
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("particleIndex")->SetValue(particleIndex);
-	class_instance->GetInstanceByFieldName("referenceVertex")->SetValue(referenceVertex);
-	class_instance->GetInstanceByFieldName("maximumDistance")->SetValue(maximumDistance);
-	class_instance->GetInstanceByFieldName("maxNormalDistance")->SetValue(maxNormalDistance);
-	class_instance->GetInstanceByFieldName("minNormalDistance")->SetValue(minNormalDistance);
 	return true;
 }
 
@@ -118,6 +114,12 @@ bool hktypes::hclLocalRangeConstraintSet::LocalStiffnessConstraint::ToInstance(h
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("particleIndex")->SetValue(particleIndex);
+	class_instance->GetInstanceByFieldName("referenceVertex")->SetValue(referenceVertex);
+	class_instance->GetInstanceByFieldName("maximumDistance")->SetValue(maximumDistance);
+	class_instance->GetInstanceByFieldName("maxNormalDistance")->SetValue(maxNormalDistance);
+	class_instance->GetInstanceByFieldName("minNormalDistance")->SetValue(minNormalDistance);
+	class_instance->GetInstanceByFieldName("stiffness")->SetValue(stiffness);
 	return true;
 }
 

@@ -61,20 +61,6 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Single::FromInstance(const hkrefl
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("weightA")->GetValue(weightA);
-	class_instance->GetInstanceByFieldName("weightB")->GetValue(weightB);
-	class_instance->GetInstanceByFieldName("weightC")->GetValue(weightC);
-	class_instance->GetInstanceByFieldName("weightD")->GetValue(weightD);
-	class_instance->GetInstanceByFieldName("bendStiffness")->GetValue(bendStiffness);
-	class_instance->GetInstanceByFieldName("restCurvature")->GetValue(restCurvature);
-	class_instance->GetInstanceByFieldName("invMassA")->GetValue(invMassA);
-	class_instance->GetInstanceByFieldName("invMassB")->GetValue(invMassB);
-	class_instance->GetInstanceByFieldName("invMassC")->GetValue(invMassC);
-	class_instance->GetInstanceByFieldName("invMassD")->GetValue(invMassD);
-	class_instance->GetInstanceByFieldName("particleA")->GetValue(particleA);
-	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
-	class_instance->GetInstanceByFieldName("particleC")->GetValue(particleC);
-	class_instance->GetInstanceByFieldName("particleD")->GetValue(particleD);
 	return true;
 }
 
@@ -134,20 +120,6 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Single::ToInstance(hkreflex::hkCl
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("weightA")->SetValue(weightA);
-	class_instance->GetInstanceByFieldName("weightB")->SetValue(weightB);
-	class_instance->GetInstanceByFieldName("weightC")->SetValue(weightC);
-	class_instance->GetInstanceByFieldName("weightD")->SetValue(weightD);
-	class_instance->GetInstanceByFieldName("bendStiffness")->SetValue(bendStiffness);
-	class_instance->GetInstanceByFieldName("restCurvature")->SetValue(restCurvature);
-	class_instance->GetInstanceByFieldName("invMassA")->SetValue(invMassA);
-	class_instance->GetInstanceByFieldName("invMassB")->SetValue(invMassB);
-	class_instance->GetInstanceByFieldName("invMassC")->SetValue(invMassC);
-	class_instance->GetInstanceByFieldName("invMassD")->SetValue(invMassD);
-	class_instance->GetInstanceByFieldName("particleA")->SetValue(particleA);
-	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
-	class_instance->GetInstanceByFieldName("particleC")->SetValue(particleC);
-	class_instance->GetInstanceByFieldName("particleD")->SetValue(particleD);
 	return true;
 }
 

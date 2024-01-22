@@ -82,6 +82,17 @@ hktypes::hclBufferedMeshObj hktypes::hclCapsuleShape::ToVisualizeMeshObj()
 	return ret;
 }
 
+void hktypes::hclCapsuleShape::FromParameters(const std::array<float, 3> a_start, const std::array<float, 3> a_end, const float a_radius)
+{
+	start = hkVector4Holder(a_start[0], a_start[1], a_start[2], 0);
+	end = hkVector4Holder(a_end[0], a_end[1], a_end[2], 0);
+	radius = a_radius;
+
+	dir = hkVector4Holder::FromVector3f((end.ToVector3f() - start.ToVector3f()).normalized());
+
+	capLenSqrdInv = 1 / (end.ToVector3f() - start.ToVector3f()).squaredNorm();
+}
+
 bool hktypes::hclTaperedCapsuleShape::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 	if (class_instance->type->type_name != "hclTaperedCapsuleShape") {

@@ -10,7 +10,7 @@ namespace hktypes {
 		using BaseType = hkReferencedObject;
 		std::string name;	// Offset: 24 Unk: 0
 		uint32_t operatorID;	// Offset: 32 Unk: 0
-		uint32_t type;	// Offset: 36 Unk: 0
+		uint32_t type = 0;	// Offset: 36 Unk: 0
 		std::vector<hclClothState::BufferAccess> usedBuffers;	// Offset: 40 Unk: 0
 		std::vector<hclClothState::TransformSetAccess> usedTransformSets;	// Offset: 56 Unk: 0
 
@@ -320,11 +320,17 @@ namespace hktypes {
 			};
 		};
 
+		class EntryBlockBase {
+		public:
+			uint16_t vertexIndices[16];	// Offset: 0 Unk: 0
+			virtual std::vector<std::vector<std::pair<uint16_t, uint8_t>>> GetBoneIndicesAndWeights(const std::vector<uint16_t>& transformSubset) = 0;
+			virtual void SetWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& _boneIndicesAndWeights, const std::vector<uint16_t>& _vert_ids) = 0;
+		};
+
 		template<uint8_t _n_blend_entries>
-		class BlendEntryBlock : public hkHolderBase {
+		class BlendEntryBlock : public hkHolderBase, public EntryBlockBase {
 		public:
 			using BaseType = void;
-			uint16_t vertexIndices[16];	// Offset: 0 Unk: 0
 			uint16_t boneIndices[16 * _n_blend_entries];	// Offset: 32 Unk: 0
 			uint8_t boneWeights[16 * _n_blend_entries];	// Offset: 32 + 32 * _n_blend_entries Unk: 0
 
@@ -382,7 +388,7 @@ namespace hktypes {
 				};
 			};
 
-			std::vector<std::vector<std::pair<uint16_t, uint8_t>>> GetBoneIndicesAndWeights(std::vector<uint16_t>& transformSubset) {
+			std::vector<std::vector<std::pair<uint16_t, uint8_t>>> GetBoneIndicesAndWeights(const std::vector<uint16_t>& transformSubset) override {
 				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> result;
 				for (int i = 0; i < 16; i++) {
 					std::vector<std::pair<uint16_t, uint8_t>> boneIndicesAndWeights;
@@ -393,9 +399,36 @@ namespace hktypes {
 				}
 				return result;
 			}
+
+			void SetWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& _boneIndicesAndWeights, const std::vector<uint16_t>& _vert_ids) override {
+				assert(vert_ids.size() == boneIndicesAndWeights.size());
+				std::vector<uint16_t> vert_ids(_vert_ids);
+				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> boneIndicesAndWeights(_boneIndicesAndWeights);
+				for (auto& weight_pair: boneIndicesAndWeights) {
+					while (weight_pair.size() < _n_blend_entries) {
+						weight_pair.push_back({ weight_pair.front().first, 0 });
+					}
+					assert(weight_pair.size() == _n_blend_entries);
+				}
+				while (vert_ids.size() < 16) {
+					vert_ids.push_back(vert_ids.back());
+					boneIndicesAndWeights.push_back(boneIndicesAndWeights.back());
+				}
+				assert(vert_ids.size() == 16);
+				assert(boneIndicesAndWeights.size() == 16);
+
+				std::memcpy(vertexIndices, vert_ids.data(), 16 * sizeof(uint16_t));
+
+				for (int i = 0; i < 16; i++) {
+					for (int j = 0; j < _n_blend_entries; j++) {
+						boneIndices[i * _n_blend_entries + j] = boneIndicesAndWeights[i][j].first;
+						boneWeights[i * _n_blend_entries + j] = boneIndicesAndWeights[i][j].second;
+					}
+				}
+			}
 		};
 
-		class OneBlendEntryBlock : public hkHolderBase {
+		class OneBlendEntryBlock : public hkHolderBase, public EntryBlockBase {
 		public:
 			using BaseType = void;
 			uint16_t vertexIndices[16];	// Offset: 0 Unk: 0
@@ -444,7 +477,7 @@ namespace hktypes {
 				};
 			};
 
-			std::vector<std::vector<std::pair<uint16_t, uint8_t>>> GetBoneIndicesAndWeights(std::vector<uint16_t>& transformSubset) {
+			std::vector<std::vector<std::pair<uint16_t, uint8_t>>> GetBoneIndicesAndWeights(const std::vector<uint16_t>& transformSubset) override {
 				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> result;
 				for (int i = 0; i < 16; i++) {
 					std::vector<std::pair<uint16_t, uint8_t>> boneIndicesAndWeights;
@@ -453,6 +486,24 @@ namespace hktypes {
 					result.push_back(boneIndicesAndWeights);
 				}
 				return result;
+			}
+		
+			void SetWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& _boneIndicesAndWeights, const std::vector<uint16_t>& _vert_ids) override {
+				assert(vert_ids.size() == boneIndicesAndWeights.size());
+				std::vector<uint16_t> vert_ids(_vert_ids);
+				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> boneIndicesAndWeights(_boneIndicesAndWeights);
+				while (vert_ids.size() < 16) {
+					vert_ids.push_back(vert_ids.back());
+					boneIndicesAndWeights.push_back(boneIndicesAndWeights.back());
+				}
+				assert(vert_ids.size() == 16);
+				assert(boneIndicesAndWeights.size() == 16);
+
+				std::memcpy(vertexIndices, vert_ids.data(), 16 * sizeof(uint16_t));
+
+				for (int i = 0; i < 16; i++) {
+					boneIndices[i] = boneIndicesAndWeights[i][0].first;
+				}
 			}
 		};
 
@@ -475,7 +526,7 @@ namespace hktypes {
 		std::vector<uint8_t> controlBytes;	// Offset: 128 Unk: 0
 		uint16_t startVertexIndex;	// Offset: 144 Unk: 0
 		uint16_t endVertexIndex;	// Offset: 146 Unk: 0
-		bool partialWrite;	// Offset: 148 Unk: 0
+		bool partialWrite = false;	// Offset: 148 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -621,13 +672,13 @@ namespace hktypes {
 		class Config : public hkHolderBase {
 		public:
 			using BaseType = void;
-			std::string name;	// Offset: 0 Unk: 0
+			std::string name = "Default Config";	// Offset: 0 Unk: 0
 			std::vector<int> constraintExecution;	// Offset: 8 Unk: 0
 			std::vector<bool> instanceCollidablesUsed;	// Offset: 24 Unk: 0
-			uint8_t subSteps;	// Offset: 40 Unk: 0
-			uint8_t numberOfSolveIterations;	// Offset: 41 Unk: 0
-			bool useAllInstanceCollidables;	// Offset: 42 Unk: 0
-			bool adaptConstraintStiffness;	// Offset: 43 Unk: 0
+			uint8_t subSteps = 1;	// Offset: 40 Unk: 0
+			uint8_t numberOfSolveIterations = 1;	// Offset: 41 Unk: 0
+			bool useAllInstanceCollidables = true;	// Offset: 42 Unk: 0
+			bool adaptConstraintStiffness = true;	// Offset: 43 Unk: 0
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;

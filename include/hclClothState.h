@@ -30,7 +30,14 @@ namespace hktypes {
 			};
 		};
 
-		uint8_t perComponentFlags[2];	// Offset: 0 Unk: 0
+		enum UsageFlags : uint8_t {
+			None = 0,
+			UF_Read = 1 << 0,
+			UF_Write = 1 << 1,
+			UF_ReadBeforeWrite = 1 << 3,
+		};
+
+		uint8_t perComponentFlags[2] = { 0,0 };	// Offset: 0 Unk: 0
 		std::vector<TransformTracker> perComponentTransformTrackers;	// Offset: 8 Unk: 0
 
 		// Extra
@@ -45,13 +52,53 @@ namespace hktypes {
 				{ "perComponentTransformTrackers", "hkArray<hclTransformSetUsage::TransformTracker, hkContainerHeapAllocator>" },
 			};
 		};
+
+
+		inline void SetNumBitsForAll(int num_bits) {
+			for (auto& tracker : perComponentTransformTrackers) {
+				tracker.read.SetNumBits(num_bits);
+				tracker.readBeforeWrite.SetNumBits(num_bits);
+				tracker.written.SetNumBits(num_bits);
+			}
+		}
+
+		template<typename _elem_t>
+		requires utils::_unsigned_integer_t<_elem_t>
+		inline bool AddUsage(uint8_t component_index, uint8_t usage_flags, std::vector<_elem_t> accessed_ids) {
+			if (accessed_ids.empty())
+				return false;
+			if (component_index >= 2)
+				return false;
+			std::vector<uint32_t> accessed_ids_32(accessed_ids.begin(), accessed_ids.end());
+			perComponentFlags[component_index] |= usage_flags;
+			if (usage_flags & UsageFlags::UF_Read) {
+				auto& record = perComponentTransformTrackers[component_index].read;
+				record = record | hkBitField(accessed_ids_32, record.GetNumBits());
+			}
+			if (usage_flags & UsageFlags::UF_ReadBeforeWrite) {
+				auto& record = perComponentTransformTrackers[component_index].readBeforeWrite;
+				record = record | hkBitField(accessed_ids_32, record.GetNumBits());
+			}
+			if (usage_flags & UsageFlags::UF_Write) {
+				auto& record = perComponentTransformTrackers[component_index].written;
+				record = record | hkBitField(accessed_ids_32, record.GetNumBits());
+			}
+		};
 	};
 
 	class hclBufferUsage : public hkHolderBase {
 	public:
+		enum ComponentFlags : uint8_t {
+			CF_Position = 0,
+			CF_Normal = 1,
+			CF_Tangent = 2,
+			CF_Bitangent = 3,
+			CF_Total = 4,
+		};
+
 		using BaseType = void;
-		uint8_t perComponentFlags[4];	// Offset: 0 Unk: 0
-		bool trianglesRead;	// Offset: 4 Unk: 0
+		uint8_t perComponentFlags[4] = { 0,0,0,0 };	// Offset: 0 Unk: 0
+		bool trianglesRead = false;	// Offset: 4 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;

@@ -53,6 +53,8 @@ namespace hktypes {
 		};
 
 		hclBufferedMeshObj ToVisualizeMeshObj() override;
+
+		void FromParameters(const std::array<float,3> a_start, const std::array<float,3> a_end, const float a_radius);
 	};
 
 	class hclTaperedCapsuleShape : public hclShape {

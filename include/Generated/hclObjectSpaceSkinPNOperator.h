@@ -5,9 +5,9 @@
 namespace hktypes{
 	template <typename tT, typename tAllocator>
 	class ;
+	class hclObjectSpaceSkinOperator;
 	template <typename tT, typename tAllocator>
 	class ;
-	class hclObjectSpaceSkinOperator;
 
 	class hclObjectSpaceSkinPNOperator : public hclObjectSpaceSkinOperator {
 	public:
