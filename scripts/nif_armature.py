@@ -234,7 +234,8 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 	for i in range(4):
 		for j in range(4):
 			T[i][j] = armature_dict['matrix'][i][j]
-	
+	print(b.name)
+	print(T)
 	b.matrix = BoneAxisCorrection(T)
 	#print(armature_dict['name'])
 	if parent_bone != None:
@@ -307,7 +308,7 @@ def CreateArmatureDictRecursive(cur_bone, edit_bones) -> dict:
 	armature_dict['scale'] = 1
 	armature_dict['sgo_keep'] = 1
 	armature_dict['geometry_index'] = 4294967295
-	T = cur_bone.matrix
+	T = BoneAxisCorrectionRevert(cur_bone.matrix)
 	for i in range(4):
 		for j in range(4):
 			armature_dict['matrix'][i][j] = float(T[i][j])

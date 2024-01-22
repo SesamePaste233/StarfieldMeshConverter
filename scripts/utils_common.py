@@ -206,3 +206,14 @@ def RecurseDirIfExsit(path:str, recurs_depth:int = 1):
 		return lst + sub_lst
 	
 	return []
+
+def FlattenDictToList(dictionary: dict, index_type = int, replace_none = False, replace_none_with = None):
+	max_id = 0
+	for id in dictionary.keys():
+		if int(id) > max_id:
+			max_id = int(id)
+
+	if replace_none:
+		return [dictionary[index_type(i)] if index_type(i) in dictionary else replace_none_with for i in range(max_id + 1)]
+	else:
+		return [dictionary[index_type(i)] for i in range(max_id + 1) if index_type(i) in dictionary]

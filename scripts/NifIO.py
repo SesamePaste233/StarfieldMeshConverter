@@ -19,10 +19,11 @@ def ResetSkeletonObjDict():
 def GetSkeletonObjDict():
 	return skeleton_obj_dict
 
-def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict, options, additional_assets_folder, context, operator, nif_name = ''):
+def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict, options, additional_assets_folder, context, operator, nif_name = '', connect_pts = {}):
 	_objects = []
 	is_node = False
 	is_rigged = False
+	connect_point_nodes = []
 	if (armature_dict["geometry_index"] != 4294967295):
 		data = root_dict["geometries"][armature_dict["geometry_index"]]
 		geo_name = armature_dict['name']
@@ -113,11 +114,21 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 
 	else:
 		is_node = True
-		Axis = bpy.data.objects.new(armature_dict['name'], None, )
+		node_name = armature_dict['name']
+		Axis = bpy.data.objects.new(node_name, None, )
 		Axis.empty_display_type = 'ARROWS'
 		Axis.show_name = True
 		Axis.empty_display_size = 0.015
 		_objects.append(Axis)
+
+	if armature_dict['name'] in connect_pts.keys():
+		for cp in connect_pts[armature_dict['name']]:
+			cp_obj = bpy.data.objects.new("CPA:" + cp['child_name'], None)
+			cp_obj.empty_display_type = 'ARROWS'
+			cp_obj.show_name = True
+			cp_obj.empty_display_size = 0.015
+			connect_point_nodes.append(cp_obj)
+		utils_blender.move_object_to_collection(connect_point_nodes, collection.children['ConnectPoint:Parents'])
 
 	utils_blender.move_object_to_collection(_objects, collection)
 	for obj in _objects:
@@ -131,6 +142,13 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		obj.matrix_world = T
 		scale = armature_dict['scale']
 		obj.scale = tuple([scale,scale,scale])
+
+		for cp_obj in connect_point_nodes:
+			cp_obj.location = cp['translation']
+			cp_obj.rotation_quaternion = cp['rot_quat']
+			cp_scale = cp['scale']
+			cp_obj.scale = tuple([cp_scale,cp_scale,cp_scale])
+			cp_obj.parent = obj
 	
 	if options.correct_rotation and is_node == False and is_rigged and skeleton != None:
 		skeleton_info = nif_armature.SkeletonLookup(skeleton)
@@ -171,7 +189,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			#	mesh_obj.matrix_world[j][3] = pivot['matrix'][j][3]
 
 	for child_dict in armature_dict['children']:
-		TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, additional_assets_folder, context, operator, nif_name)
+		TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, additional_assets_folder, context, operator, nif_name, connect_pts)
 
 
 def ImportNif(file_path, options, context, operator):
@@ -197,6 +215,22 @@ def ImportNif(file_path, options, context, operator):
 	
 	_data = json.loads(json_str)
 
+	prev_coll = bpy.data.collections.new(nifname)
+	bpy.context.scene.collection.children.link(prev_coll)
+
+	connect_pts = {}
+	if "connection_points_p" in _data.keys():
+		for cp in _data["connection_points_p"]:
+			parent_name = cp["parent_name"]
+			if parent_name == "":
+				parent_name = _data['name']
+			if parent_name not in connect_pts.keys():
+				connect_pts[parent_name] = [cp]
+			else:
+				connect_pts[parent_name].append(cp)
+		cpa_coll = bpy.data.collections.new("ConnectPoint:Parents")
+		prev_coll.children.link(cpa_coll)
+	#print(connect_pts)
 	# Save the JSON data to a file
 	#with open(utils.export_mesh_folder_path + '/nifDebug.json', 'w') as json_file:
 	#	json.dump(_data, json_file, indent = 4)
@@ -204,9 +238,6 @@ def ImportNif(file_path, options, context, operator):
 	# Save the JSON str to a file
 	#with open(utils.export_mesh_folder_path + '/nifDebugStr.json', 'w') as json_file:
 	#	json_file.write(json_str)
-
-	prev_coll = bpy.data.collections.new(nifname)
-	bpy.context.scene.collection.children.link(prev_coll)
 
 	if "geometries" not in _data.keys():
 		
@@ -217,7 +248,7 @@ def ImportNif(file_path, options, context, operator):
 		operator.report({'INFO'}, f'Nif has no geometry. Loaded as Armature.')
 		return {'FINISHED'}, None, None
 	else:
-		TraverseNodeRecursive(_data, None, prev_coll, _data, options, additional_assets_folders, context, operator, nifname + ' ' + nif_folder_name)
+		TraverseNodeRecursive(_data, None, prev_coll, _data, options, additional_assets_folders, context, operator, nifname + ' ' + nif_folder_name, connect_pts)
 
 	operator.report({'INFO'}, f'Meshes loaded for {nifname}.')
 	
@@ -269,12 +300,13 @@ def ExportNif(options, context, operator):
 
 	geometries = []
 	mode = "MULTI_MESH"
+	connect_pts = []
 	if root.type == 'EMPTY':
 		mode = "MULTI_MESH"
-		_data = nif_template.RootNodeTemplate(root, geometries)
+		_data = nif_template.RootNodeTemplate(root, geometries, connect_pts)
 	elif root.type == 'MESH':
 		mode = "SINGLE_MESH"
-		_data = nif_template.SingleClothTemplate(root, geometries)
+		_data = nif_template.SingleClothTemplate(root, geometries, connect_pts)
 	elif root.type == 'ARMATURE':
 		mode = "SINGLE_MESH"
 		_data = nif_template.NifArmatureTemplate(root)
@@ -310,8 +342,6 @@ def ExportNif(options, context, operator):
 		bone_list_filter = None
 		if len(vgrp_names) > 0 and options.WEIGHTS:
 			armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
-
-			cloth_bones = [vg for vg in vgrp_names if 'cloth' in utils._tag(vg)]
 
 			if len(armatures) == 0:
 				armature_name, bone_list_filter = nif_armature.MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
@@ -405,12 +435,18 @@ def ExportNif(options, context, operator):
 
 	_data['skeleton_mode'] = False
 	_data['auto_detect'] = True
+
+	for cp in connect_pts:
+		if cp['parent_name'] == _data['name']:
+			cp['parent_name'] = ''
+
+	_data['connection_points_p'] = connect_pts
 	#print(_data)
 	json_data = json.dumps(_data)
 
 	# Write the JSON data to a file
-	with open(nif_filepath + '.json', 'w') as json_file:
-		json_file.write(json_data)
+	#with open(nif_filepath + '.json', 'w') as json_file:
+	#	json_file.write(json_data)
 
 	returncode = MeshConverter._dll_export_nif(json_data.encode('utf-8'), nif_filepath.encode('utf-8'), export_folder.encode('utf-8'))
 

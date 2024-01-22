@@ -18,6 +18,12 @@ import NifIO
 
 import nif_armature
 
+import PhysicsEditor.PhysicsNodes as PhysicsNodes
+
+import PhysicsEditor.BlenderUIRegistry as BlenderUIRegistry
+
+import AttrOperator as attr_op
+
 #import imp
 #imp.reload(utils_blender)
 #imp.reload(utils)
@@ -523,6 +529,7 @@ class ExportSFMeshPanel(bpy.types.Panel):
 		layout.operator("export_scene.sfmesh", text = "Export .mesh")
 
 
+
 # Add custom menu entries in the File menu
 def menu_func_export(self, context):
 	self.layout.operator(
@@ -626,7 +633,6 @@ def register():
 		description="Export shape keys as morph keys",
 		default=True
 	)
-
 	bpy.types.Scene.export_sf_mesh_open_folder = bpy.props.BoolProperty(
 		name="Open folder",
 		default=False,
@@ -652,6 +658,10 @@ def register():
 	bpy.types.TOPBAR_MT_file_import.append(menu_func_import_nif)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_morph)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_nif)
+
+	PhysicsNodes.register()
+	BlenderUIRegistry.register()
+	attr_op.register()
 
 def unregister():
 	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
@@ -682,6 +692,10 @@ def unregister():
 	del bpy.types.Scene.export_sf_mesh_open_folder
 	del bpy.types.Scene.export_sf_mesh_hash_result
 	del bpy.types.Scene.export_morph
+
+	PhysicsNodes.unregister()
+	BlenderUIRegistry.unregister()
+	attr_op.unregister()
 
 if __name__ == "__main__":
 	register()

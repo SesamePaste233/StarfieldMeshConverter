@@ -6,7 +6,9 @@ import mathutils
 
 import utils_math
 import utils_common as utils
+from nif_armature import BoneAxisCorrectionRevert
 import CapsuleGenGeoNode as capsule_gen
+import PlaneGenGeoNode as plane_gen
 
 read_only_marker = '[READONLY]'
 mix_normal = False
@@ -103,6 +105,27 @@ def GetSharpGroups(selected_obj):
 
 	return sharp_edge_vertices
 
+def TriangulateMesh(mesh_obj:bpy.types.Object, make_copy = True) -> bpy.types.Object:
+	if make_copy:
+		mesh_obj = mesh_obj.copy()
+		mesh_obj.data = mesh_obj.data.copy()
+		bpy.context.collection.objects.link(mesh_obj)
+		bpy.context.view_layer.objects.active = mesh_obj
+
+	# Use bmesh to triangulate the mesh
+	bm = bmesh.new()
+	bm.from_mesh(mesh_obj.data)
+	bmesh.ops.triangulate(bm, faces=bm.faces)
+	bm.to_mesh(mesh_obj.data)
+	bm.free()
+
+	return mesh_obj
+
+def ApplyTransform(mesh_obj:bpy.types.Object):
+	prev_active = SetActiveObject(mesh_obj)
+	bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+	SetActiveObject(prev_active)
+
 def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = True, do_triangulation = True):
 	if old_obj and old_obj.type == 'MESH':
 		
@@ -116,35 +139,6 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 				keys = old_obj.data.shape_keys.key_blocks.keys()
 				shape_key_index = keys.index('Basis')
 				old_obj.active_shape_key_index = shape_key_index
-		
-		#SetActiveObject(old_obj, True)
-		#bpy.ops.object.mode_set(mode='EDIT')
-		#bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-		#bpy.ops.mesh.select_all(action='DESELECT')
-		#bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=False, use_multi_face = True,use_non_contiguous = True, use_verts = False)
-		#has_double_faces = False
-		#__obj = bpy.context.edit_object
-		#__me = __obj.data
-
-		#double_faces_verts = []
-
-		#__bm = bmesh.from_edit_mesh(__me)
-		#for __e in __bm.edges:
-		#	if __e.select:
-		#		has_double_faces = True
-		#		double_faces_verts.append(__e.verts[0].index)
-		#		double_faces_verts.append(__e.verts[1].index)
-		#		break
-		#if has_double_faces:
-		#	operator.report({'ERROR'}, f"There are double faces in your model! They are highlighted in selection mode.")
-		#	return None, None
-		
-		#bpy.ops.object.mode_set(mode='OBJECT')
-
-		#double_faces_vg = old_obj.vertex_groups.new(name='DOUBLE_FACES_VERTS')
-		#double_faces_vg.add(double_faces_verts, 1,'REPLACE')
-
-		#__bm.free()
 
 		new_obj = old_obj.copy()
 		new_obj.data = old_obj.data.copy()
@@ -193,20 +187,6 @@ def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = Tr
 		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
 		bpy.ops.mesh.remove_doubles()
 		bpy.ops.object.mode_set(mode='OBJECT')
-
-		#bpy.ops.object.shade_smooth(use_auto_smooth=True)
-		
-		#modifier1 = base_obj.modifiers.new(name = base_obj.name, type='DATA_TRANSFER')
-		#modifier1.object = old_obj
-		#modifier1.vertex_group = double_faces_vg.name
-		#modifier1.use_loop_data = True
-		#modifier1.invert_vertex_group = True
-		#modifier1.data_types_loops = {'CUSTOM_NORMAL'}
-		#modifier1.use_max_distance = True
-		#modifier1.max_distance = 0.001
-		#modifier1.loop_mapping = "TOPOLOGY"
-
-		#bpy.ops.object.modifier_apply(modifier=modifier1.name)
 
 		SetActiveObject(new_obj, True)
 		bpy.ops.object.mode_set(mode='EDIT')
@@ -301,7 +281,20 @@ def move_object_to_collection(objs, coll):
 				if c != None:
 					c.objects.unlink(obj)
 			coll.objects.link(obj)
-	
+
+def new_collection(name, do_link = True):
+	coll = bpy.data.collections.new(name)
+	if do_link:
+		bpy.context.scene.collection.children.link(coll)
+	return coll
+
+def remove_collection(coll, hierarchy = True):
+	if hierarchy:
+		for obj in coll.objects:
+			bpy.data.objects.remove(obj, do_unlink=True)
+
+	bpy.data.collections.remove(coll)
+
 def move_object_to_parent(objs, parent):
 	for obj in objs:
 		if obj != None and parent != None:
@@ -351,12 +344,12 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
 def GetNormalTangents(mesh, with_tangent = True):
 	verts_count = len(mesh.vertices)
 	Normals = [np.array([0,0,0]) for i in range(verts_count)]
+	mesh.calc_normals_split()
 	if with_tangent:
 		Bitangent_sign = [1 for i in range(verts_count)]
 		Tangents = [np.array([0,0,0]) for i in range(verts_count)]
+		mesh.calc_tangents()
 
-	mesh.calc_normals_split()
-	mesh.calc_tangents()
 
 	for face in mesh.polygons:
 		for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
@@ -369,17 +362,19 @@ def GetNormalTangents(mesh, with_tangent = True):
 
 	if with_tangent:
 		_Tangents = [utils_math.GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
+		return np.array(_Normals), np.array(_Tangents), Bitangent_sign
 	else:
 		_Tangents = None
 		Bitangent_sign = None
-
-	return np.array(_Normals), np.array(_Tangents), Bitangent_sign
+		return np.array(_Normals), None, None
 
 def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
 	bm = bmesh.new()
 	bm.from_mesh(obj_mesh)
 	num_tangents = len(vectors)
-	if num_tangents != len(bm.verts) or len(offsets) != len(bm.verts):
+	if len(offsets) == 0:
+		offsets = [(0,0,0) for i in range(num_tangents)]
+	if num_tangents != len(bm.verts):
 		print("Cannot create vector vis due to vertex number mismatch.")
 		pass
 	else:
@@ -550,6 +545,7 @@ def BuildhkBufferedMesh(mesh:dict):
 		mesh_obj = bpy.data.objects.new(name, bl_mesh)
 		bpy.context.scene.collection.objects.link(mesh_obj)
 		mesh_obj.matrix_world = T
+		VisualizeVectors(bl_mesh, [], normals, name = name + '_normals')
 
 
 	if 'extraShapes' in mesh.keys():
@@ -566,6 +562,10 @@ def CapsuleFromParameters(name: str, smallEnd: list, bigEnd: list, smallRadius: 
 	obj = bpy.data.objects.new(name, mesh)
 
 	bpy.context.collection.objects.link(obj)
+
+	if smallRadius > bigRadius:
+		smallRadius, bigRadius = bigRadius, smallRadius
+		smallEnd, bigEnd = bigEnd, smallEnd
 
 	gnmod = None
 	for gnmod in obj.modifiers:
@@ -595,3 +595,333 @@ def CapsuleFromParameters(name: str, smallEnd: list, bigEnd: list, smallRadius: 
 	
 	obj.display_type = 'WIRE'
 	return obj
+
+def SetCapsuleParameters(capsule_obj, smallEnd = None, bigEnd = None, smallRadius = None, bigRadius = None, create_if_not_exist = True):
+	if capsule_obj == None:
+		return
+	gnmod = None
+	for gnmod in capsule_obj.modifiers:
+		if gnmod.type == "NODES" and gnmod.node_group.name == "Capsule_Gen":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES") or (gnmod.node_group.name != "Capsule_Gen"):
+		if not create_if_not_exist:
+			return
+		gnmod = capsule_obj.modifiers.new("Capsule", "NODES")
+
+	if bigEnd is not None:
+		start_big_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Start/Big")
+		gnmod[start_big_id][0] = bigEnd[0]
+		gnmod[start_big_id][1] = bigEnd[1]
+		gnmod[start_big_id][2] = bigEnd[2]
+
+	if smallEnd is not None:
+		end_small_id = GetNodeGroupInputIdentifier(gnmod.node_group, "End/Small")
+		gnmod[end_small_id][0] = smallEnd[0]
+		gnmod[end_small_id][1] = smallEnd[1]
+		gnmod[end_small_id][2] = smallEnd[2]
+
+	if bigRadius is not None:
+		big_radius_id = GetNodeGroupInputIdentifier(gnmod.node_group, "bigRadius")
+		gnmod[big_radius_id] = bigRadius
+
+	if smallRadius is not None:
+		small_radius_id = GetNodeGroupInputIdentifier(gnmod.node_group, "smallRadius")
+		gnmod[small_radius_id] = smallRadius
+
+	gnmod.show_on_cage = True
+	gnmod.show_on_cage = False
+
+def ConstraintObjToArmatureBone(obj, armature_obj, bone_index, inherit_rotation = False):
+	if armature_obj == None:
+		return
+	if obj == None:
+		return
+	if bone_index == None:
+		return
+
+	obj.constraints.clear()
+	bone= armature_obj.data.bones[bone_index]
+	if inherit_rotation:
+		obj.matrix_world = armature_obj.matrix_world @ bone.matrix_local
+	arma_const = obj.constraints.new(type = 'ARMATURE')
+	_target = arma_const.targets.new()
+	_target.target = armature_obj
+	_target.subtarget = bone.name
+
+def PlaneFromOriginNormal(name: str, origin, normal_dir, size = 1.0):
+	mesh = bpy.data.meshes.new(name)
+	obj = bpy.data.objects.new(name, mesh)
+
+	bpy.context.collection.objects.link(obj)
+
+	gnmod = None
+	for gnmod in obj.modifiers:
+		if gnmod.type == "NODES":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES"):
+		gnmod = obj.modifiers.new("Plane", "NODES")
+
+	gnmod.node_group = plane_gen.GetGeoNode()
+
+	normal_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Normal")
+	size_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Size")
+
+	obj.location = origin
+
+	gnmod[normal_id][0] = normal_dir[0]
+	gnmod[normal_id][1] = normal_dir[1]
+	gnmod[normal_id][2] = normal_dir[2]
+
+	gnmod[size_id] = size
+	
+	return obj
+
+def SetPlaneParameters(plane_obj, origin = None, normal_dir = None, size = None, create_if_not_exist = True):
+	if plane_obj == None:
+		return
+	gnmod = None
+	for gnmod in plane_obj.modifiers:
+		if gnmod.type == "NODES" and gnmod.node_group.name == "Plane_Gen":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES") or (gnmod.node_group.name != "Plane_Gen"):
+		if not create_if_not_exist:
+			return
+		gnmod = plane_obj.modifiers.new("Plane", "NODES")
+
+	if origin is not None:
+		plane_obj.location = origin
+
+	if normal_dir is not None:
+		normal_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Normal")
+		gnmod[normal_id][0] = normal_dir[0]
+		gnmod[normal_id][1] = normal_dir[1]
+		gnmod[normal_id][2] = normal_dir[2]
+
+	if size is not None:
+		size_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Size")
+		gnmod[size_id] = size
+
+	gnmod.show_on_cage = True
+	gnmod.show_on_cage = False
+
+def ConstraintObjsToBoneRotation(objs: list[bpy.types.Object], armature_obj, bone_index) -> bpy.types.Object:
+	if armature_obj == None:
+		return
+	if objs == None or len(objs) == 0:
+		return
+	if bone_index == None:
+		return
+
+	mesh = bpy.data.meshes.new('ANCHOR_OBJ')
+	anchor_obj = bpy.data.objects.new('ANCHOR_OBJ', mesh)
+
+	bpy.context.collection.objects.link(anchor_obj)
+
+	ConstraintObjToArmatureBone(anchor_obj, armature_obj, bone_index, True)
+
+	for obj in objs:
+		if obj == None:
+			continue
+		obj.constraints.clear()
+		const = obj.constraints.new(type = 'COPY_ROTATION')
+		const.target = anchor_obj
+
+	return anchor_obj
+
+def RemoveNonBoneVG(obj:bpy.types.Object, skeleton:bpy.types.Object):
+	for vg in obj.vertex_groups:
+		if vg.name not in skeleton.data.bones:
+			obj.vertex_groups.remove(vg)
+
+def GatherWeights(obj:bpy.types.Object, quantize_bytes = 2, max_blend_entries = 8, prune_empty_vertex_groups = True):
+	vertex_groups = obj.vertex_groups
+	if prune_empty_vertex_groups:
+		vgrp_markers = [[vg.name, -1] for vg in vertex_groups]
+	else:
+		vgrp_markers = [[vg.name, i] for vg, i in zip(vertex_groups, range(len(vertex_groups)))]
+	new_id = 0
+
+	bm = bmesh.new()
+	bm.from_mesh(obj.data)
+	bm.verts.layers.deform.verify()
+
+	deform = bm.verts.layers.deform.active
+	
+	weights = []
+	_min_weight = 1 / (256 ** quantize_bytes - 2)
+	for v in bm.verts:
+		g = v[deform]
+		
+		weights.append([])
+		for vg_id, weight in g.items():
+			if weight > _min_weight:
+				if vgrp_markers[vg_id][1] == -1:
+					vgrp_markers[vg_id][1] = new_id
+					new_id += 1
+				weights[-1].append([vgrp_markers[vg_id][1], weight])
+		
+		if len(weights[-1]) > max_blend_entries:
+			index_list = sorted(range(len(weights[-1])), key=lambda k: weights[-1][k], reverse=True)
+			weights[-1] = [weights[-1][i] for i in index_list[:max_blend_entries]]
+		
+		if len(weights[-1]) == 0:
+			weights[-1].append([0, 0])
+
+	vgrp_markers = sorted(vgrp_markers, key=lambda x: x[1])
+	vgrp_names = [vg[0] for vg in vgrp_markers if vg[1] != -1]
+
+	bm.free()
+
+	return weights, vgrp_names
+
+def RemapBoneIdToSkeleton(weights, vgrp_names, skeleton:bpy.types.Object):
+	remap = {}
+	used_indices = set()
+	skele_bones = [bone.name for bone in skeleton.data.bones]
+	for i, bone in enumerate(vgrp_names):
+		if bone in skele_bones:
+			remap[i] = skele_bones.index(bone)
+			used_indices.add(skele_bones.index(bone))
+
+	for i, w in enumerate(weights):
+		for j, v in enumerate(w):
+			if v[0] in remap:
+				weights[i][j][0] = remap[v[0]]
+			else:
+				print(f"Bone {v[0]} not found in skeleton.")
+				return None, None
+			
+	return weights, list(used_indices)
+
+def RemapBoneIdToSubset(weights, subset:list, order_subset = True):
+	remap = {}
+	if order_subset:
+		subset = sorted(subset)
+	for i, bone_id in enumerate(subset):
+		remap[bone_id] = i
+
+	for i, w in enumerate(weights):
+		for j, v in enumerate(w):
+			if v[0] in remap:
+				weights[i][j][0] = remap[v[0]]
+			else:
+				print(f"Bone {v[0]} not found in subset.")
+				return None, None
+			
+	return weights, subset
+
+def NormalizeAndQuantizeWeights(weights, quantize_bytes = 2):
+	max_value = 256 ** quantize_bytes - 1
+	for i, w in enumerate(weights):
+		_sum = sum([v[1] for v in w])
+		weights[i] = [[v[0], int(max_value * v[1] / _sum)] for v in w]
+		# Sort by weight
+		weights[i] = sorted(weights[i], key=lambda x: x[1], reverse=True)
+		# Make sure weights sum up to max_value
+		if len(weights[i]) > 1:
+			weights[i][0][1] = max_value - sum([v[1] for v in weights[i][1:]])
+		else:
+			weights[i][0][1] = max_value
+	return weights
+
+def RemoveMeshObj(mesh_obj):
+	bpy.data.meshes.remove(mesh_obj.data)
+
+def QueryCloserFaces(tri_mesh_obj: bpy.types.Object, num_queries: int, center, query_func = None):
+	'''
+		tri_mesh_obj: the mesh object to query
+		num_queries: number of queries to perform
+		center: the center of the query sphere
+		query_func: query_func(face: bpy.types.MeshPolygon) -> result
+
+		return: a list of tuples (face_index, result, distance)
+	'''
+	mesh = tri_mesh_obj.data
+	size = len(mesh.polygons)
+	kd = mathutils.kdtree.KDTree(size)
+
+	for i, f in enumerate(mesh.polygons):
+		kd.insert(f.center, i)
+
+	kd.balance()
+
+	if query_func == None:
+		query_func = lambda x: None
+	results = [(index, query_func(mesh.polygons[index]), dist) for (co, index, dist) in kd.find_n(center, num_queries)]
+	
+	results = sorted(results, key=lambda x: x[2])
+
+	return results
+
+def QueryCloserFacesMultiple(tri_mesh_obj: bpy.types.Object, num_queries_per_center: int, centers: list, query_func = None):
+	'''
+		tri_mesh_obj: the mesh object to query
+		num_queries_per_center: number of queries to perform per center
+		centers: a list of centers
+		query_func: query_func(face: bpy.types.MeshPolygon, center) -> result
+
+		return: a list of lists of tuples (face_index, result, distance)
+	'''
+	mesh = tri_mesh_obj.data
+	size = len(mesh.polygons)
+	kd = mathutils.kdtree.KDTree(size)
+
+	for i, f in enumerate(mesh.polygons):
+		kd.insert(f.center, i)
+
+	kd.balance()
+
+	if query_func == None:
+		query_func = lambda x: None
+	results = []
+	for center in centers:
+		result_center = [(index, query_func(mesh.polygons[index], center), dist) for (co, index, dist) in kd.find_n(center, num_queries_per_center)]
+		results.append(sorted(result_center, key=lambda x: x[2]))
+
+	return results
+
+def GetTriVerts(mesh:bpy.types.Object, triangle:bpy.types.MeshPolygon):
+	pivot1_id = triangle.vertices[0]
+	pivot1_co = mesh.data.vertices[pivot1_id].co
+	pivot2_id = triangle.vertices[1]
+	pivot2_co = mesh.data.vertices[pivot2_id].co
+	pivot3_id = triangle.vertices[2]
+	pivot3_co = mesh.data.vertices[pivot3_id].co
+	return pivot1_co, pivot2_co, pivot3_co
+
+def Numpy2MathutilsMatrix(matrix: np.ndarray) -> mathutils.Matrix:
+	return mathutils.Matrix(matrix.tolist())
+
+def Mathutils2NumpyMatrix(matrix: mathutils.Matrix) -> np.ndarray:
+	return np.array(matrix).reshape((4,4))
+
+def Numpy2MathutilsVector(vector: np.ndarray) -> mathutils.Vector:
+	return mathutils.Vector(vector.flatten())
+
+def Mathutils2NumpyVector(vector: mathutils.Vector) -> np.ndarray:
+	return np.array(vector).reshape((3,1))
+
+def GethclLocalBoneTransform(tri_mesh: bpy.types.Object, triangle:bpy.types.MeshPolygon, bone_world_transform:mathutils.Matrix) -> list[list[float]]:
+	pivot1_co, pivot2_co, _ = GetTriVerts(tri_mesh, triangle) 
+	p_1 = Mathutils2NumpyVector(pivot1_co)
+	p_2 = Mathutils2NumpyVector(pivot2_co)
+	center = Mathutils2NumpyVector(triangle.center)
+	bone_t = Mathutils2NumpyMatrix(bone_world_transform)
+
+	np_T = utils_math.GetBoneTransformToTriangle(p_1, p_2, center, bone_t)
+
+	return np_T.tolist()
+
+def GethclLocalBoneTransforms(tri_mesh: bpy.types.Object, armature_obj: bpy.types.Object, tri_indices: list, bone_indices: list):
+	results = []
+	for f_id, b_id in zip(tri_indices, bone_indices):
+		triangle = tri_mesh.data.polygons[f_id]
+		bone = armature_obj.data.bones[b_id]
+		bone_t = armature_obj.matrix_world @ BoneAxisCorrectionRevert(bone.matrix_local)
+		np_T = GethclLocalBoneTransform(tri_mesh, triangle, bone_t)
+		results.append(np_T)
+
+	return results
