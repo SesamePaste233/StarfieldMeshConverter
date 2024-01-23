@@ -244,7 +244,13 @@
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\$(TargetFileName)"
-copy "$(ProjectDir)hkTypeTranscript.json" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\Assets\hkTypeTranscript\hkTypeTranscript.json"</Command>
+copy "$(ProjectDir)hkTypeTranscript.json" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\Assets\hkTypeTranscript\hkTypeTranscript.json"
+
+cd /d "C:/Users/26553/AppData/Roaming/Blender Foundation/Blender/3.5/scripts/addons/tool_physics_editor/"
+C:/Users/26553/AppData/Local/Programs/Python/Python310/python.exe __distribute__.py
+
+cd /d "C:/Users/26553/AppData/Roaming/Blender Foundation/Blender/3.5/scripts/addons/tool_export_mesh/"
+C:/Users/26553/AppData/Local/Programs/Python/Python310/python.exe __distribute__.py</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
