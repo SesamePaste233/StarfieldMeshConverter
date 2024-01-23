@@ -86,6 +86,8 @@ bool hktypes::hclBufferUsage::FromInstance(const hkreflex::hkClassInstance* inst
 	std::memcpy(perComponentFlags, _perComponentFlags.data(), sizeof(uint8_t) * 4);
 
 	class_instance->GetInstanceByFieldName("trianglesRead")->GetValue(trianglesRead);
+
+	return true;
 }
 
 bool hktypes::hclBufferUsage::ToInstance(hkreflex::hkClassInstance* instance)
@@ -102,6 +104,8 @@ bool hktypes::hclBufferUsage::ToInstance(hkreflex::hkClassInstance* instance)
 	class_instance->GetInstanceByFieldName("perComponentFlags")->SetValue(_perComponentFlags);
 
 	class_instance->GetInstanceByFieldName("trianglesRead")->SetValue(trianglesRead);
+
+	return true;
 }
 
 bool hktypes::hclClothState::BufferAccess::FromInstance(const hkreflex::hkClassInstance* instance)

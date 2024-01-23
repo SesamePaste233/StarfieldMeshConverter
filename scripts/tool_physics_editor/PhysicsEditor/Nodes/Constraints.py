@@ -1,11 +1,15 @@
 import bpy
 from bpy.types import Node, NodeSocket
 
-import PhysicsEditor.NodeBase as NodeBase
-from PhysicsEditor.NodeBase import find_vis_meshes
-import PhysicsEditor.utils_node as utils_node
-import utils_blender
-import PlaneGenGeoNode
+import PhysicsEditor.Nodes.NodeBase as NodeBase
+
+from PhysicsEditor.Nodes.NodeBase import find_vis_meshes
+
+import PhysicsEditor.Utilities.utils_node as utils_node
+
+import PhysicsEditor.Prefabs.PlaneGenGeoNode as PlaneGenGeoNode
+
+import PhysicsEditor.Utilities.utils_prefabs as utils_prefabs
 
 class StandardLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     ''''''
@@ -150,7 +154,7 @@ def update_plane_normal_dir(self, context):
     if planes is None or len(planes) == 0:
         return
     for plane in planes[1:]:
-        utils_blender.SetPlaneParameters(plane, normal_dir=self.plane_normal_dir)
+        utils_prefabs.SetPlaneParameters(plane, normal_dir=self.plane_normal_dir)
 
 class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Constraint Particles to Bone Planes'''
@@ -224,9 +228,9 @@ class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         p_ids = utils_node.get_socket_input_single(self,'Particle Indices')[0]
         print(p_ids)
         positions = [particles['particles'][p_id]['position'] for p_id in p_ids if p_id in particles['particles'].keys()]
-        planes = [utils_blender.PlaneFromOriginNormal(self.name, position, self.plane_normal_dir) for position in positions]
+        planes = [utils_prefabs.PlaneFromOriginNormal(self.name, position, self.plane_normal_dir) for position in positions]
         hkaBone = utils_node.get_socket_input_single(self,'Bone')
-        anchor = utils_blender.ConstraintObjsToBoneRotation(planes, hkaBone['Armature'], hkaBone['Bone Index'])
+        anchor = utils_prefabs.ConstraintObjsToBoneRotation(planes, hkaBone['Armature'], hkaBone['Bone Index'])
         if anchor is None:
             return None
         return [anchor] + planes

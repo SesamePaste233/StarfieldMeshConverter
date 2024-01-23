@@ -25,7 +25,7 @@ def IsMorphObject(obj):
 def ImportMorph(options, context, operator, result_objs = []):
 	import_path = options.filepath
 	
-	rtn = MeshConverter._dll_import_morph(import_path.encode('utf-8')).decode('utf-8')
+	rtn = MeshConverter.ImportMorphAsJson(import_path)
 
 	if rtn == "":
 		returncode = -1 
@@ -260,10 +260,10 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 
 	json_data = json.dumps(jsondata)
 
-	returncode = MeshConverter._dll_export_morph(json_data.encode(), export_file_path.encode())
+	returncode = MeshConverter.ExportMorphFromJson(json_data, export_file_path)
 
-	if returncode != 0:
-		operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+	if not returncode:
+		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 		return {"CANCELLED"}
 
 	operator.report({'INFO'}, f"Export morph successful.")
@@ -291,14 +291,14 @@ def ExportMorph(options, context, export_file_path, operator):
 
 		verts_count = len(proxy_obj.data.vertices)
 		
-		returncode = MeshConverter._dll_export_empty_morph(verts_count, export_path.encode())
+		returncode = MeshConverter.ExportEmptyMorphFromJson(verts_count, export_path)
 
-		if returncode != 0:
+		if not returncode:
 			bpy.data.meshes.remove(proxy_obj.data)
 			
 			utils_blender.SetActiveObject(target_obj)
 
-			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 			return {"CANCELLED"}
 
 		bpy.data.meshes.remove(proxy_obj.data)
@@ -319,14 +319,14 @@ def ExportMorph(options, context, export_file_path, operator):
 		
 		verts_count = len(proxy_obj.data.vertices)
 
-		returncode = MeshConverter._dll_export_empty_morph(verts_count, export_path.encode())
+		returncode = MeshConverter.ExportEmptyMorphFromJson(verts_count, export_path)
 
-		if returncode != 0:
+		if not returncode:
 			bpy.data.meshes.remove(proxy_obj.data)
 			
 			utils_blender.SetActiveObject(target_obj)
 
-			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 			return {"CANCELLED"}
 
 		bpy.data.meshes.remove(proxy_obj.data)
@@ -472,14 +472,14 @@ def ExportMorph(options, context, export_file_path, operator):
 
 	json_data = json.dumps(jsondata)
 
-	returncode = MeshConverter._dll_export_morph(json_data.encode(), export_path.encode())
+	returncode = MeshConverter.ExportMorphFromJson(json_data, export_path)
 
-	if returncode != 0:
+	if not returncode:
 		bpy.data.meshes.remove(proxy_obj.data)
 		
 		utils_blender.SetActiveObject(target_obj)
 
-		operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 		return {"CANCELLED"}
 
 	bpy.data.meshes.remove(proxy_obj.data)

@@ -1,7 +1,13 @@
 import bpy
+import json
 
-import PhysicsEditor.PhysicsConverter as PhysicsConverter
+import PhysicsConverter as PhysicsConverter
+
 import utils_common as utils
+
+import addon_utils
+
+import MeshConverter
 
 class ExportPhysicsDataOperator(bpy.types.Operator):
 	bl_idname = "object.physics_data_export"
@@ -10,7 +16,21 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 	def execute(self, context):
 		physics_node_tree = context.scene.physics_node_tree_prop
 
-		PhysicsConverter.get_physics_data(physics_node_tree)
+		data_dict = PhysicsConverter.get_physics_data(physics_node_tree)
+
+		if data_dict is None:
+			self.report({'ERROR'}, "Failed to compose physics data from node graph.")
+			return {'CANCELLED'}
+
+		json_data = json.dumps(data_dict)
+
+		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, context.scene.physics_file_path)
+
+		if not rtn:
+			self.report({'ERROR'}, f"Failed to compose physics data. Error message: \"{rtn.what()}\".")
+			return {'CANCELLED'}
+		
+		self.report({'INFO'}, "Physics data exported successfully.")
 
 		return {'FINISHED'}
 	
@@ -21,6 +41,11 @@ class ExportPhysicsDataPanel(bpy.types.Panel):
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 	bl_category = 'Tool'
+
+	@classmethod
+	def poll(cls, context):
+		_, enabled = addon_utils.check("tool_physics_editor")
+		return enabled
 
 	def draw(self, context):
 		layout = self.layout

@@ -1,6 +1,6 @@
 #include "hkTypesHeader.h"
 
-hktypes::hclBufferUsage& hktypes::operator|(const hclBufferUsage& buffer1, const hclBufferUsage& buffer2)
+hktypes::hclBufferUsage hktypes::operator|(const hclBufferUsage& buffer1, const hclBufferUsage& buffer2)
 {
     hclBufferUsage out;
     for (uint8_t i = 0; i < 4; i++) {
@@ -10,7 +10,7 @@ hktypes::hclBufferUsage& hktypes::operator|(const hclBufferUsage& buffer1, const
     return out;
 }
 
-hktypes::hclTransformSetUsage::TransformTracker& hktypes::operator|(const hclTransformSetUsage::TransformTracker& transform_tracker1, const hclTransformSetUsage::TransformTracker& transform_tracker2)
+hktypes::hclTransformSetUsage::TransformTracker hktypes::operator|(const hclTransformSetUsage::TransformTracker& transform_tracker1, const hclTransformSetUsage::TransformTracker& transform_tracker2)
 {
     hclTransformSetUsage::TransformTracker out;
 	out.read = transform_tracker1.read | transform_tracker2.read;
@@ -19,7 +19,7 @@ hktypes::hclTransformSetUsage::TransformTracker& hktypes::operator|(const hclTra
 	return out;
 }
 
-hktypes::hclTransformSetUsage& hktypes::operator|(const hclTransformSetUsage& transform_usage1, const hclTransformSetUsage& transform_usage2)
+hktypes::hclTransformSetUsage hktypes::operator|(const hclTransformSetUsage& transform_usage1, const hclTransformSetUsage& transform_usage2)
 {
     hclTransformSetUsage out;
     for (uint8_t i = 0; i < 2; i++) {
@@ -31,7 +31,7 @@ hktypes::hclTransformSetUsage& hktypes::operator|(const hclTransformSetUsage& tr
 	return out;
 }
 
-hktypes::hclClothState::BufferAccess& hktypes::operator|(const hclClothState::BufferAccess& buffer_access1, const hclClothState::BufferAccess& buffer_access2)
+hktypes::hclClothState::BufferAccess hktypes::operator|(const hclClothState::BufferAccess& buffer_access1, const hclClothState::BufferAccess& buffer_access2)
 {
 	if (!AccessSameBuffer(buffer_access1, buffer_access2)) {
 		throw std::runtime_error("Buffer indices do not match");
@@ -60,7 +60,7 @@ bool hktypes::AccessSameBuffer(const hclClothState::BufferAccess& buffer_access1
 	return buffer_access1.bufferIndex == buffer_access2.bufferIndex && buffer_access1.shadowBufferIndex == buffer_access2.shadowBufferIndex;
 }
 
-hktypes::hclClothState::TransformSetAccess& hktypes::operator|(const hclClothState::TransformSetAccess& transform_set_access1, const hclClothState::TransformSetAccess& transform_set_access2)
+hktypes::hclClothState::TransformSetAccess hktypes::operator|(const hclClothState::TransformSetAccess& transform_set_access1, const hclClothState::TransformSetAccess& transform_set_access2)
 {
 	if (!AccessSameTransformSet(transform_set_access1, transform_set_access2)) {
 		throw std::runtime_error("Transform set indices do not match");
@@ -88,7 +88,7 @@ bool hktypes::AccessSameTransformSet(const hclClothState::TransformSetAccess& tr
 	return transform_set_access1.transformSetIndex == transform_set_access2.transformSetIndex;
 }
 
-hktypes::hclClothState::BufferAccess& hktypes::FromBufferUsage(uint32_t buffer_index, hclBufferUsage buffer_usage, uint32_t shadow_buffer_index)
+hktypes::hclClothState::BufferAccess hktypes::FromBufferUsage(uint32_t buffer_index, hclBufferUsage buffer_usage, uint32_t shadow_buffer_index)
 {
 	hclClothState::BufferAccess out;
 	out.bufferIndex = buffer_index;
@@ -102,7 +102,7 @@ hktypes::hclClothState::BufferAccess& hktypes::FromBufferUsage(uint32_t buffer_i
 	return out;
 }
 
-hktypes::hclClothState::BufferAccess& hktypes::BufferAccessFromParameters(uint32_t buffer_index, uint8_t position_usage, uint8_t normal_usage, uint8_t tangent_usage, uint8_t bitangent_usage, bool triangles_read, uint32_t shadow_buffer_index)
+hktypes::hclClothState::BufferAccess hktypes::BufferAccessFromParameters(uint32_t buffer_index, uint8_t position_usage, uint8_t normal_usage, uint8_t tangent_usage, uint8_t bitangent_usage, bool triangles_read, uint32_t shadow_buffer_index)
 {
 	hclClothState::BufferAccess out;
 	out.bufferIndex = buffer_index;
@@ -120,7 +120,7 @@ hktypes::hclClothState::BufferAccess& hktypes::BufferAccessFromParameters(uint32
 	return out;
 }
 
-hktypes::hclClothState::TransformSetAccess& hktypes::FromTransformSetUsage(uint32_t transform_set_index, hclTransformSetUsage transform_set_usage)
+hktypes::hclClothState::TransformSetAccess hktypes::FromTransformSetUsage(uint32_t transform_set_index, hclTransformSetUsage transform_set_usage)
 {
 	hclClothState::TransformSetAccess out;
 	out.transformSetIndex = transform_set_index;
@@ -128,7 +128,7 @@ hktypes::hclClothState::TransformSetAccess& hktypes::FromTransformSetUsage(uint3
 	return out;
 }
 
-hktypes::hclScratchBufferDefinition& hktypes::DefaultScratchBufferDefinition()
+hktypes::hclScratchBufferDefinition hktypes::DefaultScratchBufferDefinition()
 {
     hclScratchBufferDefinition out;
 	out.meshName = "SS_cloth_SIM_MESH";
@@ -176,7 +176,7 @@ hktypes::hclScratchBufferDefinition& hktypes::DefaultScratchBufferDefinition()
 	return out;
 }
 
-hktypes::hclBufferDefinition& hktypes::DefaultBufferDefinitionWithTriangles()
+hktypes::hclBufferDefinition hktypes::DefaultBufferDefinitionWithTriangles()
 {
 	hclBufferDefinition out;
 	out.meshName = "SS_cloth_SIM_MESH";
@@ -222,7 +222,7 @@ hktypes::hclBufferDefinition& hktypes::DefaultBufferDefinitionWithTriangles()
 	return out;
 }
 
-hktypes::hclStateDependencyGraph& hktypes::DefaultStateDependencyGraph(int num_operators)
+hktypes::hclStateDependencyGraph hktypes::DefaultStateDependencyGraph(int num_operators)
 {
 	hktypes::hclStateDependencyGraph out;
 	hclStateDependencyGraph::Branch branch;
@@ -375,12 +375,12 @@ hktypes::hclCopyVerticesOperator* hktypes::AllocateCopyVerticesOperator(uint32_t
 	hclBufferUsage buffer_usage1;
 	buffer_usage1.perComponentFlags[0] = 1;
 	buffer_usage1.perComponentFlags[1] = 1;
-	auto& buffer_access1 = FromBufferUsage(0, buffer_usage1);
+	auto buffer_access1 = FromBufferUsage(0, buffer_usage1);
 
 	hclBufferUsage buffer_usage2;
 	buffer_usage2.perComponentFlags[0] = 6;
 	buffer_usage2.perComponentFlags[1] = 6;
-	auto& buffer_access2 = FromBufferUsage(1, buffer_usage2);
+	auto buffer_access2 = FromBufferUsage(1, buffer_usage2);
 
 	out->usedBuffers.push_back(buffer_access1);
 	out->usedBuffers.push_back(buffer_access2);
@@ -402,11 +402,11 @@ hktypes::hclMoveParticlesOperator* hktypes::AllocateMoveParticlesOperator(std::v
 
 	hclBufferUsage buffer_usage1;
 	buffer_usage1.perComponentFlags[0] = 1;
-	auto& buffer_access1 = FromBufferUsage(0, buffer_usage1);
+	auto buffer_access1 = FromBufferUsage(0, buffer_usage1);
 
 	hclBufferUsage buffer_usage2;
 	buffer_usage2.perComponentFlags[0] = 2;
-	auto& buffer_access2 = FromBufferUsage(1, buffer_usage2);
+	auto buffer_access2 = FromBufferUsage(1, buffer_usage2);
 
 	out->usedBuffers.push_back(buffer_access1);
 	out->usedBuffers.push_back(buffer_access2);
@@ -465,7 +465,7 @@ hktypes::hclObjectSpaceSkinPNOperator* hktypes::AllocateObjectSpaceSkinPNOperato
 	return out;
 }
 
-hktypes::hclObjectSpaceDeformer& hktypes::DeformerFromWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& weights)
+hktypes::hclObjectSpaceDeformer hktypes::DeformerFromWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& weights)
 {
 	hclObjectSpaceDeformer deformer;
 

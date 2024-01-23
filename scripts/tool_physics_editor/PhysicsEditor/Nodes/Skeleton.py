@@ -1,8 +1,9 @@
 import bpy
 from bpy.types import Node, NodeSocket
 
-import PhysicsEditor.NodeBase as NodeBase
-import PhysicsEditor.utils_node as utils_node
+import PhysicsEditor.Nodes.NodeBase as NodeBase
+
+import PhysicsEditor.Utilities.utils_node as utils_node
 
 def get_bone_enum_items(self, context):
     if self.inputs['Skeleton'].is_linked:

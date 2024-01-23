@@ -1,26 +1,30 @@
 import bpy
 from bpy.types import Context, Node, NodeSocket, UILayout
 
-import PhysicsEditor.NodeBase as NodeBase
-from PhysicsEditor.NodeBase import find_vis_meshes
-import PhysicsEditor.utils_node as utils_node
-import CapsuleGenGeoNode
-import utils_blender
+import PhysicsEditor.Nodes.NodeBase as NodeBase
+
+from PhysicsEditor.Nodes.NodeBase import find_vis_meshes
+
+import PhysicsEditor.Utilities.utils_node as utils_node
+
+import PhysicsEditor.Prefabs.CapsuleGenGeoNode as CapsuleGenGeoNode
+
+import PhysicsEditor.Utilities.utils_prefabs as utils_prefabs
 
 def update_start_pos(self, context):
-    utils_blender.SetCapsuleParameters(find_vis_meshes(self), bigEnd=self.start_pos_prop)
+    utils_prefabs.SetCapsuleParameters(find_vis_meshes(self), bigEnd=self.start_pos_prop)
 
 def update_end_pos(self, context):
-    utils_blender.SetCapsuleParameters(find_vis_meshes(self), smallEnd=self.end_pos_prop)
+    utils_prefabs.SetCapsuleParameters(find_vis_meshes(self), smallEnd=self.end_pos_prop)
 
 def update_radius(self, context):
-    utils_blender.SetCapsuleParameters(find_vis_meshes(self), smallRadius=self.radius_prop, bigRadius=self.radius_prop)
+    utils_prefabs.SetCapsuleParameters(find_vis_meshes(self), smallRadius=self.radius_prop, bigRadius=self.radius_prop)
 
 def update_start_radius(self, context):
-    utils_blender.SetCapsuleParameters(find_vis_meshes(self), bigRadius=self.start_radius_prop)
+    utils_prefabs.SetCapsuleParameters(find_vis_meshes(self), bigRadius=self.start_radius_prop)
 
 def update_end_radius(self, context):
-    utils_blender.SetCapsuleParameters(find_vis_meshes(self), smallRadius=self.end_radius_prop)
+    utils_prefabs.SetCapsuleParameters(find_vis_meshes(self), smallRadius=self.end_radius_prop)
 
 class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Capsule collider'''
@@ -101,9 +105,9 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
         return None
 
     def draw_vis_mesh(self):
-        capsule = utils_blender.CapsuleFromParameters(self.capsule_name, self.start_pos_prop, self.end_pos_prop, self.radius_prop, self.radius_prop)
+        capsule = utils_prefabs.CapsuleFromParameters(self.capsule_name, self.start_pos_prop, self.end_pos_prop, self.radius_prop, self.radius_prop)
         hkaBone = utils_node.get_socket_input_single(self,'Bind To Bone')
-        utils_blender.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'])
+        utils_prefabs.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'])
         return capsule
 
 class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
@@ -201,8 +205,8 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
         return None
     
     def draw_vis_mesh(self):
-        capsule = utils_blender.CapsuleFromParameters(self.capsule_name, self.start_pos_prop, self.end_pos_prop, self.start_radius_prop, self.end_radius_prop)
+        capsule = utils_prefabs.CapsuleFromParameters(self.capsule_name, self.start_pos_prop, self.end_pos_prop, self.start_radius_prop, self.end_radius_prop)
         hkaBone = utils_node.get_socket_input_single(self,'Bind To Bone')
-        utils_blender.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'])
+        utils_prefabs.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'])
         return capsule
     

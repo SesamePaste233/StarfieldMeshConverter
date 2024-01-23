@@ -225,7 +225,6 @@ def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 	else:
 		return None, None
 
-
 def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_capsule = None):
 	b = edit_bones.new(utils_blender.RenamingBone(armature_dict['name']))
 	b.head = tuple(armature_dict['head'])
@@ -234,8 +233,8 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 	for i in range(4):
 		for j in range(4):
 			T[i][j] = armature_dict['matrix'][i][j]
-	print(b.name)
-	print(T)
+	#print(b.name)
+	#print(T)
 	b.matrix = BoneAxisCorrection(T)
 	#print(armature_dict['name'])
 	if parent_bone != None:

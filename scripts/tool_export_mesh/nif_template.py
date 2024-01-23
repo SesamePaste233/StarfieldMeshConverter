@@ -57,8 +57,6 @@ def SingleClothTemplate(mesh_obj, mesh_data_list, connect_pts):
 	nif_dict['sgo_keep'] = 1
 	nif_dict['geometry_index'] = 4294967295
 	
-	nif_dict['children'] = []
-
-	nif_dict['children'].append(RootNodeTemplate(mesh_obj, mesh_data_list, connect_pts))
+	nif_dict['children'] = [RootNodeTemplate(mesh_obj, mesh_data_list, connect_pts)]
 
 	return nif_dict

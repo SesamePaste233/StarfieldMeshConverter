@@ -273,7 +273,7 @@ def GetSelectedObjs(exclude_active = True):
 			l.append(obj)
 	return l
 
-def move_object_to_collection(objs, coll):
+def move_object_to_collection(objs: list[bpy.types.Object], coll: bpy.types.Collection):
 	for obj in objs:
 		if obj != None:
 			old_colls = [c for c in obj.users_collection]
@@ -369,6 +369,7 @@ def GetNormalTangents(mesh, with_tangent = True):
 		return np.array(_Normals), None, None
 
 def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
+	vis_obj = None
 	bm = bmesh.new()
 	bm.from_mesh(obj_mesh)
 	num_tangents = len(vectors)
@@ -387,8 +388,10 @@ def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
 		verts = origins + [(t[0] * scale + o[0], t[1] * scale + o[1], t[2] * scale + o[2]) for t, o in zip(vectors, origins)]
 		edges = [[i,i + len(bm.verts)] for i in range(len(bm.verts))]
 		mesh.from_pydata(verts, edges, [])
+		vis_obj = obj
 
 	bm.free()
+	return vis_obj
 
 def SetWeightKeys(obj, weight_keys:list):
 	if len(weight_keys) != len(obj.vertex_groups):
@@ -522,6 +525,7 @@ def RevertRenamingBoneList(names:list):
 	return [RevertRenamingBone(name) for name in names]
 
 def BuildhkBufferedMesh(mesh:dict):
+	mesh_objs = []
 	mesh_type = mesh['type']
 	name = mesh['name']
 	print(f'Reading havok cloth sim mesh: {name}.')
@@ -535,6 +539,7 @@ def BuildhkBufferedMesh(mesh:dict):
 	if mesh_type == 1: # Capsule
 		mesh_obj = CapsuleFromParameters(name, mesh['capsuleEnd'], mesh['capsuleStart'], mesh['capsuleSmallRadius'], mesh['capsuleBigRadius'])
 		mesh_obj.matrix_world = T
+		mesh_objs.append(mesh_obj)
 	elif mesh_type == 0:
 		positions = mesh['positions']
 		normals = mesh['normals']
@@ -545,12 +550,16 @@ def BuildhkBufferedMesh(mesh:dict):
 		mesh_obj = bpy.data.objects.new(name, bl_mesh)
 		bpy.context.scene.collection.objects.link(mesh_obj)
 		mesh_obj.matrix_world = T
-		VisualizeVectors(bl_mesh, [], normals, name = name + '_normals')
+		vis_obj = VisualizeVectors(bl_mesh, [], normals, name = name + '_normals')
+		mesh_objs.append(mesh_obj)
+		mesh_objs.append(vis_obj)
 
 
 	if 'extraShapes' in mesh.keys():
 		for sub_mesh in mesh['extraShapes']:
-			BuildhkBufferedMesh(sub_mesh)
+			mesh_objs.extend(BuildhkBufferedMesh(sub_mesh))
+
+	return mesh_objs
 
 def GetNodeGroupInputIdentifier(node_group, input_name):
 	inputs = node_group.inputs
@@ -830,68 +839,6 @@ def NormalizeAndQuantizeWeights(weights, quantize_bytes = 2):
 def RemoveMeshObj(mesh_obj):
 	bpy.data.meshes.remove(mesh_obj.data)
 
-def QueryCloserFaces(tri_mesh_obj: bpy.types.Object, num_queries: int, center, query_func = None):
-	'''
-		tri_mesh_obj: the mesh object to query
-		num_queries: number of queries to perform
-		center: the center of the query sphere
-		query_func: query_func(face: bpy.types.MeshPolygon) -> result
-
-		return: a list of tuples (face_index, result, distance)
-	'''
-	mesh = tri_mesh_obj.data
-	size = len(mesh.polygons)
-	kd = mathutils.kdtree.KDTree(size)
-
-	for i, f in enumerate(mesh.polygons):
-		kd.insert(f.center, i)
-
-	kd.balance()
-
-	if query_func == None:
-		query_func = lambda x: None
-	results = [(index, query_func(mesh.polygons[index]), dist) for (co, index, dist) in kd.find_n(center, num_queries)]
-	
-	results = sorted(results, key=lambda x: x[2])
-
-	return results
-
-def QueryCloserFacesMultiple(tri_mesh_obj: bpy.types.Object, num_queries_per_center: int, centers: list, query_func = None):
-	'''
-		tri_mesh_obj: the mesh object to query
-		num_queries_per_center: number of queries to perform per center
-		centers: a list of centers
-		query_func: query_func(face: bpy.types.MeshPolygon, center) -> result
-
-		return: a list of lists of tuples (face_index, result, distance)
-	'''
-	mesh = tri_mesh_obj.data
-	size = len(mesh.polygons)
-	kd = mathutils.kdtree.KDTree(size)
-
-	for i, f in enumerate(mesh.polygons):
-		kd.insert(f.center, i)
-
-	kd.balance()
-
-	if query_func == None:
-		query_func = lambda x: None
-	results = []
-	for center in centers:
-		result_center = [(index, query_func(mesh.polygons[index], center), dist) for (co, index, dist) in kd.find_n(center, num_queries_per_center)]
-		results.append(sorted(result_center, key=lambda x: x[2]))
-
-	return results
-
-def GetTriVerts(mesh:bpy.types.Object, triangle:bpy.types.MeshPolygon):
-	pivot1_id = triangle.vertices[0]
-	pivot1_co = mesh.data.vertices[pivot1_id].co
-	pivot2_id = triangle.vertices[1]
-	pivot2_co = mesh.data.vertices[pivot2_id].co
-	pivot3_id = triangle.vertices[2]
-	pivot3_co = mesh.data.vertices[pivot3_id].co
-	return pivot1_co, pivot2_co, pivot3_co
-
 def Numpy2MathutilsMatrix(matrix: np.ndarray) -> mathutils.Matrix:
 	return mathutils.Matrix(matrix.tolist())
 
@@ -903,6 +850,15 @@ def Numpy2MathutilsVector(vector: np.ndarray) -> mathutils.Vector:
 
 def Mathutils2NumpyVector(vector: mathutils.Vector) -> np.ndarray:
 	return np.array(vector).reshape((3,1))
+
+def GetTriVerts(mesh:bpy.types.Object, triangle:bpy.types.MeshPolygon):
+	pivot1_id = triangle.vertices[0]
+	pivot1_co = mesh.data.vertices[pivot1_id].co
+	pivot2_id = triangle.vertices[1]
+	pivot2_co = mesh.data.vertices[pivot2_id].co
+	pivot3_id = triangle.vertices[2]
+	pivot3_co = mesh.data.vertices[pivot3_id].co
+	return pivot1_co, pivot2_co, pivot3_co
 
 def GethclLocalBoneTransform(tri_mesh: bpy.types.Object, triangle:bpy.types.MeshPolygon, bone_world_transform:mathutils.Matrix) -> list[list[float]]:
 	pivot1_co, pivot2_co, _ = GetTriVerts(tri_mesh, triangle) 

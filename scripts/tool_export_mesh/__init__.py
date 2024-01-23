@@ -18,11 +18,7 @@ import NifIO
 
 import nif_armature
 
-import PhysicsEditor.PhysicsNodes as PhysicsNodes
-
-import PhysicsEditor.BlenderUIRegistry as BlenderUIRegistry
-
-import AttrOperator as attr_op
+import PhysicsPanel as PhysicsPanel
 
 #import imp
 #imp.reload(utils_blender)
@@ -34,8 +30,8 @@ import AttrOperator as attr_op
 
 
 bl_info = {
-	"name": "Starfield Mesh Exporter",
-	"version": (0, 13, 0),
+	"name": "Starfield Geometry Bridge",
+	"version": (0, 15, 0),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",
@@ -659,9 +655,7 @@ def register():
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_morph)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_nif)
 
-	PhysicsNodes.register()
-	BlenderUIRegistry.register()
-	attr_op.register()
+	PhysicsPanel.register()
 
 def unregister():
 	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
@@ -693,9 +687,7 @@ def unregister():
 	del bpy.types.Scene.export_sf_mesh_hash_result
 	del bpy.types.Scene.export_morph
 
-	PhysicsNodes.unregister()
-	BlenderUIRegistry.unregister()
-	attr_op.unregister()
+	PhysicsPanel.unregister()
 
 if __name__ == "__main__":
 	register()

@@ -4,17 +4,19 @@ from bpy.types import NodeTree, Node, NodeSocket
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 
-import PhysicsEditor.NodeBase as NodeBase
-import PhysicsEditor.SocketTypes as SocketTypes
-import PhysicsEditor.Simulation as Simulation
-import PhysicsEditor.Constraints as Constraints
-import PhysicsEditor.Colliders as Colliders
-import PhysicsEditor.Skeleton as Skeleton
-import PhysicsEditor.Selection as Selection
-import PhysicsEditor.PhysicsData as PhysicsData
-import PhysicsEditor.Drivers as Drivers
+import addon_utils
 
-import PhysicsEditor.utils_node as utils_node
+import PhysicsEditor.Nodes.NodeBase as NodeBase
+import PhysicsEditor.Sockets.SocketTypes as SocketTypes
+import PhysicsEditor.Nodes.Simulation as Simulation
+import PhysicsEditor.Nodes.Constraints as Constraints
+import PhysicsEditor.Nodes.Colliders as Colliders
+import PhysicsEditor.Nodes.Skeleton as Skeleton
+import PhysicsEditor.Nodes.Selection as Selection
+import PhysicsEditor.Nodes.PhysicsData as PhysicsData
+import PhysicsEditor.Nodes.Drivers as Drivers
+
+import PhysicsEditor.Utilities.utils_node as utils_node
 
 def update_tree(self, context):
     self.update_tree(context)
@@ -29,6 +31,11 @@ class PhysicsTree(NodeTree):
     skeleton: bpy.props.PointerProperty(type=bpy.types.Object, poll=lambda self, object: object.type == 'ARMATURE', update=update_tree)
 
     vis_meshes_collection: bpy.props.PointerProperty(type=bpy.types.Collection)
+
+    @classmethod
+    def poll(cls, context):
+        _, enabled = addon_utils.check("tool_export_mesh")
+        return enabled
 
     def update(self):
         for link in self.links:

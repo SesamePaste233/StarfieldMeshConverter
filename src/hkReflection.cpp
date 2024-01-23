@@ -1942,7 +1942,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 {
 	auto element_type = type->sub_type;
 	if (element_type->type_name == "float" && type->size == 16) {
-		for (int i = this->array_instances.size(); i < 4; ++i) {
+		for (size_t i = this->array_instances.size(); i < 4; ++i) {
 			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
@@ -1953,7 +1953,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 	}
 	else if (element_type->type_name == "float" && type->size == 64) {
 		
-		for (int i = this->array_instances.size(); i < 16; ++i) {
+		for (size_t i = this->array_instances.size(); i < 16; ++i) {
 			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
@@ -1963,7 +1963,7 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 		}
 	}
 	else if (element_type->type_name == "float" && type->size == 48) {
-		for (int i = this->array_instances.size(); i < 12; ++i) {
+		for (size_t i = this->array_instances.size(); i < 12; ++i) {
 			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
@@ -1997,12 +1997,12 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 			this->in_document_ptr = 0;
 		}
 
-		for (int i = this->array_instances.size(); i > num; --i) {
+		for (size_t i = this->array_instances.size(); i > num; --i) {
 			delete this->array_instances.back();
 			this->array_instances.pop_back();
 		}
 
-		for (int i = this->array_instances.size(); i < num; ++i) {
+		for (size_t i = this->array_instances.size(); i < num; ++i) {
 			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
@@ -2023,12 +2023,12 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 			}
 		}
 
-		for (int i = this->array_instances.size(); i > compile_size; --i) {
+		for (size_t i = this->array_instances.size(); i > compile_size; --i) {
 			delete this->array_instances.back();
 			this->array_instances.pop_back();
 		}
 
-		for (int i = this->array_instances.size(); i < compile_size; ++i) {
+		for (size_t i = this->array_instances.size(); i < compile_size; ++i) {
 			auto instance = AllocateInstance(element_type, ref_context);
 			if (!instance) {
 				return;
@@ -2290,6 +2290,7 @@ void hkreflex::hkTypeTranscriptor::SerializeTranscripts(std::string path, int js
 
 void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(nlohmann::json& json)
 {
+	this->Clear();
 	for (auto& json_properties : json) {
 		TypeTranscriptProperties properties;
 		properties.declared = (uint8_t)json_properties["declared"];
@@ -2333,7 +2334,7 @@ void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(nlohmann::json& json)
 	}
 }
 
-void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool throw_if_not_exist) {
+bool hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool throw_if_not_exist) {
 	std::ifstream file(path);
 
 	std::filesystem::path currentPath = std::filesystem::current_path();
@@ -2348,7 +2349,7 @@ void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool
 			throw std::runtime_error("File not found.");
 		}
 		std::cout << "Warning: File not found." << std::endl;
-		return;
+		return false;
 	}
 
 	nlohmann::json json;
@@ -2356,6 +2357,7 @@ void hkreflex::hkTypeTranscriptor::DeserializeTranscripts(std::string path, bool
 	file.close();
 
 	DeserializeTranscripts(json);
+	return true;
 }
 
 void hkreflex::hkClassInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes) {

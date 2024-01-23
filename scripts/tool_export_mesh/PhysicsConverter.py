@@ -1,17 +1,14 @@
 import bpy
 import os
 import json
-import PhysicsEditor.utils_node as utils_node
 
 import nif_armature
 import utils_blender
 import utils_common as utils
 
-def get_physics_data(tree: bpy.types.NodeTree):
+def get_physics_data(out_nodes: list[bpy.types.Node], tree: bpy.types.NodeTree):
     if tree.bl_idname != 'hclPhysicsTreeType':
         return None
-    
-    out_nodes = utils_node.get_all_output_nodes(tree)
 
     if len(out_nodes) != 1:
         return None
@@ -47,7 +44,7 @@ def get_physics_data(tree: bpy.types.NodeTree):
         bone_list = [utils_blender.RevertRenamingBone(bone.name) for bone in armature.data.bones]
         arma_dict = nif_armature.CreateArmatureDict(armature)
 
-        normals,_,_ = utils_blender.GetNormalTangents(ref_mesh.data, with_tangent=False)
+        #normals,_,_ = utils_blender.GetNormalTangents(ref_mesh.data, with_tangent=False)
 
         # Copy ref_mesh and triangulate it
         tri_mesh = utils_blender.TriangulateMesh(ref_mesh)
@@ -100,9 +97,9 @@ def get_physics_data(tree: bpy.types.NodeTree):
         }
 
         # Save the physics data to a json file
-        physics_data_path = os.path.join(utils.export_mesh_folder_path, 'physics_data.json')
-        with open(physics_data_path, 'w') as f:
-            json.dump(physics_data, f)
+        #physics_data_path = os.path.join(utils.export_mesh_folder_path, 'physics_data.json')
+        #with open(physics_data_path, 'w') as f:
+        #    json.dump(physics_data, f)
 
         return physics_data
     

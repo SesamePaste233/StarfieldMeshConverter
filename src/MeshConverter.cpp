@@ -132,7 +132,7 @@ uint32_t CreateNif(const char* json_data, const char* output_file, const char* a
 	auto rtti = temp->Deserialize(jsonData);
 
 	if (rtti == nif::ni_template::RTTI::None) {
-		std::cerr << "Failed to deserialize json to template" << std::endl;
+		std::cerr << "Failed to deserialize json to template." << std::endl;
 		return 10; // Return an error code
 	}
 	else {
@@ -140,7 +140,7 @@ uint32_t CreateNif(const char* json_data, const char* output_file, const char* a
 	}
 
 	if (!nif.FromTemplate(nif::ni_template::slice_cast(temp, rtti))) {
-		std::cerr << "Failed to convert template to nif" << std::endl;
+		std::cerr << "Failed to convert template to nif." << std::endl;
 		return 11; // Return an error code
 	}
 
@@ -187,9 +187,35 @@ const char* ImportNif(const char* input_file)
 	return utils::make_copy(jsondata.dump());
 }
 
-uint32_t ComposePhysicsData(const char* json_data, const char* output_file)
+uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char* transcript_path, const char* output_file)
 {
 	nlohmann::json jsonData = nlohmann::json::parse(json_data);
+
+	hkphysics::hkPhysicsDataBuilder builder;
+
+	builder.build_target_platform = (hkphysics::hkPhysicsDataBuilder::Platform)platform;
+
+	if (!hkreflex::hkTypeTranscriptor::SetTranscriptPath(transcript_path)){
+		std::cout << "Failed to set transcript path." << std::endl;
+		return 13; // Return an error code
+	}
+
+	if (!builder.ParseJson(jsonData) || !builder.build_target_finished) {
+		std::cout << "Physics data build failed." << std::endl;
+		return 14; // Return an error code
+	}
+
+	hkphysics::hkReflDataSerializer serializer;
+	serializer.root_level_container = &builder.GetTarget();
+
+	std::ofstream file(output_file, std::ios::binary);
+	if (!file.is_open()) {
+		std::cout << "Failed to open output file." << std::endl;
+		return 15; // Return an error code
+	}
+
+	serializer.Serialize(file);
+	file.close();
 
 	return 0;
 }

@@ -1,9 +1,30 @@
 import bpy
-import PhysicsEditor.utils_node as utils_node
 
-import utils_blender
+import PhysicsEditor.Utilities.utils_node as utils_node
 
 global_vis_meshes = {}
+
+def move_object_to_collection(objs, coll):
+	for obj in objs:
+		if obj != None:
+			old_colls = [c for c in obj.users_collection]
+			for c in old_colls:
+				if c != None:
+					c.objects.unlink(obj)
+			coll.objects.link(obj)
+
+def new_collection(name, do_link = True):
+	coll = bpy.data.collections.new(name)
+	if do_link:
+		bpy.context.scene.collection.children.link(coll)
+	return coll
+
+def remove_collection(coll, hierarchy = True):
+	if hierarchy:
+		for obj in coll.objects:
+			bpy.data.objects.remove(obj, do_unlink=True)
+
+	bpy.data.collections.remove(coll)
 
 def insert_vis_meshes(who: bpy.types.Node, vis_mesh: bpy.types.Object):
     global global_vis_meshes
@@ -184,11 +205,11 @@ class ViewerOutputNodeBase(hclPhysicsNodeBase, bpy.types.Node):
     def update(self):
         clear_vis_meshes()
         if self.id_data.vis_meshes_collection is not None:
-            utils_blender.remove_collection(self.id_data.vis_meshes_collection)
+            remove_collection(self.id_data.vis_meshes_collection)
         meshes, _ = self.backward_vis_mesh()
         if meshes is not None and len(meshes) != 0:
-            coll = utils_blender.new_collection('VIS_MESHES')
-            utils_blender.move_object_to_collection(meshes, coll)
+            coll = new_collection('VIS_MESHES')
+            move_object_to_collection(meshes, coll)
             self.id_data.vis_meshes_collection = coll
         #print(meshes)
 
@@ -221,11 +242,11 @@ class OutputNodeBase(hclPhysicsNodeBase, bpy.types.Node):
     def update(self):
         clear_vis_meshes()
         if self.id_data.vis_meshes_collection is not None:
-            utils_blender.remove_collection(self.id_data.vis_meshes_collection)
+            remove_collection(self.id_data.vis_meshes_collection)
         meshes, rtn = self.backward_vis_mesh()
         if meshes is not None and len(meshes) != 0:
-            coll = utils_blender.new_collection('VIS_MESHES')
-            utils_blender.move_object_to_collection(meshes, coll)
+            coll = new_collection('VIS_MESHES')
+            move_object_to_collection(meshes, coll)
             self.id_data.vis_meshes_collection = coll
             self.error_msg = ""
         else:

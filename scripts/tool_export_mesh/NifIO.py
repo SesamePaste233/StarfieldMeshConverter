@@ -207,7 +207,7 @@ def ImportNif(file_path, options, context, operator):
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')
 		return {'CANCELLED'}, None, None
 	
-	json_str = MeshConverter._dll_import_nif(file_path.encode('utf-8')).decode('utf-8')
+	json_str = MeshConverter.ImportNifAsJson(file_path)
 	
 	if len(json_str) == 0:
 		operator.report({'WARNING'}, f'Nif failed to load.')
@@ -278,8 +278,12 @@ def ImportNif(file_path, options, context, operator):
 
 	if options.debug_havok_physics and 'havok_meshes' in _data.keys():
 		havok_meshes = _data['havok_meshes']
+		havok_vis_objs = []
 		for mesh in havok_meshes:
-			utils_blender.BuildhkBufferedMesh(mesh)
+			havok_vis_objs.extend(utils_blender.BuildhkBufferedMesh(mesh))
+
+		hk_coll = utils_blender.new_collection("HavokPhysics")
+		utils_blender.move_object_to_collection(havok_vis_objs, hk_coll)
 
 
 	return {'FINISHED'}, best_skel, obj_list
@@ -448,10 +452,10 @@ def ExportNif(options, context, operator):
 	#with open(nif_filepath + '.json', 'w') as json_file:
 	#	json_file.write(json_data)
 
-	returncode = MeshConverter._dll_export_nif(json_data.encode('utf-8'), nif_filepath.encode('utf-8'), export_folder.encode('utf-8'))
+	returncode = MeshConverter.CreateNifFromJson(json_data, nif_filepath, export_folder)
 
-	if returncode != 0:
-		operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+	if not returncode:
+		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 		return {'CANCELLED'}
 
 	operator.report({'INFO'},f'Export Nif successful.')

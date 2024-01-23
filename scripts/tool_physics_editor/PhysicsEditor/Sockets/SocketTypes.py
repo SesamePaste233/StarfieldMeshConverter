@@ -1,5 +1,7 @@
 import bpy
-import PhysicsEditor.utils_node as utils_node
+
+import PhysicsEditor.Utilities.utils_node as utils_node
+
 # Custom socket type
 class hclNodeSocketBase():
     # Description string

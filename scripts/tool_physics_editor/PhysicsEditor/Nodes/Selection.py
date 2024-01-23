@@ -2,8 +2,9 @@ import bpy
 import bmesh
 from bpy.types import Node, NodeLink, NodeSocket
 
-import PhysicsEditor.NodeBase as NodeBase
-import PhysicsEditor.utils_node as utils_node
+import PhysicsEditor.Nodes.NodeBase as NodeBase
+
+import PhysicsEditor.Utilities.utils_node as utils_node
 
 def get_attr_enum_items(self, context):
     if self.inputs['Mesh'].is_linked:

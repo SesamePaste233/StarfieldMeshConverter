@@ -779,19 +779,45 @@ namespace hkreflex {
 
 		std::unordered_map<MapIdType, bool> entry_updated;
 
-		std::unordered_map<MapIdType, hkreflex::hkClassBase*> all_allocated_classes;
+		std::unordered_map<MapIdType, hkreflex::hkClassBase*> all_allocated_classes; // References
 
-		std::vector<hkreflex::hkClassBase*> all_allocated_classes_list;
+		std::vector<hkreflex::hkClassBase*> all_allocated_classes_list; // References
 
 		static std::string transcript_path;
+
+		void Clear() {
+			type_transcripts.clear();
+			entry_updated.clear();
+			all_allocated_classes.clear();
+			all_allocated_classes_list.clear();
+		}
 
 		static hkTypeTranscriptor& GetInstance() {
 			static hkTypeTranscriptor instance;
 			return instance;
 		}
 
-		static inline void SetTranscriptPath(std::string path) {
+		static inline bool SetTranscriptPath(std::string path, bool throw_if_not_exist = false) {
+			std::ifstream file(path);
+
+			std::filesystem::path currentPath = std::filesystem::current_path();
+
+			std::filesystem::path absolutePath = currentPath / path;
+
+			std::cout << "Loading transcript at: " << absolutePath.string() << std::endl;
+
+			if (!file.is_open()) {
+
+				if (throw_if_not_exist) {
+					throw std::runtime_error("File not found.");
+				}
+				std::cout << "Warning: File not found." << std::endl;
+				return false;
+			}
+
 			transcript_path = path;
+
+			return true;
 		}
 
 		bool RegisterClass(hkreflex::hkClassBase* hk_class, bool recursive = true, bool update_exist = true);
@@ -808,7 +834,7 @@ namespace hkreflex {
 
 		void DeserializeTranscripts(nlohmann::json& json);
 
-		void DeserializeTranscripts(std::string path, bool throw_if_not_exist = false);
+		bool DeserializeTranscripts(std::string path, bool throw_if_not_exist = false);
 
 		inline bool TranscriptEntryUpdated(MapIdType id) const {
 			if (entry_updated.find(id) == entry_updated.end())
@@ -1309,6 +1335,7 @@ namespace hkreflex {
 				return ret;
 			}
 		}
+		return ret;
 	}
 
 	//class ClassSerializeContext {

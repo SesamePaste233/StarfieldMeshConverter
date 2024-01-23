@@ -18,6 +18,7 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 {
 	if (!json.contains("data") || !json["data"].contains("target")) {
 		std::cout << "Warning: Invalid json file" << std::endl;
+		return false;
 	}
 
 	auto& physics_data = json["data"];
@@ -90,7 +91,7 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 		this->SetSkeleton(skeleton);
 
 		this->hcl_sim_cloth_data->fixedParticles = fixed_particles;
-		for (size_t i = 0; i < particles.size(); ++i) {
+		for (uint16_t i = 0; i < particles.size(); ++i) {
 			this->hcl_sim_cloth_data->SetMassUnsafe(i, particles[i]["mass"]);
 			this->hcl_sim_cloth_data->SetRadius(i, particles[i]["radius"]);
 			this->hcl_sim_cloth_data->SetFriction(i, particles[i]["friction"]);
@@ -273,8 +274,8 @@ void hkphysics::hkPhysicsDataBuilder::SetSkeleton(hktypes::hkaSkeleton& skeleton
 
 void hkphysics::hkPhysicsDataBuilder::SetSimClothDefaultMesh(hktypes::hclBufferedMeshObj& mesh) {
 	CheckValid(BuildTarget_GenericClothSim);
-	uint32_t num_vertices = mesh.positions.size();
-	uint32_t num_triangles = mesh.triangleIndices.size() / 3;
+	uint32_t num_vertices = (uint32_t)mesh.positions.size();
+	uint32_t num_triangles = (uint32_t)mesh.triangleIndices.size() / 3;
 
 	hcl_sim_cloth_data->SetDefaultPoses(&mesh);
 
@@ -287,8 +288,8 @@ void hkphysics::hkPhysicsDataBuilder::SetSimClothDefaultMesh(hktypes::hclBuffere
 void hkphysics::hkPhysicsDataBuilder::SetSimClothDefaultMesh(std::vector<std::vector<float>>& positions, std::vector<uint16_t>& triangleIndices)
 {
 	CheckValid(BuildTarget_GenericClothSim);
-	uint32_t num_vertices = positions.size();
-	uint32_t num_triangles = triangleIndices.size() / 3;
+	uint32_t num_vertices = (uint32_t)positions.size();
+	uint32_t num_triangles = (uint32_t)triangleIndices.size() / 3;
 
 	hcl_sim_cloth_data->SetDefaultPoses(positions, triangleIndices);
 

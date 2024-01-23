@@ -1,8 +1,9 @@
 import bpy
 from bpy.types import Node, NodeSocket
-import PhysicsEditor.utils_node as utils_node
 
-import PhysicsEditor.NodeBase as NodeBase
+import PhysicsEditor.Utilities.utils_node as utils_node
+
+import PhysicsEditor.Nodes.NodeBase as NodeBase
 
 class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Combine particles and colliders to create a cloth data, allow multiple collider inputs'''

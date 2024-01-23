@@ -1,11 +1,11 @@
 import bpy
 from bpy.types import Node, NodeSocket
-import PhysicsEditor.utils_node as utils_node
 
-import PhysicsEditor.NodeBase as NodeBase
+import PhysicsEditor.Utilities.utils_node as utils_node
 
-import utils_blender
-import utils_math
+import PhysicsEditor.Nodes.NodeBase as NodeBase
+
+import PhysicsEditor.Utilities.utils_geometry as utils_geometry
 
 class SimpleTriangleBoneDriverNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Drive physics bones with the closest triangle from simulation mesh'''
@@ -63,16 +63,16 @@ class SimpleTriangleBoneDriverNode(NodeBase.hclPhysicsNodeBase, Node):
         face_indices = []
         bone_centers = [armature.data.bones[i].head_local for i in bone_indices]
         if mode == 'FACE':
-            rtn = utils_blender.QueryCloserFacesMultiple(mesh, 1, bone_centers)
+            rtn = utils_geometry.QueryCloserFacesMultiple(mesh, 1, bone_centers)
             face_indices = [i for i, _, _ in rtn]
         elif mode == 'EDGE':
             def query_func(face:bpy.types.MeshPolygon, center):
-                pivot1_co, pivot2_co, pivot3_co = utils_blender.GetTriVerts(mesh, face)
+                pivot1_co, pivot2_co, pivot3_co = utils_geometry.GetTriVerts(mesh, face)
 
-                dist1, dist2, dist3 = utils_math.TriangleEdgeDistances(pivot1_co, pivot2_co, pivot3_co, center)
+                dist1, dist2, dist3 = utils_geometry.TriangleEdgeDistances(pivot1_co, pivot2_co, pivot3_co, center)
                 return max(dist1, dist2, dist3)
             
-            rtn = utils_blender.QueryCloserFacesMultiple(mesh, 3, bone_centers, query_func)
+            rtn = utils_geometry.QueryCloserFacesMultiple(mesh, 3, bone_centers, query_func)
             rtn = [sorted(lst, key=lambda x: x[1] * x[2]) for lst in rtn]
             face_indices = [lst[0][0] for lst in rtn]
         else:

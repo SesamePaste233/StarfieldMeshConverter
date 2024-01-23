@@ -1,7 +1,7 @@
 import bpy
 import bmesh
 
-class OBJECT_OT_add_boolean_attribute(bpy.types.Operator):
+class OBJECT_OT_add_custom_attribute(bpy.types.Operator):
     bl_idname = "object.add_custom_attribute"
     bl_label = "Add Custom Attribute"
     bl_options = {'REGISTER', 'UNDO'}
@@ -89,17 +89,15 @@ class OBJECT_OT_add_boolean_attribute(bpy.types.Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-    
-
 def menu_func(self, context):
-    self.layout.operator(OBJECT_OT_add_boolean_attribute.bl_idname)
+    self.layout.operator(OBJECT_OT_add_custom_attribute.bl_idname)
 
 
 def register():
-    bpy.utils.register_class(OBJECT_OT_add_boolean_attribute)
+    bpy.utils.register_class(OBJECT_OT_add_custom_attribute)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.append(menu_func)
 
 
 def unregister():
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(menu_func)
-    bpy.utils.unregister_class(OBJECT_OT_add_boolean_attribute)
+    bpy.utils.unregister_class(OBJECT_OT_add_custom_attribute)

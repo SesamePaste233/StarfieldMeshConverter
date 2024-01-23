@@ -243,7 +243,8 @@
       <AdditionalDependencies>DirectXMesh.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\$(TargetFileName)"</Command>
+      <Command>copy "$(TargetPath)" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\$(TargetFileName)"
+copy "$(ProjectDir)hkTypeTranscript.json" "C:\Users\26553\AppData\Roaming\Blender Foundation\Blender\3.5\scripts\addons\tool_export_mesh\Assets\hkTypeTranscript\hkTypeTranscript.json"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -234,9 +234,9 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 		#with open(result_file_path + '.json', 'w') as json_file:
 		#	json_file.write(json_data)
 		
-		returncode = MeshConverter._dll_export_mesh(json_data.encode('utf-8'), result_file_path.encode('utf-8'), options.mesh_scale, False, options.normalize_weights, False)
+		returncode = MeshConverter.ExportMeshFromJson(json_data, result_file_path, options.mesh_scale, False, options.normalize_weights, False)
 
-		if returncode == 0:
+		if returncode:
 			operator.report({'INFO'}, "Starfield .mesh exported successfully")
 
 			if options.export_sf_mesh_open_folder == True:
@@ -245,7 +245,7 @@ def ExportMesh(options, context, filepath, operator, bone_list_filter = None, pr
 			return {'FINISHED'}, verts_count, indices_count, vgrp_names
 			
 		else:
-			operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
+			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 			return {'CANCELLED'}, 0,0, None
 		
 	return {'CANCELLED'}, 0,0, None
@@ -254,7 +254,7 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 	import_path = file_path
 	temp_path = utils_blender.TempFolderPath()
 
-	rtn = MeshConverter._dll_import_mesh(import_path.encode('utf-8'), os.path.join(temp_path, "mesh_data_import").encode('utf-8')).decode('utf-8')
+	rtn = MeshConverter.ImportMeshAsJson(import_path, os.path.join(temp_path, "mesh_data_import"))
 
 	if rtn == "":
 		returncode = -1 

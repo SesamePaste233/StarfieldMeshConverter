@@ -7,35 +7,35 @@
 #include "hclSimClothData.h"
 
 namespace hktypes {
-	hclBufferUsage& operator|(const hclBufferUsage& buffer_usage1, const hclBufferUsage& buffer_usage2);
+	hclBufferUsage operator|(const hclBufferUsage& buffer_usage1, const hclBufferUsage& buffer_usage2);
 
-	hclTransformSetUsage::TransformTracker& operator|(const hclTransformSetUsage::TransformTracker& transform_tracker1, const hclTransformSetUsage::TransformTracker& transform_tracker2);
+	hclTransformSetUsage::TransformTracker operator|(const hclTransformSetUsage::TransformTracker& transform_tracker1, const hclTransformSetUsage::TransformTracker& transform_tracker2);
 
-	hclTransformSetUsage& operator|(const hclTransformSetUsage& transform_usage1, const hclTransformSetUsage& transform_usage2);
+	hclTransformSetUsage operator|(const hclTransformSetUsage& transform_usage1, const hclTransformSetUsage& transform_usage2);
 
-	hclClothState::BufferAccess& operator|(const hclClothState::BufferAccess& buffer_access1, const hclClothState::BufferAccess& buffer_access2);
+	hclClothState::BufferAccess operator|(const hclClothState::BufferAccess& buffer_access1, const hclClothState::BufferAccess& buffer_access2);
 
 	hclClothState::BufferAccess CombineBufferAccess(const std::vector<hclClothState::BufferAccess>& buffer_accesses);
 
 	bool AccessSameBuffer(const hclClothState::BufferAccess& buffer_access1, const hclClothState::BufferAccess& buffer_access2);
 
-	hclClothState::TransformSetAccess& operator|(const hclClothState::TransformSetAccess& transform_set_access1, const hclClothState::TransformSetAccess& transform_set_access2);
+	hclClothState::TransformSetAccess operator|(const hclClothState::TransformSetAccess& transform_set_access1, const hclClothState::TransformSetAccess& transform_set_access2);
 
 	hclClothState::TransformSetAccess CombineTransformSetAccess(const std::vector<hclClothState::TransformSetAccess>& transform_set_accesses);
 
 	bool AccessSameTransformSet(const hclClothState::TransformSetAccess& transform_set_access1, const hclClothState::TransformSetAccess& transform_set_access2);
 
-	hclClothState::BufferAccess& FromBufferUsage(uint32_t buffer_index, hclBufferUsage buffer_usage, uint32_t shadow_buffer_index = uint32_t(-1));
+	hclClothState::BufferAccess FromBufferUsage(uint32_t buffer_index, hclBufferUsage buffer_usage, uint32_t shadow_buffer_index = uint32_t(-1));
 
-	hclClothState::BufferAccess& BufferAccessFromParameters(uint32_t buffer_index, uint8_t position_usage, uint8_t normal_usage, uint8_t tangent_usage, uint8_t bitangent_usage, bool triangles_read = false, uint32_t shadow_buffer_index = uint32_t(-1));
+	hclClothState::BufferAccess BufferAccessFromParameters(uint32_t buffer_index, uint8_t position_usage, uint8_t normal_usage, uint8_t tangent_usage, uint8_t bitangent_usage, bool triangles_read = false, uint32_t shadow_buffer_index = uint32_t(-1));
 
-	hclClothState::TransformSetAccess& FromTransformSetUsage(uint32_t transform_set_index, hclTransformSetUsage transform_set_usage);
+	hclClothState::TransformSetAccess FromTransformSetUsage(uint32_t transform_set_index, hclTransformSetUsage transform_set_usage);
 
-	hclScratchBufferDefinition& DefaultScratchBufferDefinition();
+	hclScratchBufferDefinition DefaultScratchBufferDefinition();
 
-	hclBufferDefinition& DefaultBufferDefinitionWithTriangles();
+	hclBufferDefinition DefaultBufferDefinitionWithTriangles();
 
-	hclStateDependencyGraph& DefaultStateDependencyGraph(int num_operators);
+	hclStateDependencyGraph DefaultStateDependencyGraph(int num_operators);
 
 	hclShape* AllocateShapeFromMesh(hclBufferedMeshObj& mesh_obj);
 
@@ -61,7 +61,7 @@ namespace hktypes {
 		const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& weights
 	);
 
-	hclObjectSpaceDeformer& DeformerFromWeights(
+	hclObjectSpaceDeformer DeformerFromWeights(
 		const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& weights
 	);
 
