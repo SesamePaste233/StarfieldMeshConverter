@@ -572,7 +572,10 @@ def update_func(self, context):
 # Register the operators and menu entries
 def register():
 	utils.load("cached_paths")
-
+	bpy.types.Scene.geometry_bridge_version = bpy.props.StringProperty(
+		name="__geometry_bridge_version__",
+		default = f"{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}",
+	)
 	bpy.types.Scene.export_mesh_folder_path = bpy.props.StringProperty(
 		name="Export Folder",
 		subtype='DIR_PATH',
@@ -673,6 +676,7 @@ def unregister():
 	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_morph)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_morph)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_nif)
+	del bpy.types.Scene.geometry_bridge_version
 	del bpy.types.Scene.export_mesh_folder_path
 	del bpy.types.Scene.assets_folder
 	del bpy.types.Scene.mesh_scale

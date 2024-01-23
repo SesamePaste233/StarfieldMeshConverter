@@ -15,7 +15,15 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 	bl_label = "Export Physics Data"
 
 	def execute(self, context):
+		if context.scene.sf_physics_editor_version != context.scene.geometry_bridge_version:
+			self.report({'ERROR'}, "Physics editor version does not match geometry bridge version.")
+			return {'CANCELLED'}
+		
 		physics_node_tree = context.scene.physics_node_tree_prop
+
+		if physics_node_tree is None:
+			self.report({'ERROR'}, "No physics node tree selected.")
+			return {'CANCELLED'}
 
 		output_file = os.path.join(context.scene.physics_file_path, f"{utils.sanitize_filename(physics_node_tree.name)}.bin")
 

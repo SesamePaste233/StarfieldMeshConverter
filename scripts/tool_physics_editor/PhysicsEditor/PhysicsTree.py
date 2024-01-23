@@ -35,7 +35,7 @@ class PhysicsTree(NodeTree):
     @classmethod
     def poll(cls, context):
         _, enabled = addon_utils.check("tool_export_mesh")
-        return enabled
+        return enabled and context.scene.sf_physics_editor_version == context.scene.geometry_bridge_version
 
     def update(self):
         for link in self.links:

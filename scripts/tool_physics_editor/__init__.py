@@ -20,9 +20,14 @@ bl_info = {
 	}
 
 def register():
-    AttrOperator.register()
-    PhysicsTree.register()
+	bpy.types.Scene.sf_physics_editor_version = bpy.props.StringProperty(
+		name="__sf_physics_editor_version__",
+		default = f"{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}",
+	)
+	AttrOperator.register()
+	PhysicsTree.register()
 
 def unregister():
-    AttrOperator.unregister()
-    PhysicsTree.unregister()
+	AttrOperator.unregister()
+	PhysicsTree.unregister()
+	del bpy.types.Scene.sf_physics_editor_version
