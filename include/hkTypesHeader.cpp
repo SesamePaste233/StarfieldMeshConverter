@@ -25,8 +25,8 @@ hktypes::hclTransformSetUsage hktypes::operator|(const hclTransformSetUsage& tra
     for (uint8_t i = 0; i < 2; i++) {
 		out.perComponentFlags[i] = transform_usage1.perComponentFlags[i] | transform_usage2.perComponentFlags[i];
 	}
-    for (uint32_t i = 0; i < transform_usage1.perComponentTransformTrackers.size(); i++) {
-		out.perComponentTransformTrackers.push_back(transform_usage1.perComponentTransformTrackers[i] | transform_usage2.perComponentTransformTrackers[i]);
+    for (uint32_t i = 0; i < 2; i++) {
+		out.perComponentTransformTrackers[i] = transform_usage1.perComponentTransformTrackers[i] | transform_usage2.perComponentTransformTrackers[i];
 	}
 	return out;
 }
@@ -299,7 +299,7 @@ hktypes::hclTransformSetUsage hktypes::CollectTransformSetUsage(hclSimClothData*
 	return out;
 }
 
-hktypes::hclSimpleMeshBoneDeformOperator* hktypes::AllocateSimpleMeshBoneDeformOperator(std::vector<std::pair<uint16_t, uint16_t>> bone_triangle_id_pair, std::vector<Eigen::Matrix4f> local_bone_transforms)
+hktypes::hclSimpleMeshBoneDeformOperator* hktypes::AllocateSimpleMeshBoneDeformOperator(uint32_t num_bones, std::vector<std::pair<uint16_t, uint16_t>> bone_triangle_id_pair, std::vector<Eigen::Matrix4f> local_bone_transforms)
 {
 	hclSimpleMeshBoneDeformOperator* out = new hclSimpleMeshBoneDeformOperator();
 	out->name = "Deform";
@@ -323,6 +323,7 @@ hktypes::hclSimpleMeshBoneDeformOperator* hktypes::AllocateSimpleMeshBoneDeformO
 	}
 
 	hclTransformSetUsage transform_set_usage;
+	transform_set_usage.SetNumBitsForAll(num_bones);
 	transform_set_usage.AddUsage(0, hclTransformSetUsage::UF_Write, used_bone_ids);
 
 	out->usedTransformSets.push_back(FromTransformSetUsage(output_transform_set_index, transform_set_usage));
@@ -450,6 +451,7 @@ hktypes::hclObjectSpaceSkinPNOperator* hktypes::AllocateObjectSpaceSkinPNOperato
 	}
 
 	hclTransformSetUsage transform_set_usage;
+	transform_set_usage.SetNumBitsForAll(skeleton->bones.size());
 	transform_set_usage.AddUsage(0, hclTransformSetUsage::UF_Read | hclTransformSetUsage::UF_ReadBeforeWrite, used_bone_ids);
 
 	out->usedTransformSets.push_back(FromTransformSetUsage(0, transform_set_usage));
@@ -482,15 +484,15 @@ hktypes::hclObjectSpaceDeformer hktypes::DeformerFromWeights(const std::vector<s
 	}
 
 	for (uint8_t i = 0; i < entry_vert_ids.size(); ++i) {
-		auto& entry = entry_vert_ids[i];
+		auto& entry = entry_vert_ids[7 - i];
 		if (entry.empty()) {
 			continue;
 		}
 		int j = 0;
 		while (entry.size() < 16 && i + j + 1 < 8) {
-			auto& next_entry = entry_vert_ids[i + j + 1];
+			auto& next_entry = entry_vert_ids[7 - (i + j + 1)];
 			int additional = 16 - entry.size();
-			utils::stack_elems(entry, next_entry, additional);
+			utils::stack_elems(next_entry, entry, additional);
 			j++;
 		}
 	}
@@ -645,9 +647,9 @@ hktypes::hclObjectSpaceDeformer hktypes::DeformerFromWeights(const std::vector<s
 	// two: 0 (index 2 or null)
 	// one: 1 (index 3 or 2)
 	// control_bytes: 0,0,0,0,1,1,3 (whereas currently: 0,0,0,0,1,1,2)
-	for (int i = 7, j = 0; i > 0; i++) {
+	for (int i = 7, j = 0; i > 0; --i) {
 		int num_entries = entry_vert_ids[i].size() % 16 > 0 ? entry_vert_ids[i].size() / 16 + 1 : entry_vert_ids[i].size() / 16;
-		for (int i = 0; i < num_entries; ++i) {
+		for (int k = 0; k < num_entries; ++k) {
 			deformer.controlBytes.push_back(j);
 		}
 		if (num_entries > 0) {
@@ -700,8 +702,8 @@ std::vector<hktypes::hclObjectSpaceDeformer::LocalBlockPN> hktypes::localPNsFrom
 		for (int j = 0; j < 16; ++j) {
 			auto& p = localPositions[j];
 			auto& n = localNormals[j];
-			p.FromVector3f(Eigen::Vector3f(positions[vert_id_list[j]][0], positions[vert_id_list[j]][1], positions[vert_id_list[j]][2]));
-			n.FromVector3f(Eigen::Vector3f(normals[vert_id_list[j]][0], normals[vert_id_list[j]][1], normals[vert_id_list[j]][2]));
+			p = p.FromVector3f(Eigen::Vector3f(positions[vert_id_list[j]][0], positions[vert_id_list[j]][1], positions[vert_id_list[j]][2]));
+			n = n.FromVector3f(Eigen::Vector3f(normals[vert_id_list[j]][0], normals[vert_id_list[j]][1], normals[vert_id_list[j]][2]));
 		}
 	}
 
@@ -764,5 +766,5 @@ hktypes::hclStandardLinkConstraintSetMx* hktypes::impl::AllocateStandardLinkCons
 	using namespace hktypes;
 	hclStandardLinkConstraintSetMx* out = new hclStandardLinkConstraintSetMx();
 	out->name = name;
-	return nullptr;
+	return out;
 }

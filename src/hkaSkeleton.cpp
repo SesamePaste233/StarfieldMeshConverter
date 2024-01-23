@@ -297,13 +297,15 @@ void hktypes::hkaSkeleton::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
 {
 	bool calc_num_bones = false;
 	if (bone == nullptr) {
+		this->name == "Root";
 		this->root = new hkaBoneHolder();
 		bone = this->root;
 		calc_num_bones = true;
 	}
 
 	bone->name = json["name"];
-	bone->lockTranslation = json["lock_translation"];
+	if (json.contains("lock_translation"))
+		bone->lockTranslation = json["lock_translation"];
 
 	Eigen::Matrix4f matrix;
 	matrix.setIdentity();

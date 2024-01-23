@@ -278,9 +278,15 @@ void hktypes::hkBitField::SetMaskedIds(std::vector<uint32_t>& ids)
 	this->SetMask(mask);
 }
 
-hktypes::hkBitField& hktypes::hkBitField::operator|(const hkBitField& other) const
+void hktypes::hkBitField::operator=(const hkBitField& other)
 {
-	hkBitField ret;
+	this->storage.numBits = other.storage.numBits;
+	this->storage.words = other.storage.words;
+}
+
+hktypes::hkBitField hktypes::hkBitField::operator|(const hkBitField& other) const
+{
+	hkBitField ret = *this;
 	auto& storage = ret.storage;
 	auto& other_storage = other.storage;
 	if (storage.numBits != other_storage.numBits) {
@@ -292,6 +298,21 @@ hktypes::hkBitField& hktypes::hkBitField::operator|(const hkBitField& other) con
 		storage.words[i] |= other_storage.words[i];
 	}
 	return ret;
+}
+
+hktypes::hkBitField hktypes::hkBitField::operator|=(const hkBitField& other)
+{
+	auto& storage = this->storage;
+	auto& other_storage = other.storage;
+	if (storage.numBits != other_storage.numBits) {
+		std::cout << "hkBitField::operator|=: numBits is not equal" << std::endl;
+		throw std::runtime_error("hkBitField::operator|=: numBits is not equal");
+		return *this;
+	}
+	for (int i = 0; i < storage.words.size(); i++) {
+		storage.words[i] |= other_storage.words[i];
+	}
+	return *this;
 }
 
 bool hktypes::hkRootLevelContainer::NamedVariant::FromInstance(const hkreflex::hkClassInstance* instance)

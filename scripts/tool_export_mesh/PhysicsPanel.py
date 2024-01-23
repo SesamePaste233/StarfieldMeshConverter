@@ -1,4 +1,5 @@
 import bpy
+import os
 import json
 
 import PhysicsConverter as PhysicsConverter
@@ -16,7 +17,9 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 	def execute(self, context):
 		physics_node_tree = context.scene.physics_node_tree_prop
 
-		data_dict = PhysicsConverter.get_physics_data(physics_node_tree)
+		output_file = os.path.join(context.scene.physics_file_path, f"{utils.sanitize_filename(physics_node_tree.name)}.bin")
+
+		data_dict = PhysicsConverter.get_physics_data(physics_node_tree.get_output_nodes(), physics_node_tree)
 
 		if data_dict is None:
 			self.report({'ERROR'}, "Failed to compose physics data from node graph.")
@@ -24,7 +27,7 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 
 		json_data = json.dumps(data_dict)
 
-		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, context.scene.physics_file_path)
+		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, output_file)
 
 		if not rtn:
 			self.report({'ERROR'}, f"Failed to compose physics data. Error message: \"{rtn.what()}\".")

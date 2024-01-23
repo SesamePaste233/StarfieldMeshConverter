@@ -53,6 +53,9 @@ class PhysicsTree(NodeTree):
                 input_skt = links[0].to_socket
                 self.links.remove(links[0])
                 self.links.new(input_skt, output_skt)
+
+    def get_output_nodes(self):
+        return utils_node.get_all_output_nodes(self)
                 
 
 class MyNodeCategory(NodeCategory):
@@ -83,9 +86,9 @@ node_categories = [
     ]),
     MyNodeCategory('CONSTRAINTS', "Constraints", items=[
         NodeItem("StandardLinkConstraint", label="Standard Link"),
-        NodeItem("StretchLinkConstraint", label="Stretch Link"),
-        NodeItem("BendLinkConstraint", label="Bend Link"),
-        NodeItem("BonePlanesConstraint", label="Global Bone Plane Constraint"),
+        #NodeItem("StretchLinkConstraint", label="Stretch Link"),
+        #NodeItem("BendLinkConstraint", label="Bend Link"),
+        #NodeItem("BonePlanesConstraint", label="Global Bone Plane Constraint"),
     ]),
     MyNodeCategory('COLLIDERS', "Colliders", items=[
         NodeItem("CapsuleCollider", label="Capsule Collider"),

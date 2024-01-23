@@ -148,12 +148,17 @@ namespace hktypes {
 		void SetMaskedIds(std::vector<uint32_t>& ids);
 		inline void SetNumBits(int num_bits) {
 			storage.numBits = num_bits;
+			storage.words.resize((num_bits + 31) / 32);
 		}
 		inline int GetNumBits() {
 			return storage.numBits;
 		}
 
-		hkBitField& operator|(const hkBitField& other) const;
+		void operator=(const hkBitField& other);
+
+		hkBitField operator|(const hkBitField& other) const;
+
+		hkBitField operator|=(const hkBitField& other);
 	};
 
 	class hkRootLevelContainer : public hkHolderBase {

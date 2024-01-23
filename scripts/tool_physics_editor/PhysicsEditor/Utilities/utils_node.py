@@ -177,14 +177,11 @@ def get_all_output_nodes(tree:bpy.types.NodeTree, valid_only = True, linked_only
     output_nodes = []
     for node in tree.nodes:
         if node.bl_idname == 'OutputNode':
-            if valid_only:
-                if node.check_valid():
-                    output_nodes.append(node)
-            elif linked_only:
-                if node.inputs[0].is_linked:
-                    output_nodes.append(node)
-            else:
-                output_nodes.append(node)
+            if linked_only and not node.inputs[0].is_linked:
+                continue
+            if valid_only and hasattr(node, "check_valid") and not node.check_valid():
+                continue
+            output_nodes.append(node)
     return output_nodes
 
 def update_tree_from_node(self, context):

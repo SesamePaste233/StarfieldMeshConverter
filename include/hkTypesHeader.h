@@ -45,7 +45,7 @@ namespace hktypes {
 
 	hclTransformSetUsage CollectTransformSetUsage(hclSimClothData* sim_cloth_data, int num_bones);
 
-	hclSimpleMeshBoneDeformOperator* AllocateSimpleMeshBoneDeformOperator(std::vector<std::pair<uint16_t, uint16_t>> bone_triangle_id_pair, std::vector<Eigen::Matrix4f> local_bone_transforms);
+	hclSimpleMeshBoneDeformOperator* AllocateSimpleMeshBoneDeformOperator(uint32_t num_bones, std::vector<std::pair<uint16_t, uint16_t>> bone_triangle_id_pair, std::vector<Eigen::Matrix4f> local_bone_transforms);
 
 	hclSimulateOperator* AllocateSimulateOperator(hclSimClothData* sim_cloth_data, hclTransformSetDefinition* transform_set_definition, uint8_t subSteps = 1, uint8_t numberOfSolveIterations = 1);
 

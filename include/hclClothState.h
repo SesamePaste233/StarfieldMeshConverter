@@ -53,6 +53,9 @@ namespace hktypes {
 			};
 		};
 
+		hclTransformSetUsage() {
+			perComponentTransformTrackers.resize(2);
+		}
 
 		inline void SetNumBitsForAll(int num_bits) {
 			for (auto& tracker : perComponentTransformTrackers) {
@@ -73,15 +76,15 @@ namespace hktypes {
 			perComponentFlags[component_index] |= usage_flags;
 			if (usage_flags & UsageFlags::UF_Read) {
 				auto& record = perComponentTransformTrackers[component_index].read;
-				record = record | hkBitField(accessed_ids_32, record.GetNumBits());
+				record |= hkBitField(accessed_ids_32, record.GetNumBits());
 			}
 			if (usage_flags & UsageFlags::UF_ReadBeforeWrite) {
 				auto& record = perComponentTransformTrackers[component_index].readBeforeWrite;
-				record = record | hkBitField(accessed_ids_32, record.GetNumBits());
+				record |= hkBitField(accessed_ids_32, record.GetNumBits());
 			}
 			if (usage_flags & UsageFlags::UF_Write) {
 				auto& record = perComponentTransformTrackers[component_index].written;
-				record = record | hkBitField(accessed_ids_32, record.GetNumBits());
+				record |= hkBitField(accessed_ids_32, record.GetNumBits());
 			}
 		};
 	};

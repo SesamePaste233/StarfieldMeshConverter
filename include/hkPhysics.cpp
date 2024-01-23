@@ -41,9 +41,16 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 		std::vector<uint16_t> triangle_indices = json["mesh_indices"];
 		std::vector<uint16_t> fixed_particles;
 		std::vector<float> gravity = cloth_data["gravity_vector"];
-		std::vector<std::string> bone_list = cloth_data["bone_list"];
-		uint8_t subSteps = cloth_data["sub_steps"];
-		uint8_t solverIterations = cloth_data["solver_iterations"];
+		std::vector<std::string> bone_list;
+		for (auto& bone_name: json["bone_list"]) {
+			bone_list.push_back(bone_name);
+		}
+		uint8_t subSteps = 1;
+		if (cloth_data.contains("sub_steps"))
+			subSteps = cloth_data["sub_steps"];
+		uint8_t solverIterations = 1;
+		if (cloth_data.contains("solver_iterations"))
+			solverIterations = cloth_data["solver_iterations"];
 		float global_damping = cloth_data["global_damping_per_second"];
 
 		int num_particles = 0;
@@ -171,6 +178,7 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 			}
 
 			hktypes::hclSimpleMeshBoneDeformOperator* simple_mesh_bone_deform_operator = hktypes::AllocateSimpleMeshBoneDeformOperator(
+				this->hcl_transform_set_definition->numTransforms,
 				bone_triangle_pairs,
 				local_bone_transforms
 			);
@@ -331,6 +339,8 @@ hktypes::hclConstraintSet* hkphysics::hkPhysicsDataBuilder::AddConstraintSet(std
 			std::cout << "Warning: Invalid constraint type \"" << type << "\"" << std::endl;
 			throw std::runtime_error("Invalid constraint type");
 		}
+
+		this->hcl_sim_cloth_data->AddConstraintSet(constraint);
 
 		return constraint;
 	}

@@ -401,7 +401,7 @@ namespace hktypes {
 			}
 
 			void SetWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& _boneIndicesAndWeights, const std::vector<uint16_t>& _vert_ids) override {
-				assert(vert_ids.size() == boneIndicesAndWeights.size());
+				assert(_vert_ids.size() == _boneIndicesAndWeights.size());
 				std::vector<uint16_t> vert_ids(_vert_ids);
 				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> boneIndicesAndWeights(_boneIndicesAndWeights);
 				for (auto& weight_pair: boneIndicesAndWeights) {
@@ -489,7 +489,7 @@ namespace hktypes {
 			}
 		
 			void SetWeights(const std::vector<std::vector<std::pair<uint16_t, uint8_t>>>& _boneIndicesAndWeights, const std::vector<uint16_t>& _vert_ids) override {
-				assert(vert_ids.size() == boneIndicesAndWeights.size());
+				assert(_vert_ids.size() == _boneIndicesAndWeights.size());
 				std::vector<uint16_t> vert_ids(_vert_ids);
 				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> boneIndicesAndWeights(_boneIndicesAndWeights);
 				while (vert_ids.size() < 16) {

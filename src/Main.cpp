@@ -311,7 +311,38 @@ void pmain() {
 	return;
 }
 
-void main() {
+int main() {
+	std::string json_file = "C:\\repo\\MeshConverter\\physics_data.json";
+	std::string output_file = "C:\\repo\\MeshConverter\\physics_data.bin";
+
+	std::ifstream file(json_file);
+	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+	nlohmann::json jsonData = nlohmann::json::parse(json_data);
+	hkphysics::hkPhysicsDataBuilder builder;
+
+
+	if (!builder.ParseJson(jsonData) || !builder.build_target_finished) {
+		std::cout << "Physics data build failed." << std::endl;
+		return 14; // Return an error code
+	}
+
+	hkphysics::hkReflDataSerializer serializer;
+	serializer.root_level_container = &builder.GetTarget();
+
+	std::ofstream file1(output_file, std::ios::binary);
+	if (!file1.is_open()) {
+		std::cout << "Failed to open output file." << std::endl;
+		return 15; // Return an error code
+	}
+
+	serializer.Serialize(file1);
+	file1.close();
+
+	return 0;
+}
+
+void asdadsmain() {
 	nif::NifIO nif;
 	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_dress_sari_lowerbody_f.nif");
 
