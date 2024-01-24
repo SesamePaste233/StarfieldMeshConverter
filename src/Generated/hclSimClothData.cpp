@@ -164,9 +164,6 @@ bool hktypes::hclSimClothData::CollidablePinchingData::FromInstance(const hkrefl
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->GetValue(pinchDetectionEnabled);
-	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->GetValue(pinchDetectionPriority);
-	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->GetValue(pinchDetectionRadius);
 	return true;
 }
 
@@ -316,9 +313,6 @@ bool hktypes::hclSimClothData::CollidablePinchingData::ToInstance(hkreflex::hkCl
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("pinchDetectionEnabled")->SetValue(pinchDetectionEnabled);
-	class_instance->GetInstanceByFieldName("pinchDetectionPriority")->SetValue(pinchDetectionPriority);
-	class_instance->GetInstanceByFieldName("pinchDetectionRadius")->SetValue(pinchDetectionRadius);
 	return true;
 }
 

@@ -497,6 +497,7 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 void nif::BSClothExtraData::Deserialize(std::istream& file)
 {
 	this->data = new hkphysics::hkReflDataDeserializer();
+#ifndef _DEBUG
 	try {
 		this->data_length = utils::read<uint32_t>(file)[0];
 		assert(this->binary_bytes == this->data_length + 4);
@@ -507,6 +508,12 @@ void nif::BSClothExtraData::Deserialize(std::istream& file)
 		std::cout << "Failed to deserialize BSClothExtraData." << std::endl;
 		std::cout << e.what() << std::endl;
 	}
+#else
+	this->data_length = utils::read<uint32_t>(file)[0];
+	assert(this->binary_bytes == this->data_length + 4);
+	this->data->Deserialize(file, this->data_length);
+	root_level_container = this->data->root_level_container;
+#endif
 }
 
 void nif::BSClothExtraData::Serialize(std::ostream& file)

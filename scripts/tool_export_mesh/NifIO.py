@@ -266,7 +266,7 @@ def ImportNif(file_path, options, context, operator):
 	# Havok skeleton
 	if 'havok_skeleton' in _data.keys():
 		havok_skel = _data['havok_skeleton']
-		skel_coll = bpy.data.collections.new(skel)
+		skel_coll = bpy.data.collections.new("HavokSkeleton")
 		bpy.context.scene.collection.children.link(skel_coll)
 		nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, "hkaSkeleton")
 		best_skel = None

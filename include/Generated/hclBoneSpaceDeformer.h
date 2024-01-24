@@ -95,15 +95,19 @@ namespace hktypes{
 		class TwoBlendEntryBlock : public hkHolderBase {
 		public:
 			using BaseType = void;
+			T[N]<hkUint16, 8> vertexIndices; // Offset: 0
+			T[N]<hkUint16, 16> boneIndices; // Offset: 16
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclBoneSpaceDeformer::TwoBlendEntryBlock"; };
 			inline std::string GetTranscriptId() override { return "hclBoneSpaceDeformer::TwoBlendEntryBlock"; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline uint32_t GethkClassHash() override { return 2640620584; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "vertexIndices", "T[N]<hkUint16, 8>" },
+					{ "boneIndices", "T[N]<hkUint16, 16>" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

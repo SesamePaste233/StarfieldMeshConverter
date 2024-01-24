@@ -5,8 +5,6 @@
 namespace hktypes{
 	class hkReferencedObject;
 	class hkStringPtr;
-	template <typename tT, typename tAllocator>
-	class ;
 	class hkBool;
 	template <typename tT, typename tAllocator>
 	class ;
@@ -26,6 +24,8 @@ namespace hktypes{
 	class ;
 	class hkVector4;
 	class hclVirtualCollisionPointsData;
+	template <typename tT, typename tAllocator>
+	class ;
 	template <typename tT, typename tAllocator>
 	class ;
 	template <typename tT, typename tAllocator>
@@ -180,21 +180,15 @@ namespace hktypes{
 		class CollidablePinchingData : public hkHolderBase {
 		public:
 			using BaseType = void;
-			hkBool pinchDetectionEnabled; // Offset: 0
-			hkInt8 pinchDetectionPriority; // Offset: 1
-			hkReal pinchDetectionRadius; // Offset: 4
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclSimClothData::CollidablePinchingData"; };
 			inline std::string GetTranscriptId() override { return "hclSimClothData::CollidablePinchingData"; };
-			inline uint32_t GethkClassHash() override { return 3233440473; };
+			inline uint32_t GethkClassHash() override { return 0; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
-					{ "pinchDetectionEnabled", "hkBool" },
-					{ "pinchDetectionPriority", "hkInt8" },
-					{ "pinchDetectionRadius", "hkReal" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

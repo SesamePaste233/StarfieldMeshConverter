@@ -311,7 +311,7 @@ void pmain() {
 	return;
 }
 
-int main() {
+int phymain() {
 	std::string json_file = "C:\\repo\\MeshConverter\\physics_data.json";
 	std::string output_file = "C:\\repo\\MeshConverter\\physics_data.bin";
 
@@ -342,9 +342,9 @@ int main() {
 	return 0;
 }
 
-void asdadsmain() {
+void main() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_dress_sari_lowerbody_f.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\shaggy_f.nif");
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -369,7 +369,7 @@ void asdadsmain() {
 	}
 
 	auto instances = data->root_level_instance->dump();
-	std::ofstream file_i("C:\\repo\\MeshConverter\\outfit_dress_sari_lowerbody_f.txt");
+	std::ofstream file_i("C:\\repo\\MeshConverter\\shaggy_f.txt");
 	file_i << instances;
 	file_i.close();
 

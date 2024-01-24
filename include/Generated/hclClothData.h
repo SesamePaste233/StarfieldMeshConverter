@@ -4,6 +4,8 @@
 
 namespace hktypes{
 	class hkReferencedObject;
+	template <typename tT, typename tAllocator>
+	class ;
 	class hkStringPtr;
 	template <typename tT, typename tAllocator>
 	class ;
@@ -13,14 +15,12 @@ namespace hktypes{
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	template <typename tT, typename tAllocator>
-	class ;
-	template <typename tT, typename tAllocator>
-	class ;
-	template <typename tT, typename tAllocator>
-	class ;
 	class hkBool;
+	template <typename tT, typename tAllocator>
+	class ;
 	template <typename tENUM, typename tSTORAGE>
+	class ;
+	template <typename tT, typename tAllocator>
 	class ;
 
 	class hclClothData : public hkReferencedObject {
