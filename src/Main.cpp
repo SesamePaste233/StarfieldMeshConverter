@@ -195,6 +195,39 @@ int blenderToMorph(int argc, char* argv[]) {
 //	return 0; // Return success
 //}
 
+void main() {
+	nif::NifIO nif;
+	std::string input_file("C:\\repo\\MeshConverter\\shaggy_f.nif");
+
+	if (!nif.Deserialize(input_file)) {
+		std::cerr << "Failed to load nif from " << input_file << std::endl;
+		return;
+	}
+
+	auto t_ptr = nif.ToTemplate<nif::ni_template::NiSkinInstanceTemplate>();
+
+	if (t_ptr == nullptr) {
+		std::cerr << "Failed to convert nif to template" << std::endl;
+		return;
+	}
+	else {
+		std::cout << "Nif converted to template RTTI: " << (uint32_t)t_ptr->GetRTTI() << std::endl;
+	}
+
+	/*if (t_ptr->GetRTTI() == nif::ni_template::RTTI::NiArmature) {
+		dynamic_cast<nif::ni_template::NiArmatureTemplate*>(t_ptr)->skeleton_mode = true;
+	}*/
+
+	auto jsondata = t_ptr->Serialize();
+
+	jsondata["TEMPLATE_RTTI"] = (uint32_t)t_ptr->GetRTTI();
+
+	std::cout << "Nif serialized to json" << std::endl;
+
+
+	return;
+}
+
 void __main() {
 	// Recursively get all filepaths with .dat extension from the directory
 	std::vector<std::string> filepaths;
@@ -342,10 +375,10 @@ int phymain() {
 	return 0;
 }
 
-void main() {
+void phnifmain() {
 	nif::NifIO nif;
 	nif.Deserialize("C:\\repo\\MeshConverter\\shaggy_f.nif");
-
+	
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
 		std::ofstream file("C:\\repo\\MeshConverter\\profiler\\" + profiler->GetRTTIName() + "_" + std::to_string(i++) + ".bin");

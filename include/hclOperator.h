@@ -492,7 +492,6 @@ namespace hktypes {
 		class OneBlendEntryBlock : public hkHolderBase, public EntryBlockBase {
 		public:
 			using BaseType = void;
-			uint16_t vertexIndices[16];	// Offset: 0 Unk: 0
 			uint16_t boneIndices[16];	// Offset: 32 Unk: 0
 
 			// Extra

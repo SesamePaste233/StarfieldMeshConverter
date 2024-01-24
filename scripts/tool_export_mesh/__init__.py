@@ -210,7 +210,7 @@ class ImportCustomNif(bpy.types.Operator):
 	debug_havok_physics: bpy.props.BoolProperty(
 		name="Visualize Havok Cloth Sim Data",
 		description="Reinterpret Havok Cloth Sim Data as mesh objects and capsules.",
-		default=True
+		default=False
 	)
 
 	import_as_read_only: bpy.props.BoolProperty(

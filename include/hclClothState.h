@@ -86,6 +86,7 @@ namespace hktypes {
 				auto& record = perComponentTransformTrackers[component_index].written;
 				record |= hkBitField(accessed_ids_32, record.GetNumBits());
 			}
+			return true;
 		};
 	};
 

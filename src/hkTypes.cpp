@@ -492,7 +492,7 @@ hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromObjectSpaceSkinPNO
 	blocks.push_back(utils::make_references<_block_t*>(deformer.twoBlendEntries));
 	blocks.push_back(utils::make_references<_block_t*>(deformer.oneBlendEntries));
 
-	blocks.erase(std::remove_if(blocks.begin(), blocks.end(), [](auto& block) {return block.empty(); }), blocks.end());
+	//blocks.erase(std::remove_if(blocks.begin(), blocks.end(), [](auto& block) {return block.empty(); }), blocks.end());
 
 	std::vector<uint8_t> control_bytes = deformer.controlBytes;
 
@@ -516,14 +516,14 @@ hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromObjectSpaceSkinPNO
 	// TODO: there could be another indexing scheme for control bytes
 	// four: 4 (index 0)
 	// three: 2 (index 1)
-	// two: 0 (index 2 or null)
-	// one: 1 (index 3 or 2)
-	// control_bytes: 0,0,0,0,1,1,3 (whereas currently: 0,0,0,0,1,1,2)
+	// two: 0 (index 2)
+	// one: 1 (index 3)
+	// control_bytes: 0,0,0,0,1,1,3
 	for (int i = 0; i < PNs.size(); ++i) {
 		auto& localPositions = PNs[i].localPosition;
 		auto& localNormals = PNs[i].localNormal;
 
-		auto& vert_id_block = vert_ids[control_bytes[i]];
+		auto& vert_id_block = vert_ids[control_bytes[i] + 4];
 		auto& vert_id_list = vert_id_block.front();
 		vert_id_block.pop();
 
@@ -746,7 +746,7 @@ nlohmann::json hktypes::hclBufferedMeshObj::ToJson()
 	return ret;
 }
 
-hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromJson(nlohmann::json& json)
+hktypes::hclBufferedMeshObj hktypes::hclBufferedMeshObj::FromJson(nlohmann::json& json)
 {
 	this->name = json["name"];
 
@@ -815,4 +815,5 @@ hktypes::hclBufferedMeshObj& hktypes::hclBufferedMeshObj::FromJson(nlohmann::jso
 			this->extraShapes.push_back(extra_shape);
 		}
 	}
+	return *this;
 }

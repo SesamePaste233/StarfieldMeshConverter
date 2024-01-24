@@ -644,17 +644,15 @@ hktypes::hclObjectSpaceDeformer hktypes::DeformerFromWeights(const std::vector<s
 	// TODO: there could be another indexing scheme for control bytes
 	// four: 4 (index 0)
 	// three: 2 (index 1)
-	// two: 0 (index 2 or null)
-	// one: 1 (index 3 or 2)
-	// control_bytes: 0,0,0,0,1,1,3 (whereas currently: 0,0,0,0,1,1,2)
-	for (int i = 7, j = 0; i > 0; --i) {
+	// two: 0 (index 2)
+	// one: 1 (index 3)
+	// control_bytes: 0,0,0,0,1,1,3
+	for (uint8_t i = 7, j = -4; i > 0; --i) {
 		int num_entries = entry_vert_ids[i].size() % 16 > 0 ? entry_vert_ids[i].size() / 16 + 1 : entry_vert_ids[i].size() / 16;
 		for (int k = 0; k < num_entries; ++k) {
 			deformer.controlBytes.push_back(j);
 		}
-		if (num_entries > 0) {
-			j++;
-		}
+		j++;
 	}
 
 	return deformer;

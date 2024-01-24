@@ -264,7 +264,7 @@ def ImportNif(file_path, options, context, operator):
 	print(best_skel, obj_list)
 
 	# Havok skeleton
-	if 'havok_skeleton' in _data.keys():
+	if options.debug_havok_physics and'havok_skeleton' in _data.keys():
 		havok_skel = _data['havok_skeleton']
 		skel_coll = bpy.data.collections.new("HavokSkeleton")
 		bpy.context.scene.collection.children.link(skel_coll)
