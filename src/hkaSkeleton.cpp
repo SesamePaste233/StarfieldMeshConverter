@@ -96,6 +96,7 @@ hktypes::hkQsTransformf hktypes::hkQsTransformf::fromInverse(hkQsTransformf& a)
 	Eigen::Vector4f inv_t = -a.translation;
 	result.translation = getRotatedDir(inv_t, result.rotation);
 	result.scale = a.scale.cwiseInverse();
+	result.scale.w() = 0;
 	return result;
 }
 
@@ -159,6 +160,7 @@ void hktypes::hkaBoneHolder::SetWorldTransform(hkQsTransformf& transform, bool u
 		}
 		else {
 			this->transform = this->world_transform;
+			this->transform.scale.w() = 1.0f;
 		}
 	}
 }
@@ -297,7 +299,7 @@ void hktypes::hkaSkeleton::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
 {
 	bool calc_num_bones = false;
 	if (bone == nullptr) {
-		this->name == "Root";
+		this->name = "Root";
 		this->root = new hkaBoneHolder();
 		bone = this->root;
 		calc_num_bones = true;
@@ -322,6 +324,7 @@ void hktypes::hkaSkeleton::FromJson(nlohmann::json& json, hkaBoneHolder* bone)
 	for (auto child : json["children"]) {
 		auto child_bone = new hkaBoneHolder();
 		bone->children.push_back(child_bone);
+		child_bone->parent = bone;
 		this->FromJson(child, child_bone);
 	}
 

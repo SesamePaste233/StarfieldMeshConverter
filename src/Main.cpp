@@ -195,7 +195,7 @@ int blenderToMorph(int argc, char* argv[]) {
 //	return 0; // Return success
 //}
 
-void main() {
+void importnif_main() {
 	nif::NifIO nif;
 	std::string input_file("C:\\repo\\MeshConverter\\shaggy_f.nif");
 
@@ -344,7 +344,7 @@ void pmain() {
 	return;
 }
 
-int phymain() {
+int main() {
 	std::string json_file = "C:\\repo\\MeshConverter\\physics_data.json";
 	std::string output_file = "C:\\repo\\MeshConverter\\physics_data.bin";
 
@@ -371,6 +371,27 @@ int phymain() {
 
 	serializer.Serialize(file1);
 	file1.close();
+
+	hkphysics::hkReflDataDeserializer deserializer;
+
+	std::ifstream file2(output_file, std::ios::binary);
+	if (!file2.is_open()) {
+		std::cout << "Failed to open output file." << std::endl;
+		return 16; // Return an error code
+	}
+
+	size_t data_size = utils::read<uint32_t>(file2, 1, true)[0];
+	file2.seekg(0, std::ios::beg);
+	deserializer.Deserialize(file2, data_size);
+	file2.close();
+
+	deserializer.root_level_instance->assert_equals(serializer.root_level_instance);
+
+	auto instance_str = deserializer.root_level_instance->dump();
+
+	std::ofstream file3("C:\\repo\\MeshConverter\\physics_data.txt");
+	file3 << instance_str;
+	file3.close();
 
 	return 0;
 }

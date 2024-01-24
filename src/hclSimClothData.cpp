@@ -772,7 +772,7 @@ void hktypes::hclStandardLinkConstraintSetMx::AddDefaultLink(hclSimClothData* cl
 	}
 	else if (is_B_fixed) {
 		stiffnessA = stiffness;
-		stiffnessB = 0;
+		stiffnessB = -0;
 	}
 	AddLinkImpl(particleA, particleB, stiffnessA, stiffnessB, restLength);
 }

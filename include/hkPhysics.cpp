@@ -85,6 +85,7 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 				return false;
 			}
 			bone_id_map[bone_id] = skeleton_bone_id;
+			++bone_id;
 		}
 
 
@@ -138,6 +139,8 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 				return false;
 			}
 		}
+
+		this->hcl_sim_cloth_data->Finalize();
 
 		hktypes::hclObjectSpaceSkinPNOperator* skin_operator = hktypes::AllocateObjectSpaceSkinPNOperator(
 			this->hka_skeleton, 
@@ -323,6 +326,7 @@ void hkphysics::hkPhysicsDataBuilder::AddSimClothCollisionMesh(hktypes::hclBuffe
 		hcl_sim_cloth_data->collidableTransformMap.transformSetIndex = 0;
 		hcl_sim_cloth_data->collidableTransformMap.transformIndices.push_back(bone_id);
 		hcl_sim_cloth_data->collidableTransformMap.offsets.push_back(hktypes::hkMatrix4Holder());
+		hcl_sim_cloth_data->collidablePinchingDatas.push_back(hktypes::hclSimClothData::CollidablePinchingData());
 	}
 	else {
 		std::cout << "Warning: Invalid mesh for collision" << std::endl;

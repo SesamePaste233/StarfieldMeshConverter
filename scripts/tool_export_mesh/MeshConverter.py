@@ -30,7 +30,7 @@ _dll_import_morph.argtypes = [ctypes.c_char_p]
 _dll_import_morph.restype = ctypes.c_char_p
 
 _dll_compose_physics_data = _dll.ComposePhysicsData
-_dll_compose_physics_data.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_char_p]
+_dll_compose_physics_data.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
 
 from enum import Enum
 
@@ -122,7 +122,7 @@ def CreateNifFromJson(json_data_string: str, output_file: str, assets_folder_pat
 def ImportNifAsJson(input_file: str) -> str:
     return _dll_import_nif(input_file.encode('utf-8')).decode('utf-8')
 
-def ComposePhysicsDataFromJson(json_data_string: str, platform: Platform, output_binary_path: str) -> DLLReturnCode:
+def ComposePhysicsDataFromJson(json_data_string: str, platform: Platform, output_binary_path: str, export_readable: bool = False) -> DLLReturnCode:
     transcript_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Assets', 'hkTypeTranscript', 'hkTypeTranscript.json'))
-    rtn = _dll_compose_physics_data(json_data_string.encode('utf-8'), int(platform.value), transcript_path.encode('utf-8'), output_binary_path.encode('utf-8'))
+    rtn = _dll_compose_physics_data(json_data_string.encode('utf-8'), int(platform.value), transcript_path.encode('utf-8'), output_binary_path.encode('utf-8'), export_readable)
     return DLLReturnCode(rtn)

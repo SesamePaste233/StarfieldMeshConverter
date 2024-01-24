@@ -829,9 +829,9 @@ namespace hktypes {
 		class CollidablePinchingData : public hkHolderBase {
 		public:
 			using BaseType = void;
-			bool pinchDetectionEnabled; // Offset: 0
-			int8_t pinchDetectionPriority; // Offset: 1
-			float pinchDetectionRadius; // Offset: 4
+			bool pinchDetectionEnabled = false; // Offset: 0
+			int8_t pinchDetectionPriority = 0; // Offset: 1
+			float pinchDetectionRadius = 0.01f; // Offset: 4
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;

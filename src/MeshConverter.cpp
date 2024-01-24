@@ -187,7 +187,7 @@ const char* ImportNif(const char* input_file)
 	return utils::make_copy(jsondata.dump());
 }
 
-uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char* transcript_path, const char* output_file)
+uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char* transcript_path, const char* output_file, bool export_readable)
 {
 	nlohmann::json jsonData = nlohmann::json::parse(json_data);
 
@@ -216,6 +216,14 @@ uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char
 
 	serializer.Serialize(file);
 	file.close();
+
+	if (export_readable) {
+		auto root_lvl_instance = serializer.root_level_instance;
+		auto instances = root_lvl_instance->dump();
+		std::ofstream file_i(std::string(output_file) + "_debug.txt");
+		file_i << instances;
+		file_i.close();
+	}
 
 	return 0;
 }

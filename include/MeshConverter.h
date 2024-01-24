@@ -33,5 +33,5 @@ extern "C" {
 
 	DLL const char* ImportNif(const char* input_file);
 
-	DLL uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char* transcript_path, const char* output_file);
+	DLL uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char* transcript_path, const char* output_file, bool export_readable);
 }
