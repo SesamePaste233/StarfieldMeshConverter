@@ -35,7 +35,12 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 
 		json_data = json.dumps(data_dict)
 
-		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, output_file, True)
+        # Save the physics data to a json file
+		#physics_data_path = os.path.join(os.path.dirname(output_file), 'physics_data.json')
+		#with open(physics_data_path, 'w') as f:
+		#	json.dump(data_dict, f)
+
+		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, output_file, False)
 
 		if not rtn:
 			self.report({'ERROR'}, f"Failed to compose physics data. Error message: \"{rtn.what()}\".")

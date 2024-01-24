@@ -96,10 +96,6 @@ def get_physics_data(out_nodes: list[bpy.types.Node], tree: bpy.types.NodeTree):
             'used_indices': used_indices,
         }
 
-        # Save the physics data to a json file
-        #physics_data_path = os.path.join(utils.export_mesh_folder_path, 'physics_data.json')
-        #with open(physics_data_path, 'w') as f:
-        #    json.dump(physics_data, f)
 
         return physics_data
     

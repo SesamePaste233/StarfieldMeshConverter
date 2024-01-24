@@ -1125,17 +1125,14 @@ std::string hkreflex::hkClassPointerInstance::dump(int indent)
 	}
 
 	std::string ret = "<ptr_ref> " + std::to_string(in_document_ptr) + " => " + type->sub_type->type_name + ": {\n";
-	if (in_document_ptr != 0) {
-		if (in_document_ptr > ref_context->indexed_blocks.size()) {
-			ret += indent_str + "\t// Error: Out of bounds\n";
-		}
-		else if(this->ptr_instance) {
-			ret += indent_str + "\t" + this->ptr_instance->dump(indent + 1) + "\n";
-		}
-		else {
-			ret += indent_str + "\t// Error: Null pointer\n";
-		}
+	
+	if (this->ptr_instance) {
+		ret += indent_str + "\t" + this->ptr_instance->dump(indent + 1) + "\n";
 	}
+	else {
+		ret += indent_str + "\t// Error: Null pointer\n";
+	}
+
 	ret += indent_str + "}";
 	return ret;
 }

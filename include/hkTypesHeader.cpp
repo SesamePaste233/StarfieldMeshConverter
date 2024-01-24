@@ -289,7 +289,7 @@ hktypes::hclTransformSetUsage hktypes::CollectTransformSetUsage(hclSimClothData*
 		static_bone_ids.push_back(sim_cloth_data->transferMotionData.transformIndex);
 	}
 	out.AddUsage(0, hclTransformSetUsage::UF_Read | hclTransformSetUsage::UF_ReadBeforeWrite, static_bone_ids);
-
+	
 	std::vector<uint32_t> constraint_bone_ids;
 	for (auto& constraint : sim_cloth_data->staticConstraintSets) {
 		constraint->CollectBoneUsage(constraint_bone_ids);
