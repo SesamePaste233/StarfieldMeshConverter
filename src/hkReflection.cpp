@@ -1815,6 +1815,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		return ret;
 	}
 	else if (element_type->type_name == "float" && type->size == 16) {
+		this->update_view();
 		std::string ret = "[";
 		for (int i = 0; i < 3; i++) {
 			ret += std::to_string(float_array[i]) + ", ";
@@ -1823,6 +1824,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		return ret;
 	}
 	else if (element_type->type_name == "float" && type->size == 64) {
+		this->update_view();
 		std::string ret = c_type + "{\n";
 		for (int j = 0; j < 4; j++) {
 			ret += indent_str + "\t";
@@ -1834,6 +1836,7 @@ std::string hkreflex::hkClassArrayInstance::dump(int indent)
 		return ret + indent_str + "}";
 	}
 	else if (element_type->type_name == "float" && type->size == 48) {
+		this->update_view();
 		std::string ret = c_type + "{\n";
 		for (int j = 0; j < 3; j++) {
 			ret += indent_str + "\t";

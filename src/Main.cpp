@@ -344,9 +344,9 @@ void pmain() {
 	return;
 }
 
-int main() {
-	std::string json_file = "C:\\repo\\MeshConverter\\physics_data.json";
-	std::string output_file = "C:\\repo\\MeshConverter\\physics_data.bin";
+int asdmain() {
+	std::string json_file = "C:\\repo\\MeshConverter\\physics_data_debug.json";
+	std::string output_file = "C:\\repo\\MeshConverter\\physics_data_debug.bin";
 
 	std::ifstream file(json_file);
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -406,7 +406,7 @@ void phnifmain() {
 		profiler->dump(file);
 	});
 
-	auto data = dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->GetDataDeserializer();
+	auto data = &dynamic_cast<nif::BSClothExtraData*>(nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData)[0])->GetDataDeserializer();
 
 	auto updated_transcript = data->RegisterClassesToTranscriptor();
 
@@ -456,12 +456,12 @@ void phnifmain() {
 	//}
 }
 
-int asdmain() {
+int main() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\skeleton.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\SpaceSuit_Recon_LowerBody_01_F_0_LOD_1.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

@@ -12,12 +12,16 @@ class TwoStatePhysicsDataNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_label = 'Two State Physics Data'
 
     def init(self, context):
+        super().init(context)
         self.inputs.new('hclSimClothDataType', 'Cloth Data')
         self.inputs.new('NodeSocketGeometry', 'Simulation Mesh')
         self.inputs.new('SimulationBonesType', 'Physics Bones')
         self.outputs.new('hclPhysicsDataType', 'Physics Data')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if not self.inputs['Cloth Data'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Cloth Data linked")

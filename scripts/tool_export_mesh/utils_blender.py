@@ -524,7 +524,7 @@ def RevertRenamingBone(name:str):
 def RevertRenamingBoneList(names:list):
 	return [RevertRenamingBone(name) for name in names]
 
-def BuildhkBufferedMesh(mesh:dict):
+def BuildhkBufferedMesh(mesh: dict, hkaSkeleton_obj: bpy.types.Object):
 	mesh_objs = []
 	mesh_type = mesh['type']
 	name = mesh['name']
@@ -544,20 +544,27 @@ def BuildhkBufferedMesh(mesh:dict):
 		positions = mesh['positions']
 		normals = mesh['normals']
 		triangles = mesh['triangleIndices']
-		boneWeights = mesh['boneWeights']
+		boneWeights = utils.TransformWeightData(mesh['boneWeights'], do_normalize=True)
 		bl_mesh = bpy.data.meshes.new(name = name)
 		bl_mesh.from_pydata(positions, [], triangles)
 		mesh_obj = bpy.data.objects.new(name, bl_mesh)
 		bpy.context.scene.collection.objects.link(mesh_obj)
 		mesh_obj.matrix_world = T
-		vis_obj = VisualizeVectors(bl_mesh, [], normals, name = name + '_normals')
+
+		for b_id, b_entry in boneWeights.items():
+			vg = mesh_obj.vertex_groups.new(name = hkaSkeleton_obj.data.bones[b_id].name)
+			for v_id, weight in b_entry:
+				vg.add([v_id], weight, 'REPLACE')
+
+
+		vis_obj = VisualizeVectors(bl_mesh, [], normals, 'normals')
 		mesh_objs.append(mesh_obj)
 		mesh_objs.append(vis_obj)
 
 
 	if 'extraShapes' in mesh.keys():
 		for sub_mesh in mesh['extraShapes']:
-			mesh_objs.extend(BuildhkBufferedMesh(sub_mesh))
+			mesh_objs.extend(BuildhkBufferedMesh(sub_mesh, hkaSkeleton_obj))
 
 	return mesh_objs
 
@@ -881,3 +888,21 @@ def GethclLocalBoneTransforms(tri_mesh: bpy.types.Object, armature_obj: bpy.type
 		results.append(np_T)
 
 	return results
+
+def is_plugin_debug_mode() -> bool:
+	return bpy.context.scene.sgb_debug_mode == True
+
+def TransferWeightByDistance(target_obj: bpy.types.Object, reference_obj: bpy.types.Object):
+	if target_obj == None or reference_obj == None:
+		return
+	for r_vg in reference_obj.vertex_groups:
+		if r_vg.name not in target_obj.vertex_groups:
+			target_obj.vertex_groups.new(name = r_vg.name)
+	original_active = SetActiveObject(target_obj)
+	modifier = target_obj.modifiers.new(name = 'WeightTransfer', type='DATA_TRANSFER')
+	modifier.object = reference_obj
+	modifier.use_vert_data = True
+	modifier.data_types_verts = {'VGROUP_WEIGHTS'}
+	bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+	SetActiveObject(original_active)

@@ -6,7 +6,9 @@ import nif_armature
 import utils_blender
 import utils_common as utils
 
-def get_physics_data(out_nodes: list[bpy.types.Node], tree: bpy.types.NodeTree):
+def get_physics_data(tree: bpy.types.NodeTree):
+    out_nodes: list[bpy.types.Node] = tree.get_output_nodes()
+    
     if tree.bl_idname != 'hclPhysicsTreeType':
         return None
 

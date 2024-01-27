@@ -10,6 +10,7 @@ import nif_armature
 import nif_template
 import utils_common as utils
 import MeshConverter
+import PhysicsConverter
 
 skeleton_obj_dict = {}
 
@@ -268,7 +269,7 @@ def ImportNif(file_path, options, context, operator):
 		havok_skel = _data['havok_skeleton']
 		skel_coll = bpy.data.collections.new("HavokSkeleton")
 		bpy.context.scene.collection.children.link(skel_coll)
-		nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, "hkaSkeleton")
+		hkaSkele = nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, "hkaSkeleton")
 		best_skel = None
 		obj_list = []
 		
@@ -276,14 +277,24 @@ def ImportNif(file_path, options, context, operator):
 		#with open(utils.export_mesh_folder_path + '/hkaSkeletonDebug.json', 'w') as json_file:
 		#	json.dump(_data['havok_skeleton'], json_file, indent = 4)
 
-	if options.debug_havok_physics and 'havok_meshes' in _data.keys():
-		havok_meshes = _data['havok_meshes']
-		havok_vis_objs = []
-		for mesh in havok_meshes:
-			havok_vis_objs.extend(utils_blender.BuildhkBufferedMesh(mesh))
+		if options.debug_havok_physics and 'havok_meshes' in _data.keys():
+			havok_meshes = _data['havok_meshes']
+			havok_vis_objs = []
+			for mesh in havok_meshes:
+				havok_vis_objs.extend(utils_blender.BuildhkBufferedMesh(mesh, hkaSkele))
+			havok_vis_objs = [obj for obj in havok_vis_objs if obj != None]
+			sim_mesh_obj = None
+			pn_operator = None
+			for vis_obj in havok_vis_objs:
+				if vis_obj.name.find('hclSimClothData') != -1:
+					sim_mesh_obj = vis_obj
+				elif vis_obj.name.find('SkinPNOperator') != -1:
+					pn_operator = vis_obj
+			
+			utils_blender.TransferWeightByDistance(sim_mesh_obj, pn_operator)
 
-		hk_coll = utils_blender.new_collection("HavokPhysics")
-		utils_blender.move_object_to_collection(havok_vis_objs, hk_coll)
+			hk_coll = utils_blender.new_collection("HavokPhysics")
+			utils_blender.move_object_to_collection(havok_vis_objs, hk_coll)
 
 
 	return {'FINISHED'}, best_skel, obj_list
@@ -445,12 +456,19 @@ def ExportNif(options, context, operator):
 			cp['parent_name'] = ''
 
 	_data['connection_points_p'] = connect_pts
+
+	if options.physics_tree != "None" and options.physics_tree in bpy.data.node_groups:
+		physics_data = PhysicsConverter.get_physics_data(bpy.data.node_groups[options.physics_tree])
+		if physics_data != None:
+			_data['physics_data'] = physics_data
+			_data['transcript_path'] = MeshConverter.GetTranscriptPath()
 	#print(_data)
 	json_data = json.dumps(_data)
 
 	# Write the JSON data to a file
-	#with open(nif_filepath + '.json', 'w') as json_file:
-	#	json_file.write(json_data)
+	if utils_blender.is_plugin_debug_mode():
+		with open(nif_filepath + '.json', 'w') as json_file:
+			json_file.write(json_data)
 
 	returncode = MeshConverter.CreateNifFromJson(json_data, nif_filepath, export_folder)
 

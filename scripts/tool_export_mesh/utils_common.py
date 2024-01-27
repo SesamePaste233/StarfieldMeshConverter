@@ -217,3 +217,24 @@ def FlattenDictToList(dictionary: dict, index_type = int, replace_none = False, 
 		return [dictionary[index_type(i)] if index_type(i) in dictionary else replace_none_with for i in range(max_id + 1)]
 	else:
 		return [dictionary[index_type(i)] for i in range(max_id + 1) if index_type(i) in dictionary]
+	
+def TransformWeightData(weight_data: list[list[list]], do_normalize = False) -> dict[list[list]]:
+	'''
+	weight_data: [index: [entry: [bone_index, weight]]]
+	transform to
+	weight_data: {bone_index: [entry: [index, weight]]}
+	'''
+	output = {}
+	for index in range(len(weight_data)):
+		if do_normalize:
+			total_weight = sum([entry[1] for entry in weight_data[index]])
+			weight_data[index] = [[entry[0], entry[1] / total_weight] for entry in weight_data[index] if entry[1] > 0]
+		for entry in weight_data[index]:
+			if entry[0] not in output:
+				output[entry[0]] = []
+			output[entry[0]].append([index, entry[1]])
+		
+	return output
+
+
+			

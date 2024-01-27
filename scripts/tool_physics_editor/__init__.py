@@ -6,6 +6,8 @@ dir = os.path.dirname(os.path.realpath(__file__))
 if dir not in sys.path:
 	sys.path.append(dir)
 
+from version import __plugin_version__, Version
+
 import PhysicsEditor.AttrOperator as AttrOperator
 import PhysicsEditor.PhysicsTree as PhysicsTree
 
@@ -18,6 +20,8 @@ bl_info = {
 	"warning": "",
 	"category": "Import-Export",
 	}
+
+__plugin_version__ = Version(bl_info['version'])
 
 def register():
 	bpy.types.Scene.sf_physics_editor_version = bpy.props.StringProperty(

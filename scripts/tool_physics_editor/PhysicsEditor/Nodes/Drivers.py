@@ -15,11 +15,15 @@ class SimpleTriangleBoneDriverNode(NodeBase.hclPhysicsNodeBase, Node):
     mode_enum_prop: bpy.props.EnumProperty(name='Mode', items=[('FACE', 'Face Center', 'Drive physics bones with the triangle of the closest face center from simulation mesh'), ('EDGE','Avg. Edge Distance','Drive physics bones with the triangle with the minimun average edge distance to the bone from simulation mesh')], default='EDGE')
 
     def init(self, context):
+        super().init(context)
         self.inputs.new('hkaBoneType', 'Bones')
         self.inputs.new('NodeSocketGeometry', 'Simulation Mesh')
         self.outputs.new('SimulationBonesType', 'Physics Bones')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if not self.inputs['Bones'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Bones linked")

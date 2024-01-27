@@ -1,4 +1,6 @@
 import bpy
+from version import __plugin_version__, make_version, Version
+from PhysicsEditor.NodeVersions import get_node_version
 
 import PhysicsEditor.Utilities.utils_node as utils_node
 
@@ -7,11 +9,19 @@ global_vis_meshes = {}
 def move_object_to_collection(objs, coll):
 	for obj in objs:
 		if obj != None:
-			old_colls = [c for c in obj.users_collection]
-			for c in old_colls:
-				if c != None:
-					c.objects.unlink(obj)
-			coll.objects.link(obj)
+			if isinstance(obj, bpy.types.Object):
+				old_colls = [c for c in obj.users_collection]
+				for c in old_colls:
+					if c != None:
+						c.objects.unlink(obj)
+				coll.objects.link(obj)
+			elif isinstance(obj, list):
+				for o in obj:
+					old_colls = [c for c in o.users_collection]
+					for c in old_colls:
+						if c != None:
+							c.objects.unlink(o)
+					coll.objects.link(o)
 
 def new_collection(name, do_link = True):
 	coll = bpy.data.collections.new(name)
@@ -85,10 +95,19 @@ def find_vis_meshes(who: bpy.types.Node):
         return None
 
 class hclPhysicsNodeBase:
+    instance_version: bpy.props.StringProperty(name='Version', default=Version((1,0,0)).as_str(), options={'HIDDEN'})
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'hclPhysicsTreeType'
     
+    # Called on init for every node
+    def update_version(self):
+        self.instance_version = get_node_version(self.bl_idname).as_str()
+
+    def init(self, context):
+        self.update_version()
+
     def backward_vis_mesh(self, draw_only_valid = True) -> tuple[list[bpy.types.Object], utils_node.NodeValidityReturn]: 
         print(f"called {self.bl_idname}")
 
@@ -147,7 +166,10 @@ class hclPhysicsNodeBase:
     
     # Override this function to check if the node is valid
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        if make_version(self.instance_version) != get_node_version(self.bl_idname):
+            return utils_node.NodeValidityReturn(False, self, "Version mismatch! Delete and recreate this node.")
         return utils_node.NodeValidityReturn(True, self)
+        
     
     # Override this function to get the output of a socket
     def get_socket_output(self, socket_name:str):
@@ -191,12 +213,13 @@ class ViewerOutputNodeBase(hclPhysicsNodeBase, bpy.types.Node):
     bl_label = "Viewer Output"
 
     def init(self, context):
+        super().init(context)
         viewer_skt = self.inputs.new('VersitileSocket', "Any")
         viewer_skt.link_limit = 8
         viewer_skt.display_shape = 'DIAMOND'
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
-        return utils_node.NodeValidityReturn(True, self)
+        return super().check_valid()
 
     def free(self):
         clear_vis_meshes()
@@ -224,9 +247,14 @@ class OutputNodeBase(hclPhysicsNodeBase, bpy.types.Node):
     error_msg: bpy.props.StringProperty(name='Error Message', default='')
         
     def init(self, context):
+        super().init(context)
         self.inputs.new('hclPhysicsDataType', "Physics Data")
     
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
+
         if not self.inputs['Physics Data'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Physics Data linked")
         
@@ -277,9 +305,9 @@ class OutputNodeBase(hclPhysicsNodeBase, bpy.types.Node):
         for line in lines:
             box.label(text=line)
 
-        layout.label(text="Export Folder:")
-        layout.prop(context.scene, "physics_file_path", text="")
-        layout.operator('object.physics_data_export', text='Export Physics Data', icon='EXPORT')
+        #layout.label(text="Export Folder:")
+        #layout.prop(context.scene, "physics_file_path", text="")
+        #layout.operator('object.physics_data_export', text='To Portable File', icon='EXPORT')
 
 class SkeletonInputNodeBase(hclPhysicsNodeBase, hclSingletonNodeBase, bpy.types.Node):
     '''Input Skeleton for Particles and Colliders. A graph share the same skeleton.'''
@@ -288,9 +316,13 @@ class SkeletonInputNodeBase(hclPhysicsNodeBase, hclSingletonNodeBase, bpy.types.
     bl_label = "Skeleton Input"
 
     def init(self, context):
+        super().init(context)
         self.outputs.new('hkaSkeletonType', "hkaSkeleton")
         
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         # find skeleton, if not found, return false
         if self.id_data.skeleton is None or self.id_data.skeleton.type != 'ARMATURE' or self.id_data.skeleton.data is None:
             return utils_node.NodeValidityReturn(False, self, "No Skeleton input")
@@ -310,9 +342,13 @@ class MeshInputNodeBase(hclPhysicsNodeBase, hclSingletonNodeBase, bpy.types.Node
     bl_label = "Simulation Mesh Input"
 
     def init(self, context):
+        super().init(context)
         self.outputs.new('NodeSocketGeometry', "Simulation Mesh")
         
     def check_valid(self)-> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         # find mesh, if not found, return false
         if self.id_data.mesh is None or self.id_data.mesh.type != 'MESH' or self.id_data.mesh.data is None:
             return utils_node.NodeValidityReturn(False, self, "No Mesh input")

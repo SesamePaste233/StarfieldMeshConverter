@@ -17,57 +17,6 @@ bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream, s
 	const uint8_t* _file_buffer = utils::readBytes(data_stream, data_size);
 
 	return Deserialize(_file_buffer, data_size);
-
-	//utils::DataAccessor _accessor = utils::DataAccessor::Create(_file_buffer, this->data_size, true);
-
-	//hkDataChunkTAG0* chunk = new hkDataChunkTAG0(this);
-
-	//chunk->SetBuffer(_accessor.make_reference());
-
-	//size_t cur_pos = 0;
-	//uint32_t sizeAndFlags = utils::readFromAccessor<uint32_t>(_accessor, cur_pos, true); // Size and flags
-	//chunk->chunk_decorator = sizeAndFlags >> 24; // Decorator
-	//chunk->data_size = sizeAndFlags & 0x00FFFFFF; // Data size
-
-	//std::string type_name = utils::readStringFromAccessor(_accessor, cur_pos, 4); // Type name
-	//chunk->SetName(type_name);
-
-	//chunk->DistributeAndDecode();
-
-	//chunk->Traverse([this](hkDataChunkBase* chunk) {
-	//	this->data_chunks[chunk->GetType()] = chunk;
-	//	if (std::string(chunk->type_name) == "TYPE") {
-	//		chunk->OwnBuffer();
-	//	}
-	//	});
-
-	//for (auto type = this->classes.begin() + 1; type != this->classes.end(); type++) {
-	//	(*type)->ctype_name = hktypes::hkTypeMapper::GetSingleton().GetCType((*type));
-	//}
-
-	//// Root level instance
-	//auto suc = this->indexed_blocks[1]->BuildInstances();
-	//if (!suc) {
-	//	std::cout << "Warning: root level instance build failed." << std::endl;
-	//	return false;
-	//}
-
-	//for (auto block = this->indexed_blocks.begin() + 1; block != this->indexed_blocks.end(); block++) {
-	//	if((*block)->_built)
-	//		continue;
-	//	std::cout << "Warning: bogus block detected." << std::endl;
-	//	return false;
-	//}
-
-	//if (this->indexed_blocks[1]->m_instances.size() != 1) {
-	//	std::cout << "Warning: root level instance count is not 1." << std::endl;
-	//	return false;
-	//}
-
-	//this->root_level_instance = this->indexed_blocks[1]->m_instances[0];
-
-	//ExtractClasses();
-	//return true;
 }
 
 bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data, size_t data_size)
@@ -133,77 +82,12 @@ bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data, size_t 
 	return true;
 }
 
-//bool hkphysics::hkReflDataSerializer::SerializeWithTypeUnchanged(std::ostream& data_stream)
-//{
-//	auto patch_chunk = this->GetPatchChunk();
-//	if (patch_chunk) {
-//		patch_chunk->patches.clear();
-//	}
-//	else {
-//		throw std::exception("Not implemented");
-//	}
-//
-//	uint64_t cur_block_index = 0;
-//
-//	size_t alloc_size = 0;
-//	for (auto block : this->indexed_blocks) {
-//		alloc_size += ((uint64_t)block->m_data_type->size + block->m_data_type->alignment + 2) * block->m_num_instances;
-//	}
-//
-//	auto out_accessor = this->AllocateSerializeData(alloc_size);
-//
-//	size_t true_alloc = 0;
-//
-//	hkreflex::hkIndexedDataBlock* root_block = hkreflex::hkIndexedDataBlock::CreatePointerAndAlloc(this, this->root_level_instance->type, this->root_level_instance);
-//	
-//	utils::SerializePool serializer(1);
-//	serializer.QueueSerialization(root_block, true);
-//	cur_block_index = serializer.Resolve(out_accessor.make_reference(), true_alloc);
-//	
-//	this->indexed_blocks.push_back(new hkreflex::hkIndexedDataBlock(this));
-//	for (auto block : serializer.serialized_objects) {
-//		this->indexed_blocks.push_back(dynamic_cast<hkreflex::hkIndexedDataBlock*>(block));
-//	}
-///*
-//#ifdef _DEBUG
-//	auto map1 = utils::count_element<hkreflex::hkIndexedDataBlock*, std::string>(this->indexed_blocks_out, [](hkreflex::hkIndexedDataBlock* block) {
-//		return block->m_data_type ? block->m_data_type->type_name : "";
-//		});
-//
-//	auto map2 = utils::count_element<hkreflex::hkIndexedDataBlock*, std::string>(this->indexed_blocks, [](hkreflex::hkIndexedDataBlock* block) {
-//		return block->m_data_type ? block->m_data_type->type_name : "";
-//		});
-//	_ASSERT(this->indexed_blocks_out.size() == this->indexed_blocks.size());
-//#endif*/
-//
-//	out_accessor.size = true_alloc;
-//
-//	auto tag0 = dynamic_cast<hkDataChunkTAG0*>(this->data_chunks[ChunkType::TAG0]);
-//
-//	utils::DataAccessor result;
-//	auto size = (uint32_t)tag0->DistributeAndSerialize(result, true);
-//
-//	data_stream.write((const char*)result.data, result.size);
-//
-//	return true;
-//}
-
 void hkphysics::hkReflDataDeserializer::ExtractClasses()
 {
 	auto root_ctn_insts = this->GetInstancesByClassName("hkRootLevelContainer");
 	if (root_ctn_insts.size() == 1) {
 		this->root_level_container = new hktypes::hkRootLevelContainer();
 		root_ctn_insts[0]->GetValue(*this->root_level_container);
-
-		/*this->skeleton = dynamic_cast<hktypes::hkaSkeleton*>(this->root_level_container->GetNamedVariantRef("hkaSkeleton"));
-
-		if (this->skeleton == nullptr) {
-			auto skele_insts = this->GetInstancesByClassName("hkaSkeleton");
-			if (skele_insts.size() == 1) {
-				this->skeleton = new hktypes::hkaSkeleton();
-				skele_insts[0]->GetValue(*this->skeleton);
-			}
-		}*/
 	}
 }
 
@@ -466,10 +350,6 @@ std::string hkphysics::hkReflDataSerializeContext::classes_to_literal(bool show_
 
 std::string hkphysics::hkReflDataSerializeContext::dump_indexed_blocks()
 {
-	/*for (auto it = indexed_blocks.begin() + 1; it != indexed_blocks.end(); ++it) {
-		(*it)->_dumped = false;
-	}*/
-
 	std::string ret = "";
 	for (auto it = indexed_blocks.begin() + 1; it != indexed_blocks.end(); ++it) {
 		if ((*it)->_dumped == false)

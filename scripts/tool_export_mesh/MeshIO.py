@@ -286,6 +286,10 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 			data = json.loads(rtn)
 
 			if len(data["vertex_weights"]) > 0:
+				if len(bm.verts) != len(data["vertex_weights"]):
+					operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")
+					return {'CANCELLED'}
+				
 				num_bones_per_vert = len(data["vertex_weights"][0])
 				num_bones = -1
 				for v in bm.verts:
@@ -298,10 +302,6 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 				for i in range(num_bones):
 					bones.append(obj.vertex_groups.new(name='bone' + str(i)))
 
-				if len(bm.verts) != len(data["vertex_weights"]):
-					operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")
-					return {'CANCELLED'}
-				
 				for v in bm.verts:
 					for i in range(num_bones_per_vert):
 						cur_boneweight = data["vertex_weights"][v.index][i]

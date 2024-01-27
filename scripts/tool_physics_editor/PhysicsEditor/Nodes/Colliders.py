@@ -1,4 +1,6 @@
 import bpy
+import math
+import mathutils
 from bpy.types import Context, Node, NodeSocket, UILayout
 
 import PhysicsEditor.Nodes.NodeBase as NodeBase
@@ -39,6 +41,7 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
     radius_prop: bpy.props.FloatProperty(name='Radius', default=0.5, update=update_radius)    
 
     def init(self, context):
+        super().init(context)
         CapsuleGenGeoNode.GetGeoNode()
         collider_skt = self.outputs.new('hclColliderType', 'Collider')
         bone_skt = self.inputs.new('hkaBoneType', 'Bind To Bone')
@@ -70,6 +73,9 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
         self.capsule_name = f'{bone_name}_Capsule'
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         parent = utils_node.get_linked_single(self.inputs['Bind To Bone'])
         if parent is None:
@@ -91,10 +97,14 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
             armature = hkaBone['Armature']
             bone_index = hkaBone['Bone Index']
             #bone_name = armature.data.bones[bone_index].name
+            bone= armature.data.bones[bone_index]
+            collider_world_transform: mathutils.Matrix = armature.matrix_world @ bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Z')
+            
             collider = {
                 'collider': 'Capsule',
                 'name': self.capsule_name,
                 'type': 1,
+                'localFrame': [[collider_world_transform[i][j] for i in range(4)] for j in range(4)],
                 'capsuleStart': list(self.start_pos_prop),
                 'capsuleEnd': list(self.end_pos_prop),
                 'capsuleBigRadius': self.radius_prop,
@@ -107,7 +117,7 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
     def draw_vis_mesh(self):
         capsule = utils_prefabs.CapsuleFromParameters(self.capsule_name, self.start_pos_prop, self.end_pos_prop, self.radius_prop, self.radius_prop)
         hkaBone = utils_node.get_socket_input_single(self,'Bind To Bone')
-        utils_prefabs.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'])
+        utils_prefabs.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'], True)
         return capsule
 
 class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
@@ -124,6 +134,7 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
     end_radius_prop: bpy.props.FloatProperty(name='End Radius', default=0.5, update=update_end_radius)
 
     def init(self, context):
+        super().init(context)
         CapsuleGenGeoNode.GetGeoNode()
         collider_skt = self.outputs.new('hclColliderType', 'Collider')
         bone_skt = self.inputs.new('hkaBoneType', 'Bind To Bone')
@@ -157,6 +168,9 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
         self.capsule_name = f'{bone_name}_TaperedCapsule'
         
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         parent = utils_node.get_linked_single(self.inputs['Bind To Bone'])
         if parent is None:
@@ -179,11 +193,15 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
             armature = hkaBone['Armature']
             bone_index = hkaBone['Bone Index']
             #bone_name = armature.data.bones[bone_index].name
+            bone= armature.data.bones[bone_index]
+            collider_world_transform: mathutils.Matrix = armature.matrix_world @ bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Z')
+            
             if self.start_radius_prop < self.end_radius_prop:
                 collider = {
                     'collider': 'Capsule',
                     'name': self.capsule_name,
                     'type': 1,
+                    'localFrame': [[collider_world_transform[i][j] for i in range(4)] for j in range(4)],
                     'capsuleStart': list(self.end_pos_prop),
                     'capsuleEnd': list(self.start_pos_prop),
                     'capsuleBigRadius': self.end_radius_prop,
@@ -195,6 +213,7 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
                     'collider': 'Capsule',
                     'name': self.capsule_name,
                     'type': 1,
+                    'localFrame': [[collider_world_transform[i][j] for i in range(4)] for j in range(4)],
                     'capsuleStart': list(self.start_pos_prop),
                     'capsuleEnd': list(self.end_pos_prop),
                     'capsuleBigRadius': self.start_radius_prop,
@@ -207,6 +226,6 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
     def draw_vis_mesh(self):
         capsule = utils_prefabs.CapsuleFromParameters(self.capsule_name, self.start_pos_prop, self.end_pos_prop, self.start_radius_prop, self.end_radius_prop)
         hkaBone = utils_node.get_socket_input_single(self,'Bind To Bone')
-        utils_prefabs.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'])
+        utils_prefabs.ConstraintObjToArmatureBone(capsule, hkaBone['Armature'], hkaBone['Bone Index'], True)
         return capsule
     

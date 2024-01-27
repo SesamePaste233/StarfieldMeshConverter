@@ -218,8 +218,23 @@ uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char
 	file.close();
 
 	if (export_readable) {
-		auto root_lvl_instance = serializer.root_level_instance;
-		auto instances = root_lvl_instance->dump();
+		hkphysics::hkReflDataDeserializer deserializer;
+
+		std::ifstream file2(output_file, std::ios::binary);
+		if (!file2.is_open()) {
+			std::cout << "Failed to open output file." << std::endl;
+			return 16; // Return an error code
+		}
+
+		size_t data_size = utils::read<uint32_t>(file2, 1, true)[0];
+		file2.seekg(0, std::ios::beg);
+		deserializer.Deserialize(file2, data_size);
+		file2.close();
+
+		std::cout << "Ensuring IO equality..." << std::endl;
+		deserializer.root_level_instance->assert_equals(serializer.root_level_instance);
+
+		auto instances = deserializer.root_level_instance->dump();
 		std::ofstream file_i(std::string(output_file) + "_debug.txt");
 		file_i << instances;
 		file_i.close();

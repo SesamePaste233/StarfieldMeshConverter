@@ -3,7 +3,7 @@ import bmesh
 
 class OBJECT_OT_add_custom_attribute(bpy.types.Operator):
     bl_idname = "object.add_custom_attribute"
-    bl_label = "Add Custom Attribute"
+    bl_label = "Mark Selected Elements"
     bl_options = {'REGISTER', 'UNDO'}
 
     attribute_name: bpy.props.StringProperty(

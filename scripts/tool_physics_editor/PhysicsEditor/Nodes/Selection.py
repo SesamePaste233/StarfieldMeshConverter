@@ -55,12 +55,16 @@ class MeshAttrSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
     bool_operand_prop: bpy.props.BoolProperty(name='Operand', default=True)
 
     def init(self, context):
+        super().init(context)
         mesh_skt = self.inputs.new('NodeSocketGeometry', 'Mesh')
         mesh_skt.show_expanded = True
         mesh_skt.hide_value = True
         elem_indices_skt = self.outputs.new('IndicesOnDomainType', 'Indices On Domain')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if self.inputs['Mesh'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Mesh'])
@@ -172,11 +176,15 @@ class ConcatenateIndicesNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_label = 'Concatenate Indices'
 
     def init(self, context):
+        super().init(context)
         self.inputs.new('IndicesOnDomainType', 'Indices 1')
         self.inputs.new('IndicesOnDomainType', 'Indices 2')
         self.outputs.new('IndicesOnDomainType', 'Indices On Domain')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if self.inputs['Indices 1'].is_linked and self.inputs['Indices 2'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Indices 1'])

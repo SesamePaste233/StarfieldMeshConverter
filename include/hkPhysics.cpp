@@ -134,6 +134,45 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 
 				standard_link->MergeSingles();
 			}
+			else if (type == "StretchLink") {
+				auto constraint_ptr = this->AddConstraintSet(type, name);
+				auto stretch_link = dynamic_cast<hktypes::hclStretchLinkConstraintSetMx*>(constraint_ptr);
+
+				for (auto& link : constraint["links"]) {
+					stretch_link->AddDefaultLink(this->hcl_sim_cloth_data, link["particleA"], link["particleB"], link["stiffness"]);
+				}
+			}
+			else if (type == "BonePlanes") {
+				/*
+				constraint = {
+					'constraint': 'BonePlanes',
+					'name': self.name,
+					'particles': particles_list,
+					'bone_ids': bones_list,
+					'plane_normal_dirs': plane_normal_dir_list,
+					'stiffnesses': stiffness_list,
+				}
+				*/
+				auto constraint_ptr = this->AddConstraintSet(type, name);
+				auto bone_planes = dynamic_cast<hktypes::hclBonePlanesConstraintSet*>(constraint_ptr);
+
+				std::vector<uint16_t> particle_indices = constraint["particles"];
+				std::vector<uint16_t> bone_indices = constraint["bone_ids"];
+				std::vector<float> stiffnesses = constraint["stiffnesses"];
+				std::vector<Eigen::Vector4f> plane_normal_dirs;
+				for (auto& plane : constraint["plane_normal_dirs"]) {
+					plane_normal_dirs.push_back(Eigen::Vector4f(plane[0], plane[1], plane[2], plane[3]));
+				}
+
+				assert(particle_indices.size() == bone_indices.size());
+				assert(particle_indices.size() == plane_normal_dirs.size());
+				assert(particle_indices.size() == stiffnesses.size());
+
+				for (size_t i = 0; i < particle_indices.size(); ++i) {
+					bone_planes->AddBonePlane(hktypes::hkVector4Holder::FromVector4f(plane_normal_dirs[i]), particle_indices[i], bone_id_map[bone_indices[i]], stiffnesses[i]);
+				}
+
+			}
 			else {
 				std::cout << "Warning: Invalid constraint type \"" << type << "\"" << std::endl;
 				return false;
@@ -337,21 +376,15 @@ void hkphysics::hkPhysicsDataBuilder::AddSimClothCollisionMesh(hktypes::hclBuffe
 hktypes::hclConstraintSet* hkphysics::hkPhysicsDataBuilder::AddConstraintSet(std::string type, std::string name)
 {
 	CheckValid(BuildTarget_GenericClothSim);
-	if (type == "StandardLink") {
-		auto constraint = hktypes::AllocateConstraint(type, name);
-		if (constraint == nullptr) {
-			std::cout << "Warning: Invalid constraint type \"" << type << "\"" << std::endl;
-			throw std::runtime_error("Invalid constraint type");
-		}
-
-		this->hcl_sim_cloth_data->AddConstraintSet(constraint);
-
-		return constraint;
-	}
-	else {
+	auto constraint = hktypes::AllocateConstraint(type, name);
+	if (constraint == nullptr) {
 		std::cout << "Warning: Invalid constraint type \"" << type << "\"" << std::endl;
 		throw std::runtime_error("Invalid constraint type");
 	}
+
+	this->hcl_sim_cloth_data->AddConstraintSet(constraint);
+
+	return constraint;
 }
 
 void hkphysics::hkPhysicsDataBuilder::AddOperator(hktypes::hclOperator* physics_operator)

@@ -34,7 +34,7 @@ namespace hktypes {
 			};
 		};
 
-		virtual void CollectBoneUsage(std::vector<uint32_t> bone_indices) {};
+		virtual void CollectBoneUsage(std::vector<uint32_t>& bone_indices) {};
 		virtual int ConstraintPriority() { return 0; };
 	};
 
@@ -144,14 +144,34 @@ namespace hktypes {
 			};
 		};
 
-		inline void CollectBoneUsage(std::vector<uint32_t> bone_indices) override {
+		inline void CollectBoneUsage(std::vector<uint32_t>& bone_indices) override {
+			std::set<uint32_t> bone_set;
 			for (auto& bone_plane : bonePlanes) {
-				bone_indices.push_back(bone_plane.transformIndex);
+				bone_set.insert(bone_plane.transformIndex);
 			}
+			bone_indices.insert(bone_indices.end(), bone_set.begin(), bone_set.end());
 		}
 
 		inline int ConstraintPriority() override {
 			return 5;
+		}
+
+		inline void AddBonePlane(hkVector4Holder planeEquationBone, uint16_t particleIndex, uint16_t transformIndex, float stiffness) {
+			BonePlane bone_plane;
+			bone_plane.planeEquationBone = planeEquationBone;
+			bone_plane.particleIndex = particleIndex;
+			bone_plane.transformIndex = transformIndex;
+			bone_plane.stiffness = stiffness;
+			bonePlanes.push_back(bone_plane);
+		}
+
+		inline void AddBonePlane(Eigen::Vector3f planeNormalDir, uint16_t particleIndex, uint16_t transformIndex, float stiffness) {
+			BonePlane bone_plane;
+			bone_plane.planeEquationBone = hkVector4Holder::FromVector3f(planeNormalDir, 1.f);
+			bone_plane.particleIndex = particleIndex;
+			bone_plane.transformIndex = transformIndex;
+			bone_plane.stiffness = stiffness;
+			bonePlanes.push_back(bone_plane);
 		}
 	};
 
@@ -619,6 +639,35 @@ namespace hktypes {
 		inline int ConstraintPriority() override {
 			return 1;
 		}
+
+		inline void MergeSingles() {
+			uint16_t fours = singles.size() / 4;
+			uint16_t i = 0;
+			for (; i < fours; ++i) {
+				Batch batch;
+				for (uint16_t j = 0; j < 4; ++j) {
+					batch.restLengths[j] = singles[i * 4 + j].restLength;
+					batch.stiffnesses[j] = singles[i * 4 + j].stiffness;
+					batch.particlesA[j] = singles[i * 4 + j].particleA;
+					batch.particlesB[j] = singles[i * 4 + j].particleB;
+				}
+				batches.push_back(batch);
+			}
+			if (fours > 0) {
+				singles.erase(singles.begin(), singles.begin() + fours * 4);
+			}
+		}
+
+		inline void AddLinkImpl(uint16_t particleA, uint16_t particleB, float stiffness, float restLength) {
+			Single link;
+			link.particleA = particleA;
+			link.particleB = particleB;
+			link.stiffness = stiffness;
+			link.restLength = restLength;
+			singles.push_back(link);
+		}
+
+		void AddDefaultLink(hclSimClothData* cloth_data, uint16_t particleA, uint16_t particleB, float stiffness);
 	};
 
 	class hclSimClothPose : public hkReferencedObject {

@@ -496,13 +496,13 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 
 void nif::BSClothExtraData::Deserialize(std::istream& file)
 {
-	this->data = new hkphysics::hkReflDataDeserializer();
+	this->data.Clear();
 #ifndef _DEBUG
 	try {
 		this->data_length = utils::read<uint32_t>(file)[0];
 		assert(this->binary_bytes == this->data_length + 4);
-		this->data->Deserialize(file, this->data_length);
-		root_level_container = this->data->root_level_container;
+		this->data.Deserialize(file, this->data_length);
+		root_level_container = this->data.root_level_container;
 	}
 	catch (std::exception& e) {
 		std::cout << "Failed to deserialize BSClothExtraData." << std::endl;
@@ -511,13 +511,21 @@ void nif::BSClothExtraData::Deserialize(std::istream& file)
 #else
 	this->data_length = utils::read<uint32_t>(file)[0];
 	assert(this->binary_bytes == this->data_length + 4);
-	this->data->Deserialize(file, this->data_length);
-	root_level_container = this->data->root_level_container;
+	this->data.Deserialize(file, this->data_length);
+	root_level_container = this->data.root_level_container;
 #endif
 }
 
 void nif::BSClothExtraData::Serialize(std::ostream& file)
 {
+	if (this->root_level_container) {
+		this->data_serializer.Clear();
+		this->data_serializer.root_level_container = this->root_level_container;
+		this->data_length = this->data_serializer.Serialize(file);
+		this->binary_bytes = this->data_length + 4;
+		return;
+	}
+
 	BinaryBlock::Serialize(file);
 }
 

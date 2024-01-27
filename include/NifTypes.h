@@ -509,17 +509,17 @@ namespace nif {
 			return std::vector<uint32_t>();
 		};
 
-		hkphysics::hkReflDataDeserializer* GetDataDeserializer() {
+		hkphysics::hkReflDataDeserializer& GetDataDeserializer() {
 			return data;
 		};
 
-		hkphysics::hkReflDataSerializer* GetDataSerializer() {
+		hkphysics::hkReflDataSerializer& GetDataSerializer() {
 			return data_serializer;
 		};
 
 	protected:
-		hkphysics::hkReflDataDeserializer* data = nullptr;
-		hkphysics::hkReflDataSerializer* data_serializer = nullptr;
+		hkphysics::hkReflDataDeserializer data;
+		hkphysics::hkReflDataSerializer data_serializer;
 	};
 
 	class bhkPhysicsSystem : public BinaryBlock {

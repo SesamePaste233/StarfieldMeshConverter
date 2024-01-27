@@ -24,7 +24,7 @@ def update_tree(self, context):
 class PhysicsTree(NodeTree):
     '''Node tree representation of hclPhysics Data'''
     bl_idname = 'hclPhysicsTreeType'
-    bl_label = "HCL Physics Editor"
+    bl_label = "New Composition"
     bl_icon = 'NODETREE'
 
     mesh: bpy.props.PointerProperty(type=bpy.types.Object, poll=lambda self, object: object.type == 'MESH', update=update_tree)
@@ -86,9 +86,9 @@ node_categories = [
     ]),
     MyNodeCategory('CONSTRAINTS', "Constraints", items=[
         NodeItem("StandardLinkConstraint", label="Standard Link"),
-        #NodeItem("StretchLinkConstraint", label="Stretch Link"),
-        #NodeItem("BendLinkConstraint", label="Bend Link"),
-        #NodeItem("BonePlanesConstraint", label="Global Bone Plane Constraint"),
+        NodeItem("StretchLinkConstraint", label="Stretch Link"),
+        #NodeItem("BendStiffnessConstraint", label="Bend Stiffness"),
+        NodeItem("BonePlanesConstraint", label="Global Bone Plane Constraint"),
     ]),
     MyNodeCategory('COLLIDERS', "Colliders", items=[
         NodeItem("CapsuleCollider", label="Capsule Collider"),
@@ -126,7 +126,7 @@ classes = [
     Simulation.SimClothDataNode,
     Constraints.StandardLinkConstraintNode,
     Constraints.StretchLinkConstraintNode,
-    Constraints.BendLinkConstraintNode,
+    Constraints.BendStiffnessConstraintNode,
     Constraints.BonePlanesConstraintNode,
     Colliders.CapsuleColliderNode,
     Colliders.TaperedCapsuleColliderNode,

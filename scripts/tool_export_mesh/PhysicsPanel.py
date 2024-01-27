@@ -5,6 +5,7 @@ import json
 import PhysicsConverter as PhysicsConverter
 
 import utils_common as utils
+import utils_blender as utils_blender
 
 import addon_utils
 
@@ -12,7 +13,7 @@ import MeshConverter
 
 class ExportPhysicsDataOperator(bpy.types.Operator):
 	bl_idname = "object.physics_data_export"
-	bl_label = "Export Physics Data"
+	bl_label = "Export As Portable"
 
 	def execute(self, context):
 		if context.scene.sf_physics_editor_version != context.scene.geometry_bridge_version:
@@ -27,23 +28,25 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 
 		output_file = os.path.join(context.scene.physics_file_path, f"{utils.sanitize_filename(physics_node_tree.name)}.bin")
 
-		data_dict = PhysicsConverter.get_physics_data(physics_node_tree.get_output_nodes(), physics_node_tree)
+		data_dict = PhysicsConverter.get_physics_data(physics_node_tree)
 
 		if data_dict is None:
-			self.report({'ERROR'}, "Failed to compose physics data from node graph.")
+			self.report({'ERROR'}, "Failed to compose physics data from node graph. Is your output node valid?")
+			physics_node_tree.update_tree(context)
 			return {'CANCELLED'}
 
 		json_data = json.dumps(data_dict)
 
         # Save the physics data to a json file
-		#physics_data_path = os.path.join(os.path.dirname(output_file), 'physics_data.json')
-		#with open(physics_data_path, 'w') as f:
-		#	json.dump(data_dict, f)
+		if utils_blender.is_plugin_debug_mode():
+			physics_data_path = os.path.join(os.path.dirname(output_file), 'physics_data_debug.json')
+			with open(physics_data_path, 'w') as f:
+				json.dump(data_dict, f)
 
-		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, output_file, False)
+		rtn = MeshConverter.ComposePhysicsDataFromJson(json_data, MeshConverter.Platform.HCL_PLATFORM_X64, output_file, utils_blender.is_plugin_debug_mode())
 
 		if not rtn:
-			self.report({'ERROR'}, f"Failed to compose physics data. Error message: \"{rtn.what()}\".")
+			self.report({'ERROR'}, f"Dll failed to compose physics data. Error message: \"{rtn.what()}\".")
 			return {'CANCELLED'}
 		
 		self.report({'INFO'}, "Physics data exported successfully.")

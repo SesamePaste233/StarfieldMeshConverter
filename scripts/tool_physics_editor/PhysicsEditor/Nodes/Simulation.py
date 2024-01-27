@@ -15,6 +15,7 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
     global_damping_per_second: bpy.props.FloatProperty(name='Global Damping Per Second', default=0.2)
 
     def init(self, context):
+        super().init(context)
         particles = self.inputs.new('hclClothParticlesType', 'Particles')
         particles.hide_value = True
         colliders = self.inputs.new('hclMultiColliderType', 'Colliders')
@@ -24,6 +25,9 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
         my_output = self.outputs.new('hclSimClothDataType', 'Simulation Data')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if not self.inputs['Particles'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Particles linked")
@@ -76,6 +80,7 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     friction_prop: bpy.props.FloatProperty(name='Friction', default=0.5)
 
     def init(self, context):
+        super().init(context)
         output_skt = self.outputs.new('hclClothParticlesType', 'Particles')
         output_skt.hide_value = True
         input_skt = self.inputs.new('NodeSocketGeometry', 'Mesh')
@@ -86,6 +91,9 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         input_skt1.hide_value = True
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if not self.inputs['Mesh'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Mesh linked")
@@ -167,6 +175,7 @@ class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     stiffness_prop: bpy.props.FloatProperty(name='Stiffness', default=1.0)
 
     def init(self, context):
+        super().init(context)
         input_skt = self.inputs.new('NodeSocketGeometry', 'Mesh')
         input_skt.hide_value = True
         input_skt1 = self.inputs.new('IndicesOnDomainType', 'Edge Indices')
@@ -176,6 +185,9 @@ class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         output_skt.hide_value = True
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if not self.inputs['Mesh'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Mesh linked")
@@ -234,6 +246,7 @@ class DisableCollisionNode(NodeBase.hclPhysicsNodeBase, Node):
     collider_enum_prop: bpy.props.EnumProperty(name='Collider', items=get_collider_enum_items)
 
     def init(self, context):
+        super().init(context)
         input_skt = self.inputs.new('hclSimClothDataType', 'Cloth Data')
         input_skt.hide_value = True
         particle_ids_skt = self.inputs.new('IndicesOnDomainType', 'Particle Indices')
@@ -241,6 +254,9 @@ class DisableCollisionNode(NodeBase.hclPhysicsNodeBase, Node):
         output_skt.hide_value = True
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if not self.inputs['Cloth Data'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Cloth Data linked")

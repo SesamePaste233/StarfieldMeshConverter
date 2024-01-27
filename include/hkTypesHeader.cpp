@@ -265,9 +265,8 @@ hktypes::hclCollidable* hktypes::AllocateCollidableFromMesh(hclBufferedMeshObj& 
 	}
 
 	hclCollidable* out = new hclCollidable();
-	auto transform = hkMatrix4Holder::FromMatrix4f(mesh_obj.localFrame.transpose());
 	out->name = mesh_obj.name;
-	out->transform = transform;
+	out->transform = hkMatrix4Holder::FromMatrix4f(mesh_obj.localFrame);
 	out->shape = shape;
 	return out;
 }
@@ -276,6 +275,12 @@ hktypes::hclConstraintSet* hktypes::AllocateConstraint(std::string type, std::st
 {
 	if (type == "StandardLink") {
 		return impl::AllocateStandardLinkConstraintSetMx(name);
+	}
+	else if (type == "StretchLink") {
+		return impl::AllocateStretchLinkConstraintSetMx(name);
+	}
+	else if (type == "BonePlanes") {
+		return impl::AllocateBonePlanesConstraintSet(name);
 	}
 	return nullptr;
 }
@@ -761,8 +766,21 @@ hktypes::hclTaperedCapsuleShape* hktypes::impl::AllocateTaperedCapsuleShapeFromM
 
 hktypes::hclStandardLinkConstraintSetMx* hktypes::impl::AllocateStandardLinkConstraintSetMx(std::string name)
 {
-	using namespace hktypes;
 	hclStandardLinkConstraintSetMx* out = new hclStandardLinkConstraintSetMx();
+	out->name = name;
+	return out;
+}
+
+hktypes::hclStretchLinkConstraintSetMx* hktypes::impl::AllocateStretchLinkConstraintSetMx(std::string name)
+{
+	hclStretchLinkConstraintSetMx* out = new hclStretchLinkConstraintSetMx();
+	out->name = name;
+	return out;
+}
+
+hktypes::hclBonePlanesConstraintSet* hktypes::impl::AllocateBonePlanesConstraintSet(std::string name)
+{
+	hclBonePlanesConstraintSet* out = new hclBonePlanesConstraintSet();
 	out->name = name;
 	return out;
 }

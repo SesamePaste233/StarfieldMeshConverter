@@ -1,4 +1,6 @@
 import bpy
+import math
+import mathutils
 
 import PhysicsEditor.Prefabs.CapsuleGenGeoNode as capsule_gen
 import PhysicsEditor.Prefabs.PlaneGenGeoNode as plane_gen
@@ -94,7 +96,8 @@ def ConstraintObjToArmatureBone(obj, armature_obj, bone_index, inherit_rotation 
 	obj.constraints.clear()
 	bone= armature_obj.data.bones[bone_index]
 	if inherit_rotation:
-		obj.matrix_world = armature_obj.matrix_world @ bone.matrix_local
+		obj.matrix_world = armature_obj.matrix_world @ bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Z')
+		print(obj.matrix_world)
 	arma_const = obj.constraints.new(type = 'ARMATURE')
 	_target = arma_const.targets.new()
 	_target.target = armature_obj
@@ -171,7 +174,7 @@ def ConstraintObjsToBoneRotation(objs: list[bpy.types.Object], armature_obj, bon
 
 	bpy.context.collection.objects.link(anchor_obj)
 
-	ConstraintObjToArmatureBone(anchor_obj, armature_obj, bone_index, True)
+	ConstraintObjToArmatureBone(anchor_obj, armature_obj, bone_index, False)
 
 	for obj in objs:
 		if obj == None:

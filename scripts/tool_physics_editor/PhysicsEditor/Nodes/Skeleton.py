@@ -17,10 +17,7 @@ def get_bone_enum_items(self, context):
     return []
 
 def update_bone_enum(self, context):
-    parent = utils_node.get_linked_single(self.inputs['Skeleton'])
-    if parent.check_valid():
-        skeleton = utils_node.get_socket_input_single(self,'Skeleton')
-        self.outputs['Bone Index'].default_value = skeleton.data.bones[self.bone_enum].index
+    utils_node.update_tree_from_node(self, context)
 
 class PickBoneFromSkeletonNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Pick a Bone from Skeleton'''
@@ -31,6 +28,7 @@ class PickBoneFromSkeletonNode(NodeBase.hclPhysicsNodeBase, Node):
     bone_enum: bpy.props.EnumProperty(name='Bone', items=get_bone_enum_items, update=update_bone_enum)
 
     def init(self, context):
+        super().init(context)
         skeleton_skt = self.inputs.new('hkaSkeletonType', 'Skeleton')
         skeleton_skt.show_expanded = True
         skeleton_skt.hide_value = True
@@ -39,6 +37,9 @@ class PickBoneFromSkeletonNode(NodeBase.hclPhysicsNodeBase, Node):
         bone_index_skt.hide_value = True
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         print(f'check_valid {self.name}')
         if self.inputs['Skeleton'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Skeleton'])
@@ -82,6 +83,7 @@ class MatchBoneNameNode(NodeBase.hclPhysicsNodeBase, Node):
     matched_bone_enum: bpy.props.EnumProperty(name='Matched Bone', items=get_matched_bone_enum_items)
 
     def init(self, context):
+        super().init(context)
         skeleton_skt = self.inputs.new('hkaSkeletonType', 'Skeleton')
         skeleton_skt.show_expanded = True
         skeleton_skt.hide_value = True
@@ -90,6 +92,9 @@ class MatchBoneNameNode(NodeBase.hclPhysicsNodeBase, Node):
         bone_index_skt.hide_value = True
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
         if self.inputs['Skeleton'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Skeleton'])
             if parent.check_valid():

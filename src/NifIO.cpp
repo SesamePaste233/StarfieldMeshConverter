@@ -301,7 +301,6 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 		block = new NiIntegersExtraData();
 	}
 	else if (type_name == "BSClothExtraData") {
-		_ASSERT(block_bytes != -1);
 		block = new BSClothExtraData(block_bytes);
 		dynamic_cast<BSClothExtraData*>(block)->RTTI = type_name;
 	}
@@ -993,6 +992,7 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 
 		skin_bonedata->num_bone_infos = num_bones;
 
+#ifndef _DEBUG
 		if (skin_info.request_recalc_bounding_sphere) {
 			auto mesh = nif.GetMesh(bsgeometry);
 			if (mesh == nullptr) {
@@ -1011,6 +1011,7 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 			}
 			delete mesh;
 		}
+#endif
 
 		skin_bonedata->bone_infos = skin_info.bone_infos;
 
@@ -1320,6 +1321,28 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 	root_node->AddExtraData(nif.block_manager.FindBlock(bsxflags));
 
 	bsxflags->flags = this->bsx_flags;
+
+	if (!this->physics_data.empty()) {
+		auto bscloth = dynamic_cast<nif::BSClothExtraData*>(nif.AddBlock(nif::NiRTTI::BSClothExtraData));
+
+		root_node->AddExtraData(nif.block_manager.FindBlock(bscloth));
+
+		hkphysics::hkPhysicsDataBuilder builder;
+
+		builder.build_target_platform = hkphysics::hkPhysicsDataBuilder::Platform::HCL_PLATFORM_X64;
+
+		if (!hkreflex::hkTypeTranscriptor::SetTranscriptPath(this->transcript_path)) {
+			std::cout << "Failed to set transcript path." << std::endl;
+			return false;
+		}
+
+		if (!builder.ParseJson(this->physics_data) || !builder.build_target_finished) {
+			std::cout << "Physics data build failed." << std::endl;
+			return false;
+		}
+
+		bscloth->root_level_container = &builder.GetTarget();
+	}
 
 	if (this->sub_template & SubTemplate::PureSkeleton) {
 		auto bsbound = dynamic_cast<nif::BSBound*>(nif.AddBlock(nif::NiRTTI::BSBound, "BBX"));

@@ -85,7 +85,7 @@ class hclMultiColliderSocket(bpy.types.NodeSocket, hclNodeSocketBase):
         layout.label(text=text)
 
 class IndicesOnDomainSocket(bpy.types.NodeSocket, hclNodeSocketBase):
-    default_value: tuple = ([], 'None')
+    default_value: tuple = ([], 'DOMAIN')
     bl_idname = 'IndicesOnDomainType'
     bl_label = 'Indices On Domain'
     color = (0.5, 0.8, 0.5, 1)

@@ -122,7 +122,10 @@ def CreateNifFromJson(json_data_string: str, output_file: str, assets_folder_pat
 def ImportNifAsJson(input_file: str) -> str:
     return _dll_import_nif(input_file.encode('utf-8')).decode('utf-8')
 
+def GetTranscriptPath() -> str:
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), 'Assets', 'hkTypeTranscript', 'hkTypeTranscript.json'))
+
 def ComposePhysicsDataFromJson(json_data_string: str, platform: Platform, output_binary_path: str, export_readable: bool = False) -> DLLReturnCode:
-    transcript_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Assets', 'hkTypeTranscript', 'hkTypeTranscript.json'))
+    transcript_path = GetTranscriptPath()
     rtn = _dll_compose_physics_data(json_data_string.encode('utf-8'), int(platform.value), transcript_path.encode('utf-8'), output_binary_path.encode('utf-8'), export_readable)
     return DLLReturnCode(rtn)

@@ -295,7 +295,14 @@ class ImportCustomNif(bpy.types.Operator):
 		self.skeleton_register_name = ""
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
-	
+
+def get_physics_node_tree_names(self, context):
+	physics_node_tree_names = [("None", "None", "No physics data.", 'NONE', 0)]
+	for node_tree in bpy.data.node_groups:
+		if node_tree.bl_idname == 'hclPhysicsTreeType':
+			physics_node_tree_names.append((node_tree.name, node_tree.name, node_tree.name, 'NODETREE', len(physics_node_tree_names)))
+	return tuple(physics_node_tree_names)
+
 class ExportCustomNif(bpy.types.Operator):
 	bl_idname = "export_scene.custom_nif"
 	bl_label = "Export Custom Nif"
@@ -351,6 +358,13 @@ class ExportCustomNif(bpy.types.Operator):
 		name="Export morph data (if any)",
 		description="Export shape keys as morph keys",
 		default=False,
+	)
+
+	physics_tree: bpy.props.EnumProperty(
+		name="Physics Node Tree",
+		description="",
+		items=get_physics_node_tree_names,
+		default=0,
 	)
 
 	export_sf_mesh_open_folder: bpy.props.BoolProperty(
@@ -524,6 +538,8 @@ class ExportSFMeshPanel(bpy.types.Panel):
 		layout.operator("object.advanced_morph_edit_create", text = "Advanced Morph Edit")
 		layout.operator("export_scene.sfmesh", text = "Export .mesh")
 
+		layout.prop(context.scene, "sgb_debug_mode", text="Debug")
+
 
 
 # Add custom menu entries in the File menu
@@ -572,6 +588,12 @@ def update_func(self, context):
 # Register the operators and menu entries
 def register():
 	utils.load("cached_paths")
+	bpy.types.Scene.sgb_debug_mode = bpy.props.BoolProperty(
+		name="Debug Mode",
+		description="Debug option. DO NOT USE.",
+		default=False
+	)
+
 	bpy.types.Scene.geometry_bridge_version = bpy.props.StringProperty(
 		name="__geometry_bridge_version__",
 		default = f"{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}",

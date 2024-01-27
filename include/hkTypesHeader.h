@@ -79,5 +79,9 @@ namespace hktypes {
 		hclTaperedCapsuleShape* AllocateTaperedCapsuleShapeFromMesh(hclBufferedMeshObj& mesh_obj);
 
 		hclStandardLinkConstraintSetMx* AllocateStandardLinkConstraintSetMx(std::string name);
+
+		hclStretchLinkConstraintSetMx* AllocateStretchLinkConstraintSetMx(std::string name);
+
+		hclBonePlanesConstraintSet* AllocateBonePlanesConstraintSet(std::string name);
 	}
 }

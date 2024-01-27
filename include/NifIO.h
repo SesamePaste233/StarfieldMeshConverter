@@ -204,7 +204,7 @@ namespace nif {
 
 		void SetAssetsPath(const std::string& path) {
 			// Append "geometries" to the path if it doesn't end with it
-			if (path.substr(path.length() - 11) != "/geometries/") {
+			if (path.length() >= 11 && path.substr(path.length() - 11) != "/geometries/") {
 				assets_path = path + "/geometries/";
 			}
 			else
@@ -321,6 +321,8 @@ namespace nif {
 				havok_skeleton = other.havok_skeleton;
 				havok_root_lvl_container = other.havok_root_lvl_container;
 				connection_points_parent = other.connection_points_parent;
+				physics_data = other.physics_data;
+				transcript_path = other.transcript_path;
 			};
 
 			NiArmatureTemplate& operator=(const NiArmatureTemplate& other) {
@@ -331,6 +333,8 @@ namespace nif {
 				havok_skeleton = other.havok_skeleton;
 				havok_root_lvl_container = other.havok_root_lvl_container;
 				connection_points_parent = other.connection_points_parent;
+				physics_data = other.physics_data;
+				transcript_path = other.transcript_path;
 				return *this;
 			};
 
@@ -355,6 +359,9 @@ namespace nif {
 			SubTemplate sub_template = SubTemplate::None;
 
 			uint32_t bsx_flags = 65536;
+
+			nlohmann::json physics_data;
+			std::string transcript_path = "";
 
 			RTTI GetRTTI() const override {
 				return RTTI::NiArmature;
@@ -415,6 +422,11 @@ namespace nif {
 						new_cp.FromJson(cp);
 						connection_points_parent.push_back(new_cp);
 					}
+				}
+
+				if (data.contains("physics_data")) {
+					physics_data = data["physics_data"];
+					transcript_path = data["transcript_path"];
 				}
 
 				if (data.find("skeleton_mode") != data.end())
