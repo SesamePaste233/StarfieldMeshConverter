@@ -164,7 +164,7 @@ namespace utils {
 	int16_t double_to_snorm(double value, double max_border);
 
 	template<typename T>
-	void writeAsHex(std::ostream& file, T& value, bool big_endian = false) {
+	void writeAsHex(std::ostream& file, T&& (value), bool big_endian = false) {
 		T _v = value;
 		if (big_endian) {
 			_v = switchEndian(value);

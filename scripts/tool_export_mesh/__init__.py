@@ -28,10 +28,9 @@ import PhysicsPanel as PhysicsPanel
 #imp.reload(NifIO)
 #imp.reload(nif_armature)
 
-
 bl_info = {
 	"name": "Starfield Geometry Bridge",
-	"version": (0, 15, 0),
+	"version": (0, 15, 1),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",

@@ -519,10 +519,13 @@ void nif::BSClothExtraData::Deserialize(std::istream& file)
 void nif::BSClothExtraData::Serialize(std::ostream& file)
 {
 	if (this->root_level_container) {
+		std::stringstream ss;
 		this->data_serializer.Clear();
 		this->data_serializer.root_level_container = this->root_level_container;
-		this->data_length = this->data_serializer.Serialize(file);
+		this->data_length = this->data_serializer.Serialize(ss);
 		this->binary_bytes = this->data_length + 4;
+		utils::writeAsHex<uint32_t>(file, this->data_length);
+		utils::writeString(file, ss.str());
 		return;
 	}
 

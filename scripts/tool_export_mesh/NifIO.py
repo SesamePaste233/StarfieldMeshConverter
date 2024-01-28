@@ -307,6 +307,11 @@ def ExportNif(options, context, operator):
 	hash_filepath = options.export_sf_mesh_hash_result
 	options.export_sf_mesh_hash_result = False
 	options.use_world_origin = False
+	has_physics_graph = options.physics_tree != "None" and options.physics_tree in bpy.data.node_groups
+	physics_graph = bpy.data.node_groups[options.physics_tree]
+	custom_armature_attached = False
+	physics_armature_attached = False
+	has_skinned_geometry = False
 
 	root = utils_blender.GetActiveObject()
 	if root.type not in ['EMPTY','MESH', 'ARMATURE']:
@@ -376,7 +381,10 @@ def ExportNif(options, context, operator):
 				
 				bone_list_filter = list(set(skeleton_info.keys()) & set(vgrp_names))
 				bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
+				if has_physics_graph:
+					custom_armature_attached = True
+					if armature == physics_graph.skeleton:
+						physics_armature_attached = True
 			#bone_list_filter = list(set(bone_list_filter) | set(cloth_bones))
 
 		if hash_filepath:
@@ -401,6 +409,8 @@ def ExportNif(options, context, operator):
 		if 'FINISHED' not in rtn:
 			operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
 			continue
+
+		has_skinned_geometry = True
 		
 		if options.export_morph:
 			if mode == "SINGLE_MESH":
@@ -457,11 +467,14 @@ def ExportNif(options, context, operator):
 
 	_data['connection_points_p'] = connect_pts
 
-	if options.physics_tree != "None" and options.physics_tree in bpy.data.node_groups:
-		physics_data = PhysicsConverter.get_physics_data(bpy.data.node_groups[options.physics_tree])
-		if physics_data != None:
-			_data['physics_data'] = physics_data
-			_data['transcript_path'] = MeshConverter.GetTranscriptPath()
+	if has_physics_graph:
+		if not has_skinned_geometry or not physics_armature_attached:
+			operator.report({'WARNING'}, f'Nif export doesn\'t have a skinned mesh that is weighted to the very same skeleton in Physics Editor. Physics data will be ignored.')
+		else:
+			physics_data = PhysicsConverter.get_physics_data(physics_graph)
+			if physics_data != None:
+				_data['physics_data'] = physics_data
+				_data['transcript_path'] = MeshConverter.GetTranscriptPath()
 	#print(_data)
 	json_data = json.dumps(_data)
 

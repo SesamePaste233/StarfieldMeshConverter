@@ -63,7 +63,7 @@ bool nif::NifIO::Serialize(const std::string filename)
 	std::string extension = filename.substr(filename.find_last_of(".") + 1);
 	if (extension != "nif")
 	{
-		std::cout << "Invalid file extension" << std::endl;
+		std::cout << "At: NifIO::Serialize(). Invalid file extension" << std::endl;
 		return false;
 	}
 
@@ -72,7 +72,7 @@ bool nif::NifIO::Serialize(const std::string filename)
 	file.open(filename, std::ios::binary);
 	if (!file.is_open())
 	{
-		std::cout << "Error opening file" << std::endl;
+		std::cout << "At: NifIO::Serialize(). Error opening file" << std::endl;
 		return false;
 	}
 
@@ -80,7 +80,7 @@ bool nif::NifIO::Serialize(const std::string filename)
 
 	// Write the header
 	if (!WriteHeader(file)) {
-		std::cout << "Error writing header" << std::endl;
+		std::cout << "At: NifIO::Serialize(). Error writing header" << std::endl;
 		return false;
 	}
 
