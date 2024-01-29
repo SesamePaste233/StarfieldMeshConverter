@@ -248,9 +248,9 @@ namespace hktypes {
 		std::vector<LocalConstraint> localConstraints;	// Offset: 40 Unk: 0
 		std::vector<LocalStiffnessConstraint> localStiffnessConstraints;	// Offset: 56 Unk: 0
 		uint32_t referenceMeshBufferIdx;	// Offset: 72 Unk: 0
-		float stiffness;	// Offset: 76 Unk: 0
-		ShapeType shapeType;	// Offset: 80 Unk: 0
-		bool applyNormalComponent;	// Offset: 84 Unk: 0
+		float stiffness = 1.f;	// Offset: 76 Unk: 0
+		ShapeType shapeType = ShapeType::ST_SPHERE;	// Offset: 80 Unk: 0
+		bool applyNormalComponent = false;	// Offset: 84 Unk: 0
 
 		// Extra
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
@@ -271,6 +271,28 @@ namespace hktypes {
 
 		inline int ConstraintPriority() override {
 			return 6;
+		}
+
+		inline void AddConstraintPair(uint16_t particleIndex, uint16_t referenceVertex, float maximumDistance, float maxNormalDistance, float minNormalDistance, float stiffness) {
+			if (stiffness == 1.f) {
+				LocalConstraint local_constraint;
+				local_constraint.particleIndex = particleIndex;
+				local_constraint.referenceVertex = referenceVertex;
+				local_constraint.maximumDistance = maximumDistance;
+				local_constraint.maxNormalDistance = maxNormalDistance;
+				local_constraint.minNormalDistance = minNormalDistance;
+				localConstraints.push_back(local_constraint);
+			}
+			else {
+				LocalStiffnessConstraint local_stiffness_constraint;
+				local_stiffness_constraint.particleIndex = particleIndex;
+				local_stiffness_constraint.referenceVertex = referenceVertex;
+				local_stiffness_constraint.maximumDistance = maximumDistance;
+				local_stiffness_constraint.maxNormalDistance = maxNormalDistance;
+				local_stiffness_constraint.minNormalDistance = minNormalDistance;
+				local_stiffness_constraint.stiffness = stiffness;
+				localStiffnessConstraints.push_back(local_stiffness_constraint);
+			}
 		}
 	};
 

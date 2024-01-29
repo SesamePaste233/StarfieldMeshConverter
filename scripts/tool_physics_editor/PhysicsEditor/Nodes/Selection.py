@@ -103,7 +103,13 @@ class MeshAttrSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
             bm = bmesh.new()
             bm.from_mesh(mesh.data)
             if self.type_enum_prop == 'FLOAT':
-                layer = bm.verts.layers.float.get(attr.name)
+                if self.domain_enum_prop == 'POINT':
+                    layer = bm.verts.layers.float.get(attr.name)
+                elif self.domain_enum_prop == 'EDGE':
+                    layer = bm.edges.layers.float.get(attr.name)
+                elif self.domain_enum_prop == 'FACE':
+                    layer = bm.faces.layers.float.get(attr.name)
+
                 print(bm.verts.layers.float)
                 if self.operator_enum_prop == 'Higher than':
                     if self.domain_enum_prop == 'POINT':

@@ -764,6 +764,10 @@ hktypes::hclBufferedMeshObj hktypes::hclBufferedMeshObj::FromJson(nlohmann::json
 	}
 
 	if (this->shapeType == ShapeType::Capsule) {
+		// Some weird thing in havok cloth
+		this->localFrame(1, 3) = this->localFrame(2, 0);
+		this->localFrame(0, 3) = this->localFrame(2, 1);
+
 		this->capsuleStart = json["capsuleStart"];
 		this->capsuleEnd = json["capsuleEnd"];
 		this->capsuleBigRadius = json["capsuleBigRadius"];

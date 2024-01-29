@@ -89,6 +89,7 @@ node_categories = [
         NodeItem("StretchLinkConstraint", label="Stretch Link"),
         #NodeItem("BendStiffnessConstraint", label="Bend Stiffness"),
         NodeItem("BonePlanesConstraint", label="Global Bone Plane Constraint"),
+        NodeItem("LocalRangeConstraint", label="Local Range Constraint"),
     ]),
     MyNodeCategory('COLLIDERS', "Colliders", items=[
         NodeItem("CapsuleCollider", label="Capsule Collider"),
@@ -128,6 +129,7 @@ classes = [
     Constraints.StretchLinkConstraintNode,
     Constraints.BendStiffnessConstraintNode,
     Constraints.BonePlanesConstraintNode,
+    Constraints.LocalRangeConstraintNode,
     Colliders.CapsuleColliderNode,
     Colliders.TaperedCapsuleColliderNode,
     Skeleton.PickBoneFromSkeletonNode,
@@ -138,6 +140,7 @@ classes = [
     PhysicsData.TwoStatePhysicsDataNode,
     Skeleton.MatchBoneNameNode,
     Drivers.SimpleTriangleBoneDriverNode,
+
 ]
 
 

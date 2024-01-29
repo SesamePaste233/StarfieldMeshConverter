@@ -141,6 +141,8 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 				for (auto& link : constraint["links"]) {
 					stretch_link->AddDefaultLink(this->hcl_sim_cloth_data, link["particleA"], link["particleB"], link["stiffness"]);
 				}
+
+				stretch_link->MergeSingles();
 			}
 			else if (type == "BonePlanes") {
 				/*
@@ -172,6 +174,45 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 					bone_planes->AddBonePlane(hktypes::hkVector4Holder::FromVector4f(plane_normal_dirs[i]), particle_indices[i], bone_id_map[bone_indices[i]], stiffnesses[i]);
 				}
 
+			}
+			else if (type == "LocalRange") {
+				/*constraint = {
+					'constraint': 'LocalRange',
+					'name' : self.name,
+					'particles' : particles_list,
+					'max_distances' : max_distances,
+					'upper_normal_thresholds' : upper_normal_threshold_list,
+					'lower_normal_thresholds' : lower_normal_threshold_list,
+					'stiffnesses' : stiffness_list,
+					'modes' : [self.mode for _ in particle_indices[0]] ,
+					'apply_normal_component' : self.constraint_normals,
+				}*/
+
+				auto constraint_ptr = this->AddConstraintSet(type, name);
+				auto local_range = dynamic_cast<hktypes::hclLocalRangeConstraintSet*>(constraint_ptr);
+
+				std::vector<uint16_t> particle_indices = constraint["particles"];
+				std::vector<float> max_distances = constraint["max_distances"];
+				std::vector<float> upper_normal_thresholds = constraint["upper_normal_thresholds"];
+				std::vector<float> lower_normal_thresholds = constraint["lower_normal_thresholds"];
+				std::vector<float> stiffnesses = constraint["stiffnesses"];
+
+				local_range->applyNormalComponent = constraint["apply_normal_component"];
+				local_range->referenceMeshBufferIdx = 0;
+
+				for (size_t i = 0; i < particle_indices.size(); ++i) {
+					if (this->hcl_sim_cloth_data->IsFixedParticle(particle_indices[i])) {
+						continue;
+					}
+					local_range->AddConstraintPair(
+						particle_indices[i],
+						particle_indices[i],
+						max_distances[i],
+						upper_normal_thresholds[i],
+						lower_normal_thresholds[i],
+						stiffnesses[i]
+					);
+				}
 			}
 			else {
 				std::cout << "Warning: Invalid constraint type \"" << type << "\"" << std::endl;

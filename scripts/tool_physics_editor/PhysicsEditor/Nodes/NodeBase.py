@@ -1,6 +1,6 @@
 import bpy
 from version import __plugin_version__, make_version, Version
-from PhysicsEditor.NodeVersions import get_node_version
+from PhysicsEditor.NodeVersions import get_node_script_version
 
 import PhysicsEditor.Utilities.utils_node as utils_node
 
@@ -103,7 +103,7 @@ class hclPhysicsNodeBase:
     
     # Called on init for every node
     def update_version(self):
-        self.instance_version = get_node_version(self.bl_idname).as_str()
+        self.instance_version = get_node_script_version(self.bl_idname).as_str()
 
     def init(self, context):
         self.update_version()
@@ -166,7 +166,7 @@ class hclPhysicsNodeBase:
     
     # Override this function to check if the node is valid
     def check_valid(self) -> utils_node.NodeValidityReturn:
-        if make_version(self.instance_version) != get_node_version(self.bl_idname):
+        if make_version(self.instance_version) != get_node_script_version(self.bl_idname):
             return utils_node.NodeValidityReturn(False, self, "Version mismatch! Delete and recreate this node.")
         return utils_node.NodeValidityReturn(True, self)
         

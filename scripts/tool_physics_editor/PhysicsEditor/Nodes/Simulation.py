@@ -12,7 +12,7 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_label = 'Sim Cloth Data'
 
     gravity_vector: bpy.props.FloatVectorProperty(name='Gravity Vector', default=(0,0,-9.81), size=3)
-    global_damping_per_second: bpy.props.FloatProperty(name='Global Damping Per Second', default=0.2)
+    global_damping_per_second: bpy.props.FloatProperty(name='Global Damping Per Second',min=0, max=1, default=0.2)
 
     def init(self, context):
         super().init(context)
@@ -75,9 +75,9 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_idname = 'hclParticlesFromMesh'
     bl_label = 'Particles From Mesh'
 
-    mass_prop: bpy.props.FloatProperty(name='Mass', default=1.0)
-    radius_prop: bpy.props.FloatProperty(name='Radius', default=0.02)
-    friction_prop: bpy.props.FloatProperty(name='Friction', default=0.5)
+    mass_prop: bpy.props.FloatProperty(name='Mass', min=0.001, default=1.0)
+    radius_prop: bpy.props.FloatProperty(name='Radius', min=0.001, default=0.02)
+    friction_prop: bpy.props.FloatProperty(name='Friction', min=0, max=1, default=0.5)
 
     def init(self, context):
         super().init(context)
@@ -172,13 +172,13 @@ class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_idname = 'hclLinksFromMesh'
     bl_label = 'Links From Mesh'
 
-    stiffness_prop: bpy.props.FloatProperty(name='Stiffness', default=1.0)
+    stiffness_prop: bpy.props.FloatProperty(name='Stiffness', min=0, max=1, default=1.0)
 
     def init(self, context):
         super().init(context)
         input_skt = self.inputs.new('NodeSocketGeometry', 'Mesh')
         input_skt.hide_value = True
-        input_skt1 = self.inputs.new('IndicesOnDomainType', 'Edge Indices')
+        input_skt1 = self.inputs.new('IndicesOnDomainType', 'Edge Indices (Default: All)')
         input_skt1.display_shape = 'CIRCLE_DOT'
         input_skt1.hide_value = True
         output_skt = self.outputs.new('hclClothLinksType', 'Links')
@@ -192,11 +192,11 @@ class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         if not self.inputs['Mesh'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Mesh linked")
         
-        if self.inputs['Edge Indices'].is_linked:
+        if self.inputs['Edge Indices (Default: All)'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Mesh'])
-            parent1 = utils_node.get_linked_single(self.inputs['Edge Indices'])
+            parent1 = utils_node.get_linked_single(self.inputs['Edge Indices (Default: All)'])
             if parent.check_valid() and parent1.check_valid():
-                vertex_indices_input = utils_node.get_socket_input_single(self,'Edge Indices')
+                vertex_indices_input = utils_node.get_socket_input_single(self,'Edge Indices (Default: All)')
                 try:
                     domain = vertex_indices_input[1]
                     if domain != 'EDGE':
@@ -213,8 +213,8 @@ class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         
         if socket_name == 'Links':
             mesh = utils_node.get_socket_input_single(self,'Mesh')
-            if self.inputs['Edge Indices'].is_linked:
-                edge_indices_input = utils_node.get_socket_input_single(self,'Edge Indices')
+            if self.inputs['Edge Indices (Default: All)'].is_linked:
+                edge_indices_input = utils_node.get_socket_input_single(self,'Edge Indices (Default: All)')
                 e_ids = edge_indices_input[0]
             else:
                 e_ids = [i for i in range(len(mesh.data.edges))]

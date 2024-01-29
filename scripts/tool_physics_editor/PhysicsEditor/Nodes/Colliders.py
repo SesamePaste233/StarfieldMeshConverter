@@ -38,7 +38,7 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
 
     start_pos_prop: bpy.props.FloatVectorProperty(name='Start Position', default=(0, 0, 0), update=update_start_pos)
     end_pos_prop: bpy.props.FloatVectorProperty(name='End Position', default=(0, 0, 1), update=update_end_pos)
-    radius_prop: bpy.props.FloatProperty(name='Radius', default=0.5, update=update_radius)    
+    radius_prop: bpy.props.FloatProperty(name='Radius', min=0.001, default=0.5, update=update_radius)    
 
     def init(self, context):
         super().init(context)
@@ -130,8 +130,8 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
 
     start_pos_prop: bpy.props.FloatVectorProperty(name='Start Position', default=(0, 0, 0), update=update_start_pos)
     end_pos_prop: bpy.props.FloatVectorProperty(name='End Position', default=(0, 0, 1), update=update_end_pos)
-    start_radius_prop: bpy.props.FloatProperty(name='Start Radius', default=0.5, update=update_start_radius)
-    end_radius_prop: bpy.props.FloatProperty(name='End Radius', default=0.5, update=update_end_radius)
+    start_radius_prop: bpy.props.FloatProperty(name='Start Radius', min=0.001, default=0.5, update=update_start_radius)
+    end_radius_prop: bpy.props.FloatProperty(name='End Radius', min=0.001, default=0.5, update=update_end_radius)
 
     def init(self, context):
         super().init(context)

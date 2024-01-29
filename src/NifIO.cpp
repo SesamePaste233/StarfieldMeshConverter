@@ -1342,6 +1342,8 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 		}
 
 		bscloth->root_level_container = &builder.GetTarget();
+
+		root_node->flags |= 1 << 29;
 	}
 
 	if (this->sub_template & SubTemplate::PureSkeleton) {

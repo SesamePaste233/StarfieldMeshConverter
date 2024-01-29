@@ -841,10 +841,20 @@ void hktypes::hclStretchLinkConstraintSetMx::AddDefaultLink(hclSimClothData* clo
 	float restLength = (posA - posB).norm();
 	bool is_A_fixed = cloth_data->IsFixedParticle(particleA);
 	bool is_B_fixed = cloth_data->IsFixedParticle(particleB);
+	uint16_t _particleA = particleA;	
+	uint16_t _particleB = particleB;
 	if (is_A_fixed && is_B_fixed) {
 		return;
 	}
-	AddLinkImpl(particleA, particleB, stiffness, restLength);
+	else if (is_A_fixed) {
+		// Do nothing
+	}
+	else if (is_B_fixed) {
+		// Switch A and B
+		_particleA = particleB;
+		_particleB = particleA;
+	}
+	AddLinkImpl(_particleA, _particleB, stiffness, restLength);
 }
 
 bool hktypes::hclStretchLinkConstraintSetMx::Single::FromInstance(const hkreflex::hkClassInstance* instance)

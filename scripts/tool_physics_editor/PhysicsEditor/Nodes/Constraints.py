@@ -11,6 +11,8 @@ import PhysicsEditor.Prefabs.PlaneGenGeoNode as PlaneGenGeoNode
 
 import PhysicsEditor.Utilities.utils_prefabs as utils_prefabs
 
+import PhysicsEditor.Utilities.utils_geometry as utils_geometry
+
 def update_visibility(self, context):
     objects = find_vis_meshes(self)
     if objects is None or len(objects) == 0:
@@ -212,7 +214,7 @@ class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
 
     show_constraint: bpy.props.BoolProperty(name='Show Constraint', default=False, update=update_visibility)
     vis_plane_size: bpy.props.FloatProperty(name='Plane Size', default=0.1, min=0.001, update=update_plane_size)
-    stiffness: bpy.props.FloatProperty(name='Stiffness', default=1)
+    stiffness: bpy.props.FloatProperty(name='Stiffness', min=0, max=1, default=1)
     plane_normal_dir: bpy.props.FloatVectorProperty(name='Plane Normal Direction', default=(1, 0, 0), update=update_plane_normal_dir)
 
     def init(self, context):
@@ -315,3 +317,160 @@ class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         for obj in vis_objs:
             obj.hide_viewport = not self.show_constraint
         return vis_objs
+    
+class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
+    '''Constraint Particles to a range of their initial positions'''
+
+    bl_idname = 'LocalRangeConstraint'
+    bl_label = 'Local Range Constraint'
+
+    show_constraint: bpy.props.BoolProperty(name='Show Constraint', default=False, update=update_visibility)
+    stiffness: bpy.props.FloatProperty(name='Global Stiffness', min=0, max=1, description="1 means particles will only move within the range, 0 means no constraint at all, 0.3 will allow some flexibility", default=1)
+    base_stiffness: bpy.props.FloatProperty(name='Base Stiffness', min=0, max=1, description="1 means particles will only move within the range, 0 means no constraint at all, 0.3 will allow some flexibility", default=0.1)
+    effect_range: bpy.props.FloatProperty(name='Minimun Range', min = 0.001, description="Particles within this range will NOT be constrained", default=0.01)
+    mode: bpy.props.EnumProperty(name='Mode', items=[('FIXED', 'Fixed', 'Constraint strength for particles is a fixed value'), ('CASCADE', 'Cascade', 'Particles around cloth bones that are closer to non-cloth bones have higher stiffness')], default='CASCADE')
+    cascade_falloff_factor: bpy.props.FloatProperty(name='Cascade Falloff Factor', min=0, max=1, description="The falloff factor for cloth bones in cascade mode", default=0.8)
+    constraint_normals: bpy.props.BoolProperty(name='Constraint Normal Directions', default=False)
+    upper_normal_threshold: bpy.props.FloatProperty(name='Upper Normal Threshold', default=0.5)
+    lower_normal_threshold: bpy.props.FloatProperty(name='Lower Normal Threshold', default=-0.5)
+
+    def init(self, context):
+        super().init(context)
+        particles_skt = self.inputs.new('hclClothParticlesType', 'Particles')
+        input_skt1 = self.inputs.new('IndicesOnDomainType', 'Particle Indices (Default: All)')
+        input_skt1.display_shape = 'CIRCLE_DOT'
+        particles_out_skt = self.outputs.new('hclClothParticlesType', 'Particles')
+        
+    def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
+        print(f'check_valid {self.name}')
+        if self.inputs['Particles'].is_linked:
+            parent = utils_node.get_linked_single(self.inputs['Particles'])
+            if not parent.check_valid():
+                return utils_node.NodeValidityReturn(False, self, "Invalid Particles linked")
+            
+            parent2 = utils_node.get_linked_single(self.inputs['Particle Indices (Default: All)'])
+            if parent2 is not None:
+                if not parent2.check_valid():
+                    return utils_node.NodeValidityReturn(False, self, "Invalid Particle Indices linked")
+                
+                domain = utils_node.get_socket_input_single(self,'Particle Indices (Default: All)')[1]
+                if domain != 'POINT':
+                    return utils_node.NodeValidityReturn(False, self, "Particle Indices must be on POINT domain")
+            return utils_node.NodeValidityReturn(True, self)
+        return utils_node.NodeValidityReturn(False, self, 'No Particles or Bone linked')
+
+    def draw_buttons(self, context, layout):
+        super().draw_buttons(context, layout)
+        if self.show_constraint:
+            box = layout.box()
+            box.scale_y = 0.9
+            box.prop(self, "show_constraint", text="Show Constraint")
+        else:
+            layout.prop(self, "show_constraint", text="Show Constraint")
+
+        if self.mode == "FIXED":
+            layout.prop(self, "stiffness", text="Particles Stiffness")
+        else:
+            layout.prop(self, "base_stiffness", text="Base Stiffness (better around 0.3)")
+
+        layout.prop(self, "effect_range", text="Minimum Range")
+        if self.mode == "FIXED":
+            layout.prop(self, "mode", text="Mode")
+        elif self.mode == "CASCADE":
+            box0 = layout.box()
+            box0.prop(self, "mode", text="Mode")
+            box0.prop(self, "cascade_falloff_factor", text="Cascade Falloff Factor")
+        if self.constraint_normals:
+            box1 = layout.box()
+            box1.scale_y = 0.9
+            box1.prop(self, "constraint_normals", text="Constraint Normals")
+            box1.prop(self, "upper_normal_threshold", text="Upper Normal Threshold")
+            box1.prop(self, "lower_normal_threshold", text="Lower Normal Threshold")
+        else:
+            layout.prop(self, "constraint_normals", text="Constraint Normals")
+
+    def get_socket_output(self, socket_name: str):
+        valid = self.check_valid()
+        if not valid:
+            return None
+        
+        if socket_name == 'Particles':
+            particles = utils_node.get_socket_input_single(self,'Particles').copy()
+
+            if self.inputs['Particle Indices (Default: All)'].is_linked:
+                particle_indices = utils_node.get_socket_input_single(self,'Particle Indices (Default: All)')
+            else:
+                particle_indices = [list(particles['particles'].keys()), 'POINT']
+
+            particles_list = particle_indices[0]
+            if self.mode == 'FIXED':
+                stiffness_list = [float(self.stiffness) for _ in particle_indices[0]]
+            else:
+                stiffness_list = [float(self.base_stiffness) for _ in particle_indices[0]]
+            max_distances = [float(self.effect_range) for _ in particle_indices[0]]
+            if self.constraint_normals:
+                upper_normal_threshold_list = [float(self.upper_normal_threshold) for _ in particle_indices[0]]
+                lower_normal_threshold_list = [float(self.lower_normal_threshold) for _ in particle_indices[0]]
+            else:
+                upper_normal_threshold_list = [340282001837565597733306976381245063168 for _ in particle_indices[0]]
+                lower_normal_threshold_list = [-340282001837565597733306976381245063168 for _ in particle_indices[0]]
+
+            if 'constraints' in particles:
+                # if there exists a constraint of the same type, pick it
+                for constraint in particles['constraints']:
+                    if constraint['constraint'] == 'LocalRange':
+                        constraint['particles'].extend(particles_list)
+                        constraint['max_distances'].extend(max_distances)
+                        constraint['upper_normal_thresholds'].extend(upper_normal_threshold_list)
+                        constraint['lower_normal_thresholds'].extend(lower_normal_threshold_list)
+                        constraint['stiffnesses'].extend(stiffness_list)
+                        constraint['modes'].extend([self.mode for _ in particle_indices[0]])
+                        constraint['apply_normal_component'] = constraint['apply_normal_component'] or self.constraint_normals
+                        return particles
+
+            constraint = {
+                'constraint': 'LocalRange',
+                'name': self.name,
+                'particles': particles_list,
+                'max_distances': max_distances,
+                'upper_normal_thresholds': upper_normal_threshold_list,
+                'lower_normal_thresholds': lower_normal_threshold_list,
+                'stiffnesses': stiffness_list,
+                'modes': [self.mode for _ in particle_indices[0]],
+                'apply_normal_component': self.constraint_normals,
+            }
+            particles['constraints'].append(constraint)
+            return particles
+        
+    def get_constraint_data(self, _constraint_dict, armature: bpy.types.Object, mesh: bpy.types.Object, cloth_bone_ids: list[int]):
+        constraint_dict = _constraint_dict.copy()
+        bone_names = [armature.data.bones[i].name for i in cloth_bone_ids]
+        bone_centers = {armature.data.bones[i].name: armature.data.bones[i].head_local for i in cloth_bone_ids}
+        cascade_trees, bone_factors, bone_tree_ids = utils_geometry.GetClothBoneSubTrees(armature, bone_names, self.cascade_falloff_factor)
+        bone_centers = {armature.data.bones[i].name: armature.data.bones[i].head_local for i in bone_tree_ids.keys()}
+        query_particle_centers = []
+        query_particles_list_idx = []
+        for i, modes in enumerate(constraint_dict['modes']):
+            if modes == 'CASCADE':
+                query_particles_list_idx.append(i)
+                query_particle_centers.append(mesh.data.vertices[i].co)
+
+        particle_tree_ids, particle_tree_dists = utils_geometry.AssignPointsToSubTrees(bone_centers, bone_tree_ids, query_particle_centers)
+
+        for p_t_id in range(len(cascade_trees)):
+            particle_ids = [i for i in range(len(query_particle_centers)) if particle_tree_ids[i] == p_t_id]
+            particle_centers = [query_particle_centers[i] for i in range(len(query_particle_centers)) if particle_tree_ids[i] == p_t_id]
+            particle_dists = [particle_tree_dists[i] for i in range(len(query_particle_centers)) if particle_tree_ids[i] == p_t_id]
+            subtree_bones = [k for k in bone_tree_ids.keys() if bone_tree_ids[k] == p_t_id]
+            subtree_centers = [bone_centers[k] for k in subtree_bones]
+            subtree_factors = [bone_factors[k] for k in subtree_bones]
+            avg_dist = sum(particle_dists) / len(particle_dists)
+            p_factors = utils_geometry.GaussianDistanceWeightingScheme(subtree_centers, subtree_factors, particle_centers, avg_dist * 0.5)
+
+            for p_id, p_factor in zip(particle_ids, p_factors):
+                constraint_dict['stiffnesses'][query_particles_list_idx[p_id]] *= p_factor
+
+        return constraint_dict

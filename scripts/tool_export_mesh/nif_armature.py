@@ -257,7 +257,7 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 		for child_dict in armature_dict['children']:
 			CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule)
 
-def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name = None, debug_capsule = None):
+def CreateArmature(armature_dict: dict, skin_objects: bpy.types.Object, collection: bpy.types.Collection, armature_name = None, debug_capsule = None):
 	old_active = utils_blender.GetActiveObject()
 	old_selected = utils_blender.GetSelectedObjs(True)
 
@@ -289,10 +289,13 @@ def CreateArmature(armature_dict: dict, skin_objects, collection, armature_name 
 	utils_blender.SetActiveObject(old_active)
 	return arm_obj
 
-def ImportArmatureFromJson(skeleton_name, collection, skin_objs, armature_name = None, debug_capsule = None):
+def ImportArmatureFromJson(skeleton_name: str, collection: bpy.types.Collection, skin_objs: bpy.types.Object = None, armature_name = None, debug_capsule = None):
 	utils_path = utils_blender.UtilsFolderPath()
 	skeleton_path = os.path.join(utils_path, "Assets", f"{skeleton_name}.json")
 	
+	if armature_name == None:
+		armature_name = skeleton_name
+
 	with open(skeleton_path, 'r') as json_file:
 		data = json.load(json_file)
 

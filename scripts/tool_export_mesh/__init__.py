@@ -20,6 +20,8 @@ import nif_armature
 
 import PhysicsPanel as PhysicsPanel
 
+import ImportSkeleOp as ImportSkeleOp
+
 #import imp
 #imp.reload(utils_blender)
 #imp.reload(utils)
@@ -30,6 +32,7 @@ import PhysicsPanel as PhysicsPanel
 
 bl_info = {
 	"name": "Starfield Geometry Bridge",
+	"author": "SesamePaste",
 	"version": (0, 15, 1),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
@@ -680,6 +683,7 @@ def register():
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_nif)
 
 	PhysicsPanel.register()
+	ImportSkeleOp.register()
 
 def unregister():
 	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
@@ -713,6 +717,7 @@ def unregister():
 	del bpy.types.Scene.export_morph
 
 	PhysicsPanel.unregister()
+	ImportSkeleOp.unregister()
 
 if __name__ == "__main__":
 	register()

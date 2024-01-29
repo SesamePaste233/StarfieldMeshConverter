@@ -282,6 +282,11 @@ hktypes::hclConstraintSet* hktypes::AllocateConstraint(std::string type, std::st
 	else if (type == "BonePlanes") {
 		return impl::AllocateBonePlanesConstraintSet(name);
 	}
+	else if (type == "LocalRange") {
+		hclLocalRangeConstraintSet* out = new hclLocalRangeConstraintSet();
+		out->name = name;
+		return out;
+	}
 	return nullptr;
 }
 

@@ -13,6 +13,7 @@ import PhysicsEditor.PhysicsTree as PhysicsTree
 
 bl_info = {
 	"name": "Starfield Havok Physics Editor",
+	"author": "SesamePaste",
 	"version": (0, 15, 1),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",

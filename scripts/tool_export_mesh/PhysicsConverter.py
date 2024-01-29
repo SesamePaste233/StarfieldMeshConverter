@@ -8,7 +8,7 @@ import utils_common as utils
 
 def get_physics_data(tree: bpy.types.NodeTree):
     out_nodes: list[bpy.types.Node] = tree.get_output_nodes()
-    
+
     if tree.bl_idname != 'hclPhysicsTreeType':
         return None
 
@@ -85,6 +85,12 @@ def get_physics_data(tree: bpy.types.NodeTree):
         else:
             physics_data_dict['bone_driver_data'] = processed_driver_data
 
+
+        for constraint in physics_data_dict['cloth_data']['constraints']:
+            if constraint['constraint'] == 'LocalRange' and 'CASCADE' in constraint['modes']:
+                constraint_node = tree.nodes[constraint['name']]
+                constraint = constraint_node.get_constraint_data(constraint, armature, tri_mesh, processed_driver_data['cloth_bones'])
+
         # Delete the copy of the mesh
         utils_blender.RemoveMeshObj(tri_mesh)
 
@@ -97,7 +103,6 @@ def get_physics_data(tree: bpy.types.NodeTree):
             'weights': weights,
             'used_indices': used_indices,
         }
-
 
         return physics_data
     
