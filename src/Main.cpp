@@ -197,7 +197,7 @@ int blenderToMorph(int argc, char* argv[]) {
 
 void importnif_main() {
 	nif::NifIO nif;
-	std::string input_file("C:\\repo\\MeshConverter\\shaggy_f.nif");
+	std::string input_file("C:\\repo\\MeshConverter\\naked_m.nif");
 
 	if (!nif.Deserialize(input_file)) {
 		std::cerr << "Failed to load nif from " << input_file << std::endl;

@@ -308,7 +308,8 @@ def ExportNif(options, context, operator):
 	options.export_sf_mesh_hash_result = False
 	options.use_world_origin = False
 	has_physics_graph = options.physics_tree != "None" and options.physics_tree in bpy.data.node_groups
-	physics_graph = bpy.data.node_groups[options.physics_tree]
+	if has_physics_graph:
+		physics_graph = bpy.data.node_groups[options.physics_tree]
 	custom_armature_attached = False
 	physics_armature_attached = False
 	has_skinned_geometry = False
@@ -361,9 +362,10 @@ def ExportNif(options, context, operator):
 		skeleton_info = None
 		bone_list_filter = None
 		if len(vgrp_names) > 0 and options.WEIGHTS:
-			armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE']
+			armatures = [m.object for m in mesh_obj.modifiers if m.type == 'ARMATURE' and m.object is not None]
 
 			if len(armatures) == 0:
+				operator.report({'WARNING'}, f'Object {mesh_obj.name} has no valid armature modifier. Searching in database for skeleton...')
 				armature_name, bone_list_filter = nif_armature.MatchSkeletonAdvanced(vgrp_names, mesh_obj.name + ' ' + mesh_obj.data.name)
 				if armature_name != None:
 					skeleton_info = nif_armature.SkeletonLookup(armature_name)

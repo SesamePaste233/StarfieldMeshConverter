@@ -48,7 +48,15 @@ Eigen::Vector3f hktypes::hkPackedVector3::ToVector3f()
 hktypes::hkPackedVector3 hktypes::hkPackedVector3::FromVector3f(const Eigen::Vector3f vec)
 {
 	hkPackedVector3 result;
-	float m = vec.maxCoeff();
+	// Find the maximum absolute value among the components
+	float m = 0;
+	for (int i = 0; i < 3; ++i) {
+		float absValue = fabs(vec[i]);
+		if (absValue > m) {
+			m = absValue;
+		}
+	}
+	// Calculate exponential part
 	uint8_t b = 0;
 	int* const exp_ptr = reinterpret_cast<int*>(&m);
 	int x = *exp_ptr;
@@ -63,6 +71,7 @@ hktypes::hkPackedVector3 hktypes::hkPackedVector3::FromVector3f(const Eigen::Vec
 	result.values[3] = b << 7;
 	int iexp = b << 23;
 	float fexp = *reinterpret_cast<float*>(&iexp);
+	// Scale and pack the values part
 	result.values[0] = (int32_t)(vec.x() / fexp) >> 16;
 	result.values[1] = (int32_t)(vec.y() / fexp) >> 16;
 	result.values[2] = (int32_t)(vec.z() / fexp) >> 16;

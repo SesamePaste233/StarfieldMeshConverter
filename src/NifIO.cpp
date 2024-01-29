@@ -76,6 +76,12 @@ bool nif::NifIO::Serialize(const std::string filename)
 		return false;
 	}
 
+	std::stringstream block_buffer;
+
+	for (int i = 0; i < this->header.num_blocks; i++) {
+		this->blocks[i]->Serialize(block_buffer);
+	}
+
 	this->UpdateHeader();
 
 	// Write the header
@@ -83,10 +89,8 @@ bool nif::NifIO::Serialize(const std::string filename)
 		std::cout << "At: NifIO::Serialize(). Error writing header" << std::endl;
 		return false;
 	}
-
-	for (int i = 0; i < this->header.num_blocks; i++) {
-		this->blocks[i]->Serialize(file);
-	}
+	
+	utils::writeString(file, block_buffer.str());
 
 	return true;
 }

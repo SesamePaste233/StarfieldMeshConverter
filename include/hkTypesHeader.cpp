@@ -657,7 +657,7 @@ hktypes::hclObjectSpaceDeformer hktypes::DeformerFromWeights(const std::vector<s
 	// two: 0 (index 2)
 	// one: 1 (index 3)
 	// control_bytes: 0,0,0,0,1,1,3
-	for (uint8_t i = 7, j = -4; i > 0; --i) {
+	for (uint8_t i = 7, j = -4; i < 8 && i >= 0; --i) {
 		int num_entries = entry_vert_ids[i].size() % 16 > 0 ? entry_vert_ids[i].size() / 16 + 1 : entry_vert_ids[i].size() / 16;
 		for (int k = 0; k < num_entries; ++k) {
 			deformer.controlBytes.push_back(j);
@@ -710,8 +710,11 @@ std::vector<hktypes::hclObjectSpaceDeformer::LocalBlockPN> hktypes::localPNsFrom
 		for (int j = 0; j < 16; ++j) {
 			auto& p = localPositions[j];
 			auto& n = localNormals[j];
+			auto n_vec = Eigen::Vector3f(normals[vert_id_list[j]][0], normals[vert_id_list[j]][1], normals[vert_id_list[j]][2]);
+			// Normalize it
+			n_vec = n_vec / n_vec.norm();
 			p = p.FromVector3f(Eigen::Vector3f(positions[vert_id_list[j]][0], positions[vert_id_list[j]][1], positions[vert_id_list[j]][2]));
-			n = n.FromVector3f(Eigen::Vector3f(normals[vert_id_list[j]][0], normals[vert_id_list[j]][1], normals[vert_id_list[j]][2]));
+			n = n.FromVector3f(n_vec);
 		}
 	}
 
