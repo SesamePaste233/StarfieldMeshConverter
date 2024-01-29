@@ -683,7 +683,7 @@ std::vector<hktypes::hclObjectSpaceDeformer::LocalBlockPN> hktypes::localPNsFrom
 	blocks.push_back(utils::make_references<_block_t*>(deformer.twoBlendEntries));
 	blocks.push_back(utils::make_references<_block_t*>(deformer.oneBlendEntries));
 
-	blocks.erase(std::remove_if(blocks.begin(), blocks.end(), [](auto& block) {return block.empty(); }), blocks.end());
+	//blocks.erase(std::remove_if(blocks.begin(), blocks.end(), [](auto& block) {return block.empty(); }), blocks.end());
 
 	std::vector<uint8_t> control_bytes = deformer.controlBytes;
 
@@ -703,7 +703,7 @@ std::vector<hktypes::hclObjectSpaceDeformer::LocalBlockPN> hktypes::localPNsFrom
 		auto& localPositions = PNs[i].localPosition;
 		auto& localNormals = PNs[i].localNormal;
 
-		auto& vert_id_block = vert_ids[control_bytes[i]];
+		auto& vert_id_block = vert_ids[control_bytes[i] + 4];
 		auto& vert_id_list = vert_id_block.front();
 		vert_id_block.pop();
 

@@ -344,7 +344,7 @@ void pmain() {
 	return;
 }
 
-int asdmain() {
+int main() {
 	std::string json_file = "C:\\repo\\MeshConverter\\physics_data_debug.json";
 	std::string output_file = "C:\\repo\\MeshConverter\\physics_data_debug.bin";
 
@@ -456,7 +456,7 @@ void phnifmain() {
 	//}
 }
 
-int main() {
+int asdmain() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();

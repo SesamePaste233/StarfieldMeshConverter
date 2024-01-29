@@ -33,7 +33,7 @@ import ImportSkeleOp as ImportSkeleOp
 bl_info = {
 	"name": "Starfield Geometry Bridge",
 	"author": "SesamePaste",
-	"version": (0, 15, 1),
+	"version": (0, 15, 2),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",

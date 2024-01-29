@@ -22,7 +22,7 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
         colliders.link_limit = 32
         colliders.display_shape = 'DIAMOND'
         colliders.hide_value = True
-        my_output = self.outputs.new('hclSimClothDataType', 'Simulation Data')
+        my_output = self.outputs.new('hclSimClothDataType', 'Cloth Data')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
