@@ -215,5 +215,8 @@ class CombineBoneSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
                 rtn2 = parent2.get_socket_output()
                 arma_obj = rtn2['Armature']
                 bone_indices += rtn2['Bone Indices']
-            return {'Armature':arma_obj, 'Bone Index':None, 'Bone Indices': bone_indices}
+            if len(bone_indices) == 1:
+                return {'Armature':arma_obj, 'Bone Index':bone_indices[0], 'Bone Indices': bone_indices}
+            else:
+                return {'Armature':arma_obj, 'Bone Index':None, 'Bone Indices': bone_indices}
         return None
