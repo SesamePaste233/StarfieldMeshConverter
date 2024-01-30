@@ -319,7 +319,7 @@ class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         return vis_objs
     
 class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
-    '''Constraint Particles to a range of their initial positions'''
+    '''Constraint Particles within a range of their initial positions'''
 
     bl_idname = 'LocalRangeConstraint'
     bl_label = 'Local Range Constraint'

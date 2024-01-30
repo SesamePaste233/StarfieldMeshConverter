@@ -23,8 +23,8 @@ def get_attr_enum_items(self, context):
     return []
 
 valid_operators = {
-    'FLOAT': ('Higher or equal to','Lower or equal to','Higher than','Lower than','Equal to','Not equal to',),
-    'INT': ('Higher or equal to','Lower or equal to','Higher than','Lower than','Equal to','Not equal to',),
+    'FLOAT': ('Equal to','Higher or equal to','Lower or equal to','Higher than','Lower than','Not equal to',),
+    'INT': ('Equal to','Higher or equal to','Lower or equal to','Higher than','Lower than','Not equal to',),
     'BOOLEAN': ('Is','Not')
 }
 
@@ -50,7 +50,7 @@ class MeshAttrSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
     type_enum_prop: bpy.props.EnumProperty(name='Type', items=[('FLOAT', 'Float', 'Float')], update=update_type_enum)
     attr_enum_prop: bpy.props.EnumProperty(name='Attribute', items=get_attr_enum_items)
     operator_enum_prop: bpy.props.EnumProperty(name='Operator', items=get_operator_enum_items)
-    float_operand_prop: bpy.props.FloatProperty(name='Operand', default=0)
+    float_operand_prop: bpy.props.FloatProperty(name='Operand', default=1.0)
     int_operand_prop: bpy.props.IntProperty(name='Operand', default=0)
     bool_operand_prop: bpy.props.BoolProperty(name='Operand', default=True)
 

@@ -155,4 +155,65 @@ class MatchBoneNameNode(NodeBase.hclPhysicsNodeBase, Node):
             else:
                 return {'Armature':armature, 'Bone Index':None, 'Bone Indices': bone_indices}
         return None
+
+class CombineBoneSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
+    '''Combine Bone/Bones inputs'''
+
+    bl_idname = 'CombineBoneSelection'
+    bl_label = 'Combine Bone Selection'
+
+    def init(self, context):
+        super().init(context)
+        bone_index_skt_in1 = self.inputs.new('hkaBoneType', 'Bone(s) A')
+        bone_index_skt_in2 = self.inputs.new('hkaBoneType', 'Bone(s) B')
+        bone_index_skt = self.outputs.new('hkaBoneType', 'Bones')
+ 
+    def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
+        
+        if self.inputs['Bone(s) A'].is_linked and self.inputs['Bone(s) B'].is_linked:
+            parent1 = utils_node.get_linked_single(self.inputs['Bone(s) A'])
+            parent2 = utils_node.get_linked_single(self.inputs['Bone(s) B'])
+            if parent1.check_valid() and parent2.check_valid():
+                return utils_node.NodeValidityReturn(True, self)
+            else:
+                return utils_node.NodeValidityReturn(False, self, "Bone(s) A or Bone(s) B not valid")
+            
+        elif self.inputs['Bone(s) A'].is_linked:
+            parent1 = utils_node.get_linked_single(self.inputs['Bone(s) A'])
+            if parent1.check_valid():
+                return utils_node.NodeValidityReturn(True, self)
+            else:
+                return utils_node.NodeValidityReturn(False, self, "Bone(s) A not valid")
+        
+        elif self.inputs['Bone(s) B'].is_linked:
+            parent2 = utils_node.get_linked_single(self.inputs['Bone(s) B'])
+            if parent2.check_valid():
+                return utils_node.NodeValidityReturn(True, self)
+            else:
+                return utils_node.NodeValidityReturn(False, self, "Bone(s) B not valid")
+        
+        return utils_node.NodeValidityReturn(False, self, "No Bone(s) A or Bone(s) B linked")
     
+    def get_socket_output(self, socket_name: str):
+        valid = self.check_valid()
+        if not valid:
+            return None
+        
+        if socket_name == 'Bones':
+            bone_indices = []
+            arma_obj = None
+            if self.inputs['Bone(s) A'].is_linked:
+                parent1 = utils_node.get_linked_single(self.inputs['Bone(s) A'])
+                rtn1 = parent1.get_socket_output()
+                arma_obj = rtn1['Armature']
+                bone_indices += rtn1['Bone Indices']
+            if self.inputs['Bone(s) B'].is_linked:
+                parent2 = utils_node.get_linked_single(self.inputs['Bone(s) B'])
+                rtn2 = parent2.get_socket_output()
+                arma_obj = rtn2['Armature']
+                bone_indices += rtn2['Bone Indices']
+            return {'Armature':arma_obj, 'Bone Index':None, 'Bone Indices': bone_indices}
+        return None

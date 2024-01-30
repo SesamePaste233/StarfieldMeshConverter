@@ -295,3 +295,73 @@ class DisableCollisionNode(NodeBase.hclPhysicsNodeBase, Node):
         super().draw_buttons(context, layout)
         layout.label(text="Collider:")
         layout.prop(self, "collider_enum_prop", text="")
+
+class SetParticleAttrNode(NodeBase.hclPhysicsNodeBase, Node):
+    '''Set particle attributes'''
+
+    bl_idname = 'SetParticleAttr'
+    bl_label = 'Set Particle Attributes'
+
+    mass_prop: bpy.props.FloatProperty(name='Mass', min=0.001, default=1.0)
+    radius_prop: bpy.props.FloatProperty(name='Radius', min=0.001, default=0.02)
+    friction_prop: bpy.props.FloatProperty(name='Friction', min=0, max=1, default=0.5)
+
+    def init(self, context):
+        super().init(context)
+        output_skt = self.outputs.new('hclClothParticlesType', 'Particles')
+        output_skt.hide_value = True
+        input_skt2 = self.inputs.new('hclClothParticlesType', 'Particles')
+        input_skt2.hide_value = True
+        input_skt1 = self.inputs.new('IndicesOnDomainType', 'Particle Indices')
+        input_skt1.hide_value = True
+
+    def check_valid(self) -> utils_node.NodeValidityReturn:
+        valid = super().check_valid()
+        if not valid:
+            return valid
+        print(f'check_valid {self.name}')
+
+        if not self.inputs['Particle Indices'].is_linked:
+            return utils_node.NodeValidityReturn(False, self, "No Particle Indices linked")
+        
+        parent = utils_node.get_linked_single(self.inputs['Particle Indices'])
+        if not parent.check_valid():
+            return utils_node.NodeValidityReturn(False, self, "Invalid Particle Indices linked")
+        
+        domain = utils_node.get_socket_input_single(self,'Particle Indices')[1]
+        if domain != 'POINT':
+            return utils_node.NodeValidityReturn(False, self, "Particle Indices must be on POINT domain")
+        
+        if not self.inputs['Particles'].is_linked:
+            return utils_node.NodeValidityReturn(False, self, "No Particles linked")
+        
+        parent1 = utils_node.get_linked_single(self.inputs['Particles'])
+        if not parent1.check_valid():
+            return utils_node.NodeValidityReturn(False, self, "Invalid Particles linked")
+        
+        return utils_node.NodeValidityReturn(True, self)
+
+    def get_socket_output(self, socket_name: str = 'Particles'):
+        valid = self.check_valid()
+        if not valid:
+            return None
+        
+        if socket_name == 'Particles':
+            particles = utils_node.get_socket_input_single(self,'Particles').copy()
+            particle_indices = utils_node.get_socket_input_single(self,'Particle Indices')[0]
+            for i in particle_indices:
+                if i in particles:
+                    particles[i]['mass'] = self.mass_prop
+                    particles[i]['radius'] = self.radius_prop
+                    particles[i]['friction'] = self.friction_prop
+            return particles
+        return None
+
+    def draw_buttons(self, context, layout):
+        super().draw_buttons(context, layout)
+        layout.label(text="Particle Mass:")
+        layout.prop(self, "mass_prop", text="")
+        layout.label(text="Particle Radius:")
+        layout.prop(self, "radius_prop", text="")
+        layout.label(text="Particle Friction:")
+        layout.prop(self, "friction_prop", text="")
