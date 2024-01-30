@@ -206,13 +206,11 @@ class CombineBoneSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
             bone_indices = []
             arma_obj = None
             if self.inputs['Bone(s) A'].is_linked:
-                parent1 = utils_node.get_linked_single(self.inputs['Bone(s) A'])
-                rtn1 = parent1.get_socket_output()
+                rtn1 = utils_node.get_socket_input_single(self,'Bone(s) A')
                 arma_obj = rtn1['Armature']
                 bone_indices += rtn1['Bone Indices']
             if self.inputs['Bone(s) B'].is_linked:
-                parent2 = utils_node.get_linked_single(self.inputs['Bone(s) B'])
-                rtn2 = parent2.get_socket_output()
+                rtn2 = utils_node.get_socket_input_single(self,'Bone(s) B')
                 arma_obj = rtn2['Armature']
                 bone_indices += rtn2['Bone Indices']
             if len(bone_indices) == 1:
