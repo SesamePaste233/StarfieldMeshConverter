@@ -158,16 +158,18 @@ def _tag(name:str):
 	for combined_tag in tags:
 		sub_tags = combined_tag.lower().split('_')
 		for tag in sub_tags:
-			if tag == 'f':
-				tag = 'female'
-			elif tag == 'm':
-				tag = 'male'
-			elif tag == 'r' or tag == 'R' or tag == 'Right':
-				tag = 'right'
-			elif tag == 'l' or tag == 'L' or tag == 'Left':
-				tag = 'left'
-			elif tag == 'ss':
-				tag == 'cloth'
+			if tag == 'female' or tag == 'f':
+				tag = 'FE'
+			elif tag == 'male' or tag == 'm':
+				tag = 'MA'
+			elif tag == 'right' or tag == 'r':
+				tag = 'RI'
+			elif tag == 'left' or tag == 'l':
+				tag = 'LE'
+			elif tag == 'ss' or tag == 'cloth':
+				tag == 'CL'
+			elif tag == 'facebone' or tag == 'fb':
+				tag = 'FB'
 			final_tags.append(tag)
     
 	return list(set(final_tags))
@@ -177,7 +179,14 @@ def _match_tags(tags_a:list, tags_b:list, normalized = False):
 	for tag_a in tags_a:
 		tag_score = 0
 		for tag_b in tags_b:
-			tag_score += edit_distance_similarity(tag_a, tag_b)
+			# if tag_a or tag_b is upper case
+			if tag_a.isupper() or tag_b.isupper():
+				if tag_a == tag_b:
+					tag_score += 1
+				else:
+					tag_score += 0
+			else:
+				tag_score += edit_distance_similarity(tag_a, tag_b)
 		final_score += tag_score
 	
 	if normalized:

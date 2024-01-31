@@ -213,7 +213,7 @@ def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 	highest_score = 0
 	for i in range(len(best_matches)):
 		tags_b = utils._tag(best_matches[i])
-		score = utils._match_tags(tags_a, tags_b)
+		score = utils._match_tags(tags_a, tags_b, True)
 		print(obj_name, best_matches[i], score)
 		if score > highest_score:
 			best_id = i

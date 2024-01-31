@@ -200,9 +200,6 @@ def ImportNif(file_path, options, context, operator):
 	nifname = os.path.basename(file_path)
 	additional_assets_folders = utils.ParentDirIfExsit(file_path, 6)
 	nif_folder_name = os.path.basename(os.path.dirname(file_path))
-	
-	for additional_assets_f in additional_assets_folders:
-		print(additional_assets_f)
 
 	if assets_folder == utils.default_assets_folder:
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')

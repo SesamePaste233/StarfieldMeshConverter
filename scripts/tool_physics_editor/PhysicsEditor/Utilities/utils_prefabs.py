@@ -2,8 +2,10 @@ import bpy
 import math
 import mathutils
 
+import PhysicsEditor.AttrOperator as AttrOperator
 import PhysicsEditor.Prefabs.CapsuleGenGeoNode as capsule_gen
 import PhysicsEditor.Prefabs.PlaneGenGeoNode as plane_gen
+import PhysicsEditor.Prefabs.AttributeVisGeoNode as attr_vis_gen
 
 def GetNodeGroupInputIdentifier(node_group, input_name):
 	inputs = node_group.inputs
@@ -184,3 +186,127 @@ def ConstraintObjsToBoneRotation(objs: list[bpy.types.Object], armature_obj, bon
 		const.target = anchor_obj
 
 	return anchor_obj
+
+def VisVertsFromMesh(mesh_obj: bpy.types.Object, vert_ids: list[int], v_scales: list[float], vis_scale = 0.02):
+	if mesh_obj == None:
+		return None
+	if vert_ids == None or len(vert_ids) == 0:
+		return None
+
+	mesh = mesh_obj.data.copy()
+	obj = bpy.data.objects.new('VIS_MESH', mesh)
+
+	bpy.context.collection.objects.link(obj)
+
+	AttrOperator.NewFloatAttr(obj, '_vis_V_', 'POINT', True)
+
+	AttrOperator.AddAttr(obj, '_vis_V_', 'POINT', vert_ids, v_scales)
+
+	gnmod = None
+	for gnmod in obj.modifiers:
+		if gnmod.type == "NODES":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES"):
+		gnmod = obj.modifiers.new("Verts", "NODES")
+
+	gnmod.node_group = attr_vis_gen.GetGeoNode()
+	size_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Size")
+	vis_scale_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Vis Scale")
+	vis_invert_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Vis Invert")
+	V_attr_name_id = GetNodeGroupInputIdentifier(gnmod.node_group, "V_attr_name")
+	#E_attr_name_id = GetNodeGroupInputIdentifier(gnmod.node_group, "E_attr_name")
+	
+	gnmod[size_id] = 1.0
+	gnmod[vis_scale_id] = vis_scale
+	gnmod[vis_invert_id] = True
+	gnmod[V_attr_name_id] = '_vis_V_'
+
+	return obj
+
+def SetVisVertsParameters(vis_obj: bpy.types.Object, vert_ids: list[int] = None, v_scales: list[float] = None, vis_scale = None, default_value = None, create_if_not_exist = True):
+	if vis_obj == None:
+		return
+	gnmod = None
+	for gnmod in vis_obj.modifiers:
+		if gnmod.type == "NODES" and gnmod.node_group.name == "Attr_Vis":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES") or (gnmod.node_group.name != "Attr_Vis"):
+		if not create_if_not_exist:
+			return
+		gnmod = vis_obj.modifiers.new("Verts", "NODES")
+
+	if vert_ids is not None:
+		if v_scales is None:
+			return
+		AttrOperator.AddAttr(vis_obj, '_vis_V_', 'POINT', vert_ids, v_scales, default_value=default_value)
+
+	if vis_scale is not None:
+		vis_scale_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Vis Scale")
+		gnmod[vis_scale_id] = vis_scale
+
+	gnmod.show_on_cage = True
+	gnmod.show_on_cage = False
+
+def VisEdgesFromMesh(mesh_obj: bpy.types.Object, edge_ids: list[int], e_scales: list[float], vis_scale = 0.02):
+	if mesh_obj == None:
+		return None
+	if edge_ids == None or len(edge_ids) == 0:
+		return None
+
+	mesh = mesh_obj.data.copy()
+	obj = bpy.data.objects.new('VIS_MESH', mesh)
+
+	bpy.context.collection.objects.link(obj)
+
+	AttrOperator.NewFloatAttr(obj, '_vis_E_', 'EDGE', True)
+
+	AttrOperator.AddAttr(obj, '_vis_E_', 'EDGE', edge_ids, e_scales)
+
+	gnmod = None
+	for gnmod in obj.modifiers:
+		if gnmod.type == "NODES":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES"):
+		gnmod = obj.modifiers.new("Edges", "NODES")
+
+	gnmod.node_group = attr_vis_gen.GetGeoNode()
+	size_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Size")
+	vis_scale_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Vis Scale")
+	vis_invert_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Vis Invert")
+	#V_attr_name_id = GetNodeGroupInputIdentifier(gnmod.node_group, "V_attr_name")
+	E_attr_name_id = GetNodeGroupInputIdentifier(gnmod.node_group, "E_attr_name")
+	
+	gnmod[size_id] = 1.0
+	gnmod[vis_scale_id] = vis_scale
+	gnmod[vis_invert_id] = True
+	gnmod[E_attr_name_id] = '_vis_E_'
+
+	return obj
+
+def SetVisEdgesParameters(vis_obj: bpy.types.Object, edge_ids: list[int] = None, e_scales: list[float] = None, vis_scale = None, default_value = None, create_if_not_exist = True):
+	if vis_obj == None:
+		return
+	gnmod = None
+	for gnmod in vis_obj.modifiers:
+		if gnmod.type == "NODES" and gnmod.node_group.name == "Attr_Vis":
+			break
+
+	if (gnmod is None) or (gnmod.type != "NODES") or (gnmod.node_group.name != "Attr_Vis"):
+		if not create_if_not_exist:
+			return
+		gnmod = vis_obj.modifiers.new("Edges", "NODES")
+
+	if edge_ids is not None:
+		if e_scales is None:
+			return
+		AttrOperator.AddAttr(vis_obj, '_vis_E_', 'EDGE', edge_ids, e_scales, default_value=default_value)
+
+	if vis_scale is not None:
+		vis_scale_id = GetNodeGroupInputIdentifier(gnmod.node_group, "Vis Scale")
+		gnmod[vis_scale_id] = vis_scale
+
+	gnmod.show_on_cage = True
+	gnmod.show_on_cage = False

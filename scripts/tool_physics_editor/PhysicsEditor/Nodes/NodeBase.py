@@ -6,6 +6,8 @@ import PhysicsEditor.Utilities.utils_node as utils_node
 
 global_vis_meshes = {}
 
+global_initialized = set()
+
 def move_object_to_collection(objs, coll):
 	for obj in objs:
 		if obj != None:
@@ -73,18 +75,23 @@ def remove_vis_meshes(who: bpy.types.Node):
 
 def clear_vis_meshes():
     global global_vis_meshes
-    for node, mesh in global_vis_meshes.items():
-        if isinstance(mesh, list):
-            for m in mesh:
+    try: 
+        for node, mesh in global_vis_meshes.items():
+            if mesh == None:
+                continue
+            if isinstance(mesh, list):
+                for m in mesh:
+                    try:
+                        bpy.data.meshes.remove(m.data)
+                    except:
+                        pass
+            elif isinstance(mesh, bpy.types.Object):
                 try:
-                    bpy.data.meshes.remove(m.data)
+                    bpy.data.meshes.remove(mesh.data)
                 except:
                     pass
-        elif isinstance(mesh, bpy.types.Object):
-            try:
-                bpy.data.meshes.remove(mesh.data)
-            except:
-                pass
+    except:
+        pass
     global_vis_meshes.clear()
 
 def find_vis_meshes(who: bpy.types.Node):
@@ -120,6 +127,10 @@ class hclPhysicsNodeBase:
             else:
                 print(f"valid {self.name}")
                 self.show_as_valid()
+
+        if self.id_data not in global_initialized:
+            global_initialized.add(self.id_data)
+            return [], utils_node.NodeValidityReturn(True, self)
 
         children = utils_node.get_all_linked_nodes(self)
         meshes = []

@@ -3,6 +3,45 @@ import bpy
 import bmesh
 from bpy.types import Context, Event
 
+def NewFloatAttr(mesh_obj:bpy.types.Object, attr_name: str, attr_domain: str, remove_existing: bool = False):
+    if mesh_obj.data.attributes.get(attr_name) is not None:
+        if not remove_existing:
+            return
+        mesh_obj.data.attributes.remove(mesh_obj.data.attributes.get(attr_name))
+    mesh_obj.data.attributes.new(attr_name, 'FLOAT', attr_domain)
+
+def AddAttr(mesh_obj:bpy.types.Object, attr_name: str, attr_domain: str, element_ids: list[int], attr_values: list[float], default_value: float = None):
+    bm = bmesh.new()
+    bm.from_object(mesh_obj, bpy.context.evaluated_depsgraph_get())
+
+    if attr_domain == 'POINT':
+        bm.verts.ensure_lookup_table()
+        layer = bm.verts.layers.float.get(attr_name)
+        if default_value is not None:
+            for v in bm.verts:
+                v[layer] = default_value
+        for p_id, i in enumerate(element_ids):
+            bm.verts[i][layer] = attr_values[p_id]
+    elif attr_domain == 'EDGE':
+        bm.edges.ensure_lookup_table()
+        layer = bm.edges.layers.float.get(attr_name)
+        if default_value is not None:
+            for e in bm.edges:
+                e[layer] = default_value
+        for p_id, i in enumerate(element_ids):
+            bm.edges[i][layer] = attr_values[p_id]
+    elif attr_domain == 'FACE':
+        bm.faces.ensure_lookup_table()
+        layer = bm.faces.layers.float.get(attr_name)
+        if default_value is not None:
+            for f in bm.faces:
+                f[layer] = default_value
+        for p_id, i in enumerate(element_ids):
+            bm.faces[i][layer] = attr_values[p_id]
+    bm.to_mesh(mesh_obj.data)
+    bm.free()
+
+
 class OBJECT_OT_add_custom_attribute_dialog(bpy.types.Operator):
     bl_idname = "object.add_custom_attribute_dialog"
     bl_label = "Mark Selected Elements"

@@ -4,7 +4,6 @@
 import bpy
 
 #initialize capsule_gen node group
-#initialize capsule_gen node group
 def capsule_gen_node_group():
 	capsule_gen= bpy.data.node_groups.new(type = 'GeometryNodeTree', name = "Capsule_Gen")
 

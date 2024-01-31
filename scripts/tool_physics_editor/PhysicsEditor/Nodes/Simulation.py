@@ -1,9 +1,36 @@
 import bpy
-from bpy.types import Node, NodeSocket
+from bpy.types import Context, Node, NodeSocket, UILayout
 
 import PhysicsEditor.Utilities.utils_node as utils_node
 
 import PhysicsEditor.Nodes.NodeBase as NodeBase
+
+import PhysicsEditor.Utilities.utils_prefabs as utils_prefabs
+
+from PhysicsEditor.Nodes.NodeBase import find_vis_meshes
+
+import PhysicsEditor.Prefabs.AttributeVisGeoNode as AttributeVisGeoNode
+
+def update_visibility(self, context):
+    objects = find_vis_meshes(self)
+    if objects is None:
+        utils_node.update_tree_from_node(self, context)
+        return
+    if isinstance(objects, bpy.types.Object):
+        objects.hide_viewport = not self.show_particles
+    else:
+        for obj in objects:
+            obj.hide_viewport = not self.show_particles
+
+def update_vis_scale(self, context):
+    objects = find_vis_meshes(self)
+    if objects is None:
+        return
+    if isinstance(objects, bpy.types.Object):
+        utils_prefabs.SetVisVertsParameters(objects, vis_scale=self.vis_scale)
+    else:
+        for obj in objects:
+            utils_prefabs.SetVisVertsParameters(obj, vis_scale=self.vis_scale)
 
 class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Combine particles and colliders to create a cloth data, allow multiple collider inputs'''
@@ -11,11 +38,14 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_idname = 'SimClothData'
     bl_label = 'Sim Cloth Data'
 
+    show_particles: bpy.props.BoolProperty(name='Show Particles', default=False, update=update_visibility)
+    vis_scale: bpy.props.FloatProperty(name='Vis Scale', default=0.02, min=0.001, update=update_vis_scale)
     gravity_vector: bpy.props.FloatVectorProperty(name='Gravity Vector', default=(0,0,-9.81), size=3)
     global_damping_per_second: bpy.props.FloatProperty(name='Global Damping Per Second',min=0, max=1, default=0.2)
 
     def init(self, context):
         super().init(context)
+        AttributeVisGeoNode.GetGeoNode()
         particles = self.inputs.new('hclClothParticlesType', 'Particles')
         particles.hide_value = True
         colliders = self.inputs.new('hclMultiColliderType', 'Colliders')
@@ -26,6 +56,7 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
@@ -64,10 +95,26 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def draw_buttons(self, context, layout):
         super().draw_buttons(context, layout)
+        if self.show_particles:
+            box = layout.box()
+            box.scale_y = 0.9
+            box.prop(self, "show_particles", text="Show Particles")
+            box.prop(self, "vis_scale")
+        else:
+            layout.prop(self, "show_particles", text="Show Particles")
         layout.label(text="Gravity Vector:")
         layout.prop(self, "gravity_vector", text="")
         layout.label(text="Global Damping Per Second:")
         layout.prop(self, "global_damping_per_second", text="")
+
+    def draw_vis_mesh(self):
+        print(f'draw_vis_mesh {self.name}')
+        if not self.show_particles:
+            return None
+        
+        particles = utils_node.get_socket_input_single(self,'Particles')['particles']
+        radius = [p['radius'] if not p['is_fixed'] else 0 for p in particles.values()]
+        return utils_prefabs.VisVertsFromMesh(self.id_data.mesh, particles.keys(), radius)
 
 class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Generate particles from mesh vertices'''
@@ -75,12 +122,15 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_idname = 'hclParticlesFromMesh'
     bl_label = 'Particles From Mesh'
 
+    show_particles: bpy.props.BoolProperty(name='Show Particles', default=False, update=update_visibility)
+    vis_scale: bpy.props.FloatProperty(name='Vis Scale', default=0.02, min=0.001, update=update_vis_scale)
     mass_prop: bpy.props.FloatProperty(name='Mass', min=0.001, default=1.0)
     radius_prop: bpy.props.FloatProperty(name='Radius', min=0.001, default=0.02)
     friction_prop: bpy.props.FloatProperty(name='Friction', min=0, max=1, default=0.5)
 
     def init(self, context):
         super().init(context)
+        AttributeVisGeoNode.GetGeoNode()
         output_skt = self.outputs.new('hclClothParticlesType', 'Particles')
         output_skt.hide_value = True
         input_skt = self.inputs.new('NodeSocketGeometry', 'Mesh')
@@ -92,6 +142,7 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
@@ -159,12 +210,41 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         
     def draw_buttons(self, context, layout):
         super().draw_buttons(context, layout)
+
+        if self.show_particles:
+            box = layout.box()
+            box.scale_y = 0.9
+            box.prop(self, "show_particles", text="Show Particles")
+            box.prop(self, "vis_scale")
+        else:
+            layout.prop(self, "show_particles", text="Show Particles")
+
         layout.label(text="Particle Mass:")
         layout.prop(self, "mass_prop", text="")
         layout.label(text="Particle Radius:")
         layout.prop(self, "radius_prop", text="")
         layout.label(text="Particle Friction:")
         layout.prop(self, "friction_prop", text="")
+
+    def draw_vis_mesh(self):
+        print(f'draw_vis_mesh {self.name}')
+        if not self.show_particles:
+            return None
+        
+        mesh = utils_node.get_socket_input_single(self,'Mesh')
+        v_ids = [v.index for v in mesh.data.vertices]
+
+        if self.inputs['Fixed Particle Indices'].is_linked:
+            fixed_particle_indices_input = utils_node.get_socket_input_single(self,'Fixed Particle Indices')
+            f_ids = fixed_particle_indices_input[0]
+        else:
+            f_ids = []
+
+        radius = [self.radius_prop if i not in f_ids else 0 for i in v_ids]
+
+        return utils_prefabs.VisVertsFromMesh(mesh, v_ids, radius)
+        
+        
 
 class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Generate constraint links from mesh edges'''

@@ -9,16 +9,42 @@ import PhysicsEditor.Utilities.utils_node as utils_node
 
 import PhysicsEditor.Prefabs.PlaneGenGeoNode as PlaneGenGeoNode
 
+import PhysicsEditor.Prefabs.AttributeVisGeoNode as AttributeVisGeoNode
+
 import PhysicsEditor.Utilities.utils_prefabs as utils_prefabs
 
 import PhysicsEditor.Utilities.utils_geometry as utils_geometry
 
 def update_visibility(self, context):
     objects = find_vis_meshes(self)
-    if objects is None or len(objects) == 0:
+    if objects is None:
+        utils_node.update_tree_from_node(self, context)
         return
-    for obj in objects:
-        obj.hide_viewport = not self.show_constraint
+    if isinstance(objects, bpy.types.Object):
+        objects.hide_viewport = not self.show_constraint
+    else:
+        for obj in objects:
+            obj.hide_viewport = not self.show_constraint
+
+def update_vis_scale(self, context):
+    objects = find_vis_meshes(self)
+    if objects is None:
+        return
+    if isinstance(objects, bpy.types.Object):
+        utils_prefabs.SetVisEdgesParameters(objects, vis_scale=self.vis_scale)
+    else:
+        for obj in objects:
+            utils_prefabs.SetVisEdgesParameters(obj, vis_scale=self.vis_scale)
+
+def update_vis_scale_verts(self, context):
+    objects = find_vis_meshes(self)
+    if objects is None:
+        return
+    if isinstance(objects, bpy.types.Object):
+        utils_prefabs.SetVisVertsParameters(objects, vis_scale=self.vis_scale)
+    else:
+        for obj in objects:
+            utils_prefabs.SetVisVertsParameters(obj, vis_scale=self.vis_scale)
 
 class StandardLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Default cloth simulation links between particles. Constraint on the length of the link'''
@@ -27,15 +53,18 @@ class StandardLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_label = 'Standard Link'
 
     show_constraint: bpy.props.BoolProperty(name='Show Constraint', default=False, update=update_visibility)
+    vis_scale: bpy.props.FloatProperty(name='Vis Scale', default=0.02, min=0.001, update=update_vis_scale)
 
     def init(self, context):
         super().init(context)
+        AttributeVisGeoNode.GetGeoNode()
         particles_skt = self.inputs.new('hclClothParticlesType', 'Particles')
         links_skt = self.inputs.new('hclClothLinksType', 'Links')
         particles_out_skt = self.outputs.new('hclClothParticlesType', 'Particles')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
@@ -55,6 +84,7 @@ class StandardLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
             box = layout.box()
             box.scale_y = 0.9
             box.prop(self, "show_constraint", text="Show Constraint")
+            box.prop(self, "vis_scale", text="Vis Scale")
         else:
             layout.prop(self, "show_constraint", text="Show Constraint")
     
@@ -80,6 +110,15 @@ class StandardLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
             particles['constraints'].append(constraint)
             return particles
         return None
+    
+    def draw_vis_mesh(self):
+        if not self.show_constraint:
+            return None
+        links = utils_node.get_socket_input_single(self,'Links')['links']
+        e_ids = links.keys()
+        e_values = [l['stiffness'] for l in links.values()]
+
+        return utils_prefabs.VisEdgesFromMesh(self.id_data.mesh, e_ids, e_values, self.vis_scale)
 
 class StretchLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Constraint the stretch of links between particles. Useful for cloth with elastic properties'''
@@ -88,15 +127,18 @@ class StretchLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_label = 'Stretch Link'
 
     show_constraint: bpy.props.BoolProperty(name='Show Constraint', default=False, update=update_visibility)
+    vis_scale: bpy.props.FloatProperty(name='Vis Scale', default=0.02, min=0.001, update=update_vis_scale)
 
     def init(self, context):
         super().init(context)
+        AttributeVisGeoNode.GetGeoNode()
         particles_skt = self.inputs.new('hclClothParticlesType', 'Particles')
         links_skt = self.inputs.new('hclClothLinksType', 'Links')
         particles_out_skt = self.outputs.new('hclClothParticlesType', 'Particles')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
@@ -116,6 +158,7 @@ class StretchLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
             box = layout.box()
             box.scale_y = 0.9
             box.prop(self, "show_constraint", text="Show Constraint")
+            box.prop(self, "vis_scale", text="Vis Scale")
         else:
             layout.prop(self, "show_constraint", text="Show Constraint")
     
@@ -142,6 +185,15 @@ class StretchLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
             return particles
         return None
 
+    def draw_vis_mesh(self):
+        if not self.show_constraint:
+            return None
+        links = utils_node.get_socket_input_single(self,'Links')['links']
+        e_ids = links.keys()
+        e_values = [l['stiffness'] for l in links.values()]
+
+        return utils_prefabs.VisEdgesFromMesh(self.id_data.mesh, e_ids, e_values, self.vis_scale)
+    
 class BendStiffnessConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     '''Constraint the bend stiffness of links between particles'''
 
@@ -336,6 +388,7 @@ class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def init(self, context):
         super().init(context)
+        AttributeVisGeoNode.GetGeoNode()
         particles_skt = self.inputs.new('hclClothParticlesType', 'Particles')
         input_skt1 = self.inputs.new('IndicesOnDomainType', 'Particle Indices (Default: All)')
         input_skt1.display_shape = 'CIRCLE_DOT'
@@ -343,6 +396,7 @@ class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
@@ -474,3 +528,18 @@ class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
                 constraint_dict['stiffnesses'][query_particles_list_idx[p_id]] *= p_factor
 
         return constraint_dict
+
+    def draw_vis_mesh(self):
+        if not self.show_constraint:
+            return None
+        
+        particles = utils_node.get_socket_input_single(self,'Particles')
+        particle_indices = []
+        if self.inputs['Particle Indices (Default: All)'].is_linked:
+            particle_indices = utils_node.get_socket_input_single(self,'Particle Indices (Default: All)')[0]
+        else:
+            particle_indices = particles['particles'].keys()
+
+        stiffness = [float(self.stiffness * 0.02) for _ in particle_indices]
+
+        return utils_prefabs.VisVertsFromMesh(self.id_data.mesh, particle_indices, stiffness)

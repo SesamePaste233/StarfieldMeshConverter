@@ -197,7 +197,7 @@ class CombineBoneSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
         
         return utils_node.NodeValidityReturn(False, self, "No Bone(s) A or Bone(s) B linked")
     
-    def get_socket_output(self, socket_name: str):
+    def get_socket_output(self, socket_name: str = "Bones"):
         valid = self.check_valid()
         if not valid:
             return None

@@ -74,6 +74,7 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        CapsuleGenGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
@@ -169,6 +170,7 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
         
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
+        CapsuleGenGeoNode.GetGeoNode()
         if not valid:
             return valid
         print(f'check_valid {self.name}')
