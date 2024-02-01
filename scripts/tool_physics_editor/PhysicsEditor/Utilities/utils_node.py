@@ -1,8 +1,6 @@
 from typing import Any
 import bpy
 
-import PhysicsEditor.Nodes.NodeBase as NodeBase
-
 class NodeValidityReturn:
     def __init__(self, valid:bool, who:bpy.types.Node, message:str = ''):
         self.valid = valid
@@ -186,7 +184,18 @@ def get_all_output_nodes(tree:bpy.types.NodeTree, valid_only = True, linked_only
             output_nodes.append(node)
     return output_nodes
 
-def update_tree_from_node(node: NodeBase, context):
+def get_all_physics_trees() -> list[bpy.types.NodeTree]:
+    trees = []
+    for tree in bpy.data.node_groups:
+        if tree.bl_idname == 'hclPhysicsTreeType':
+            trees.append(tree)
+    return trees
+
+def update_tree_from_node_safe(node, context):
+    if node is not None and isinstance(node, bpy.types.Node) and isinstance(node.id_data, bpy.types.NodeTree) and hasattr(node.id_data, 'update_tree'):
+        node.id_data.update_tree(context)
+
+def update_tree_from_node(node, context):
     node.id_data.update_tree(context)
 
 def remove_socket_output(from_node: bpy.types.Node, from_socket: bpy.types.NodeSocket):

@@ -8,8 +8,12 @@ if dir not in sys.path:
 
 from version import __plugin_version__, Version
 
+import PhysicsEditor.Utilities.utils_node as utils_node
+
 import PhysicsEditor.AttrOperator as AttrOperator
 import PhysicsEditor.PhysicsTree as PhysicsTree
+
+import PhysicsEditor.ActivateVisOperator as ActivateVisOperator
 
 bl_info = {
 	"name": "Starfield Havok Physics Editor",
@@ -31,8 +35,10 @@ def register():
 	)
 	AttrOperator.register()
 	PhysicsTree.register()
+	ActivateVisOperator.register()
 
 def unregister():
+	ActivateVisOperator.unregister()
 	AttrOperator.unregister()
 	PhysicsTree.unregister()
 	del bpy.types.Scene.sf_physics_editor_version

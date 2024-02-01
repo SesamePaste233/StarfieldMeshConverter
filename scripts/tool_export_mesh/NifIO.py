@@ -52,7 +52,9 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 				if 'FINISHED' in rtn:
 					imported_obj = utils_blender.GetActiveObject()
 					_objects.append(imported_obj)
-					_objects[-1].name = geo_name + f'_LOD:{lod}'
+					_objects[-1].name = geo_name
+					if options.max_lod > 1:
+						_objects[-1].name += f'_lod{lod}'
 					imported_obj.data.materials.append(material)
 					loaded = True
 				else:
@@ -205,7 +207,7 @@ def ImportNif(file_path, options, context, operator):
 		operator.report({'WARNING'}, 'Setup your assets folder before importing!')
 		return {'CANCELLED'}, None, None
 	
-	json_str = MeshConverter.ImportNifAsJson(file_path)
+	json_str = MeshConverter.ImportNifAsJson(file_path, utils_blender.is_plugin_debug_mode(), os.path.join(utils.export_mesh_folder_path, 'havok_debug.txt'))
 	
 	if len(json_str) == 0:
 		operator.report({'WARNING'}, f'Nif failed to load.')

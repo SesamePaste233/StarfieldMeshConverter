@@ -65,7 +65,7 @@ class MeshAttrSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Mesh'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Mesh'])
             if parent.check_valid():
@@ -110,7 +110,7 @@ class MeshAttrSelectionNode(NodeBase.hclPhysicsNodeBase, Node):
                 elif self.domain_enum_prop == 'FACE':
                     layer = bm.faces.layers.float.get(attr.name)
 
-                print(bm.verts.layers.float)
+                #print(bm.verts.layers.float)
                 if self.operator_enum_prop == 'Higher than':
                     if self.domain_enum_prop == 'POINT':
                         return [v.index for v in bm.verts if v[layer] > self.float_operand_prop], self.domain_enum_prop
@@ -191,7 +191,7 @@ class ConcatenateIndicesNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Indices 1'].is_linked and self.inputs['Indices 2'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Indices 1'])
             parent1 = utils_node.get_linked_single(self.inputs['Indices 2'])

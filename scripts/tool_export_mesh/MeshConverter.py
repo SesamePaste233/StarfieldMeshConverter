@@ -18,7 +18,7 @@ _dll_export_nif = _dll.CreateNif
 _dll_export_nif.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
 
 _dll_import_nif = _dll.ImportNif
-_dll_import_nif.argtypes = [ctypes.c_char_p]
+_dll_import_nif.argtypes = [ctypes.c_char_p, ctypes.c_bool, ctypes.c_char_p]
 _dll_import_nif.restype = ctypes.c_char_p
 
 _dll_import_mesh = _dll.ImportMesh
@@ -119,8 +119,8 @@ def CreateNifFromJson(json_data_string: str, output_file: str, assets_folder_pat
     rtn = _dll_export_nif(json_data_string.encode('utf-8'), output_file.encode('utf-8'), assets_folder_path.encode('utf-8'))
     return DLLReturnCode(rtn)
 
-def ImportNifAsJson(input_file: str) -> str:
-    return _dll_import_nif(input_file.encode('utf-8')).decode('utf-8')
+def ImportNifAsJson(input_file: str, export_havok_readable: bool = False, readable_path: str = '') -> str:
+    return _dll_import_nif(input_file.encode('utf-8'), export_havok_readable, readable_path.encode('utf-8')).decode('utf-8')
 
 def GetTranscriptPath() -> str:
     return os.path.abspath(os.path.join(os.path.dirname(__file__), 'Assets', 'hkTypeTranscript', 'hkTypeTranscript.json'))

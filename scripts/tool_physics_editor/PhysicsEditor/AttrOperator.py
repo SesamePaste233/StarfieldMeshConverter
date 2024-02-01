@@ -161,7 +161,6 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh.append(menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.append(menu_func_dialog)
 
-
 def unregister():
     bpy.types.VIEW3D_MT_edit_mesh.remove(menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(menu_func_dialog)

@@ -99,7 +99,7 @@ def ConstraintObjToArmatureBone(obj, armature_obj, bone_index, inherit_rotation 
 	bone= armature_obj.data.bones[bone_index]
 	if inherit_rotation:
 		obj.matrix_world = armature_obj.matrix_world @ bone.matrix_local @ mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Z')
-		print(obj.matrix_world)
+		#print(obj.matrix_world)
 	arma_const = obj.constraints.new(type = 'ARMATURE')
 	_target = arma_const.targets.new()
 	_target.target = armature_obj

@@ -132,7 +132,7 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 					standard_link->AddDefaultLink(this->hcl_sim_cloth_data, link["particleA"], link["particleB"], link["stiffness"]);
 				}
 
-				standard_link->MergeSingles();
+				//standard_link->MergeSingles();
 			}
 			else if (type == "StretchLink") {
 				auto constraint_ptr = this->AddConstraintSet(type, name);
@@ -142,7 +142,7 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 					stretch_link->AddDefaultLink(this->hcl_sim_cloth_data, link["particleA"], link["particleB"], link["stiffness"]);
 				}
 
-				stretch_link->MergeSingles();
+				//stretch_link->MergeSingles();
 			}
 			else if (type == "BonePlanes") {
 				/*

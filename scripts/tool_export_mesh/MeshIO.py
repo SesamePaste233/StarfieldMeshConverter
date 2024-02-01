@@ -12,7 +12,7 @@ import utils_common as utils
 import utils_math
 import MeshConverter
 
-def ExportMesh(options, context, filepath, operator, bone_list_filter = None, prune_empty_vertex_groups = False):
+def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False):
 	export_mesh_file_path = filepath
 	export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
 	

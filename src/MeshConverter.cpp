@@ -154,7 +154,7 @@ uint32_t CreateNif(const char* json_data, const char* output_file, const char* a
 	return 0;
 }
 
-const char* ImportNif(const char* input_file)
+const char* ImportNif(const char* input_file, bool export_havok_readable, const char* readable_filepath)
 {
 	nif::NifIO nif;
 
@@ -183,6 +183,18 @@ const char* ImportNif(const char* input_file)
 
 	std::cout << "Nif serialized to json" << std::endl;
 
+	if (export_havok_readable) {
+		auto bs_cloths = nif.GetRTTIBlocks(nif::NiRTTI::BSClothExtraData);
+		for (auto& cloth : bs_cloths) {
+			auto cloth_ptr = dynamic_cast<nif::BSClothExtraData*>(cloth);
+			if (cloth_ptr != nullptr) {
+				auto instances = cloth_ptr->GetDataDeserializer().root_level_instance->dump();
+				std::ofstream file_i(readable_filepath);
+				file_i << instances;
+				file_i.close();
+			}
+		}
+	}
 	
 	return utils::make_copy(jsondata.dump());
 }
@@ -199,6 +211,9 @@ uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char
 		std::cout << "Failed to set transcript path." << std::endl;
 		return 13; // Return an error code
 	}
+
+	auto& transcript = hkreflex::hkTypeTranscriptor::GetInstance();
+	transcript.DeserializeTranscripts(transcript_path);
 
 	if (!builder.ParseJson(jsonData) || !builder.build_target_finished) {
 		std::cout << "Physics data build failed." << std::endl;
@@ -218,6 +233,7 @@ uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char
 	file.close();
 
 	if (export_readable) {
+		std::cout << "Exporting readable data..." << std::endl;
 		hkphysics::hkReflDataDeserializer deserializer;
 
 		std::ifstream file2(output_file, std::ios::binary);

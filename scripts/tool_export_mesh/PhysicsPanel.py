@@ -75,6 +75,7 @@ class ExportPhysicsDataPanel(bpy.types.Panel):
 		layout.prop(context.scene, "physics_node_tree_prop", text="Physics Node Tree")
 		# Export button
 		layout.operator("object.physics_data_export", text="Export Physics Data")
+		layout.operator("object.geo_node_vis_reload")
 		
 def register():
 	bpy.types.Scene.physics_node_tree_prop = bpy.props.PointerProperty(type=bpy.types.NodeTree, poll = lambda self, object: object.bl_idname == 'hclPhysicsTreeType')

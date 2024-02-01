@@ -64,10 +64,9 @@ class StandardLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
-        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Particles'].is_linked and self.inputs['Links'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Particles'])
             parent1 = utils_node.get_linked_single(self.inputs['Links'])
@@ -138,10 +137,9 @@ class StretchLinkConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
-        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Particles'].is_linked and self.inputs['Links'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Particles'])
             parent1 = utils_node.get_linked_single(self.inputs['Links'])
@@ -212,7 +210,7 @@ class BendStiffnessConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Particles'].is_linked and self.inputs['Links'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Particles'])
             parent1 = utils_node.get_linked_single(self.inputs['Links'])
@@ -281,7 +279,7 @@ class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Particles'].is_linked and self.inputs['Bone'].is_linked and self.inputs['Particle Indices'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Particles'])
             parent1 = utils_node.get_linked_single(self.inputs['Bone'])
@@ -353,12 +351,12 @@ class BonePlanesConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         return None
     
     def draw_vis_mesh(self):
-        print(f'draw_vis_mesh {self.name}')
+        #print(f'draw_vis_mesh {self.name}')
         if not self.show_constraint:
             return None
         particles = utils_node.get_socket_input_single(self,'Particles')
         p_ids = utils_node.get_socket_input_single(self,'Particle Indices')[0]
-        print(p_ids)
+        #print(p_ids)
         positions = [particles['particles'][p_id]['position'] for p_id in p_ids if p_id in particles['particles'].keys()]
         planes = [utils_prefabs.PlaneFromOriginNormal(self.name, position, self.plane_normal_dir, size = self.vis_plane_size) for position in positions]
         hkaBone = utils_node.get_socket_input_single(self,'Bone')
@@ -396,10 +394,9 @@ class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
-        AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Particles'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Particles'])
             if not parent.check_valid():

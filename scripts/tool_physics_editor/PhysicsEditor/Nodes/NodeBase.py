@@ -116,16 +116,16 @@ class hclPhysicsNodeBase:
         self.update_version()
 
     def backward_vis_mesh(self, draw_only_valid = True) -> tuple[list[bpy.types.Object], utils_node.NodeValidityReturn]: 
-        print(f"called {self.bl_idname}")
+        #print(f"called {self.bl_idname}")
 
         if draw_only_valid:
             if not self.check_valid():
                 self.show_as_invalid()
-                print(f"invalid {self.name}")
+                #print(f"invalid {self.name}")
                 rtn = self.backward_check_valid()
                 return [], rtn
             else:
-                print(f"valid {self.name}")
+                #print(f"valid {self.name}")
                 self.show_as_valid()
 
         if self.id_data not in global_initialized:

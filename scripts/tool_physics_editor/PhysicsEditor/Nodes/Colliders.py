@@ -74,10 +74,9 @@ class CapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
-        CapsuleGenGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         parent = utils_node.get_linked_single(self.inputs['Bind To Bone'])
         if parent is None:
             return utils_node.NodeValidityReturn(False, self, "No Bone linked")
@@ -170,10 +169,9 @@ class TaperedCapsuleColliderNode(NodeBase.hclPhysicsNodeBase, Node):
         
     def check_valid(self) -> utils_node.NodeValidityReturn:
         valid = super().check_valid()
-        CapsuleGenGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         parent = utils_node.get_linked_single(self.inputs['Bind To Bone'])
         if parent is None:
             return utils_node.NodeValidityReturn(False, self, "No Bone linked")

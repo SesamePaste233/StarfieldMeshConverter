@@ -1087,6 +1087,10 @@ bool hktypes::hclSimClothData::FromInstance(const hkreflex::hkClassInstance* ins
 	class_instance->GetInstanceByFieldName("maxCollisionPairs")->GetValue(maxCollisionPairs);
 	//class_instance->GetInstanceByFieldName("virtualCollisionPointsData")->GetValue(virtualCollisionPointsData);
 
+	for (auto constraint : this->staticConstraintSets) {
+		std::cout << "Constraint: " << constraint->GethkClassName() << std::endl;
+	}
+
 	return true;
 }
 

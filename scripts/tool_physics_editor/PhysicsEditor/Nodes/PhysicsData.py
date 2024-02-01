@@ -22,7 +22,7 @@ class TwoStatePhysicsDataNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if not self.inputs['Cloth Data'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Cloth Data linked")
         if not self.inputs['Physics Bones'].is_linked:

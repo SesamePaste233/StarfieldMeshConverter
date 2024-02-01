@@ -36,10 +36,9 @@ def load(filename):
 		assets_folder = default_assets_folder
 
 def sanitize_filename(filename):
-	illegal_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
-	replacement_char = '_'  # You can replace illegal characters with another character or remove them
+	illegal_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*', '.']
+	replacement_char = '_'
 
-	# Replace illegal characters with the replacement character
 	for char in illegal_chars:
 		filename = filename.replace(char, replacement_char)
 

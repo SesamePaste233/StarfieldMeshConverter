@@ -59,7 +59,7 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
         AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if not self.inputs['Particles'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Particles linked")
         
@@ -108,7 +108,7 @@ class SimClothDataNode(NodeBase.hclPhysicsNodeBase, Node):
         layout.prop(self, "global_damping_per_second", text="")
 
     def draw_vis_mesh(self):
-        print(f'draw_vis_mesh {self.name}')
+        #print(f'draw_vis_mesh {self.name}')
         if not self.show_particles:
             return None
         
@@ -145,7 +145,7 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         AttributeVisGeoNode.GetGeoNode()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if not self.inputs['Mesh'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Mesh linked")
         
@@ -204,7 +204,7 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
                 'friction': self.friction_prop,
                 'is_fixed': i in f_ids,
             } for i in v_ids}
-            print(output)
+            #print(output)
             return {'particles':output, 'pivot':utils_node.get_socket_input_single(self,'Bind To Bone')['Bone Index'], 'constraints': []}
         return None
         
@@ -227,7 +227,7 @@ class hclParticlesFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         layout.prop(self, "friction_prop", text="")
 
     def draw_vis_mesh(self):
-        print(f'draw_vis_mesh {self.name}')
+        #print(f'draw_vis_mesh {self.name}')
         if not self.show_particles:
             return None
         
@@ -268,7 +268,7 @@ class hclLinksFromMeshNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if not self.inputs['Mesh'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Mesh linked")
         
@@ -337,7 +337,7 @@ class DisableCollisionNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if not self.inputs['Cloth Data'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Cloth Data linked")
         
@@ -399,7 +399,7 @@ class SetParticleAttrNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
 
         if not self.inputs['Particle Indices'].is_linked:
             return utils_node.NodeValidityReturn(False, self, "No Particle Indices linked")

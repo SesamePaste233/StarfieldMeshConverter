@@ -40,7 +40,7 @@ class PickBoneFromSkeletonNode(NodeBase.hclPhysicsNodeBase, Node):
         valid = super().check_valid()
         if not valid:
             return valid
-        print(f'check_valid {self.name}')
+        #print(f'check_valid {self.name}')
         if self.inputs['Skeleton'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Skeleton'])
             if parent.check_valid():
