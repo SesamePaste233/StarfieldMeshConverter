@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkReferencedObject;
 	class hkStringPtr;
+	class hkReferencedObject;
 	template <typename tT, typename tAllocator>
 	class ;
 

@@ -1,12 +1,13 @@
 #include "Generated\hkEnum.h"
 
-#include "Generated\hclClothData.h"
-#include "Generated\hclBufferLayout.h"
-#include "Generated\hclRuntimeConversionInfo.h"
-#include "Generated\hclBufferLayout.h"
+#include "Generated\hknpMaterial.h"
+#include "Generated\hknpMaterial.h"
+#include "Generated\hknpMaterial.h"
+#include "Generated\hknpShapeType.h"
+#include "Generated\hknpCollisionDispatchType.h"
 
 template<>
-bool hktypes::hkEnum<hclClothData::Platform, hkUint32>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkEnum<hknpMaterial::TriggerType, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -21,7 +22,7 @@ bool hktypes::hkEnum<hclClothData::Platform, hkUint32>::FromInstance(const hkref
 }
 
 template<>
-bool hktypes::hkEnum<hclClothData::Platform, hkUint32>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkEnum<hknpMaterial::TriggerType, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -36,49 +37,13 @@ bool hktypes::hkEnum<hclClothData::Platform, hkUint32>::ToInstance(hkreflex::hkC
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hclClothData::Platform, hkUint32>::GetTemplateArgs() { return {
-	{"tENUM", "hclClothData::Platform"},
-	{"tSTORAGE", "hkUint32"},
-}; };
-
-template<>
-bool hktypes::hkEnum<hclBufferLayout::TriangleFormat, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("storage")->GetValue(storage);
-	return true;
-}
-
-template<>
-bool hktypes::hkEnum<hclBufferLayout::TriangleFormat, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
-	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
-
-#ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
-		throw;
-	}
-#endif // NO_HK_TYPENAME_CHECK
-
-	class_instance->GetInstanceByFieldName("storage")->SetValue(storage);
-	return true;
-}
-
-template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hclBufferLayout::TriangleFormat, hkUint8>::GetTemplateArgs() { return {
-	{"tENUM", "hclBufferLayout::TriangleFormat"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hknpMaterial::TriggerType, hkUint8>::GetTemplateArgs() { return {
+	{"tENUM", "hknpMaterial::TriggerType"},
 	{"tSTORAGE", "hkUint8"},
 }; };
 
 template<>
-bool hktypes::hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkEnum<hknpMaterial::CombinePolicy, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -93,7 +58,7 @@ bool hktypes::hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>::FromI
 }
 
 template<>
-bool hktypes::hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkEnum<hknpMaterial::CombinePolicy, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -108,13 +73,13 @@ bool hktypes::hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>::ToIns
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>::GetTemplateArgs() { return {
-	{"tENUM", "hclRuntimeConversionInfo::VectorConversion"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hknpMaterial::CombinePolicy, hkUint8>::GetTemplateArgs() { return {
+	{"tENUM", "hknpMaterial::CombinePolicy"},
 	{"tSTORAGE", "hkUint8"},
 }; };
 
 template<>
-bool hktypes::hkEnum<hclBufferLayout::SlotFlags, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
+bool hktypes::hkEnum<hknpMaterial::MassChangerCategory, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -129,7 +94,7 @@ bool hktypes::hkEnum<hclBufferLayout::SlotFlags, hkUint8>::FromInstance(const hk
 }
 
 template<>
-bool hktypes::hkEnum<hclBufferLayout::SlotFlags, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
+bool hktypes::hkEnum<hknpMaterial::MassChangerCategory, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
@@ -144,8 +109,80 @@ bool hktypes::hkEnum<hclBufferLayout::SlotFlags, hkUint8>::ToInstance(hkreflex::
 }
 
 template<>
-inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hclBufferLayout::SlotFlags, hkUint8>::GetTemplateArgs() { return {
-	{"tENUM", "hclBufferLayout::SlotFlags"},
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hknpMaterial::MassChangerCategory, hkUint8>::GetTemplateArgs() { return {
+	{"tENUM", "hknpMaterial::MassChangerCategory"},
+	{"tSTORAGE", "hkUint8"},
+}; };
+
+template<>
+bool hktypes::hkEnum<hknpShapeType::Enum, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("storage")->GetValue(storage);
+	return true;
+}
+
+template<>
+bool hktypes::hkEnum<hknpShapeType::Enum, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("storage")->SetValue(storage);
+	return true;
+}
+
+template<>
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hknpShapeType::Enum, hkUint8>::GetTemplateArgs() { return {
+	{"tENUM", "hknpShapeType::Enum"},
+	{"tSTORAGE", "hkUint8"},
+}; };
+
+template<>
+bool hktypes::hkEnum<hknpCollisionDispatchType::Enum, hkUint8>::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("storage")->GetValue(storage);
+	return true;
+}
+
+template<>
+bool hktypes::hkEnum<hknpCollisionDispatchType::Enum, hkUint8>::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("storage")->SetValue(storage);
+	return true;
+}
+
+template<>
+inline std::vector<std::pair<std::string, std::string>> hktypes::hkEnum<hknpCollisionDispatchType::Enum, hkUint8>::GetTemplateArgs() { return {
+	{"tENUM", "hknpCollisionDispatchType::Enum"},
 	{"tSTORAGE", "hkUint8"},
 }; };
 

@@ -128,7 +128,7 @@ namespace hkphysics {
 
 		hktypes::hkHolderBase* root_level_container = nullptr;
 
-		bool Deserialize(const std::string filename);
+		bool Deserialize(const std::string filename, bool no_instantiation = false);
 
 		bool Deserialize(hktypes::hkHolderBase*& root_level_container, std::istream& data_stream, size_t data_size) {
 			auto rtn = Deserialize(data_stream, data_size);
@@ -138,9 +138,9 @@ namespace hkphysics {
 			return rtn;
 		}
 
-		bool Deserialize(std::istream& data_stream, size_t data_size);
+		bool Deserialize(std::istream& data_stream, size_t data_size, bool no_instantiation = false);
 
-		bool Deserialize(const uint8_t* data, size_t data_size);
+		bool Deserialize(const uint8_t* data, size_t data_size, bool no_instantiation = false);
 
 		void ExtractClasses();
 	};

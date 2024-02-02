@@ -390,6 +390,17 @@ hktypes::hkReferencedObject* hktypes::hkRootLevelContainer::GetNamedVariantRef(s
 	return nullptr;
 }
 
+std::vector<hktypes::hkReferencedObject*> hktypes::hkRootLevelContainer::GetNamedVariantRefs(std::string type_name, std::string instance_name)
+{
+	std::vector<hkReferencedObject*> ret;
+	for (auto& namedVariant : this->namedVariants) {
+		if (namedVariant.className == type_name && (instance_name.empty() || instance_name == namedVariant.name)) {
+			ret.push_back(namedVariant.variant);
+		}
+	}
+	return ret;
+}
+
 hktypes::hkRootLevelContainer::NamedVariant& hktypes::hkRootLevelContainer::GetNamedVariant(std::string type_name, std::string instance_name)
 {
 	for (auto& namedVariant : this->namedVariants) {

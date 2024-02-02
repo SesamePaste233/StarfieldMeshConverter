@@ -98,6 +98,31 @@ namespace utils {
 		return result;
 	}
 
+
+	template<class _elem_t>
+	void _combinations_helper(const std::vector<_elem_t>& vec, size_t num_elems, size_t start, std::vector<_elem_t>& current_combination, std::vector<std::vector<_elem_t>>& result) {
+		if (num_elems == 0) {
+			result.push_back(current_combination);
+			return;
+		}
+
+		for (size_t i = start; i <= vec.size() - num_elems; ++i) {
+			current_combination.push_back(vec[i]);
+			_combinations_helper(vec, num_elems - 1, i + 1, current_combination, result);
+			current_combination.pop_back();
+		}
+	}
+
+	template<class _elem_t>
+	std::vector<std::vector<_elem_t>> combinations(const std::vector<_elem_t>& vec, size_t num_elems) {
+		std::vector<std::vector<_elem_t>> result;
+		std::vector<_elem_t> current_combination;
+
+		_combinations_helper(vec, num_elems, 0, current_combination, result);
+
+		return result;
+	}
+
 	template<class _result_t, class _elem_t>
 	std::vector<_result_t> group_and_calc(const std::vector<_elem_t>& vec, std::function<bool(const _elem_t&, const _elem_t&)> group_func, std::function<_result_t(const std::vector<_elem_t>&)> calc_func) {
 		std::vector<_result_t> result;
@@ -434,5 +459,42 @@ namespace utils {
 		std::string pureName;
 		std::string cxxIdentifier;
 		std::vector<ClassProperty> templateArgs;
+	};
+
+	template<class _elem_T>
+	requires utils::_is_integer_t<_elem_T> && (!std::is_same_v<_elem_T, uint64_t>)
+	class CommutativePair {
+	public:
+		_elem_T upper;
+		_elem_T lower;
+		CommutativePair(const _elem_T& a, const _elem_T& b) {
+			if (a > b) {
+				upper = a;
+				lower = b;
+			}
+			else {
+				upper = b;
+				lower = a;
+			}
+		}
+
+		bool operator==(const CommutativePair& other) const {
+			return upper == other.upper && lower == other.lower;
+		}
+
+		struct Hash {
+			std::size_t operator()(const CommutativePair& _pair) const {
+				return size_t(_pair.lower) << 32 | size_t(_pair.upper);
+			}
+		};
+	};
+}
+
+namespace std {
+	template<class _elem_T>
+	struct hash<utils::CommutativePair<_elem_T>> {
+		std::size_t operator()(const utils::CommutativePair<_elem_T>& _pair) const {
+			return size_t(_pair.lower) << 32 | size_t(_pair.upper);
+		}
 	};
 }

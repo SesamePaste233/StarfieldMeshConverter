@@ -1,25 +1,25 @@
 #include "hkReflDataSerializeContext.h"
 
-bool hkphysics::hkReflDataDeserializer::Deserialize(const std::string filename)
+bool hkphysics::hkReflDataDeserializer::Deserialize(const std::string filename, bool no_instantiation)
 {
 	std::ifstream file(filename, std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
 
-	uint32_t size = utils::read<uint32_t>(file)[0];
-
-	return this->Deserialize(file, size);
+	uint32_t size = utils::read<uint32_t>(file, 1, true)[0];
+	file.seekg(0, std::ios::beg);
+	return this->Deserialize(file, size, no_instantiation);
 }
 
-bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream, size_t data_size)
+bool hkphysics::hkReflDataDeserializer::Deserialize(std::istream& data_stream, size_t data_size, bool no_instantiation)
 {
 	const uint8_t* _file_buffer = utils::readBytes(data_stream, data_size);
 
-	return Deserialize(_file_buffer, data_size);
+	return Deserialize(_file_buffer, data_size, no_instantiation);
 }
 
-bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data, size_t data_size)
+bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data, size_t data_size, bool no_instantiation)
 {
 	this->Clear();
 
@@ -72,6 +72,10 @@ bool hkphysics::hkReflDataDeserializer::Deserialize(const uint8_t* data, size_t 
 	}
 
 	this->root_level_instance = this->indexed_blocks[1]->m_instances[0];
+
+	if (no_instantiation) {
+		return true;
+	}
 
 	auto root_ctn_insts = this->GetInstancesByClassName("hkRootLevelContainer");
 	if (root_ctn_insts.size() == 1) {

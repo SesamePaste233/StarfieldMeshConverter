@@ -363,6 +363,8 @@ class MeshInputNodeBase(hclPhysicsNodeBase, hclSingletonNodeBase, bpy.types.Node
         # find mesh, if not found, return false
         if self.id_data.mesh is None or self.id_data.mesh.type != 'MESH' or self.id_data.mesh.data is None:
             return utils_node.NodeValidityReturn(False, self, "No Mesh input")
+        elif len(self.id_data.mesh.data.polygons) == 0:
+            return utils_node.NodeValidityReturn(False, self, f"Mesh \"{self.id_data.mesh.name}\" has no faces")
         return utils_node.NodeValidityReturn(True, self)
     
     def get_socket_output(self, socket_name: str = "Simulation Mesh"):

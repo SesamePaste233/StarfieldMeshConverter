@@ -1,9 +1,9 @@
 import bpy
 import nif_armature
 
-def NifArmatureTemplate(armature_obj, name_ignore_suffix = True):
+def NifArmatureTemplate(armature_obj, bone_name_list:list, name_ignore_suffix = True):
 	mesh_data_list = []
-	nif_dict = nif_armature.CreateArmatureDict(armature_obj)
+	nif_dict = nif_armature.CreateArmatureDict(armature_obj, bone_name_list)
 	return nif_dict
 
 def RootNodeTemplate(parent_obj, mesh_data_list, connect_pts, name_ignore_suffix = True):

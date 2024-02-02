@@ -373,6 +373,10 @@ def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
 	bm = bmesh.new()
 	bm.from_mesh(obj_mesh)
 	num_tangents = len(vectors)
+
+	for v in vectors:
+		print(v)
+
 	if len(offsets) == 0:
 		offsets = [(0,0,0) for i in range(num_tangents)]
 	if num_tangents != len(bm.verts):

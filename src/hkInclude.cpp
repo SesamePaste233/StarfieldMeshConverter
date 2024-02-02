@@ -93,6 +93,9 @@ hktypes::hkHolderBase* hktypes::AllocateHolder(const hkreflex::hkClassInstance* 
 	else if (class_instance->type->type_name == "hclBendStiffnessConstraintSetMx") {
 		return new hclBendStiffnessConstraintSetMx();
 	}
+	else if (class_instance->type->type_name == "hclBendStiffnessConstraintSet") {
+		return new hclBendStiffnessConstraintSet();
+	}
 	else if (class_instance->type->type_name == "hclCapsuleShape") {
 		return new hclCapsuleShape();
 	}

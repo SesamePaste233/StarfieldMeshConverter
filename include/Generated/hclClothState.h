@@ -3,16 +3,16 @@
 
 
 namespace hktypes{
-	class hkReferencedObject;
 	class hkStringPtr;
+	class hkReferencedObject;
 	template <typename tT, typename tAllocator>
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	class hclTransformSetUsage;
 	class hclBufferUsage;
+	class hclTransformSetUsage;
 	class hclStateDependencyGraph;
 
 	class hclClothState : public hkReferencedObject {

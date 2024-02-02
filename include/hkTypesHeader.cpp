@@ -279,6 +279,11 @@ hktypes::hclConstraintSet* hktypes::AllocateConstraint(std::string type, std::st
 	else if (type == "StretchLink") {
 		return impl::AllocateStretchLinkConstraintSetMx(name);
 	}
+	else if (type == "BendStiffness") {
+		hclBendStiffnessConstraintSetMx* out = new hclBendStiffnessConstraintSetMx();
+		out->name = name;
+		return out;
+	}
 	else if (type == "BonePlanes") {
 		return impl::AllocateBonePlanesConstraintSet(name);
 	}
@@ -789,6 +794,13 @@ hktypes::hclStretchLinkConstraintSetMx* hktypes::impl::AllocateStretchLinkConstr
 hktypes::hclBonePlanesConstraintSet* hktypes::impl::AllocateBonePlanesConstraintSet(std::string name)
 {
 	hclBonePlanesConstraintSet* out = new hclBonePlanesConstraintSet();
+	out->name = name;
+	return out;
+}
+
+hktypes::hclBendStiffnessConstraintSetMx* hktypes::impl::AllocateBendStiffnessConstraintSetMx(std::string name)
+{
+	hclBendStiffnessConstraintSetMx* out = new hclBendStiffnessConstraintSetMx();
 	out->name = name;
 	return out;
 }

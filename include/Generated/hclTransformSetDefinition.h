@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkReferencedObject;
 	class hkStringPtr;
+	class hkReferencedObject;
 
 	class hclTransformSetDefinition : public hkReferencedObject {
 	public:

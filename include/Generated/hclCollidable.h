@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkReferencedObject;
 	class hkStringPtr;
+	class hkReferencedObject;
 	class hkBool;
 	class hkVector4;
 	class hkTransform;

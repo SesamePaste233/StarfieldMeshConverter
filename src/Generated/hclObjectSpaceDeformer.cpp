@@ -143,9 +143,6 @@ bool hktypes::hclObjectSpaceDeformer::ThreeBlendEntryBlock::FromInstance(const h
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->GetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->GetValue(boneIndices);
-	class_instance->GetInstanceByFieldName("boneWeights")->GetValue(boneWeights);
 	return true;
 }
 
@@ -159,9 +156,6 @@ bool hktypes::hclObjectSpaceDeformer::TwoBlendEntryBlock::FromInstance(const hkr
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->GetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->GetValue(boneIndices);
-	class_instance->GetInstanceByFieldName("boneWeights")->GetValue(boneWeights);
 	return true;
 }
 
@@ -175,8 +169,6 @@ bool hktypes::hclObjectSpaceDeformer::OneBlendEntryBlock::FromInstance(const hkr
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->GetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->GetValue(boneIndices);
 	return true;
 }
 
@@ -311,9 +303,6 @@ bool hktypes::hclObjectSpaceDeformer::ThreeBlendEntryBlock::ToInstance(hkreflex:
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->SetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->SetValue(boneIndices);
-	class_instance->GetInstanceByFieldName("boneWeights")->SetValue(boneWeights);
 	return true;
 }
 
@@ -327,9 +316,6 @@ bool hktypes::hclObjectSpaceDeformer::TwoBlendEntryBlock::ToInstance(hkreflex::h
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->SetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->SetValue(boneIndices);
-	class_instance->GetInstanceByFieldName("boneWeights")->SetValue(boneWeights);
 	return true;
 }
 
@@ -343,8 +329,6 @@ bool hktypes::hclObjectSpaceDeformer::OneBlendEntryBlock::ToInstance(hkreflex::h
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->SetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->SetValue(boneIndices);
 	return true;
 }
 

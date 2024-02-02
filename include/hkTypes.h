@@ -199,6 +199,7 @@ namespace hktypes {
 		};
 
 		hkReferencedObject* GetNamedVariantRef(std::string type_name, std::string instance_name = "");
+		std::vector<hkReferencedObject*> GetNamedVariantRefs(std::string type_name, std::string instance_name = "");
 		NamedVariant& GetNamedVariant(std::string type_name, std::string instance_name = "");
 	};
 

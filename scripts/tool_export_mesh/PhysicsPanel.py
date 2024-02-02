@@ -28,10 +28,10 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 
 		output_file = os.path.join(context.scene.physics_file_path, f"{utils.sanitize_filename(physics_node_tree.name)}.bin")
 
-		data_dict = PhysicsConverter.get_physics_data(physics_node_tree)
+		data_dict, error_msg = PhysicsConverter.get_physics_data(physics_node_tree)
 
 		if data_dict is None:
-			self.report({'ERROR'}, "Failed to compose physics data from node graph. Is your output node valid?")
+			self.report({'ERROR'}, error_msg)
 			physics_node_tree.update_tree(context)
 			return {'CANCELLED'}
 

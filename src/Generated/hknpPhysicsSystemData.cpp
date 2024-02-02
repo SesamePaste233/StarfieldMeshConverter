@@ -1,0 +1,86 @@
+#include "Generated\hknpPhysicsSystemData.h"
+
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+#include "Generated\.h"
+
+bool hktypes::hknpPhysicsSystemData::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hknpPhysicsSystemData") {
+		std::cout << "hknpPhysicsSystemData::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("materials")->GetValue(materials);
+	class_instance->GetInstanceByFieldName("motionProperties")->GetValue(motionProperties);
+	class_instance->GetInstanceByFieldName("bodyCinfos")->GetValue(bodyCinfos);
+	class_instance->GetInstanceByFieldName("constraintCinfos")->GetValue(constraintCinfos);
+	class_instance->GetInstanceByFieldName("name")->GetValue(name);
+	class_instance->GetInstanceByFieldName("microStepMultiplier")->GetValue(microStepMultiplier);
+	return true;
+}
+
+bool hktypes::hknpPhysicsSystemData::bodyCinfoWithAttachment::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hknpPhysicsSystemData::bodyCinfoWithAttachment") {
+		std::cout << "hknpPhysicsSystemData::bodyCinfoWithAttachment::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hknpBodyCinfo::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("attachedBody")->GetValue(attachedBody);
+	return true;
+}
+
+bool hktypes::hknpPhysicsSystemData::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hknpPhysicsSystemData") {
+		std::cout << "hknpPhysicsSystemData::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("materials")->SetValue(materials);
+	class_instance->GetInstanceByFieldName("motionProperties")->SetValue(motionProperties);
+	class_instance->GetInstanceByFieldName("bodyCinfos")->SetValue(bodyCinfos);
+	class_instance->GetInstanceByFieldName("constraintCinfos")->SetValue(constraintCinfos);
+	class_instance->GetInstanceByFieldName("name")->SetValue(name);
+	class_instance->GetInstanceByFieldName("microStepMultiplier")->SetValue(microStepMultiplier);
+	return true;
+}
+
+bool hktypes::hknpPhysicsSystemData::bodyCinfoWithAttachment::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hknpPhysicsSystemData::bodyCinfoWithAttachment") {
+		std::cout << "hknpPhysicsSystemData::bodyCinfoWithAttachment::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hknpBodyCinfo::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("attachedBody")->SetValue(attachedBody);
+	return true;
+}
+
+inline std::vector<std::pair<std::string, std::string>> hktypes::hknpPhysicsSystemData::GetTemplateArgs() { return {
+}; };
+
+inline std::vector<std::pair<std::string, std::string>> hktypes::hknpPhysicsSystemData::bodyCinfoWithAttachment::GetTemplateArgs() { return {
+}; };
+

@@ -121,6 +121,8 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 			}
 		}
 
+		this->hcl_sim_cloth_data->Finalize();
+
 		for (auto& constraint: cloth_data["constraints"]) {
 			std::string type = constraint["constraint"];
 			std::string name = constraint["name"];
@@ -143,6 +145,22 @@ bool hkphysics::hkPhysicsDataBuilder::ParseJson(nlohmann::json& json)
 				}
 
 				//stretch_link->MergeSingles();
+			}
+			else if (type == "BendStiffness") {
+				auto constraint_ptr = this->AddConstraintSet(type, name);
+				auto bend_stiffness = dynamic_cast<hktypes::hclBendStiffnessConstraintSetMx*>(constraint_ptr);
+
+				float stiffness = constraint["stiffness"];
+				std::vector<std::vector<uint16_t>> bend_edges;
+				std::vector<float> stiffnesses;
+				for (auto& link : constraint["links"]) {
+					bend_edges.push_back(link["particleA"]);
+					bend_edges.push_back(link["particleB"]);
+					stiffnesses.push_back(link["stiffness"]);
+				}
+
+				bend_stiffness->FromDefaultPose(this->hcl_sim_cloth_data, bend_edges, stiffnesses, stiffness);
+
 			}
 			else if (type == "BonePlanes") {
 				/*

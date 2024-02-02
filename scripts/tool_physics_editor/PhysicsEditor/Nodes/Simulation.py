@@ -427,14 +427,14 @@ class SetParticleAttrNode(NodeBase.hclPhysicsNodeBase, Node):
             return None
         
         if socket_name == 'Particles':
-            particles = utils_node.get_socket_input_single(self,'Particles').copy()
+            particles_input = utils_node.get_socket_input_single(self,'Particles').copy()
             particle_indices = utils_node.get_socket_input_single(self,'Particle Indices')[0]
             for i in particle_indices:
-                if i in particles:
-                    particles[i]['mass'] = self.mass_prop
-                    particles[i]['radius'] = self.radius_prop
-                    particles[i]['friction'] = self.friction_prop
-            return particles
+                if i in particles_input['particles']:
+                    particles_input['particles'][i]['mass'] = self.mass_prop
+                    particles_input['particles'][i]['radius'] = self.radius_prop
+                    particles_input['particles'][i]['friction'] = self.friction_prop
+            return particles_input
         return None
 
     def draw_buttons(self, context, layout):

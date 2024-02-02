@@ -378,6 +378,98 @@ bool hktypes::hclCompressibleLinkConstraintSetMx::ToInstance(hkreflex::hkClassIn
 	return true;
 }
 
+bool hktypes::hclBendStiffnessConstraintSet::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSet") {
+		std::cout << "hclBendStiffnessConstraintSet::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hclConstraintSet::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("links")->GetValue(links);
+	class_instance->GetInstanceByFieldName("maxRestPoseHeightSq")->GetValue(maxRestPoseHeightSq);
+	class_instance->GetInstanceByFieldName("clampBendStiffness")->GetValue(clampBendStiffness);
+	class_instance->GetInstanceByFieldName("useRestPoseConfig")->GetValue(useRestPoseConfig);
+	return true;
+}
+
+bool hktypes::hclBendStiffnessConstraintSet::Link::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSet::Link") {
+		std::cout << "hclBendStiffnessConstraintSet::Link::FromInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("weightA")->GetValue(weightA);
+	class_instance->GetInstanceByFieldName("weightB")->GetValue(weightB);
+	class_instance->GetInstanceByFieldName("weightC")->GetValue(weightC);
+	class_instance->GetInstanceByFieldName("weightD")->GetValue(weightD);
+	class_instance->GetInstanceByFieldName("bendStiffness")->GetValue(bendStiffness);
+	class_instance->GetInstanceByFieldName("restCurvature")->GetValue(restCurvature);
+	class_instance->GetInstanceByFieldName("particleA")->GetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
+	class_instance->GetInstanceByFieldName("particleC")->GetValue(particleC);
+	class_instance->GetInstanceByFieldName("particleD")->GetValue(particleD);
+	return true;
+}
+
+bool hktypes::hclBendStiffnessConstraintSet::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSet") {
+		std::cout << "hclBendStiffnessConstraintSet::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hclConstraintSet::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("links")->SetValue(links);
+	class_instance->GetInstanceByFieldName("maxRestPoseHeightSq")->SetValue(maxRestPoseHeightSq);
+	class_instance->GetInstanceByFieldName("clampBendStiffness")->SetValue(clampBendStiffness);
+	class_instance->GetInstanceByFieldName("useRestPoseConfig")->SetValue(useRestPoseConfig);
+	return true;
+}
+
+bool hktypes::hclBendStiffnessConstraintSet::Link::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSet::Link") {
+		std::cout << "hclBendStiffnessConstraintSet::Link::ToInstance: Wrong type!" << std::endl;
+		throw;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("weightA")->SetValue(weightA);
+	class_instance->GetInstanceByFieldName("weightB")->SetValue(weightB);
+	class_instance->GetInstanceByFieldName("weightC")->SetValue(weightC);
+	class_instance->GetInstanceByFieldName("weightD")->SetValue(weightD);
+	class_instance->GetInstanceByFieldName("bendStiffness")->SetValue(bendStiffness);
+	class_instance->GetInstanceByFieldName("restCurvature")->SetValue(restCurvature);
+	class_instance->GetInstanceByFieldName("particleA")->SetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
+	class_instance->GetInstanceByFieldName("particleC")->SetValue(particleC);
+	class_instance->GetInstanceByFieldName("particleD")->SetValue(particleD);
+	return true;
+}
+
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBendStiffnessConstraintSet::GetTemplateArgs() {
+	return {
+	};
+};
+
+inline std::vector<std::pair<std::string, std::string>> hktypes::hclBendStiffnessConstraintSet::Link::GetTemplateArgs() {
+	return {
+	};
+};
+
 bool hktypes::hclBendStiffnessConstraintSetMx::Batch::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
@@ -471,6 +563,10 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Batch::FromInstance(const hkrefle
 		this->particlesD[i] = particlesD[i];
 	}
 
+	for (int i = 0; i < 4; ++i) {
+		std::cout << "(" << particlesA[i] << ", " << particlesB[i] << ", " << particlesC[i] << ", " << particlesD[i] << "),\n";
+	}
+
 	return true;
 }
 
@@ -553,6 +649,9 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Single::FromInstance(const hkrefl
 	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
 	class_instance->GetInstanceByFieldName("particleC")->GetValue(particleC);
 	class_instance->GetInstanceByFieldName("particleD")->GetValue(particleD);
+
+	std::cout << "(" << particleA << ", " << particleB << ", " << particleC << ", " << particleD << "),\n";
+
 	return true;
 }
 
@@ -580,6 +679,7 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Single::ToInstance(hkreflex::hkCl
 	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
 	class_instance->GetInstanceByFieldName("particleC")->SetValue(particleC);
 	class_instance->GetInstanceByFieldName("particleD")->SetValue(particleD);
+
 	return true;
 }
 
@@ -593,7 +693,9 @@ bool hktypes::hclBendStiffnessConstraintSetMx::FromInstance(const hkreflex::hkCl
 	}
 
 	hclConstraintSet::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	std::cout << "Batch: " << std::endl;
 	class_instance->GetInstanceByFieldName("batches")->GetValue(this->batches);
+	std::cout << "Single: " << std::endl;
 	class_instance->GetInstanceByFieldName("singles")->GetValue(this->singles);
 	class_instance->GetInstanceByFieldName("maxRestPoseHeightSq")->GetValue(this->maxRestPoseHeightSq);
 	class_instance->GetInstanceByFieldName("clampBendStiffness")->GetValue(this->clampBendStiffness);
@@ -619,6 +721,126 @@ bool hktypes::hclBendStiffnessConstraintSetMx::ToInstance(hkreflex::hkClassInsta
 	class_instance->GetInstanceByFieldName("useRestPoseConfig")->SetValue(this->useRestPoseConfig);
 
 	return true;
+}
+
+void hktypes::hclBendStiffnessConstraintSetMx::FromDefaultPose(hktypes::hclSimClothData* sim_cloth_data, std::vector<std::vector<uint16_t>> edges, std::vector<float> stiffnesses, float stiffness_default) {
+	this->singles.clear();
+	this->batches.clear();
+	
+	auto& default_positions = sim_cloth_data->simClothPoses[0]->positions;
+	auto& particle_datas = sim_cloth_data->particleDatas;
+	auto& default_triangles = sim_cloth_data->triangleIndices;
+	std::vector<float> particle_invMasses;
+	for (auto& p : particle_datas) {
+		particle_invMasses.push_back(p.invMass);
+	}
+	std::vector<Eigen::Vector3d> positions;
+	for (auto& p : default_positions) {
+		auto vec3f = p.ToVector3f();
+		positions.push_back(Eigen::Vector3d(vec3f.x(), vec3f.y(), vec3f.z()));
+	}
+
+	std::vector<std::vector<uint16_t>> triangles = utils::split_vector(default_triangles, 3);
+
+	std::unordered_map<utils::CommutativePair<uint16_t>, float, utils::CommutativePair<uint16_t>::Hash> edge_set;
+
+	for (size_t i = 0; i < edges.size(); ++i) {
+		auto& edge = edges[i];
+		auto& stiffness = stiffnesses[i];
+		edge_set[utils::CommutativePair<uint16_t>(edge[0], edge[1])] = stiffness;
+	}
+
+	std::unordered_map<utils::CommutativePair<uint16_t>, std::vector<std::pair<uint32_t, uint16_t>>, utils::CommutativePair<uint16_t>::Hash> common_edges;
+
+	uint32_t num_triangles = triangles.size();
+	for (uint32_t i = 0; i < num_triangles; ++i) {
+		auto& triangle = triangles[i];
+		common_edges[utils::CommutativePair<uint16_t>(triangle[0], triangle[1])].push_back({ i, triangle[2] });
+		common_edges[utils::CommutativePair<uint16_t>(triangle[1], triangle[2])].push_back({ i, triangle[0] });
+		common_edges[utils::CommutativePair<uint16_t>(triangle[2], triangle[0])].push_back({ i, triangle[1] });
+	}
+	float maxRestPoseHeightSq = 0.f;
+	for (auto& edge : common_edges) {
+		if (edge_set.find(edge.first) != edge_set.end()) { // TODO: now it's edge_exclude
+			continue;
+		}
+		auto& all_wings = edge.second;
+		if (all_wings.size() < 2) {
+			continue;
+		}
+		//auto& stiffness = edge_set[edge.first];
+		auto wings = utils::combinations(all_wings, 2);
+		for (auto& wing_vertices : wings) {
+			// Might need to order the wings, but should work fine if not
+			Eigen::Vector3d e21 = positions[wing_vertices[0].second];
+			auto inv_mass_e21 = particle_invMasses[wing_vertices[0].second];
+			Eigen::Vector3d e22 = positions[wing_vertices[1].second];
+			auto inv_mass_e22 = particle_invMasses[wing_vertices[1].second];
+			Eigen::Vector3d e11 = positions[edge.first.lower];
+			auto inv_mass_e11 = particle_invMasses[edge.first.lower];
+			Eigen::Vector3d e12 = positions[edge.first.upper];
+			auto inv_mass_e12 = particle_invMasses[edge.first.upper];
+			Eigen::Vector3d na_e11_e12_e22 = (e11 - e22).cross(e12 - e22);
+			float l21 = na_e11_e12_e22.norm();
+			Eigen::Vector3d na_e11_e21_e22 = (e11 - e22).cross(e21 - e22);
+			float l12 = na_e11_e21_e22.norm();
+			Eigen::Vector3d na_e11_e12_e21 = (e12 - e21).cross(e11 - e21);
+			float l22 = na_e11_e12_e21.norm();
+			Eigen::Vector3d na_e12_e21_e22 = (e22 - e21).cross(e12 - e21);
+			float l11 = na_e12_e21_e22.norm();
+			float w22 = l22 / (l21 + l22);
+			float w21 = l21 / (l21 + l22);
+			float w12 = -l12 / (l11 + l12);
+			float w11 = -l11 / (l11 + l12);
+
+			Eigen::Vector3d n22 = na_e11_e12_e22 / l21;
+			Eigen::Vector3d n21 = na_e11_e12_e21 / l22;
+			Eigen::Vector3d dn = n22 - n21;
+
+			Eigen::Vector3d e1 = e12 - e11;
+			Eigen::Vector3d e2 = e22 - e21;
+			Eigen::Vector3d L = e21 * w21 + e22 * w22 + e11 * w11 + e12 * w12;
+
+			float curvature = 0.f;
+
+			if (L.norm() > 1e-4) {
+				Eigen::Vector3d dir = L.cross(e1);
+
+				Eigen::Vector3d common_n = e1.cross(e2).normalized();
+				float len_L = (e11 - e21).dot(common_n);
+				float len_L_sq = len_L * len_L * 64; // Don't know why it's 64 but it fits the observations
+				if (len_L_sq > maxRestPoseHeightSq) {
+					maxRestPoseHeightSq = len_L_sq;
+				}
+
+				curvature = -(dn.dot(dir) / e2.dot(dir));
+			}
+
+
+			float avg_inv_mass = 0.25 * (inv_mass_e21 + inv_mass_e22 + inv_mass_e11 + inv_mass_e12);
+
+			hclBendStiffnessConstraintSetMx::Single single;
+			single.weightA = w21;
+			single.weightB = w22;
+			single.weightC = w11;
+			single.weightD = w12;
+			single.bendStiffness = - stiffness_default / avg_inv_mass; // TODO: replace with stiffness
+			single.restCurvature = curvature;
+			single.invMassA = inv_mass_e21;
+			single.invMassB = inv_mass_e22;
+			single.invMassC = inv_mass_e11;
+			single.invMassD = inv_mass_e12;
+			single.particleA = wing_vertices[0].second;
+			single.particleB = wing_vertices[1].second;
+			single.particleC = edge.first.lower;
+			single.particleD = edge.first.upper;
+			this->singles.push_back(single);
+		}
+	}
+
+	this->clampBendStiffness = true;
+	this->useRestPoseConfig = true;
+	this->maxRestPoseHeightSq = maxRestPoseHeightSq;
 }
 
 bool hktypes::hclStandardLinkConstraintSetMx::Batch::FromInstance(const hkreflex::hkClassInstance* instance)

@@ -3,8 +3,10 @@
 
 
 namespace hktypes{
-	class hkReferencedObject;
 	class hkStringPtr;
+	class hkReferencedObject;
+	template <typename tT, typename tAllocator>
+	class ;
 	class hkBool;
 	template <typename tT, typename tAllocator>
 	class ;
@@ -20,16 +22,14 @@ namespace hktypes{
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	template <typename tT, typename tAllocator>
-	class ;
 	class hkVector4;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tT, typename tAllocator>
+	class ;
 	class hclVirtualCollisionPointsData;
-	template <typename tT, typename tAllocator>
-	class ;
-	template <typename tT, typename tAllocator>
-	class ;
-	template <typename tT, typename tAllocator>
-	class ;
 	template <typename tT, typename tAllocator>
 	class ;
 

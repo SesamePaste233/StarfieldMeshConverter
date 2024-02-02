@@ -18,15 +18,25 @@ namespace hktypes{
 		class LocalConstraint : public hkHolderBase {
 		public:
 			using BaseType = void;
+			hkUint16 particleIndex; // Offset: 0
+			hkUint16 referenceVertex; // Offset: 2
+			hkReal maximumDistance; // Offset: 4
+			hkReal maxNormalDistance; // Offset: 8
+			hkReal minNormalDistance; // Offset: 12
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclLocalRangeConstraintSet::LocalConstraint"; };
 			inline std::string GetTranscriptId() override { return "hclLocalRangeConstraintSet::LocalConstraint"; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline uint32_t GethkClassHash() override { return 2381122027; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "particleIndex", "hkUint16" },
+					{ "referenceVertex", "hkUint16" },
+					{ "maximumDistance", "hkReal" },
+					{ "maxNormalDistance", "hkReal" },
+					{ "minNormalDistance", "hkReal" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
@@ -35,27 +45,15 @@ namespace hktypes{
 		class LocalStiffnessConstraint : public hkHolderBase {
 		public:
 			using BaseType = void;
-			hkUint16 particleIndex; // Offset: 0
-			hkUint16 referenceVertex; // Offset: 2
-			hkReal maximumDistance; // Offset: 4
-			hkReal maxNormalDistance; // Offset: 8
-			hkReal minNormalDistance; // Offset: 12
-			hkReal stiffness; // Offset: 16
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclLocalRangeConstraintSet::LocalStiffnessConstraint"; };
 			inline std::string GetTranscriptId() override { return "hclLocalRangeConstraintSet::LocalStiffnessConstraint"; };
-			inline uint32_t GethkClassHash() override { return 2634299948; };
+			inline uint32_t GethkClassHash() override { return 0; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
-					{ "particleIndex", "hkUint16" },
-					{ "referenceVertex", "hkUint16" },
-					{ "maximumDistance", "hkReal" },
-					{ "maxNormalDistance", "hkReal" },
-					{ "minNormalDistance", "hkReal" },
-					{ "stiffness", "hkReal" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

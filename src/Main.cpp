@@ -284,29 +284,28 @@ void amain() {
 	return;
 }
 
-void test_main() {
+void main() {
 	hkphysics::hkReflDataDeserializer data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkNPCollisionObject\\2.bin", true);
+	//data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", true);
 
-	auto literals = data.classes_to_literal(true, true, true);
+	auto updated_transcript = data.RegisterClassesToTranscriptor();
 
-	auto instances = data.dump_indexed_blocks();
+	if (updated_transcript) {
+		data.SaveToCxxCode();
 
-	/*std::ofstream file0("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", std::ios::binary);
-	data.SerializeWithTypeUnchanged(file0);
-	file0.close();*/
+		auto literals = data.classes_to_literal(true, true, true);
 
-	int i = 0;
-	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
-		std::ofstream file("C:\\repo\\MeshConverter\\profiler\\" + profiler->GetRTTIName() + "_" + std::to_string(i++) + ".bin", std::ios::binary);
-		profiler->dump(file);
-		});
+		// Save the string into a file
+		std::ofstream file_l("C:\\repo\\MeshConverter\\hkGenerated.h");
+		file_l << literals;
+		file_l.close();
 
-	// Save the string into a file
-	std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated.h");
-	file << literals;
-	file.close();
+	}
+
+	auto instances = data.root_level_instance->dump();
+
 
 	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
 	file1 << instances;
@@ -344,7 +343,7 @@ void pmain() {
 	return;
 }
 
-int main() {
+int phexportmain() {
 	std::string json_file = "C:\\repo\\MeshConverter\\physics_data_debug.json";
 	std::string output_file = "C:\\repo\\MeshConverter\\physics_data_debug.bin";
 
@@ -398,7 +397,7 @@ int main() {
 
 void phnifmain() {
 	nif::NifIO nif;
-	nif.Deserialize("C:\\repo\\MeshConverter\\shaggy_f.nif");
+	nif.Deserialize("C:\\repo\\MeshConverter\\outfit_collector_f_upperbody.nif");
 	
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -423,7 +422,7 @@ void phnifmain() {
 	}
 
 	auto instances = data->root_level_instance->dump();
-	std::ofstream file_i("C:\\repo\\MeshConverter\\shaggy_f.txt");
+	std::ofstream file_i("C:\\repo\\MeshConverter\\outfit_collector_f_upperbody.txt");
 	file_i << instances;
 	file_i.close();
 

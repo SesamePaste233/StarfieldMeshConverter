@@ -321,6 +321,7 @@ def ExportNif(options, context, operator):
 	geometries = []
 	mode = "MULTI_MESH"
 	connect_pts = []
+	recur_bone_list = []
 	if root.type == 'EMPTY':
 		mode = "MULTI_MESH"
 		_data = nif_template.RootNodeTemplate(root, geometries, connect_pts)
@@ -329,7 +330,10 @@ def ExportNif(options, context, operator):
 		_data = nif_template.SingleClothTemplate(root, geometries, connect_pts)
 	elif root.type == 'ARMATURE':
 		mode = "SINGLE_MESH"
-		_data = nif_template.NifArmatureTemplate(root)
+		_data = nif_template.NifArmatureTemplate(root, recur_bone_list)
+		if len(recur_bone_list) != len(root.data.bones):
+			operator.report({'WARNING'}, f'You have bogus bones in the skeleton!')
+			return {'CANCELLED'}
 		_data['sub_template'] = 2
 
 	_data['geometries'] = []
@@ -472,10 +476,12 @@ def ExportNif(options, context, operator):
 		if not has_skinned_geometry or not physics_armature_attached:
 			operator.report({'WARNING'}, f'Nif export doesn\'t have a skinned mesh that is weighted to the very same skeleton in Physics Editor. Physics data will be ignored.')
 		else:
-			physics_data = PhysicsConverter.get_physics_data(physics_graph)
+			physics_data, error_msg = PhysicsConverter.get_physics_data(physics_graph)
 			if physics_data != None:
 				_data['physics_data'] = physics_data
 				_data['transcript_path'] = MeshConverter.GetTranscriptPath()
+			else:
+				operator.report({'WARNING'}, error_msg)
 	#print(_data)
 	json_data = json.dumps(_data)
 

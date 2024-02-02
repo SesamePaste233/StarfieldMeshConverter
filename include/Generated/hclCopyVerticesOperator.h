@@ -3,8 +3,8 @@
 
 
 namespace hktypes{
-	class hkBool;
 	class hclOperator;
+	class hkBool;
 
 	class hclCopyVerticesOperator : public hclOperator {
 	public:

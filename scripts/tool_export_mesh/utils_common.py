@@ -216,7 +216,7 @@ def RecurseDirIfExsit(path:str, recurs_depth:int = 1):
 	return []
 
 def FlattenDictToList(dictionary: dict, index_type = int, replace_none = False, replace_none_with = None):
-	max_id = 0
+	max_id = -1
 	for id in dictionary.keys():
 		if int(id) > max_id:
 			max_id = int(id)

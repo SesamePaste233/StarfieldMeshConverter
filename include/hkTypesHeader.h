@@ -83,5 +83,7 @@ namespace hktypes {
 		hclStretchLinkConstraintSetMx* AllocateStretchLinkConstraintSetMx(std::string name);
 
 		hclBonePlanesConstraintSet* AllocateBonePlanesConstraintSet(std::string name);
+
+		hclBendStiffnessConstraintSetMx* AllocateBendStiffnessConstraintSetMx(std::string name);
 	}
 }

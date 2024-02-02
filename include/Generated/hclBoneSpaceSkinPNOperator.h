@@ -3,9 +3,9 @@
 
 
 namespace hktypes{
-	class hclBoneSpaceSkinOperator;
 	template <typename tT, typename tAllocator>
 	class ;
+	class hclBoneSpaceSkinOperator;
 	template <typename tT, typename tAllocator>
 	class ;
 

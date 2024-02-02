@@ -94,8 +94,6 @@ bool hktypes::hclBoneSpaceDeformer::TwoBlendEntryBlock::FromInstance(const hkref
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->GetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->GetValue(boneIndices);
 	return true;
 }
 
@@ -199,8 +197,6 @@ bool hktypes::hclBoneSpaceDeformer::TwoBlendEntryBlock::ToInstance(hkreflex::hkC
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
-	class_instance->GetInstanceByFieldName("vertexIndices")->SetValue(vertexIndices);
-	class_instance->GetInstanceByFieldName("boneIndices")->SetValue(boneIndices);
 	return true;
 }
 

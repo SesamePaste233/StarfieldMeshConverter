@@ -198,12 +198,13 @@ class BendStiffnessConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
     bl_idname = 'BendStiffnessConstraint'
     bl_label = 'Bend Stiffness'
 
-    show_constraint: bpy.props.BoolProperty(name='Show Constraint', default=True)
+    stiffness: bpy.props.FloatProperty(name='Stiffness', min=0, max=1, default=0.5)
 
     def init(self, context):
         super().init(context)
+        AttributeVisGeoNode.GetGeoNode()
         particles_skt = self.inputs.new('hclClothParticlesType', 'Particles')
-        links_skt = self.inputs.new('hclClothLinksType', 'Links')
+        #links_skt = self.inputs.new('hclClothLinksType', 'Links')
         particles_out_skt = self.outputs.new('hclClothParticlesType', 'Particles')
 
     def check_valid(self) -> utils_node.NodeValidityReturn:
@@ -211,19 +212,17 @@ class BendStiffnessConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         if not valid:
             return valid
         #print(f'check_valid {self.name}')
-        if self.inputs['Particles'].is_linked and self.inputs['Links'].is_linked:
+        if self.inputs['Particles'].is_linked:
             parent = utils_node.get_linked_single(self.inputs['Particles'])
-            parent1 = utils_node.get_linked_single(self.inputs['Links'])
             if not parent.check_valid():
                 return utils_node.NodeValidityReturn(False, self, "Invalid Particles linked")
-            if not parent1.check_valid():
-                return utils_node.NodeValidityReturn(False, self, "Invalid Links linked")
             return utils_node.NodeValidityReturn(True, self)
-        return utils_node.NodeValidityReturn(False, self, 'No Particles or Links linked')
+        return utils_node.NodeValidityReturn(False, self, 'No Particles linked')
     
     def draw_buttons(self, context, layout):
         super().draw_buttons(context, layout)
-        layout.prop(self, "show_constraint", text="Show Constraint")
+        layout.label(text="Stiffness:")
+        layout.prop(self, "stiffness", text="")
     
     def get_socket_output(self, socket_name: str):
         valid = self.check_valid()
@@ -232,11 +231,18 @@ class BendStiffnessConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
         
         if socket_name == 'Particles':
             particles = utils_node.get_socket_input_single(self,'Particles').copy()
-            links = utils_node.get_socket_input_single(self,'Links')
+            if 'constraints' in particles:
+                # if there exists a constraint of the same type, pick it
+                for constraint in particles['constraints']:
+                    if constraint['constraint'] == 'BendStiffness':
+                        constraint['links'] = {}
+                        constraint['stiffness'] = float(self.stiffness)
+                        return particles
             constraint = {
                 'constraint': 'BendStiffness',
                 'name': self.name,
-                **links,
+                'links': {},
+                'stiffness': float(self.stiffness),
             }
             particles['constraints'].append(constraint)
             return particles

@@ -10,17 +10,17 @@ def get_physics_data(tree: bpy.types.NodeTree):
     out_nodes: list[bpy.types.Node] = tree.get_output_nodes()
 
     if tree.bl_idname != 'hclPhysicsTreeType':
-        return None
+        return None, "Tree is not physics tree"
 
     if len(out_nodes) != 1:
-        return None
+        return None, "Tree must have exactly one output node"
     
     out_node = out_nodes[0]
 
     physics_data_dict = out_node.get_socket_output()
 
     if physics_data_dict is None:
-        return None
+        return None, "Output node must have a valid output"
 
     if physics_data_dict['target'] == 'GenericClothSim':
         particles_dict = physics_data_dict['cloth_data']['particles']
@@ -44,7 +44,11 @@ def get_physics_data(tree: bpy.types.NodeTree):
         ref_mesh = tree.mesh
 
         bone_list = [utils_blender.RevertRenamingBone(bone.name) for bone in armature.data.bones]
-        arma_dict = nif_armature.CreateArmatureDict(armature)
+        recur_bone_list = []
+        arma_dict = nif_armature.CreateArmatureDict(armature, recur_bone_list)
+        if len(recur_bone_list) != len(bone_list):
+            print('You have bogus bones in the skeleton!')
+            return None, "Bogus bones in the skeleton"
 
         #normals,_,_ = utils_blender.GetNormalTangents(ref_mesh.data, with_tangent=False)
 
@@ -67,7 +71,8 @@ def get_physics_data(tree: bpy.types.NodeTree):
 
         if len(vg_names) == 0:
             print('Ref mesh must be weighted to hkaSkeleton!')
-            return None
+            utils_blender.RemoveMeshObj(tri_mesh)
+            return None, "Ref mesh must be weighted to hkaSkeleton"
 
         weights, used_indices = utils_blender.RemapBoneIdToSkeleton(weights, vg_names, armature)
 
@@ -81,7 +86,8 @@ def get_physics_data(tree: bpy.types.NodeTree):
         processed_driver_data = driver_node.gen_driver_data(driver_data, tri_mesh, armature)
         processed_driver_data['local_bone_transforms'] = utils_blender.GethclLocalBoneTransforms(tri_mesh, armature, processed_driver_data['face_indices'], processed_driver_data['cloth_bones'])
         if processed_driver_data is None:
-            return None
+            utils_blender.RemoveMeshObj(tri_mesh)
+            return None, "Failed to process driver data"
         else:
             physics_data_dict['bone_driver_data'] = processed_driver_data
 
@@ -104,6 +110,6 @@ def get_physics_data(tree: bpy.types.NodeTree):
             'used_indices': used_indices,
         }
 
-        return physics_data
+        return physics_data, "Success"
     
-    return None
+    return None, "Invalid target type"

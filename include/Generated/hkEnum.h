@@ -3,35 +3,16 @@
 
 
 namespace hktypes{
-	class hclClothData::Platform;
-	class hclBufferLayout::SlotFlags;
-	class hclRuntimeConversionInfo::VectorConversion;
-	class hclBufferLayout::TriangleFormat;
+	class hknpMaterial::MassChangerCategory;
+	class hknpMaterial::CombinePolicy;
+	class hknpMaterial::TriggerType;
+	class hknpShapeType::Enum;
+	class hknpCollisionDispatchType::Enum;
 
 	template <typename tENUM, typename tSTORAGE>
 	class hkEnum;
 	template<>
-	class hkEnum<hclClothData::Platform, hkUint32> : public hkHolderBase {
-	public:
-		using BaseType = void;
-		hkUint32 storage; // Offset: 0
-
-		// Extra
-		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
-		bool ToInstance(hkreflex::hkClassInstance* instance) override;
-		inline std::string GethkClassName() override { return "hkEnum"; };
-		inline std::string GetTranscriptId() override { return "hkEnum<hclClothData::Platform, hkUint32>"; };
-		inline uint32_t GethkClassHash() override { return 0; };
-		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
-			return {
-				{ "storage", "hkUint32" },
-			};
-		};
-		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
-	};
-
-	template<>
-	class hkEnum<hclBufferLayout::TriangleFormat, hkUint8> : public hkHolderBase {
+	class hkEnum<hknpMaterial::TriggerType, hkUint8> : public hkHolderBase {
 	public:
 		using BaseType = void;
 		hkUint8 storage; // Offset: 0
@@ -40,7 +21,7 @@ namespace hktypes{
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkEnum"; };
-		inline std::string GetTranscriptId() override { return "hkEnum<hclBufferLayout::TriangleFormat, hkUint8>"; };
+		inline std::string GetTranscriptId() override { return "hkEnum<hknpMaterial::TriggerType, hkUint8>"; };
 		inline uint32_t GethkClassHash() override { return 0; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
@@ -51,7 +32,7 @@ namespace hktypes{
 	};
 
 	template<>
-	class hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8> : public hkHolderBase {
+	class hkEnum<hknpMaterial::CombinePolicy, hkUint8> : public hkHolderBase {
 	public:
 		using BaseType = void;
 		hkUint8 storage; // Offset: 0
@@ -60,7 +41,7 @@ namespace hktypes{
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkEnum"; };
-		inline std::string GetTranscriptId() override { return "hkEnum<hclRuntimeConversionInfo::VectorConversion, hkUint8>"; };
+		inline std::string GetTranscriptId() override { return "hkEnum<hknpMaterial::CombinePolicy, hkUint8>"; };
 		inline uint32_t GethkClassHash() override { return 0; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
@@ -71,7 +52,7 @@ namespace hktypes{
 	};
 
 	template<>
-	class hkEnum<hclBufferLayout::SlotFlags, hkUint8> : public hkHolderBase {
+	class hkEnum<hknpMaterial::MassChangerCategory, hkUint8> : public hkHolderBase {
 	public:
 		using BaseType = void;
 		hkUint8 storage; // Offset: 0
@@ -80,7 +61,47 @@ namespace hktypes{
 		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkEnum"; };
-		inline std::string GetTranscriptId() override { return "hkEnum<hclBufferLayout::SlotFlags, hkUint8>"; };
+		inline std::string GetTranscriptId() override { return "hkEnum<hknpMaterial::MassChangerCategory, hkUint8>"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "storage", "hkUint8" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+	};
+
+	template<>
+	class hkEnum<hknpShapeType::Enum, hkUint8> : public hkHolderBase {
+	public:
+		using BaseType = void;
+		hkUint8 storage; // Offset: 0
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkEnum"; };
+		inline std::string GetTranscriptId() override { return "hkEnum<hknpShapeType::Enum, hkUint8>"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "storage", "hkUint8" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+	};
+
+	template<>
+	class hkEnum<hknpCollisionDispatchType::Enum, hkUint8> : public hkHolderBase {
+	public:
+		using BaseType = void;
+		hkUint8 storage; // Offset: 0
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkEnum"; };
+		inline std::string GetTranscriptId() override { return "hkEnum<hknpCollisionDispatchType::Enum, hkUint8>"; };
 		inline uint32_t GethkClassHash() override { return 0; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {

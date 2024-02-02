@@ -395,12 +395,15 @@ namespace nif {
 					json_data["havok_skeleton"] = havok_skeleton_json;
 
 					if (havok_root_lvl_container) {
-						auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(havok_root_lvl_container->GetNamedVariantRef("hclClothData"));
-						if (havok_cloth_data != nullptr) {
-							auto havok_meshes = havok_cloth_data->GetBufferedMeshes();
-							for (auto& mesh : havok_meshes) {
-								auto mesh_json = mesh.ToJson();
-								json_data["havok_meshes"].push_back(mesh_json);
+						auto havok_cloth_datas = havok_root_lvl_container->GetNamedVariantRefs("hclClothData");
+						for (auto data : havok_cloth_datas) {
+							auto havok_cloth_data = dynamic_cast<hktypes::hclClothData*>(data);
+							if (havok_cloth_data != nullptr) {
+								auto havok_meshes = havok_cloth_data->GetBufferedMeshes();
+								for (auto& mesh : havok_meshes) {
+									auto mesh_json = mesh.ToJson();
+									json_data["havok_meshes"].push_back(mesh_json);
+								}
 							}
 						}
 					}

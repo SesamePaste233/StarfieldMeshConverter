@@ -89,7 +89,7 @@ node_categories = [
     MyNodeCategory('CONSTRAINTS', "Constraints", items=[
         NodeItem("StandardLinkConstraint", label="Standard Link"),
         NodeItem("StretchLinkConstraint", label="Stretch Link"),
-        #NodeItem("BendStiffnessConstraint", label="Bend Stiffness"),
+        NodeItem("BendStiffnessConstraint", label="Bend Stiffness"),
         NodeItem("BonePlanesConstraint", label="Global Bone Plane Constraint"),
         NodeItem("LocalRangeConstraint", label="Local Range Constraint"),
     ]),

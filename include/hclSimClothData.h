@@ -376,6 +376,68 @@ namespace hktypes {
 		}
 	};
 
+	class hclBendStiffnessConstraintSet : public hclConstraintSet {
+	public:
+		using BaseType = hclConstraintSet;
+		class Link : public hkHolderBase {
+		public:
+			using BaseType = void;
+			float weightA; // Offset: 0
+			float weightB; // Offset: 4
+			float weightC; // Offset: 8
+			float weightD; // Offset: 12
+			float bendStiffness; // Offset: 16
+			float restCurvature; // Offset: 20
+			uint16_t particleA; // Offset: 24
+			uint16_t particleB; // Offset: 26
+			uint16_t particleC; // Offset: 28
+			uint16_t particleD; // Offset: 30
+
+			// Extra
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hclBendStiffnessConstraintSet::Link"; };
+			inline std::string GetTranscriptId() override { return "hclBendStiffnessConstraintSet::Link"; };
+			inline uint32_t GethkClassHash() override { return 275062867; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "weightA", "hkReal" },
+					{ "weightB", "hkReal" },
+					{ "weightC", "hkReal" },
+					{ "weightD", "hkReal" },
+					{ "bendStiffness", "hkReal" },
+					{ "restCurvature", "hkReal" },
+					{ "particleA", "hkUint16" },
+					{ "particleB", "hkUint16" },
+					{ "particleC", "hkUint16" },
+					{ "particleD", "hkUint16" },
+				};
+			};
+			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+		};
+
+		std::vector<hclBendStiffnessConstraintSet::Link> links; // Offset: 40
+		float maxRestPoseHeightSq; // Offset: 56
+		bool clampBendStiffness; // Offset: 60
+		bool useRestPoseConfig; // Offset: 61
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hclBendStiffnessConstraintSet"; };
+		inline std::string GetTranscriptId() override { return "hclBendStiffnessConstraintSet"; };
+		inline uint32_t GethkClassHash() override { return 967254011; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "links", "hkArray<hclBendStiffnessConstraintSet::Link, hkContainerHeapAllocator>" },
+				{ "maxRestPoseHeightSq", "hkReal" },
+				{ "clampBendStiffness", "hkBool" },
+				{ "useRestPoseConfig", "hkBool" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+	};
+
 	class hclBendStiffnessConstraintSetMx : public hclConstraintSet {
 	public:
 		using BaseType = hclConstraintSet;
@@ -491,6 +553,8 @@ namespace hktypes {
 		inline int ConstraintPriority() override {
 			return 2;
 		}
+
+		void FromDefaultPose(hclSimClothData* sim_cloth_data, std::vector<std::vector<uint16_t>> edges, std::vector<float> stiffnesses, float stiffness_default);
 	};
 
 	class hclStandardLinkConstraintSetMx : public hclConstraintSet {
