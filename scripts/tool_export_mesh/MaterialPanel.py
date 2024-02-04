@@ -79,7 +79,7 @@ class ExportMaterialOperator(bpy.types.Operator):
         mat_folder = context.scene.sf_export_material_folder
         texture_folder = os.path.join("Textures", mat_name)
         
-        return MaterialConverter.ExportMat(mat_name, context.scene, context, self, mat_folder, texture_folder, texconv_path)
+        return MaterialConverter.ExportMat(mat_name, context.scene, context, self, mat_folder, mat_folder, texture_folder, texconv_path)
 
 
 class ExportMaterialPanel(bpy.types.Panel):
@@ -199,7 +199,7 @@ def register():
             name=name,
             type=bpy.types.Image,
             update=update_texture_at_index(texture_item),
-            poll = lambda self, obj: obj.has_data,
+            poll = lambda self, obj: obj.size[0] * obj.size[1],
         ))
     bpy.types.Scene.sf_export_material_alpha_thresh = bpy.props.FloatProperty(
         name="Alpha Threshold",

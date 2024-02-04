@@ -288,9 +288,57 @@ class MatFile:
 
 import bpy
 import os
+import utils_common as utils
 import utils_material
 
-def ExportMat(mat_name, options, context, operator, mat_folder, texture_folder, texconv_path):
+def ExportMatFromMaterial(material:bpy.types.Material, operator, mat_folder, texture_rootfolder, texture_relfolder, texconv_path):
+    os.makedirs(mat_folder, exist_ok=True)
+    os.makedirs(texture_rootfolder, exist_ok=True)
+    
+    mat = material
+    mat_name = utils.sanitize_filename(material.name)
+    single_sided = utils_material.get_single_sided(mat)
+    alpha_thresh = utils_material.get_alpha_thresh(mat)
+    alpha_blend_channel = utils_material.get_alpha_blend_channel(mat)
+    sf_export_material_ShaderModel = "1LayerStandard" if single_sided else "TwoSided1Layer"
+    sf_export_material_alpha_thresh = alpha_thresh
+    sf_export_material_alpha_blend_channel = alpha_blend_channel.value
+    
+    images = {}
+    for texture_item in TextureIndex.__members__.values():
+        texture_node = utils_material.get_node_tree_texture_node(mat, texture_item)
+        if texture_node is not None:
+            images[f"sf_export_material_{texture_item.name}"] = texture_node.image
+    
+    mat = MatFile()
+    mat.setName(mat_name)
+    mat.setShaderModelStr(sf_export_material_ShaderModel)
+
+    for texture_item in TextureIndex.__members__.values():
+        texture_map = images[f"sf_export_material_{texture_item.name}"]
+        if texture_map is not None and isinstance(texture_map, bpy.types.Image):
+            texture_path = os.path.join(texture_rootfolder, texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.png")
+            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path)
+            
+            mat.setTexturePath(texture_item, os.path.join("Data", texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.dds"))
+
+    if images["sf_export_material_OPACITY"] is not None:
+        mat.setAlphaTestThreshold(sf_export_material_alpha_thresh)
+        mat.setAlphaBlendVertexColorChannel(sf_export_material_alpha_blend_channel)
+
+    rtn = mat.compose()
+
+    mat_path = os.path.join(mat_folder, f"{mat_name}.mat")
+    if rtn is not None:
+        with open(mat_path, "w") as f:
+            f.write(rtn)
+        operator.report({'INFO'}, "Material exported successfully.")
+        return {'FINISHED'}, mat_path
+    else:
+        operator.report({'ERROR'}, "Failed to export material.")
+        return {'CANCELLED'}, None
+
+def ExportMat(mat_name, options, context, operator, mat_folder, texture_rootfolder, texture_relfolder, texconv_path):
     mat = MatFile()
     mat.setName(mat_name)
     mat.setShaderModelStr(options.sf_export_material_ShaderModel)
@@ -298,10 +346,10 @@ def ExportMat(mat_name, options, context, operator, mat_folder, texture_folder, 
     for texture_item in TextureIndex.__members__.values():
         texture_map = options[f"sf_export_material_{texture_item.name}"]
         if texture_map is not None and isinstance(texture_map, bpy.types.Image):
-            texture_path = os.path.join(mat_folder, texture_folder, f"{mat_name}_{texture_item.name.lower()}.png")
+            texture_path = os.path.join(texture_rootfolder, texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.png")
             utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path)
             
-            mat.setTexturePath(texture_item, os.path.join("Data", texture_folder, f"{mat_name}_{texture_item.name.lower()}.dds"))
+            mat.setTexturePath(texture_item, os.path.join("Data", texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.dds"))
 
     if options.sf_export_material_OPACITY is not None:
         mat.setAlphaTestThreshold(options.sf_export_material_alpha_thresh)

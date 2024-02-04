@@ -309,6 +309,16 @@ def get_physics_node_tree_names(self, context):
 			physics_node_tree_names.append((node_tree.name, node_tree.name, node_tree.name, 'NODETREE', len(physics_node_tree_names)))
 	return tuple(physics_node_tree_names)
 
+def get_material_names(self, context):
+	material_names = []
+	for mat in bpy.data.materials:
+		if utils.is_mat(mat):
+			material_names.append((mat.name, mat.name, mat.name, 'MATERIAL', len(material_names)))
+
+	if len(material_names) == 0:
+		material_names = [("None", "None", "No Starfield material data.", 'NONE', 0)]
+	return material_names
+
 class ExportCustomNif(bpy.types.Operator):
 	bl_idname = "export_scene.custom_nif"
 	bl_label = "Export Custom Nif"
@@ -371,6 +381,12 @@ class ExportCustomNif(bpy.types.Operator):
 		description="",
 		items=get_physics_node_tree_names,
 		default=0,
+	)
+
+	export_material: bpy.props.BoolProperty(
+		name="Export Material",
+		description="Export material data to .mat",
+		default=True,
 	)
 
 	export_sf_mesh_open_folder: bpy.props.BoolProperty(

@@ -6,11 +6,13 @@ import mathutils
 import MeshIO
 import MorphIO
 import utils_blender
+import utils_material
 import nif_armature
 import nif_template
 import utils_common as utils
 import MeshConverter
 import PhysicsConverter
+import MaterialConverter
 
 skeleton_obj_dict = {}
 
@@ -303,6 +305,8 @@ def ExportNif(options, context, operator):
 	original_selected = utils_blender.GetSelectedObjs(True)
 	nif_filepath = options.filepath
 	export_folder = os.path.dirname(nif_filepath)
+	nif_filename = os.path.basename(nif_filepath)
+	nif_name = os.path.splitext(nif_filename)[0]
 	hash_filepath = options.export_sf_mesh_hash_result
 	options.export_sf_mesh_hash_result = False
 	options.use_world_origin = False
@@ -312,6 +316,14 @@ def ExportNif(options, context, operator):
 	custom_armature_attached = False
 	physics_armature_attached = False
 	has_skinned_geometry = False
+
+	export_material = options.export_material
+	if export_material:
+		mat_folder = os.path.join(export_folder, 'Materials')
+		texconv_path = utils_blender.get_texconv_path()
+		if texconv_path is None:
+			operator.report({'WARNING'}, 'Texconv path is not set. Please set it in the preferences.')
+			export_material = False
 
 	root = utils_blender.GetActiveObject()
 	if root.type not in ['EMPTY','MESH', 'ARMATURE']:
@@ -347,8 +359,20 @@ def ExportNif(options, context, operator):
 		mesh_data['geo_mesh_lod'] = []
 
 		if mesh_obj.data.materials and len(mesh_obj.data.materials) > 0 and mesh_obj.data.materials[0]:
-			mat_path = mesh_obj.data.materials[0].name
-			mesh_data['mat_path'] = mat_path[:mat_path.rfind('.mat') + 4]
+			mat = mesh_obj.data.materials[0]
+			mat_path = mat.name
+			if export_material and utils_material.is_mat(mat):
+				sub_folder_name = utils.sanitize_filename(mesh_obj.name)
+				mesh_obj_mat_folder = os.path.join(mat_folder, nif_name, sub_folder_name)
+				tex_relfolder = os.path.join('Textures', nif_name, sub_folder_name)
+				rtn, mat_path = MaterialConverter.ExportMatFromMaterial(mat, operator, mesh_obj_mat_folder, export_folder, tex_relfolder, texconv_path)
+				mat_path = os.path.relpath(mat_path, export_folder)
+				if 'FINISHED' in rtn:
+					operator.report({'INFO'}, f'Material export for {mesh_obj.name} successful.')
+				else:
+					operator.report({'WARNING'}, f'Material export for {mesh_obj.name} failed.')
+
+			mesh_data['mat_path'] = mat_path
 		else:
 			mesh_data['mat_path'] = 'MATERIAL_PATH'
 
