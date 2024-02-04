@@ -41,6 +41,15 @@ def TempFolderPath():
 		
 	return temp_path
 
+def ThirdPartyFolderPath():
+	utils_path = UtilsFolderPath()
+	third_party_path = os.path.join(utils_path, '3rdParty')
+	
+	if not os.path.isdir(third_party_path):
+		os.makedirs(third_party_path)
+		
+	return third_party_path
+
 def open_folder(initial_directory):
 
 	# Set the window manager to the current context
@@ -910,3 +919,17 @@ def TransferWeightByDistance(target_obj: bpy.types.Object, reference_obj: bpy.ty
 	bpy.ops.object.modifier_apply(modifier=modifier.name)
 
 	SetActiveObject(original_active)
+
+def get_preferences():
+    return bpy.context.preferences.addons["tool_export_mesh"].preferences
+
+def get_preference(prop:str):
+	return get_preferences().get(prop)
+
+def get_texconv_path() -> str|None:
+	texconv_path = get_preferences().texconv_path
+	if texconv_path == '':
+		return None
+	if not os.path.exists(texconv_path) or not os.path.isfile(texconv_path):
+		return None
+	return texconv_path

@@ -72,7 +72,7 @@ bool nif::NifIO::Serialize(const std::string filename)
 	file.open(filename, std::ios::binary);
 	if (!file.is_open())
 	{
-		std::cout << "At: NifIO::Serialize(). Error opening file" << std::endl;
+		std::cout << "At: NifIO::Serialize(). Error opening file: " << filename << std::endl;
 		return false;
 	}
 

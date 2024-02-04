@@ -18,7 +18,7 @@ import PhysicsEditor.ActivateVisOperator as ActivateVisOperator
 bl_info = {
 	"name": "Starfield Havok Physics Editor",
 	"author": "SesamePaste",
-	"version": (0, 15, 6),
+	"version": (0, 15, 7),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export havok physics data for starfield. Requires \"Starfield Geometry Bridge\" of the same version installed.",
