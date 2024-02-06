@@ -85,6 +85,8 @@ class MatFile:
         }
 
     def ID(self, id:str):
+        if id.startswith("res:"):
+            return id
         return f"res:{id}:{self.base_id}"
 
     @staticmethod
@@ -290,6 +292,7 @@ import bpy
 import os
 import utils_common as utils
 import utils_material
+import utils_blender
 
 def ExportMatFromMaterial(material:bpy.types.Material, operator, mat_folder, texture_rootfolder, texture_relfolder, texconv_path):
     os.makedirs(mat_folder, exist_ok=True)
@@ -318,7 +321,7 @@ def ExportMatFromMaterial(material:bpy.types.Material, operator, mat_folder, tex
         texture_map = images[f"sf_export_material_{texture_item.name}"]
         if texture_map is not None and isinstance(texture_map, bpy.types.Image):
             texture_path = os.path.join(texture_rootfolder, texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.png")
-            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path)
+            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path, not utils_blender.is_plugin_debug_mode())
             
             mat.setTexturePath(texture_item, os.path.join("Data", texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.dds"))
 
@@ -347,7 +350,7 @@ def ExportMat(mat_name, options, context, operator, mat_folder, texture_rootfold
         texture_map = options[f"sf_export_material_{texture_item.name}"]
         if texture_map is not None and isinstance(texture_map, bpy.types.Image):
             texture_path = os.path.join(texture_rootfolder, texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.png")
-            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path)
+            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path, not utils_blender.is_plugin_debug_mode())
             
             mat.setTexturePath(texture_item, os.path.join("Data", texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.dds"))
 

@@ -167,9 +167,17 @@ def export_texture_map(image:bpy.types.Image, path:str):
     if not path.endswith('.png'):
         path = os.path.splitext(path)[0] + '.png'
     os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    if os.path.exists(path) and os.path.isfile(path):
+        os.remove(path)
+        
+    original_path = image.filepath_raw
     image.filepath_raw = path
+    original_format = image.file_format
     image.file_format = 'PNG'
     image.save()
+    image.filepath_raw = original_path
+    image.file_format = original_format
     return True, path
 
 import subprocess
@@ -199,6 +207,7 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
         "-f", _get_texture_format(texture_index),
         "-o", os.path.dirname(png_path), 
         "-y",
+        "-nologo",
         png_path
     ]
 

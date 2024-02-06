@@ -98,7 +98,7 @@ class ExportMaterialPanel(bpy.types.Panel):
             layout.operator("object.choose_file_for_preferences", text="Set texconv.exe Path")
             return
 
-        if bpy.context.object.mode != 'OBJECT':
+        if bpy.context.object is not None and bpy.context.object.mode != 'OBJECT':
             layout.enabled = False
 
         layout.label(text="Material Name")
@@ -112,7 +112,8 @@ class ExportMaterialPanel(bpy.types.Panel):
             sub_layout.enabled = False
             sub_layout0.enabled = False
         else:
-            sub_layout.enabled = True
+            if context.active_object is not None and context.active_object.type == 'MESH':
+                sub_layout.enabled = True
             sub_layout0.enabled = True
 
         sub_layout0.operator("object.sf_apply_material", text="Apply Mat To Active Object")
