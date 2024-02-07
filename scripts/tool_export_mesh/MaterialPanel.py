@@ -130,8 +130,9 @@ class ExportMaterialPanel(bpy.types.Panel):
             box.label(text="Alpha Threshold")
             box.prop(context.scene, "sf_export_material_alpha_thresh", text="")
 
-            box.label(text="Blend Vertex Color Channel")
-            box.prop(context.scene, "sf_export_material_alpha_blend_channel", text="")
+            # Sadly vertex color blending doesn't really work
+            #box.label(text="Blend Vertex Color Channel")
+            #box.prop(context.scene, "sf_export_material_alpha_blend_channel", text="")
         else:
             box.label(text="No Opacity Map Found")
 

@@ -44,6 +44,7 @@ class AlphaSettingsComponent:
         if self.blendVertexColorChannel != BlendVertexColorChannel.NONE:
             rtn_dict["Data"]["Blender"] = {
                 "Data": {
+                    "UseVertexColor": "true",
                     "VertexColorChannel": self.blendVertexColorChannel.value
                 },
                 "Type": "BSMaterial::AlphaBlenderSettings"

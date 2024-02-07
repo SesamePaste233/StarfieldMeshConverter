@@ -37,7 +37,7 @@ import Preferences as Preferences
 bl_info = {
 	"name": "Starfield Geometry Bridge",
 	"author": "SesamePaste",
-	"version": (0, 15, 7),
+	"version": (0, 16, 0),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export .mesh geometry file for starfield.",
