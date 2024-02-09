@@ -1,4 +1,5 @@
 import bpy
+
 #initialize sf_shadernode node group
 def sf_shadernode_node_group():
     sf_shadernode= bpy.data.node_groups.new(type = 'ShaderNodeTree', name = "SF_ShaderNode")
@@ -44,8 +45,8 @@ def sf_shadernode_node_group():
     #Fac
     invert.inputs[0].default_value = 1.0
 
-    #node Group Input.001
-    group_input_001 = sf_shadernode.nodes.new("NodeGroupInput")
+    #node Group Input
+    group_input = sf_shadernode.nodes.new("NodeGroupInput")
     #sf_shadernode inputs
     #input COLOR
     sf_shadernode.inputs.new('NodeSocketColor', "COLOR")
@@ -67,14 +68,14 @@ def sf_shadernode_node_group():
     sf_shadernode.inputs[2].max_value = 1.0
     sf_shadernode.inputs[2].attribute_domain = 'POINT'
 
-    #input METALNESS
+    #input METAL
     sf_shadernode.inputs.new('NodeSocketFloatFactor', "METAL")
     sf_shadernode.inputs[3].default_value = 0.0
     sf_shadernode.inputs[3].min_value = 0.0
     sf_shadernode.inputs[3].max_value = 1.0
     sf_shadernode.inputs[3].attribute_domain = 'POINT'
 
-    #input ROUGHNESS
+    #input ROUGH
     sf_shadernode.inputs.new('NodeSocketFloatFactor', "ROUGH")
     sf_shadernode.inputs[4].default_value = 0.5
     sf_shadernode.inputs[4].min_value = 0.0
@@ -158,242 +159,89 @@ def sf_shadernode_node_group():
     #Weight
     principled_bsdf.inputs[25].default_value = 0.0
 
-    #node Math.003
-    math_003 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_003.operation = 'COMPARE'
-    #Value_001
-    math_003.inputs[1].default_value = 4.0
+    #node Group Input.001
+    group_input_001 = sf_shadernode.nodes.new("NodeGroupInput")
+
+    #node Math
+    math = sf_shadernode.nodes.new("ShaderNodeMath")
+    math.operation = 'LESS_THAN'
+    math.use_clamp = True
     #Value_002
-    math_003.inputs[2].default_value = 0.5
+    math.inputs[2].default_value = 0.5
 
     #node Math.001
     math_001 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_001.operation = 'COMPARE'
-    #Value_001
-    math_001.inputs[1].default_value = 2.0
+    math_001.operation = 'SUBTRACT'
+    #Value
+    math_001.inputs[0].default_value = 1.0
     #Value_002
     math_001.inputs[2].default_value = 0.5
 
     #node Math.002
     math_002 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_002.operation = 'COMPARE'
-    #Value_001
-    math_002.inputs[1].default_value = 3.0
+    math_002.operation = 'MULTIPLY'
     #Value_002
     math_002.inputs[2].default_value = 0.5
 
-    #node Math.004
-    math_004 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_004.operation = 'MULTIPLY'
-    #Value_002
-    math_004.inputs[2].default_value = 0.5
-
-    #node Math.006
-    math_006 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_006.operation = 'MULTIPLY'
-    #Value_002
-    math_006.inputs[2].default_value = 0.5
-
-    #node Math.007
-    math_007 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_007.operation = 'MULTIPLY'
-    #Value_002
-    math_007.inputs[2].default_value = 0.5
-
-    #node Math.009
-    math_009 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_009.operation = 'ADD'
-    #Value_002
-    math_009.inputs[2].default_value = 0.5
-
-    #node Math.008
-    math_008 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_008.operation = 'ADD'
-    #Value_002
-    math_008.inputs[2].default_value = 0.5
-
-    #node Math.005
-    math_005 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_005.operation = 'MULTIPLY'
-    #Value_002
-    math_005.inputs[2].default_value = 0.5
-
-    #node Math
-    math = sf_shadernode.nodes.new("ShaderNodeMath")
-    math.operation = 'COMPARE'
-    #Value_001
-    math.inputs[1].default_value = 1.0
-    #Value_002
-    math.inputs[2].default_value = 0.5
-
-    #node Color Attribute
-    color_attribute = sf_shadernode.nodes.new("ShaderNodeVertexColor")
-    color_attribute.layer_name = 'Color'
-
-    #node Group Input
-    group_input = sf_shadernode.nodes.new("NodeGroupInput")
-
-    #node Separate Color
-    separate_color = sf_shadernode.nodes.new("ShaderNodeSeparateColor")
-    separate_color.mode = 'RGB'
-
     #node Group Input.002
     group_input_002 = sf_shadernode.nodes.new("NodeGroupInput")
-
-    #node Math.010
-    math_010 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_010.operation = 'ADD'
-    math_010.use_clamp = True
-    #Value_002
-    math_010.inputs[2].default_value = 0.5
-
-    #node Math.011
-    math_011 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_011.operation = 'MULTIPLY'
-    #Value_002
-    math_011.inputs[2].default_value = 0.5
-
-    #node Group Input.003
-    group_input_003 = sf_shadernode.nodes.new("NodeGroupInput")
-
-    #node Math.012
-    math_012 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_012.operation = 'LESS_THAN'
-    #Value_002
-    math_012.inputs[2].default_value = 0.5
-
-    #node Math.013
-    math_013 = sf_shadernode.nodes.new("ShaderNodeMath")
-    math_013.operation = 'SUBTRACT'
-    #Value
-    math_013.inputs[0].default_value = 1.0
-    #Value_002
-    math_013.inputs[2].default_value = 0.5
 
 
     #Set locations
     group_output.location = (290.0, 0.0)
     mix.location = (-300.0, 180.0)
     invert.location = (-620.0, 20.0)
-    group_input_001.location = (-860.0, 180.0)
+    group_input.location = (-860.0, 180.0)
     principled_bsdf.location = (0.0, 0.0)
-    math_003.location = (-1680.0, -1240.0)
-    math_001.location = (-1680.0, -760.0)
-    math_002.location = (-1680.0, -1000.0)
-    math_004.location = (-1100.0, -620.0)
-    math_006.location = (-1100.0, -940.0)
-    math_007.location = (-1100.0, -1100.0)
-    math_009.location = (-920.0, -940.0)
-    math_008.location = (-920.0, -780.0)
-    math_005.location = (-1100.0, -780.0)
-    math.location = (-1680.0, -520.0)
-    color_attribute.location = (-1480.0, -820.0)
-    group_input.location = (-500.0, -80.0)
-    separate_color.location = (-1320.0, -720.0)
-    group_input_002.location = (-2000.0, -460.0)
-    math_010.location = (-740.0, -860.0)
-    math_011.location = (-500.0, -980.0)
-    group_input_003.location = (-740.0, -1040.0)
-    math_012.location = (-320.0, -1040.0)
-    math_013.location = (-160.0, -1040.0)
+    group_input_001.location = (-500.0, -80.0)
+    math.location = (-780.0, -520.0)
+    math_001.location = (-600.0, -520.0)
+    math_002.location = (-300.0, -520.0)
+    group_input_002.location = (-1220.0, -460.0)
 
     #Set dimensions
     group_output.width, group_output.height = 140.0, 100.0
     mix.width, mix.height = 140.0, 100.0
     invert.width, invert.height = 140.0, 100.0
-    group_input_001.width, group_input_001.height = 140.0, 100.0
+    group_input.width, group_input.height = 140.0, 100.0
     principled_bsdf.width, principled_bsdf.height = 240.0, 100.0
-    math_003.width, math_003.height = 140.0, 100.0
+    group_input_001.width, group_input_001.height = 140.0, 100.0
+    math.width, math.height = 140.0, 100.0
     math_001.width, math_001.height = 140.0, 100.0
     math_002.width, math_002.height = 140.0, 100.0
-    math_004.width, math_004.height = 140.0, 100.0
-    math_006.width, math_006.height = 140.0, 100.0
-    math_007.width, math_007.height = 140.0, 100.0
-    math_009.width, math_009.height = 140.0, 100.0
-    math_008.width, math_008.height = 140.0, 100.0
-    math_005.width, math_005.height = 140.0, 100.0
-    math.width, math.height = 140.0, 100.0
-    color_attribute.width, color_attribute.height = 140.0, 100.0
-    group_input.width, group_input.height = 140.0, 100.0
-    separate_color.width, separate_color.height = 140.0, 100.0
     group_input_002.width, group_input_002.height = 140.0, 100.0
-    math_010.width, math_010.height = 140.0, 100.0
-    math_011.width, math_011.height = 140.0, 100.0
-    group_input_003.width, group_input_003.height = 140.0, 100.0
-    math_012.width, math_012.height = 140.0, 100.0
-    math_013.width, math_013.height = 140.0, 100.0
 
     #initialize sf_shadernode links
     #principled_bsdf.BSDF -> group_output.BSDF
     sf_shadernode.links.new(principled_bsdf.outputs[0], group_output.inputs[0])
-    #group_input.METALNESS -> principled_bsdf.Metallic
-    sf_shadernode.links.new(group_input.outputs[3], principled_bsdf.inputs[6])
-    #group_input.ROUGHNESS -> principled_bsdf.Roughness
-    sf_shadernode.links.new(group_input.outputs[4], principled_bsdf.inputs[9])
-    #group_input.NORMAL -> principled_bsdf.Normal
-    sf_shadernode.links.new(group_input.outputs[1], principled_bsdf.inputs[22])
-    #group_input.HEIGHT -> group_output.Displacement
-    sf_shadernode.links.new(group_input.outputs[6], group_output.inputs[1])
-    #group_input_001.COLOR -> mix.A
-    sf_shadernode.links.new(group_input_001.outputs[0], mix.inputs[6])
-    #group_input_001.AO -> invert.Color
-    sf_shadernode.links.new(group_input_001.outputs[5], invert.inputs[1])
+    #group_input_001.METAL -> principled_bsdf.Metallic
+    sf_shadernode.links.new(group_input_001.outputs[3], principled_bsdf.inputs[6])
+    #group_input_001.ROUGH -> principled_bsdf.Roughness
+    sf_shadernode.links.new(group_input_001.outputs[4], principled_bsdf.inputs[9])
+    #group_input_001.NORMAL -> principled_bsdf.Normal
+    sf_shadernode.links.new(group_input_001.outputs[1], principled_bsdf.inputs[22])
+    #group_input_001.HEIGHT -> group_output.Displacement
+    sf_shadernode.links.new(group_input_001.outputs[6], group_output.inputs[1])
+    #group_input.COLOR -> mix.A
+    sf_shadernode.links.new(group_input.outputs[0], mix.inputs[6])
+    #group_input.AO -> invert.Color
+    sf_shadernode.links.new(group_input.outputs[5], invert.inputs[1])
     #invert.Color -> mix.B
     sf_shadernode.links.new(invert.outputs[0], mix.inputs[7])
-    #group_input_002.A_BLEND_CHANNEL -> math.Value
-    sf_shadernode.links.new(group_input_002.outputs[8], math.inputs[0])
-    #group_input_002.A_BLEND_CHANNEL -> math_001.Value
-    sf_shadernode.links.new(group_input_002.outputs[8], math_001.inputs[0])
-    #group_input_002.A_BLEND_CHANNEL -> math_002.Value
-    sf_shadernode.links.new(group_input_002.outputs[8], math_002.inputs[0])
-    #group_input_002.A_BLEND_CHANNEL -> math_003.Value
-    sf_shadernode.links.new(group_input_002.outputs[8], math_003.inputs[0])
-    #color_attribute.Color -> separate_color.Color
-    sf_shadernode.links.new(color_attribute.outputs[0], separate_color.inputs[0])
-    #separate_color.Red -> math_004.Value
-    sf_shadernode.links.new(separate_color.outputs[0], math_004.inputs[1])
-    #math.Value -> math_004.Value
-    sf_shadernode.links.new(math.outputs[0], math_004.inputs[0])
-    #math_003.Value -> math_007.Value
-    sf_shadernode.links.new(math_003.outputs[0], math_007.inputs[0])
-    #math_002.Value -> math_006.Value
-    sf_shadernode.links.new(math_002.outputs[0], math_006.inputs[0])
-    #math_001.Value -> math_005.Value
-    sf_shadernode.links.new(math_001.outputs[0], math_005.inputs[0])
-    #separate_color.Green -> math_005.Value
-    sf_shadernode.links.new(separate_color.outputs[1], math_005.inputs[1])
-    #separate_color.Blue -> math_006.Value
-    sf_shadernode.links.new(separate_color.outputs[2], math_006.inputs[1])
-    #color_attribute.Alpha -> math_007.Value
-    sf_shadernode.links.new(color_attribute.outputs[1], math_007.inputs[1])
-    #math_004.Value -> math_008.Value
-    sf_shadernode.links.new(math_004.outputs[0], math_008.inputs[0])
-    #math_005.Value -> math_008.Value
-    sf_shadernode.links.new(math_005.outputs[0], math_008.inputs[1])
-    #math_006.Value -> math_009.Value
-    sf_shadernode.links.new(math_006.outputs[0], math_009.inputs[0])
-    #math_007.Value -> math_009.Value
-    sf_shadernode.links.new(math_007.outputs[0], math_009.inputs[1])
-    #math_009.Value -> math_010.Value
-    sf_shadernode.links.new(math_009.outputs[0], math_010.inputs[1])
-    #math_008.Value -> math_010.Value
-    sf_shadernode.links.new(math_008.outputs[0], math_010.inputs[0])
-    #group_input_003.OPACITY -> math_011.Value
-    sf_shadernode.links.new(group_input_003.outputs[2], math_011.inputs[1])
-    #group_input.COLOR -> principled_bsdf.Base Color
-    sf_shadernode.links.new(group_input.outputs[0], principled_bsdf.inputs[0])
-    #math_010.Value -> math_011.Value
-    sf_shadernode.links.new(math_010.outputs[0], math_011.inputs[0])
-    #math_011.Value -> math_012.Value
-    sf_shadernode.links.new(math_011.outputs[0], math_012.inputs[0])
-    #group_input_003.A_TEST_THRESH -> math_012.Value
-    sf_shadernode.links.new(group_input_003.outputs[7], math_012.inputs[1])
-    #math_012.Value -> math_013.Value
-    sf_shadernode.links.new(math_012.outputs[0], math_013.inputs[1])
-    #math_013.Value -> principled_bsdf.Alpha
-    sf_shadernode.links.new(math_013.outputs[0], principled_bsdf.inputs[21])
-	
-    return sf_shadernode
+    #group_input_001.COLOR -> principled_bsdf.Base Color
+    sf_shadernode.links.new(group_input_001.outputs[0], principled_bsdf.inputs[0])
+    #group_input_002.OPACITY -> math.Value
+    sf_shadernode.links.new(group_input_002.outputs[2], math.inputs[0])
+    #group_input_002.A_TEST_THRESH -> math.Value
+    sf_shadernode.links.new(group_input_002.outputs[7], math.inputs[1])
+    #math.Value -> math_001.Value
+    sf_shadernode.links.new(math.outputs[0], math_001.inputs[1])
+    #math_001.Value -> math_002.Value
+    sf_shadernode.links.new(math_001.outputs[0], math_002.inputs[0])
+    #group_input_002.OPACITY -> math_002.Value
+    sf_shadernode.links.new(group_input_002.outputs[2], math_002.inputs[1])
+    #math_002.Value -> principled_bsdf.Alpha
+    sf_shadernode.links.new(math_002.outputs[0], principled_bsdf.inputs[21])
 
 def GetMatNode():
 	if "SF_ShaderNode" in bpy.data.node_groups:
