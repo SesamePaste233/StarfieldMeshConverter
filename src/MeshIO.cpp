@@ -1006,6 +1006,17 @@ bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string fil
 	json jsonData;
 	int tangents_count = 0;
 
+	if (this->num_uv2 > 0) {
+		json uv2Data = json::array();
+		for (auto& uv2 : this->UV_list2) {
+			json uv2_l = json::array();
+			uv2_l.push_back(uv2[0]);
+			uv2_l.push_back(uv2[1]);
+			uv2Data.push_back(uv2_l);
+		}
+		jsonData["uv_coords2"] = uv2Data;
+	}
+
 	jsonData["max_border"] = this->max_border;
 
 	json tangentsData = json::array();

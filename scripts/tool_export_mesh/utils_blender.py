@@ -371,7 +371,7 @@ def GetNormalTangents(mesh, with_tangent = True):
 
 	if with_tangent:
 		_Tangents = [utils_math.GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
-		return np.array(_Normals), np.array(_Tangents), Bitangent_sign
+		return np.array(_Normals), np.array(_Tangents), np.array(Bitangent_sign)
 	else:
 		_Tangents = None
 		Bitangent_sign = None

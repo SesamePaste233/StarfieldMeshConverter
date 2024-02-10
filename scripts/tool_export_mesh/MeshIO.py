@@ -285,6 +285,16 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 
 			data = json.loads(rtn)
 
+			if "uv_coords2" in data:
+				if len(data["uv_coords2"]) != len(data["positions"]):
+					operator.report({'WARNING'}, f"UV2 data mismatched. Contact the author for assistance.")
+					return {'CANCELLED'}
+				uv_layer2 = bm.loops.layers.uv.new("UV2")
+				for f in bm.faces:
+					for vert_idx, loop_idx in zip(f.verts, f.loops):
+						uv_coords = data["uv_coords2"][vert_idx.index]
+						bm.loops[loop_idx][uv_layer2].uv = (uv_coords[0],1 - uv_coords[1])
+
 			if len(data["vertex_weights"]) > 0:
 				if len(bm.verts) != len(data["vertex_weights"]):
 					operator.report({'WARNING'}, f"Weight data mismatched. Contact the author for assistance.")

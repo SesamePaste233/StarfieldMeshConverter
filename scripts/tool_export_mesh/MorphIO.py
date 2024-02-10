@@ -2,6 +2,8 @@ import bpy
 import os
 import bmesh
 import json
+import math
+import numpy as np
 
 import utils_blender
 import utils_math
@@ -230,35 +232,43 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 	}
 	jsondata["numVertices"] = verts_count
 	jsondata["shapeKeys"] = morph_names
+	jsondata["morphData"] = []
 
-	for i in range(len(morph_names)):
-		jsondata["morphData"].append([])
-		for j in range(verts_count):
-			jsondata["morphData"][i].append([0,0,0,1,[],[]])
+	morphData = [[] for _ in range(len(morph_names))]
 
-	basis_positions = [list(vert.co) for vert in basis_obj.data.vertices.values()] 
+	basis_positions = np.array([list(vert.co) for vert in basis_obj.data.vertices.values()])
 	basis_normals, basis_tangents, basis_tangentsigns = utils_blender.GetNormalTangents(basis_obj.data, True)
 
 	no_color_objs_in_group = []
 	for n, sk_obj in enumerate(morph_objs):
 
-		sk_positions = [list(vert.co) for vert in sk_obj.data.vertices.values()] 
+		sk_positions = np.array([list(vert.co) for vert in sk_obj.data.vertices.values()])
+		nan_ps = np.isnan(sk_positions.flatten())
+		if nan_ps.any():
+			operator.report({'WARNING'}, f'Found NaN(s) in shape: {sk_obj.name} at vert id: {[i for i in range(verts_count) if nan_ps[i * 3]]}.')
+			return {'CANCELLED'}
+
 		sk_normals, sk_tangents, _ = utils_blender.GetNormalTangents(sk_obj.data, True)
 		sk_v_colors, has_color = utils_blender.GetVertColorPerVert(sk_obj)
 		if has_color == False:
 			no_color_objs_in_group.append(sk_obj.name)
 
-		for i in range(verts_count):
-			for j in range(3):
-				jsondata["morphData"][n][i][j] = sk_positions[i][j] - basis_positions[i][j]
-			jsondata["morphData"][n][i][3] = utils_blender.ColorToRGB888(sk_v_colors[i])
-			jsondata["morphData"][n][i][4] = list(sk_normals[i] - basis_normals[i])
-			jsondata["morphData"][n][i][5] = list(basis_tangentsigns[i] * (sk_tangents[i] - basis_tangents[i]))
+		d_P = (sk_positions - basis_positions).tolist()
+		d_N = (sk_normals - basis_normals).tolist()
+		d_T = (basis_tangentsigns[:, np.newaxis] * (sk_tangents - basis_tangents)).tolist()
+		morphData[n] = [[d_p[0], d_p[1], d_p[2], utils_blender.ColorToRGB888(sk_v_colors[i]), d_n, d_t] for i, d_p, d_n, d_t in zip(range(verts_count), d_P, d_N, d_T)]
 
 	if len(no_color_objs_in_group) != 0 and len(no_color_objs_in_group) != len(morph_objs):
 		operator.report({'WARNING'}, f'No vertex color found in {len(no_color_objs_in_group)} morph objects: {", ".join(no_color_objs_in_group)}, target vertex colors of corresponding morph keys will be set to 1.')
 
+	jsondata["morphData"] = morphData
+
 	json_data = json.dumps(jsondata)
+
+	if utils_blender.is_plugin_debug_mode():
+		debug_json_data = json.dumps(jsondata, indent=2)
+		with open(export_file_path + ".json", 'w') as f:
+			f.write(debug_json_data)
 
 	returncode = MeshConverter.ExportMorphFromJson(json_data, export_file_path)
 

@@ -185,7 +185,7 @@ import time
 
 _texture_format: dict[str, str] = {
     "COLOR": "BC7_UNORM_SRGB",
-    "NORMAL": "BC5_UNORM",
+    "NORMAL": "BC5_SNORM",
     "OPACITY": "BC4_UNORM",
     "AO": "BC4_UNORM",
     "METAL": "BC4_UNORM",

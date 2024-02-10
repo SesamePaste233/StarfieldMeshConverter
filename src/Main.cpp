@@ -102,7 +102,7 @@ int meshToBlender(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-int morphToBlender(int argc, char* argv[]){
+int main1(int argc, char* argv[]){
 	// Check if the user provided the correct number of command-line arguments
 	if (argc != 4) {
 		std::cerr << "Usage: " << argv[0] << " -blender_morph input_morph.dat output_name.json" << std::endl;
@@ -110,8 +110,8 @@ int morphToBlender(int argc, char* argv[]){
 	}
 
 	// Extract command-line arguments
-	std::string inputMorph = argv[2];
-	std::string outputName = argv[3];
+	std::string inputMorph = "morph.dat.json";
+	std::string outputName = "morph.dat";
 
 	// Create a MorphIO object
 	MorphIO reader;
@@ -133,16 +133,11 @@ int morphToBlender(int argc, char* argv[]){
 	return 0; // Return success
 }
 
-int blenderToMorph(int argc, char* argv[]) {
-	// Check if the user provided the correct number of command-line arguments
-	if (argc != 4) {
-		std::cerr << "Usage: " << argv[0] << " -game_morph input_morph.json output_name.dat" << std::endl;
-		return 1; // Return an error code
-	}
-
+int main(int argc, char* argv[]) {
+	
 	// Extract command-line arguments
-	std::string inputMorph = argv[2];
-	std::string outputName = argv[3];
+	std::string inputMorph = "C:\\repo\\MeshConverter\\morph.dat.json";
+	std::string outputName = "morph.dat";
 
 	// Create a MorphIO object
 	MorphIO reader;
@@ -284,7 +279,7 @@ void amain() {
 	return;
 }
 
-void main() {
+void ____main() {
 	hkphysics::hkReflDataDeserializer data;
 
 	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkNPCollisionObject\\2.bin", true);
