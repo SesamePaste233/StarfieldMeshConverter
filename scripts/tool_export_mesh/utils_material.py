@@ -184,7 +184,7 @@ import subprocess
 import time
 
 _texture_format: dict[str, str] = {
-    "COLOR": "BC7_UNORM_SRGB",
+    "COLOR": "BC7_UNORM",
     "NORMAL": "BC5_SNORM",
     "OPACITY": "BC4_UNORM",
     "AO": "BC4_UNORM",
@@ -193,17 +193,26 @@ _texture_format: dict[str, str] = {
     "HEIGHT": "BC4_UNORM",
 }
 
+_srgb: list = ["COLOR"]
+
 def _get_texture_format(texture_index:MaterialConverter.TextureIndex) -> str:
     if texture_index.name not in _texture_format:
-        return "BC1_UNORM_SRGB"
+        return "BC1_UNORM"
     return _texture_format[texture_index.name]
+
+def _is_srgb(texture_index:MaterialConverter.TextureIndex) -> bool:
+    return texture_index.name in _srgb
 
 def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.TextureIndex, png_path:str):
     if not png_path.endswith('.png'):
         raise ValueError("Input image is not a PNG file")
 
-    cmd = [
-        texconv_path,
+    cmd = [texconv_path]
+    
+    if _is_srgb(texture_index):
+        cmd += ["-srgb"]
+
+    cmd += [
         "-f", _get_texture_format(texture_index),
         "-o", os.path.dirname(png_path), 
         "-y",

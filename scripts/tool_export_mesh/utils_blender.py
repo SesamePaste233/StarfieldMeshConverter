@@ -496,6 +496,9 @@ def ColorToRGB888(color):
 	rgb = list(color)[:-1]
 	return [int(v * 255) for v in rgb]
 
+def RGB888ToColor(rgb) -> tuple:
+	return tuple([v / 255 for v in rgb] + [1])
+
 def RGB888ToRGB565(rgb):
 	r = rgb[0] >> 3
 	g = rgb[1] >> 2
