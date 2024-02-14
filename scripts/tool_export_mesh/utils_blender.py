@@ -358,21 +358,26 @@ def CalcVIdLIdlist(mesh):
 	return vid_lid_list
 
 def GetNormalTangents(mesh, with_tangent = True, fast_mode = False, fast_mode_list = None):
-	verts_count = len(mesh.vertices)
-	Normals = [np.array([0,0,0]) for i in range(verts_count)]
-	mesh.calc_normals_split()
-	if with_tangent:
-		Bitangent_sign = [1 for i in range(verts_count)]
-		Tangents = [np.array([0,0,0]) for i in range(verts_count)]
-		mesh.calc_tangents()
-
 	if fast_mode and fast_mode_list != None:
-		for vert_idx, loop_idx in zip(range(verts_count), fast_mode_list):
-			Normals[vert_idx] = Normals[vert_idx] + np.array(mesh.loops[loop_idx].normal)
+		mesh.calc_normals_split()
+		if with_tangent:
+			mesh.calc_tangents()		
+			Normals = [np.array(mesh.loops[loop_idx].normal) for loop_idx in fast_mode_list]
+			
 			if with_tangent:
-				Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
-				Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
+				Bitangent_sign = [mesh.loops[loop_idx].bitangent_sign for loop_idx in fast_mode_list]
+				Tangents = [utils_math.GramSchmidtOrthogonalize(np.array(mesh.loops[loop_idx].tangent), n) for loop_idx, n in zip(fast_mode_list, Normals)]
+				return np.array(Normals), np.array(Tangents), np.array(Bitangent_sign)
+	
+			return np.array(Normals), None, None
 	else:
+		verts_count = len(mesh.vertices)
+		Normals = [np.array([0,0,0]) for i in range(verts_count)]
+		mesh.calc_normals_split()
+		if with_tangent:
+			Bitangent_sign = [1 for i in range(verts_count)]
+			Tangents = [np.array([0,0,0]) for i in range(verts_count)]
+			mesh.calc_tangents()
 		for face in mesh.polygons:
 			for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
 				Normals[vert_idx] = Normals[vert_idx] + np.array(mesh.loops[loop_idx].normal)
@@ -380,15 +385,15 @@ def GetNormalTangents(mesh, with_tangent = True, fast_mode = False, fast_mode_li
 					Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
 					Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
 
-	_Normals = [utils_math.Normalize(n) for n in Normals]
+		_Normals = [utils_math.Normalize(n) for n in Normals]
 
-	if with_tangent:
-		_Tangents = [utils_math.GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
-		return np.array(_Normals), np.array(_Tangents), np.array(Bitangent_sign)
-	else:
-		_Tangents = None
-		Bitangent_sign = None
-		return np.array(_Normals), None, None
+		if with_tangent:
+			_Tangents = [utils_math.GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]
+			return np.array(_Normals), np.array(_Tangents), np.array(Bitangent_sign)
+		else:
+			_Tangents = None
+			Bitangent_sign = None
+			return np.array(_Normals), None, None
 
 def VisualizeVectors(obj_mesh, offsets, vectors, name = "Vectors"):
 	vis_obj = None
