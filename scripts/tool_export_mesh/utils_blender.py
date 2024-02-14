@@ -310,7 +310,7 @@ def move_object_to_parent(objs, parent):
 			obj.parent = parent
 
 
-def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, base_obj = None):
+def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, base_obj = None, loop_mapping_base = "TOPOLOGY"):
 	if active_obj in selected_obj_list:
 		selected_obj_list.remove(active_obj)
 	
@@ -327,7 +327,7 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
 		modifier.data_types_loops = {'CUSTOM_NORMAL'}
 		modifier.use_max_distance = True
 		modifier.max_distance = 0.001
-		modifier.loop_mapping = "TOPOLOGY"
+		modifier.loop_mapping = loop_mapping_base
 		if apply_as_mesh:
 			bpy.ops.object.modifier_apply(modifier=modifier.name)
 
@@ -350,7 +350,14 @@ def SmoothPerimeterNormal(active_obj, selected_obj_list, apply_as_mesh = False, 
 	if apply_as_mesh:
 		SetActiveObject(original_active)
 
-def GetNormalTangents(mesh, with_tangent = True):
+def CalcVIdLIdlist(mesh):
+	vid_lid_list = [0 for _ in range(len(mesh.vertices))]
+	for face in mesh.polygons:
+		for l_id in face.loop_indices:
+			vid_lid_list[mesh.loops[l_id].vertex_index] = l_id
+	return vid_lid_list
+
+def GetNormalTangents(mesh, with_tangent = True, fast_mode = False, fast_mode_list = None):
 	verts_count = len(mesh.vertices)
 	Normals = [np.array([0,0,0]) for i in range(verts_count)]
 	mesh.calc_normals_split()
@@ -359,13 +366,19 @@ def GetNormalTangents(mesh, with_tangent = True):
 		Tangents = [np.array([0,0,0]) for i in range(verts_count)]
 		mesh.calc_tangents()
 
-
-	for face in mesh.polygons:
-		for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+	if fast_mode and fast_mode_list != None:
+		for vert_idx, loop_idx in zip(range(verts_count), fast_mode_list):
 			Normals[vert_idx] = Normals[vert_idx] + np.array(mesh.loops[loop_idx].normal)
 			if with_tangent:
 				Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
 				Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
+	else:
+		for face in mesh.polygons:
+			for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
+				Normals[vert_idx] = Normals[vert_idx] + np.array(mesh.loops[loop_idx].normal)
+				if with_tangent:
+					Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
+					Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
 
 	_Normals = [utils_math.Normalize(n) for n in Normals]
 

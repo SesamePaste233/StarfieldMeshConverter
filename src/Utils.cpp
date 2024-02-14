@@ -478,10 +478,10 @@ int16_t utils::double_to_snorm(double value, double max_border)
 
 	// Convert the normalized value to the snorm range and return as uint16_t
 	if (value >= 0) {
-		return static_cast<int16_t>(value * 32767.0);
+		return static_cast<int16_t>(std::round(value * 32767.0));
 	}
 	else {
-		return static_cast<int16_t>(value * 32768.0);
+		return static_cast<int16_t>(std::round(value * 32768.0));
 	}
 }
 

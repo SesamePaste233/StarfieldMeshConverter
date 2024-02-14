@@ -4,6 +4,7 @@ import bmesh
 import json
 import math
 import numpy as np
+import time
 
 import utils_blender
 import utils_math
@@ -237,7 +238,9 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 	morphData = [[] for _ in range(len(morph_names))]
 
 	basis_positions = np.array([list(vert.co) for vert in basis_obj.data.vertices.values()])
-	basis_normals, basis_tangents, basis_tangentsigns = utils_blender.GetNormalTangents(basis_obj.data, True)
+
+	vid_lid_list = utils_blender.CalcVIdLIdlist(basis_obj.data)
+	basis_normals, basis_tangents, basis_tangentsigns = utils_blender.GetNormalTangents(basis_obj.data, True, True, vid_lid_list)
 
 	no_color_objs_in_group = []
 	for n, sk_obj in enumerate(morph_objs):
@@ -248,7 +251,7 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 			operator.report({'WARNING'}, f'Found NaN(s) in shape: {sk_obj.name} at vert id: {[i for i in range(verts_count) if nan_ps[i * 3]]}.')
 			return {'CANCELLED'}
 
-		sk_normals, sk_tangents, _ = utils_blender.GetNormalTangents(sk_obj.data, True)
+		sk_normals, sk_tangents, _ = utils_blender.GetNormalTangents(sk_obj.data, True, True, vid_lid_list)
 		sk_v_colors, has_color = utils_blender.GetVertColorPerVert(sk_obj)
 		if has_color == False:
 			no_color_objs_in_group.append(sk_obj.name)
@@ -422,13 +425,17 @@ def ExportMorph(options, context, export_file_path, operator):
 	for key in original_shape_keys:
 		key.value = 0
 
+	time_start = time.time()
+
 	for n, sk in enumerate(shape_keys):
 		for i in range(verts_count):
 			jsondata["morphData"][n][i][0] = sk.data[i].co.x - Basis.data[i].co.x
 			jsondata["morphData"][n][i][1] = sk.data[i].co.y - Basis.data[i].co.y
 			jsondata["morphData"][n][i][2] = sk.data[i].co.z - Basis.data[i].co.z
 
-	basis_normals, basis_tangents, basis_tangentsigns = utils_blender.GetNormalTangents(proxy_obj.data, True)
+	vid_lid_list = utils_blender.CalcVIdLIdlist(proxy_obj.data)
+
+	basis_normals, basis_tangents, basis_tangentsigns = utils_blender.GetNormalTangents(proxy_obj.data, True, True, vid_lid_list)
 
 	for n, cur_key in enumerate(original_shape_keys):
 		shape_key_index = key_blocks.keys().index(cur_key.name)
@@ -457,9 +464,9 @@ def ExportMorph(options, context, export_file_path, operator):
 		utils_blender.SetActiveObject(me_obj)
 		bpy.ops.object.shade_smooth(use_auto_smooth=True)
 
-		utils_blender.SmoothPerimeterNormal(me_obj, [ref_obj], True, target_obj)
+		utils_blender.SmoothPerimeterNormal(me_obj, [ref_obj], True, target_obj, loop_mapping_base="NEAREST_POLYNOR")
 		
-		normals, tangents, _ = utils_blender.GetNormalTangents(me, True)
+		normals, tangents, _ = utils_blender.GetNormalTangents(me, True, True, vid_lid_list)
 
 		for i in range(verts_count):
 			jsondata["morphData"][n][i][3] = [255,255,255] # Target vert color
@@ -482,7 +489,16 @@ def ExportMorph(options, context, export_file_path, operator):
 
 	json_data = json.dumps(jsondata)
 
+	time_end = time.time()
+
+	if utils_blender.is_plugin_debug_mode():
+		debug_json_data = json.dumps(jsondata, indent=2)
+		with open(export_path + ".json", 'w') as f:
+			f.write(debug_json_data)
+
 	returncode = MeshConverter.ExportMorphFromJson(json_data, export_path)
+
+	time_end2 = time.time()
 
 	if not returncode:
 		bpy.data.meshes.remove(proxy_obj.data)
@@ -496,7 +512,7 @@ def ExportMorph(options, context, export_file_path, operator):
 	
 	utils_blender.SetActiveObject(target_obj)
 
-	operator.report({'INFO'}, f"Export morph successful.")
+	operator.report({'INFO'}, f"Export morph successful. Time taken: {time_end - time_start:.2f}/{time_end2 - time_end:.2} seconds.")
 	return {"FINISHED"}
 
 def CreateMorphObjSetDefault(options, context, basis_obj, target_objs: list, operator):
