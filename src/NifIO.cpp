@@ -431,7 +431,17 @@ mesh::MeshIO* nif::NifIO::GetMesh(const std::string& mesh_factory_path) const
 {
 	mesh::MeshIO* reader = new mesh::MeshIO;
 
-	if (!reader->Deserialize(this->assets_path + mesh_factory_path + ".mesh")) {
+	std::string path_with_extension = mesh_factory_path + ".mesh";
+
+	auto p = mesh_factory_path.find_last_of(".");
+	if (p != std::string::npos) {
+		auto extension = mesh_factory_path.substr(p + 1);
+		if (extension == "mesh") {
+			path_with_extension = mesh_factory_path;
+		}
+	}
+
+	if (!reader->Deserialize(this->assets_path + path_with_extension)) {
 		std::cout << "Failed to load mesh from " << this->assets_path + mesh_factory_path + ".mesh" << std::endl;
 		delete reader;
 		return nullptr;

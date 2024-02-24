@@ -525,10 +525,10 @@ def RGB888ToRGB565(rgb):
 
 def RenamingBone(name:str):
 	tags = utils._tag(name)
-	if 'right' in tags and name.startswith("R_"):
+	if 'RI' in tags and name.startswith("R_"):
 		bone_rename_dict[name[2:] + '.R'] = 1
 		return name[2:] + '.R'
-	elif 'left' in tags and name.startswith("L_"):
+	elif 'LE' in tags and name.startswith("L_"):
 		bone_rename_dict[name[2:] + '.L'] = 1
 		return name[2:] + '.L'
 	

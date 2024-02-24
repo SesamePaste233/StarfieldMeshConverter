@@ -203,6 +203,9 @@ def _get_texture_format(texture_index:MaterialConverter.TextureIndex) -> str:
 def _is_srgb(texture_index:MaterialConverter.TextureIndex) -> bool:
     return texture_index.name in _srgb
 
+def _is_normal_map(texture_index:MaterialConverter.TextureIndex) -> bool:
+    return texture_index.name == "NORMAL"
+
 def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.TextureIndex, png_path:str):
     if not png_path.endswith('.png'):
         raise ValueError("Input image is not a PNG file")
@@ -210,7 +213,10 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
     cmd = [texconv_path]
     
     if _is_srgb(texture_index):
-        cmd += ["-srgb"]
+        cmd += ["-srgbi"]
+
+    if _is_normal_map(texture_index):
+        cmd += ["-inverty"]
 
     cmd += [
         "-f", _get_texture_format(texture_index),

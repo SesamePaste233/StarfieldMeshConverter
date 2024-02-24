@@ -174,6 +174,8 @@ namespace utils {
 
 	std::uint32_t encodeDEC3N(const std::vector<float>& values, float w);
 
+	std::uint32_t encodeDEC3N(const std::vector<float>& values, float w);
+
 	std::uint16_t encodeRGB565(uint8_t r, uint8_t g, uint8_t b);
 
 	void decodeRGB565(uint16_t rgb565, uint8_t& r, uint8_t& g, uint8_t& b);

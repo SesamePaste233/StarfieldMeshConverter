@@ -39,6 +39,8 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 				break
 
 			factory_path = mesh_info['factory_path']
+			if factory_path.endswith(".mesh"):
+				factory_path = factory_path[:-5]
 
 			mesh_filepath = os.path.join(options.assets_folder, 'geometries', factory_path + '.mesh')
 			if os.path.isfile(mesh_filepath) == False:
@@ -418,14 +420,18 @@ def ExportNif(options, context, operator):
 
 		if hash_filepath:
 			mesh_folder, mesh_name = utils.hash_string(mesh_obj.name)
+			factory_name = mesh_folder + '\\' + mesh_name
 		else:
 			mesh_folder = utils.sanitize_filename(mesh_obj.name)
-			mesh_name = utils.sanitize_filename(mesh_obj.data.name)
+			if mesh_obj.data.name.endswith('.mesh'):
+				mesh_name = utils.sanitize_filename(mesh_obj.data.name[:-5])
+			else:
+				mesh_name = utils.sanitize_filename(mesh_obj.data.name)
+			factory_name = mesh_folder + '\\' + mesh_name + ".mesh"
 
 		result_file_folder = os.path.join(export_folder, 'geometries', mesh_folder)
 		os.makedirs(result_file_folder, exist_ok = True)
 		result_file_path = os.path.join(result_file_folder, mesh_name + ".mesh")
-		factory_name = mesh_folder + '\\' + mesh_name
 
 		if mode == "SINGLE_MESH":
 			utils_blender.SetSelectObjects(original_selected)
