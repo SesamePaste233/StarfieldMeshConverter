@@ -137,7 +137,7 @@ class ExportCustomMesh(bpy.types.Operator):
 	def invoke(self, context, event):
 		_obj = context.active_object
 		if _obj:
-			self.filename = _obj.name + '.mesh'
+			self.filename = utils.sanitize_filename(_obj.name) + '.mesh'
 		else:
 			self.filename = 'untitled.mesh'
 

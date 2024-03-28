@@ -272,7 +272,7 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 
 		obj = bpy.context.selected_objects[0]
 		if obj:
-			mesh = obj.data
+			mesh:bpy.types.Mesh = obj.data
 			if mesh_name_override != None:
 				mesh.name = mesh_name_override
 			if not mesh.vertex_colors:
@@ -286,7 +286,7 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 			data = json.loads(rtn)
 
 			if "uv_coords2" in data:
-				if len(data["uv_coords2"]) != len(data["positions"]):
+				if len(data["uv_coords2"]) != len(mesh.vertices):
 					operator.report({'WARNING'}, f"UV2 data mismatched. Contact the author for assistance.")
 					return {'CANCELLED'}
 				uv_layer2 = bm.loops.layers.uv.new("UV2")
