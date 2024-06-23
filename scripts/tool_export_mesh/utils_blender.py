@@ -954,3 +954,105 @@ def get_texconv_path() -> str|None:
 	if not os.path.exists(texconv_path) or not os.path.isfile(texconv_path):
 		return None
 	return texconv_path
+
+def morphPanelAdd(obj, name):
+	item = obj.morph_list.add()
+	item.name = name
+	
+	mesh = obj.data
+
+	if f"NRM_{name}" not in mesh.attributes:
+		mesh.attributes.new(name=f"NRM_{name}", type="FLOAT_VECTOR", domain="POINT")
+
+	if f"TAN_{name}" not in mesh.attributes:
+		mesh.attributes.new(name=f"TAN_{name}", type="FLOAT_VECTOR", domain="POINT")
+
+	if f"COL_{name}" not in mesh.attributes:
+		mesh.vertex_colors.new(name=f"COL_{name}")
+
+def morphPanelUpdateMorphIndex(self, context):
+    obj = context.object
+    mesh = obj.data
+
+    index = obj.morph_list_index
+
+    if len(obj.morph_list) == index or index == -1:
+        return None
+
+    active = obj.morph_list[index]
+
+    name = active.name
+
+    if obj.data.shape_keys and obj.data.shape_keys.key_blocks.find(name) != None:
+        obj.active_shape_key_index = obj.data.shape_keys.key_blocks.find(name)
+
+    if f"COL_{name}" in mesh.attributes:
+        mesh.attributes.active_color = mesh.attributes.get(f"COL_{name}")
+
+def morphPanelUpdateName(self, context):
+	items = [item.name for item in context.object.morph_list if item != self]
+		
+	if self.name in items:
+		self.name = f"{self.name}1"
+    
+	name = self.name
+	obj = context.object
+
+	if f"NRM_{name}" in obj.data.attributes:
+		obj.data.attributes.get(f"NRM_{name}").name = f"NRM_{name}"
+
+	if f"TAN_{name}" in obj.data.attributes:
+		obj.data.attributes.get(f"TAN_{name}").name = f"TAN_{name}"
+
+	if f"COL_{name}" in obj.data.attributes:
+		obj.data.attributes.get(f"COL_{name}").name = f"COL_{name}"
+
+def morphPanelUpdateMorphValue(self, context):
+    name = self.name
+    obj = context.object
+
+    if obj == None:
+        return
+
+    if obj.data.shape_keys != None and obj.data.shape_keys.key_blocks.get(name) != None:
+        obj.data.shape_keys.key_blocks.get(name).value = self.morph_value
+    
+    for material in obj.data.materials:
+        if material.node_tree == None:
+            continue
+
+        nodes = material.node_tree.nodes
+
+        if f"nrm_mix_{name}" in nodes:
+            nodes[f"nrm_mix_{name}"].inputs[0].default_value = self.morph_value
+            break
+
+def morphPanelRecalculateActiveNormals(obj):
+	index = obj.morph_list_index
+
+	if index == -1:
+		return False
+
+	active = obj.morph_list[index]
+	morph_name = active.name
+	mesh = obj.data
+
+	if f"NRM_{morph_name}" not in mesh.attributes == False:
+		mesh.attributes.new(name=f"NRM_{morph_name}", type="FLOAT_VECTOR", domain="POINT")
+	
+	if obj.data.shape_keys == None or (obj.data.shape_keys and morph_name not in obj.data.shape_keys.key_blocks):
+		return False
+	
+	nrm_attr = mesh.attributes.get(f"NRM_{morph_name}")
+	sk = obj.data.shape_keys.key_blocks.get(morph_name)
+
+	temp_sk_normals = sk.normals_vertex_get()
+	sk_normals_lists = [temp_sk_normals[i:i+3] for i in range(0, len(temp_sk_normals), 3)]
+	obj_normals = [n.normal for n in mesh.vertices]
+
+	for i in range(len(mesh.vertices)):
+		sk_nrm = mathutils.Vector(sk_normals_lists[i]).normalized()
+		obj_nrm = mathutils.Vector((n for n in obj_normals[i])).normalized()
+		dot_product = obj_nrm.dot(sk_nrm)
+
+		nrm_attr.data[i].vector = sk_nrm - (obj_nrm * -dot_product)

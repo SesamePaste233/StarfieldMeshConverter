@@ -116,7 +116,7 @@ def ImportMorph(options, context, operator, result_objs = []):
 
 	for n, key_name in enumerate(shape_keys):
 		
-		if debug_mode or options.as_multiple:
+		if debug_mode or options.as_multiple or options.morph_panel:
 			delta_normals = [[] for i in range(len(verts))]
 			delta_tangents = [[] for i in range(len(verts))]
 			offsets = [[] for i in range(len(verts))]
@@ -128,17 +128,33 @@ def ImportMorph(options, context, operator, result_objs = []):
 		sk.relative_key = sk_basis
 		sk.slider_min = 0
 		sk.slider_max = 1
+
+		if options.morph_panel:
+			utils_blender.morphPanelAdd(target_obj, sk.name)
+
+			target_obj.data.vertex_colors.active = target_obj.data.vertex_colors[f"COL_{sk.name}"]
+			
 		# position each vert
 		for i in range(len(verts)):
 			sk.data[i].co.x += morph_data[n][i][0]
 			sk.data[i].co.y += morph_data[n][i][1]
 			sk.data[i].co.z += morph_data[n][i][2]
+			
 			if debug_mode or options.as_multiple:
 				offsets[i] = [morph_data[n][i][0],morph_data[n][i][1],morph_data[n][i][2]]
 				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
 				delta_normals[i] = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
 				delta_tangents[i] = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
+			
+			if options.morph_panel:
+				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
 
+				target_obj.data.attributes.get(f"NRM_{sk.name}").data[i].vector = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
+				target_obj.data.attributes.get(f"TAN_{sk.name}").data[i].vector = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
+
+		if options.morph_panel:
+			utils_blender.SetVertColorPerVert(target_obj, target_vert_colors)
+			
 		if options.as_multiple:
 			key_blocks = target_obj.data.shape_keys.key_blocks
 			shape_key_index = key_blocks.keys().index(sk.name)
