@@ -94,6 +94,70 @@ namespace morph{
 
 		void FakeEmpty(const uint32_t n_verts, const uint8_t n_morphs = 3);
 
+		inline morph_data* GetMorphData(const uint32_t vert_idx, const uint32_t morph_idx_inner) {
+			if(morph_idx_inner < per_vert_morph_data[vert_idx].size())
+				return &per_vert_morph_data[vert_idx][morph_idx_inner];
+			else
+				std::cout << "Inner index out of bound: " << morph_idx_inner << std::endl;
+			return nullptr;
+		}
+
+		inline morph_data* GetMorphData(const uint32_t vert_idx, const std::string morph_name) {
+			auto it = std::find(morph_names.begin(), morph_names.end(), morph_name);
+			if (it == morph_names.end()) {
+				std::cout << "Morph name not found: " << morph_name << std::endl;
+				return nullptr;
+			}
+			else {
+				uint32_t morph_idx = std::distance(morph_names.begin(), it);
+				uint32_t morph_idx_inner = -1;
+				auto it2 = std::find(per_vert_morph_key_indices[vert_idx].begin(), per_vert_morph_key_indices[vert_idx].end(), morph_idx);
+				if (it2 == per_vert_morph_key_indices[vert_idx].end()) {
+					std::cout << "Morph index not found for current vert: " << morph_idx << std::endl;
+					return nullptr;
+				}
+				else {
+					morph_idx_inner = std::distance(per_vert_morph_key_indices[vert_idx].begin(), it2);
+					return GetMorphData(vert_idx, morph_idx_inner);
+				}
+			}
+			return nullptr;
+		}
+
+		inline morph_data_hf* GetMorphDataHF(const uint32_t vert_idx, const uint32_t morph_idx_inner) {
+#ifdef _EXTENDED_MORPH_DATA
+			if (morph_idx_inner < per_vert_morph_data_hf[vert_idx].size())
+				return &per_vert_morph_data_hf[vert_idx][morph_idx_inner];
+			else
+				std::cout << "Inner index out of bound: " << morph_idx_inner << std::endl;
+#endif
+			return nullptr;
+		}
+
+		inline morph_data_hf* GetMorphDataHF(const uint32_t vert_idx, const std::string morph_name) {
+#ifdef _EXTENDED_MORPH_DATA
+			auto it = std::find(morph_names.begin(), morph_names.end(), morph_name);
+			if (it == morph_names.end()) {
+				std::cout << "Morph name not found: " << morph_name << std::endl;
+				return nullptr;
+			}
+			else {
+				uint32_t morph_idx = std::distance(morph_names.begin(), it);
+				uint32_t morph_idx_inner = -1;
+				auto it2 = std::find(per_vert_morph_key_indices[vert_idx].begin(), per_vert_morph_key_indices[vert_idx].end(), morph_idx);
+				if (it2 == per_vert_morph_key_indices[vert_idx].end()) {
+					std::cout << "Morph index not found for current vert: " << morph_idx << std::endl;
+					return nullptr;
+				}
+				else {
+					morph_idx_inner = std::distance(per_vert_morph_key_indices[vert_idx].begin(), it2);
+					return GetMorphDataHF(vert_idx, morph_idx_inner);
+				}
+			}
+#endif
+			return nullptr;
+		}
+
 		uint32_t num_axis;
 
 		uint32_t num_shape_keys;
@@ -120,9 +184,6 @@ namespace morph{
 #endif
 
 		std::vector<std::vector<uint32_t>> per_vert_morph_key_indices;
-
-
-		std::vector<std::vector<uint8_t>> per_vert_morph_key_selection;
 	};
 
 }

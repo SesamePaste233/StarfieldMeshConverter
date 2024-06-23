@@ -24,9 +24,9 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	// Load the mesh from the file
 	uint32_t magic = utils::read<uint32_t>(file)[0];
-	if (magic != 1) {
+	/*if (magic != 1) {
 		return false;
-	}
+	}*/
 
 	std::cout << "Offset of Indices: " << std::hex << file.tellg() << std::endl;
 

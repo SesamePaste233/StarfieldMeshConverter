@@ -133,7 +133,7 @@ int main1(int argc, char* argv[]){
 	return 0; // Return success
 }
 
-int main(int argc, char* argv[]) {
+int __main(int argc, char* argv[]) {
 	
 	// Extract command-line arguments
 	std::string inputMorph = "C:\\repo\\MeshConverter\\morph.dat.json";
@@ -223,36 +223,24 @@ void importnif_main() {
 	return;
 }
 
-void __main() {
-	// Recursively get all filepaths with .dat extension from the directory
-	std::vector<std::string> filepaths;
-	utils::getFilePaths("C:\\test\\meshes\\morphs\\clothes", filepaths, ".dat");
+void main() {
+	MorphIO reader;
+	reader.Deserialize("C:\\repo\\MeshConverter\\morph.dat");
 
-	// Test read in MorphIO
-	std::vector<std::pair<std::string, MorphIO>> database;
-	database.reserve(filepaths.size());
+	std::vector<morph_data_hf*> morphs;
+	std::string key = "HideEar";
+	morphs.push_back(reader.GetMorphDataHF(4142, key));
+	morphs.push_back(reader.GetMorphDataHF(4143, key));
+	morphs.push_back(reader.GetMorphDataHF(4144, key));
+	morphs.push_back(reader.GetMorphDataHF(4145, key));
 
-	// Create a log file
-	std::ofstream log_file;
-	log_file.open("log.txt");
-
-	for (int i = 0; i < filepaths.size(); i++) {
-		log_file << filepaths[i] << std::endl;
-
-		MorphIO reader;
-		reader.Deserialize(filepaths[i]);
-
-		for (int k = 0; k < reader.num_vertices; k++) {
-			int16_t padding = 0;
-			for (int j = 0; j < reader.per_vert_morph_key_indices[k].size(); j++) {
-				if (reader.per_vert_morph_data[k][j].target_vert_color != padding) {
-					padding = reader.per_vert_morph_data[k][j].target_vert_color;
-					log_file << "V" + std::to_string(k)+" i" + std::to_string(j) + ": Padding changed to " << std::hex << padding << std::endl;
-				}
-			}
+	for (auto& morph : morphs) {
+		if (morph != nullptr) {
+			std::cout << "Morph: " << morph->nx << morph->ny << morph->nz << std::endl;
 		}
-
-		database.push_back(std::make_pair(filepaths[i], reader));
+		else{
+			std::cout << "Morph not found" << std::endl;
+		}
 	}
 }
 
