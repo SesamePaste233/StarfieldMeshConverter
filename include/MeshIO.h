@@ -41,15 +41,19 @@ namespace mesh {
 		// Read a mesh from a file
 		bool Deserialize(const std::string filename);
 
+		bool Deserialize(std::istream& stream);
+
 		bool Serialize(const std::string filename);
+
+		bool Serialize(std::ostream& stream);
 
 		bool Load(const std::string filename, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
 		bool LoadFromString(const std::string json_data, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
-		bool SaveOBJ(const std::string filename, const std::string obj_name);
+		bool SerializeToJsonStr(std::string& json_data) const;
 
-		bool SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name);
+		bool SerializeToJson(nlohmann::json& jsonData) const;
 
 		bool PostProcess(const uint32_t options = Options::None);
 

@@ -700,6 +700,7 @@ namespace nif {
 				uint32_t num_indices = 0;
 				uint32_t num_vertices = 0;
 				std::string factory_path = "";
+				mesh::MeshIO mesh_data;
 			};
 
 			NiSimpleGeometryTemplate() = default;
@@ -719,6 +720,8 @@ namespace nif {
 			};
 
 			struct GeoInfo {
+				bool use_internal_geom_data = false;
+
 				MeshInfo geo_mesh_lod[4];
 
 				float bounding_sphere[4] = { 0,0,0,0 };

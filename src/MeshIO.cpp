@@ -22,6 +22,19 @@ bool MeshIO::Deserialize(const std::string filename)
 		return false;
 	}
 
+	// Deserialize the mesh
+	if (!this->Deserialize(file))
+	{
+		return false;
+	}
+
+	file.close();
+
+	return true;
+}
+
+bool mesh::MeshIO::Deserialize(std::istream& file)
+{
 	// Load the mesh from the file
 	uint32_t magic = utils::read<uint32_t>(file)[0];
 	/*if (magic != 1) {
@@ -104,7 +117,7 @@ bool MeshIO::Deserialize(const std::string filename)
 	for (int i = 0; i < num_tangents; i++) {
 		auto t = utils::read<uint32_t>(file)[0];
 		float w = 0;
-		auto tangent = utils::decodeDEC3N_w(t,w);
+		auto tangent = utils::decodeDEC3N_w(t, w);
 		this->tangents.emplace_back(tangent);
 		this->tangent_signs.emplace_back(w);
 	}
@@ -222,7 +235,20 @@ bool MeshIO::Serialize(const std::string filename)
 		return false;
 	}
 
-	uint32_t magic = 1;
+	if (!this->Serialize(file))
+	{
+		std::cout << "Error: Failed to serialize mesh." << std::endl;
+		return false;
+	}
+
+	file.close();
+
+	return true;
+}
+
+bool mesh::MeshIO::Serialize(std::ostream& file)
+{
+	uint32_t magic = 2;
 	utils::writeAsHex(file, magic);
 
 	uint32_t dummy = 0;
@@ -283,7 +309,7 @@ bool MeshIO::Serialize(const std::string filename)
 		}
 		utils::writeAsHex(file, dummy);
 	}
-	
+
 	if (export_uvs) {
 		this->num_uv1 = this->UV_list1.size();
 		utils::writeAsHex(file, this->num_uv1);
@@ -309,7 +335,7 @@ bool MeshIO::Serialize(const std::string filename)
 		utils::writeAsHex(file, dummy);
 		utils::writeAsHex(file, dummy);
 	}
-	
+
 	if (export_vert_colors) {
 		this->num_vert_colors = this->vert_colors.size();
 		utils::writeAsHex(file, this->num_vert_colors);
@@ -324,7 +350,7 @@ bool MeshIO::Serialize(const std::string filename)
 	else {
 		utils::writeAsHex(file, dummy);
 	}
-	
+
 	if (export_normals) {
 		this->num_normals = this->normals.size();
 		utils::writeAsHex(file, this->num_normals);
@@ -337,12 +363,12 @@ bool MeshIO::Serialize(const std::string filename)
 	else {
 		utils::writeAsHex(file, dummy);
 	}
-	
-	if(export_tangents){
+
+	if (export_tangents) {
 		this->num_tangents = this->tangents.size();
 		utils::writeAsHex(file, this->num_tangents);
 
-		for (int i = 0; i < this->num_vertices;++i) {
+		for (int i = 0; i < this->num_vertices; ++i) {
 			auto t = utils::encodeDEC3N(this->tangents[i], this->tangent_signs[i]);
 			utils::writeAsHex(file, t);
 		}
@@ -971,39 +997,31 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 	return this->PostProcess(options);
 }
 
-bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
-	//remove the suffix of the filename
-	std::string new_filename = filename;
+bool mesh::MeshIO::SerializeToJsonStr(std::string& json_data) const
+{
+	json jsonData;
 
-	std::string json_data;
-	if (!this->SerializeToJson(json_data, filename, obj_name)) {
-		std::cout << "Error: Failed to serialize to JSON." << std::endl;
+	if (!SerializeToJson(jsonData)) {
 		return false;
 	}
 
-	std::ofstream file(new_filename + ".json");
-
-	if (!file.is_open()) {
-		std::cout << "Error: Failed to open JSON file." << std::endl;
-		return false;
-	}
-
-	file << json_data;
+	// Write the json data to file
+	json_data = jsonData.dump(4);
 
 	return true;
 }
 
-bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name)
+bool mesh::MeshIO::SerializeToJson(nlohmann::json& jsonData) const
 {
-	std::string new_filename = filename;
+	std::string obj_content;
 
 	WavefrontWriter wfw;
-	if (!wfw.Write(new_filename + ".obj", obj_name, this->indices, this->positions, this->UV_list1, this->normals)) {
+	if (!wfw.WriteString(obj_content, "DEFAULT", this->indices, this->positions, this->UV_list1, this->normals)) {
 		return false;
 	}
 
-	// Save tangent vectors in json format
-	json jsonData;
+	jsonData["obj_content"] = obj_content;
+
 	int tangents_count = 0;
 
 	if (this->num_uv2 > 0) {
@@ -1100,9 +1118,6 @@ bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string fil
 		++culldata_count;
 	}
 	jsonData["culldata"] = culldata;
-
-	// Write the json data to file
-	json_data = jsonData.dump(4);
 
 	return true;
 }

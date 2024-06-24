@@ -783,6 +783,8 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::FromNif(const
 			return rtti;
 		}
 
+		geo_info.use_internal_geom_data = bs_geo->_use_internal_geom_data();
+
 		std::memcpy(geo_info.bounding_sphere, bs_geo->center, 3 * sizeof(float));
 
 		geo_info.bounding_sphere[3] = bs_geo->radius;
@@ -813,6 +815,10 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::FromNif(const
 
 			mesh_info.num_indices = mesh.num_indices;
 
+			if (geo_info.use_internal_geom_data) {
+				mesh_info.mesh_data = mesh.mesh_data;
+			}
+
 			geo_info.geo_mesh_lod[i] = mesh_info;
 
 			i++;
@@ -838,6 +844,8 @@ nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 	for (auto& geo_info : this->geo_infos) {
 		nlohmann::json bsgeometry_result;
 
+		bsgeometry_result["use_internal_geom_data"] = int(geo_info.use_internal_geom_data);
+
 		bsgeometry_result["geo_mesh_lod"] = nlohmann::json::array();
 
 		for (int i = 0; i < 4; ++i) {
@@ -850,6 +858,10 @@ nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 			mesh_info["factory_path"] = mesh.factory_path;
 			mesh_info["num_indices"] = mesh.num_indices;
 			mesh_info["num_vertices"] = mesh.num_vertices;
+
+			if (geo_info.use_internal_geom_data) {
+				mesh.mesh_data.SerializeToJson(mesh_info["mesh_data"]);
+			}
 
 			bsgeometry_result["geo_mesh_lod"].push_back(mesh_info);
 		}

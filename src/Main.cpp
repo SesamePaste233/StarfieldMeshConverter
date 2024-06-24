@@ -66,42 +66,6 @@ int blenderToMesh(int argc, char* argv[]) {
 	return 0; // Return success
 }
 
-int meshToBlender(int argc, char* argv[]) {
-	// Check if the user provided the correct number of command-line arguments
-	if (argc != 4) {
-		std::cerr << "Usage: " << argv[0] << " -blender input_mesh.mesh output_name" << std::endl;
-		return 1; // Return an error code
-	}
-
-	// Extract command-line arguments
-	std::string inputMesh = argv[2];
-	std::string outputName = argv[3];
-
-	// Get the name of the input mesh file without the extension
-	size_t const p(inputMesh.find_last_of('.'));
-	size_t const lastSlash = inputMesh.find_last_of("/\\");
-	std::string const name(inputMesh.substr(lastSlash + 1, p));
-
-	// Create a MeshIO object
-	MeshIO reader;
-
-	// Load the mesh from the input mesh file
-	if (!reader.Deserialize(inputMesh)) {
-		std::cerr << "Failed to load mesh from " << inputMesh << std::endl;
-		return 4; // Return an error code
-	}
-
-	// Save the mesh to the output file
-	if (!reader.SaveOBJ(outputName, name)) {
-		std::cerr << "Failed to save mesh to " << outputName << std::endl;
-		return 5; // Return an error code
-	}
-
-	std::cout << "Mesh loaded from " << inputMesh << " and saved to " << outputName << std::endl;
-
-	return 0; // Return success
-}
-
 int main1(int argc, char* argv[]){
 	// Check if the user provided the correct number of command-line arguments
 	if (argc != 4) {
@@ -190,9 +154,9 @@ int __main(int argc, char* argv[]) {
 //	return 0; // Return success
 //}
 
-void importnif_main() {
+void main() {
 	nif::NifIO nif;
-	std::string input_file("C:\\repo\\MeshConverter\\naked_m.nif");
+	std::string input_file("C:\\repo\\MeshConverter\\new_nif_test.nif");
 
 	if (!nif.Deserialize(input_file)) {
 		std::cerr << "Failed to load nif from " << input_file << std::endl;
@@ -223,7 +187,7 @@ void importnif_main() {
 	return;
 }
 
-void main() {
+void importmorph_main() {
 	MorphIO reader;
 	reader.Deserialize("C:\\repo\\MeshConverter\\morph.dat");
 

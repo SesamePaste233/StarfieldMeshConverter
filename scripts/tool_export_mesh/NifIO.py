@@ -33,6 +33,8 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		material = bpy.data.materials.new(name=data['mat_path'])
 		loaded = False
 
+		use_internal_geom_data = bool(data['use_internal_geom_data'])
+
 		lod = 0
 		for mesh_info in data['geo_mesh_lod']:
 			if options.max_lod != 0 and lod == options.max_lod:
@@ -50,21 +52,26 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 						break
 			
 			lod += 1
-			if os.path.isfile(mesh_filepath):
-				rtn = MeshIO.ImportMesh(mesh_filepath, options, context, operator, factory_path)
-				
-				if 'FINISHED' in rtn:
-					imported_obj = utils_blender.GetActiveObject()
-					_objects.append(imported_obj)
-					_objects[-1].name = geo_name
-					if options.max_lod > 1:
-						_objects[-1].name += f'_lod{lod}'
-					imported_obj.data.materials.append(material)
-					loaded = True
-				else:
-					operator.report({'WARNING'}, f'{factory_path}.mesh cannot be loaded.')
-			else:
+			if not os.path.isfile(mesh_filepath) and not use_internal_geom_data:
 				operator.report({'WARNING'}, f'{mesh_filepath} doesn\'t exist. Please make sure you have the geometry files as loose files.')
+				continue
+
+			if use_internal_geom_data:
+				rtn = MeshIO.MeshFromJson(mesh_info['mesh_data'], options, context, operator)
+			else:
+				rtn = MeshIO.ImportMesh(mesh_filepath, options, context, operator, factory_path)
+			
+			if 'FINISHED' not in rtn:
+				operator.report({'WARNING'}, f'Failed to load mesh for {geo_name}.')
+				continue
+
+			imported_obj = utils_blender.GetActiveObject()
+			_objects.append(imported_obj)
+			_objects[-1].name = geo_name
+			if options.max_lod > 1:
+				_objects[-1].name += f'_lod{lod}'
+			imported_obj.data.materials.append(material)
+			loaded = True
 		
 		if options.geo_bounding_debug:
 			bound_sphere = data["geo_bounding_sphere"]
@@ -118,7 +125,6 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 						skeleton_obj_dict[skeleton].extend(_objects)
 					else:
 						skeleton_obj_dict[skeleton] = _objects
-
 	else:
 		is_node = True
 		node_name = armature_dict['name']

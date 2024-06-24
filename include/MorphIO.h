@@ -13,14 +13,12 @@ namespace morph{
 		uint32_t x, y;
 	}morph_data;
 
-#ifdef _EXTENDED_MORPH_DATA
 	typedef struct {
 		float _offset[3]; // Vertex offset/displacement as half-floats.
 		float target_vert_color; // Target vertex color.
 		float nx, ny, nz; // Delta normal, in DEC3N format.
 		float tx, ty, tz; // Delta tangent, in DEC3N format.
 	}morph_data_hf; // 16 bytes
-#endif
 
 	typedef enum {
 		None = 0,

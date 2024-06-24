@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "hkPhysics.h"
+#include "MeshIO.h"
 
 namespace nif {
 	enum class NiRTTI {
@@ -65,6 +66,10 @@ namespace nif {
 	public:
 		NiObject() = default;
 		~NiObject() = default;
+
+		enum class Flags : uint32_t {
+			SAVE_EXTERNAL_GEOM_DATA = 512,
+		};
 
 		float translation[3] = { 0,0,0 };
 		float rotation[3][3] = { 1,0,0,0,1,0,0,0,1 };
@@ -176,6 +181,7 @@ namespace nif {
 			uint32_t flags = 64;
 			uint32_t path_length = 0;
 			std::string mesh_path;
+			mesh::MeshIO mesh_data;
 		};
 
 		BSGeometry() = default;
@@ -226,6 +232,10 @@ namespace nif {
 		void AddMesh(const MeshData& mesh) {
 			meshes.push_back(mesh);
 		};
+
+		inline bool _use_internal_geom_data() {
+			return this->flags & 512;
+		}
 	};
 
 	class NiIntegerExtraData : public NiNodeBase {

@@ -252,9 +252,14 @@ def ExportMesh(options, context, filepath: str, operator, bone_list_filter = Non
 
 def ImportMesh(file_path, options, context, operator, mesh_name_override = None):
 	import_path = file_path
-	temp_path = utils_blender.TempFolderPath()
 
-	rtn = MeshConverter.ImportMeshAsJson(import_path, os.path.join(temp_path, "mesh_data_import"))
+	rtn = MeshConverter.ImportMeshAsJson(import_path)
+
+	return MeshFromJson(rtn, options, context, operator, mesh_name_override)
+
+def MeshFromJson(json_data, options, context, operator, mesh_name_override = None):
+	rtn = json_data
+	temp_path = utils_blender.TempFolderPath()
 
 	if rtn == "":
 		returncode = -1 
@@ -264,6 +269,12 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 	if returncode == 0:
 		operator.report({'INFO'}, "Starfield .mesh imported successfully")
 		
+		data = json.loads(rtn)
+
+		obj_content = data['obj_content']
+		with open(os.path.join(temp_path, "mesh_data_import.obj"), 'w') as f:
+			f.write(obj_content)
+
 		bpy.ops.wm.obj_import(
 			filepath=os.path.join(temp_path, "mesh_data_import.obj"),
 			forward_axis='Y',
@@ -283,7 +294,6 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 
 			col = obj.data.vertex_colors.active
 
-			data = json.loads(rtn)
 
 			if "uv_coords2" in data:
 				if len(data["uv_coords2"]) != len(mesh.vertices):

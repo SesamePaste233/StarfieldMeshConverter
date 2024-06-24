@@ -25,7 +25,7 @@ extern "C" {
 
 	DLL uint32_t ExportEmptyMorph(uint32_t n_verts, const char* output_file);
 
-	DLL const char * ImportMesh(const char* input_file, const char* output_name);
+	DLL const char * ImportMesh(const char* input_file);
 
 	DLL const char* ImportMorph(const char* input_file);
 
