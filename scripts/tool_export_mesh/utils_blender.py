@@ -135,11 +135,11 @@ def ApplyTransform(mesh_obj:bpy.types.Object):
 	bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 	SetActiveObject(prev_active)
 
-def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = True, do_triangulation = True):
+def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_triangulation = True):
 	if old_obj and old_obj.type == 'MESH':
 		
 		if old_obj.data.uv_layers == None or len(old_obj.data.uv_layers) == 0 or old_obj.data.uv_layers.active == None:
-			operator.report({'ERROR'}, f"Your model has no active UV map! Please create one before exporting.")
+			print(f"Your model has no active UV map! Please create one before exporting.")
 			return None, None
 
 		if old_obj.data.shape_keys != None and old_obj.data.shape_keys.key_blocks != None:

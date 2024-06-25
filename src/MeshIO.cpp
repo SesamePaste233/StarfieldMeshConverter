@@ -183,18 +183,14 @@ bool mesh::MeshIO::Deserialize(std::istream& file)
 
 	this->num_culldata = utils::read<uint32_t>(file)[0];
 	for (int i = 0; i < num_meshlets; i++) {
-		CullData cd;
-		auto data = utils::read<float>(file, 4);
-		cd.BoundingSphere.Center = XMFLOAT3(data[0], data[1], data[2]);
-		cd.BoundingSphere.Radius = data[3];
-
-		auto data2 = utils::read<uint32_t>(file)[0];
-		cd.NormalCone.v = data2;
-
-		auto data3 = utils::read<float>(file)[0];
-		cd.ApexOffset = data3;
+		auto buffer = utils::readBytes(file, sizeof(BSCullData));
+		BSCullData cd;
+		memcpy(&cd, buffer, sizeof(BSCullData));
 
 		this->culldata.emplace_back(cd);
+
+		// Release buffer
+		delete[] buffer;
 	}
 	// Print max border
 	std::cout << "Border: " << std::to_string(this->max_border) << std::endl;
@@ -413,13 +409,8 @@ bool mesh::MeshIO::Serialize(std::ostream& file)
 		this->num_culldata = this->culldata.size();
 		utils::writeAsHex(file, this->num_culldata);
 
-		for (auto culldata : this->culldata) {
-			utils::writeAsHex(file, culldata.BoundingSphere.Center.x);
-			utils::writeAsHex(file, culldata.BoundingSphere.Center.y);
-			utils::writeAsHex(file, culldata.BoundingSphere.Center.z);
-			utils::writeAsHex(file, culldata.BoundingSphere.Radius);
-			utils::writeAsHex(file, culldata.NormalCone.v);
-			utils::writeAsHex(file, culldata.ApexOffset);
+		for (auto& culldata : this->culldata) {
+			utils::writeStream(file, &culldata, sizeof(BSCullData));
 		}
 	}
 	else {
@@ -794,6 +785,11 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 
 	std::cout << "Loading mesh from string..." << std::endl;
 
+	return this->LoadFromJson(jsonData, scale_factor, options);
+}
+
+bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scale_factor, const uint32_t options)
+{
 	if (!this->GeometryFromJson(jsonData, scale_factor)) {
 		std::cout << "Error: Failed to load JSON file." << std::endl;
 		return false;
@@ -1105,15 +1101,12 @@ bool mesh::MeshIO::SerializeToJson(nlohmann::json& jsonData) const
 	json culldata = json::array();
 	for (auto cd : this->culldata) {
 		json cd_l = json::array();
-		cd_l.push_back(cd.BoundingSphere.Center.x);
-		cd_l.push_back(cd.BoundingSphere.Center.y);
-		cd_l.push_back(cd.BoundingSphere.Center.z);
-		cd_l.push_back(cd.BoundingSphere.Radius);
-		cd_l.push_back(cd.NormalCone.x);
-		cd_l.push_back(cd.NormalCone.y);
-		cd_l.push_back(cd.NormalCone.z);
-		cd_l.push_back(cd.NormalCone.w);
-		cd_l.push_back(cd.ApexOffset);
+		cd_l.push_back(cd.center[0]);
+		cd_l.push_back(cd.center[1]);
+		cd_l.push_back(cd.center[2]);
+		cd_l.push_back(cd.expand[0]);
+		cd_l.push_back(cd.expand[1]);
+		cd_l.push_back(cd.expand[2]);
 		culldata.push_back(cd_l);
 		++culldata_count;
 	}
@@ -1460,14 +1453,18 @@ bool MeshIO::GenerateTangents(const uint32_t& options) {
 }
 
 bool MeshIO::GenerateMeshlets() {
+	size_t max_vertices = 96; // 96 vertices per meshlet
+	size_t max_prims = 128; // 96 primitives per meshlet
+
 	std::vector<Meshlet>& meshlets = this->meshlets;
 	meshlets.clear();
 	std::vector<uint8_t> uniqueVertexIB;
 	std::vector<MeshletTriangle> primitiveIndices;
+
 	if (FAILED(ComputeMeshlets(indices.data(), this->num_triangles,
 		DX_positions.data(), this->num_vertices,
 		nullptr,
-		meshlets, uniqueVertexIB, primitiveIndices)))
+		meshlets, uniqueVertexIB, primitiveIndices, max_vertices, max_prims)))
 	{
 		std::cout << "Error: Failed to generate meshlets for the mesh." << std::endl;
 		return false;
@@ -1484,31 +1481,78 @@ bool MeshIO::GenerateMeshlets() {
 
 	// Convert meshlet triangles to normal triangles
 	std::vector<uint16_t> indices_l;
+	std::vector<std::vector<float>> meshlet_centers;
+	std::vector<std::vector<float>> meshlet_expands;
+
 	for (auto& _mesh_let : meshlets) {
+
+		std::vector<float> xs, ys, zs;
 		for (int i = 0; i < _mesh_let.PrimCount; i++) {
-			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i0]);
-			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i1]);
-			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i2]);
+			uint16_t id0 = uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i0];
+			uint16_t id1 = uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i1];
+			uint16_t id2 = uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i2];
+			indices_l.push_back(id0);
+			indices_l.push_back(id1);
+			indices_l.push_back(id2);
+			
+			xs.emplace_back(DX_positions[id0].x);
+			xs.emplace_back(DX_positions[id1].x);
+			xs.emplace_back(DX_positions[id2].x);
+
+			ys.emplace_back(DX_positions[id0].y);
+			ys.emplace_back(DX_positions[id1].y);
+			ys.emplace_back(DX_positions[id2].y);
+
+			zs.emplace_back(DX_positions[id0].z);
+			zs.emplace_back(DX_positions[id1].z);
+			zs.emplace_back(DX_positions[id2].z);
 		}
+
+		float min_x = *std::min_element(xs.begin(), xs.end());
+		float max_x = *std::max_element(xs.begin(), xs.end());
+		float min_y = *std::min_element(ys.begin(), ys.end());
+		float max_y = *std::max_element(ys.begin(), ys.end());
+		float min_z = *std::min_element(zs.begin(), zs.end());
+		float max_z = *std::max_element(zs.begin(), zs.end());
+
+		std::vector<float> center = { (min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2 };
+		std::vector<float> expand = { max_x - center[0], max_y - center[1], max_z - center[2] };
+
+		meshlet_centers.emplace_back(center);
+		meshlet_expands.emplace_back(expand);
 	}
 	
 	std::swap(this->indices, indices_l);
 
 
-	std::vector<CullData>& cull = this->culldata;
+	std::vector<BSCullData>& cull = this->culldata;
 	cull.clear();
 	cull.resize(meshlets.size());
 
-	if (FAILED(ComputeCullData(DX_positions.data(), this->num_vertices,
+	/*if (FAILED(ComputeCullData(DX_positions.data(), this->num_vertices,
 		meshlets.data(), meshlets.size(),
 		uniqueVertexIndices, vertIndices,
 		primitiveIndices.data(), primitiveIndices.size(), cull.data())))
 	{
 		std::cout << "Error: Failed to generate cull data for the mesh." << std::endl;
 		return false;
+	}*/
+
+	for (size_t i = 0; i < this->num_meshlets; ++i) {
+		memcpy(cull[i].center, meshlet_centers[i].data(), sizeof(float) * 3);
+		memcpy(cull[i].expand, meshlet_expands[i].data(), sizeof(float) * 3);
 	}
 
 	this->num_culldata = this->culldata.size();
+
+	// Mock up PrimOffset in meshlets
+	uint32_t prev_primOffset = 0;
+	uint32_t prev_primCount = 0;
+	for (size_t i = 0; i < this->num_meshlets; ++i) {
+		meshlets[i].PrimOffset = prev_primOffset + ((3 * prev_primCount + 3) & ~3);
+		prev_primOffset = meshlets[i].PrimOffset;
+		prev_primCount = meshlets[i].PrimCount;
+	}
 
 	return true;
 }

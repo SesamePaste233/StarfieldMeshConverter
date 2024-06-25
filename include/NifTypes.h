@@ -203,6 +203,8 @@ namespace nif {
 
 		std::vector<MeshData> meshes;
 
+		size_t _size;
+
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;
 		size_t GetSize() override;
@@ -235,6 +237,16 @@ namespace nif {
 
 		inline bool _use_internal_geom_data() {
 			return this->flags & 512;
+		}
+
+		inline bool _set_use_internal_geom_data(bool use_internal) {
+			if (use_internal) {
+				this->flags |= 512;
+			}
+			else {
+				this->flags &= ~512;
+			}
+			return this->_use_internal_geom_data();
 		}
 	};
 

@@ -694,6 +694,10 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 
 		auto& geo_info = this->geo_infos[bone.geometry_index];
 
+		if (geo_info.use_internal_geom_data) {
+			bsgeo->_set_use_internal_geom_data(true);
+		}
+
 		auto shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(nif.AddBlock(nif::NiRTTI::BSLightingShaderProperty, geo_info.mat_path));
 
 		bsgeo->shader_property = nif.block_manager.FindBlock(shader_property);
@@ -727,6 +731,8 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 			mesh_data.num_indices = mesh_info.num_indices;
 
 			mesh_data.path_length = mesh_info.factory_path.length();
+
+			mesh_data.mesh_data = mesh_info.mesh_data;
 
 			bsgeo->meshes.push_back(mesh_data);
 		}
@@ -904,11 +910,21 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 	for (auto& data : _data["geometries"]) {
 		GeoInfo geo_info;
 
+		float scale_factor = 1.0;
+		if (data["use_internal_geom_data"] == 1) {
+			geo_info.use_internal_geom_data = true;
+			scale_factor = data["scale_factor"];
+		}
+
 		if (data.find("geo_mesh_lod") != data.end()) {
 			for (int i = 0; i < 4; ++i) {
 				const nlohmann::json& mesh_info = data["geo_mesh_lod"][i];
 				if (mesh_info.is_null())
 					continue;
+
+				if (geo_info.use_internal_geom_data) {
+					geo_info.geo_mesh_lod[i].mesh_data.LoadFromJson(mesh_info["mesh_data"], scale_factor, mesh::MeshIO::Options::NormalizeWeight);
+				}
 
 				geo_info.geo_mesh_lod[i].factory_path = mesh_info["factory_path"];
 				geo_info.geo_mesh_lod[i].num_indices = mesh_info["num_indices"];

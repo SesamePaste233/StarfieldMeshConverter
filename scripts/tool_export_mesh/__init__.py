@@ -399,6 +399,12 @@ class ExportCustomNif(bpy.types.Operator):
 		default=True,
 	)
 
+	use_internal_geom_data: bpy.props.BoolProperty(
+		name="Use Internal Geometry Data",
+		description="Whether to embed geometry data in the nif file. If disabled, models will be saved as external .mesh files.",
+		default=True,
+	)
+
 	use_world_origin = False
 
 	def execute(self, context):

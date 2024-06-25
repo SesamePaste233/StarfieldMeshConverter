@@ -138,6 +138,7 @@ void nif::BSGeometry::Deserialize(std::istream& file)
 
 void nif::BSGeometry::Serialize(std::ostream& file)
 {
+	size_t start_pos = file.tellp();
 	NiObject::Serialize(file);
 
 	utils::writeAsHex(file, this->center[0]);
@@ -164,24 +165,28 @@ void nif::BSGeometry::Serialize(std::ostream& file)
 			utils::writeAsHex(file, this->meshes[i].num_indices);
 			utils::writeAsHex(file, this->meshes[i].num_vertices);
 			utils::writeAsHex(file, this->meshes[i].flags);
-			this->meshes[i].path_length = (uint32_t)this->meshes[i].mesh_path.length();
-			utils::writeAsHex(file, this->meshes[i].path_length);
-			utils::writeString(file, this->meshes[i].mesh_path);
+
+			if (this->_use_internal_geom_data()){
+				this->meshes[i].mesh_data.Serialize(file);
+			}
+			else {
+				this->meshes[i].path_length = (uint32_t)this->meshes[i].mesh_path.length();
+				utils::writeAsHex(file, this->meshes[i].path_length);
+				utils::writeString(file, this->meshes[i].mesh_path);
+			}
 		}
 		else {
 			uint8_t has_mesh = 0;
 			utils::writeAsHex(file, has_mesh);
 		}
 	}
+
+	this->_size = (size_t)file.tellp() - start_pos;
 }
 
 size_t nif::BSGeometry::GetSize()
 {
-	size_t count = 0;
-	for (auto& mesh : this->meshes) {
-		count += 16 + mesh.path_length;
-	}
-	return NiObject::GetSize() + 56 + count;
+	return this->_size;
 }
 
 void nif::NiIntegerExtraData::Deserialize(std::istream& file)

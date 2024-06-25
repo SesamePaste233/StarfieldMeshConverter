@@ -32,6 +32,11 @@ namespace mesh {
 			float radius = 0.1;
 		};
 
+		struct BSCullData {
+			float center[3] = { 0,0,0 };
+			float expand[3] = { 0,0,0 };
+		};
+
 		MeshIO() {
 			Clear();
 		};
@@ -50,6 +55,8 @@ namespace mesh {
 		bool Load(const std::string filename, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
 		bool LoadFromString(const std::string json_data, const float scale_factor = 1.f, const uint32_t options = Options::None);
+
+		bool LoadFromJson(const nlohmann::json& jsonData, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
 		bool SerializeToJsonStr(std::string& json_data) const;
 
@@ -116,7 +123,7 @@ namespace mesh {
 		std::vector<DirectX::Meshlet> meshlets;
 
 		uint32_t num_culldata;
-		std::vector<DirectX::CullData> culldata;
+		std::vector<BSCullData> culldata;
 
 		uint32_t num_smooth_group;
 		std::vector<uint16_t> smooth_group;
