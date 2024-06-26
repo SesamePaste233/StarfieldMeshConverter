@@ -154,7 +154,7 @@ int __main(int argc, char* argv[]) {
 //	return 0; // Return success
 //}
 
-void main() {
+void importnif_main() {
 	nif::NifIO nif;
 	std::string input_file("C:\\repo\\MeshConverter\\new_nif_test.nif");
 
@@ -402,12 +402,12 @@ void phnifmain() {
 	//}
 }
 
-int asdmain() {
+int main() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\SpaceSuit_Recon_LowerBody_01_F_0_LOD_1.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\LupusMaleHead.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

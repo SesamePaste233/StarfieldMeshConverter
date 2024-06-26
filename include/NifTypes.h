@@ -235,7 +235,7 @@ namespace nif {
 			meshes.push_back(mesh);
 		};
 
-		inline bool _use_internal_geom_data() {
+		inline bool _use_internal_geom_data() const {
 			return this->flags & 512;
 		}
 

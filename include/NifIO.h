@@ -213,11 +213,14 @@ namespace nif {
 
 		mesh::MeshIO* GetMesh(const std::string& mesh_factory_path) const;
 
-		mesh::MeshIO* GetMesh(const nif::BSGeometry* geometry_node) const {
+		mesh::MeshIO* GetMesh(const nif::BSGeometry* geometry_node, int lod_index = 0) const {
 			if (geometry_node->meshes.empty()) {
 				return nullptr;
 			}
-			return GetMesh(geometry_node->meshes[0].mesh_path);
+			if (geometry_node->_use_internal_geom_data()) {
+				return new mesh::MeshIO(geometry_node->meshes[lod_index].mesh_data);
+			}
+			return GetMesh(geometry_node->meshes[lod_index].mesh_path);
 		};
 
 		void DumpUnkBinary(const std::string& folder_path) const {
