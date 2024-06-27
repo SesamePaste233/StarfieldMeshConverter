@@ -92,6 +92,10 @@ bool nif::NifIO::Serialize(const std::string filename)
 	
 	utils::writeString(file, block_buffer.str());
 
+	// To align with nifskope
+	uint8_t buffer[8] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	utils::writeStream(file, buffer, 8);
+
 	return true;
 }
 
@@ -171,15 +175,18 @@ bool nif::NifIO::WriteHeader(std::ostream& file)
 		utils::writeAsHex(file, this->header.num_blocks);
 		utils::writeAsHex(file, this->header.BS_version);
 
-		uint8_t length = this->header.author.length();
+		uint8_t length = this->header.author.length() + 1;
+		uint8_t _placeholder = 0x00;
 		utils::writeAsHex(file, length);
 		utils::writeString(file, this->header.author);
+		utils::writeAsHex(file, _placeholder);
 
 		utils::writeAsHex(file, this->header.unk1);
 
-		length = this->header.process_script.length();
+		length = this->header.process_script.length() + 1;
 		utils::writeAsHex(file, length);
 		utils::writeString(file, this->header.process_script);
+		utils::writeAsHex(file, _placeholder);
 
 		length = this->header.unk2.length();
 		utils::writeAsHex(file, length);
