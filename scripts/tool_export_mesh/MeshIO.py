@@ -12,7 +12,7 @@ import utils_common as utils
 import utils_math
 import MeshConverter
 
-def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False):
+def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, replace_facebone_vg_with_head = False):
 	# Initialize dictionaries to store data
 	data = {
 		"max_border": options.max_border,
@@ -53,6 +53,10 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 		for vert_gp in selected_obj.vertex_groups:
 			if vert_gp.name not in bone_list_filter:
 				selected_obj.vertex_groups.remove(vert_gp)
+
+	if replace_facebone_vg_with_head:
+		facebone_vg_names = [vg.name for vg in selected_obj.vertex_groups if vg.name.startswith("faceBone_")]
+		utils_blender.CombineVertexGroups(selected_obj, facebone_vg_names, "C_Head", True)
 
 	bm = bmesh.new()
 	bm.from_mesh(selected_obj.data)
@@ -197,7 +201,7 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 
 	return {'FINISHED'}, "", data
 
-def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False):
+def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False, replace_facebone_vg_with_head = False):
 	export_mesh_file_path = filepath
 	export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
 	
@@ -213,7 +217,7 @@ def ExportMesh(options, context, filepath: str, operator, bone_list_filter = Non
 	else:
 		result_file_path = export_mesh_file_path
 	
-	rtn, message, data = MeshToJson(active_object, options, bone_list_filter, prune_empty_vertex_groups)
+	rtn, message, data = MeshToJson(active_object, options, bone_list_filter, prune_empty_vertex_groups, replace_facebone_vg_with_head)
 
 	if rtn != {'FINISHED'}:
 		operator.report({'ERROR'}, message)

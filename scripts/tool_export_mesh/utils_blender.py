@@ -130,6 +130,46 @@ def TriangulateMesh(mesh_obj:bpy.types.Object, make_copy = True) -> bpy.types.Ob
 
 	return mesh_obj
 
+def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False):
+	if len(vertex_groups) == 0:
+		print("No vertex groups to combine.")
+		return
+
+	# Check if new_name already exists
+	combined_vg = None
+	if new_name in [vg.name for vg in obj.vertex_groups]:
+		combined_vg = obj.vertex_groups[new_name]
+	else:
+		combined_vg = obj.vertex_groups.new(name = new_name)
+
+	# Check if all vertex groups exist
+	for vg_name in vertex_groups:
+		if vg_name not in [vg.name for vg in obj.vertex_groups]:
+			print(f"Vertex group {vg_name} does not exist in the object.")
+			return
+		
+	combine_vg_index = combined_vg.index
+	vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
+		
+	bm = bmesh.new()
+	bm.from_mesh(obj.data)
+	
+	deform_layer = bm.verts.layers.deform.active
+
+	for v in bm.verts:
+		d_vert = v[deform_layer]
+		weights = [d_vert[vg_index] for vg_index in vg_indices if vg_index in d_vert]
+		combined_vg.add([v.index], sum(weights), 'ADD')
+
+	bm.to_mesh(obj.data)
+	bm.free()
+
+	if delete_old:
+		for vg_name in vertex_groups:
+			obj.vertex_groups.remove(obj.vertex_groups[vg_name])
+		
+
+
 def ApplyTransform(mesh_obj:bpy.types.Object):
 	prev_active = SetActiveObject(mesh_obj)
 	bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)

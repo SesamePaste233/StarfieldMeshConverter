@@ -22,7 +22,7 @@ _dll_import_nif.argtypes = [ctypes.c_char_p, ctypes.c_bool, ctypes.c_char_p]
 _dll_import_nif.restype = ctypes.c_char_p
 
 _dll_import_mesh = _dll.ImportMesh
-_dll_import_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+_dll_import_mesh.argtypes = [ctypes.c_char_p]
 _dll_import_mesh.restype = ctypes.c_char_p
 
 _dll_import_morph = _dll.ImportMorph

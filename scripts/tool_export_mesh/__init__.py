@@ -405,9 +405,42 @@ class ExportCustomNif(bpy.types.Operator):
 		default=True,
 	)
 
+	is_head_object: bpy.props.EnumProperty(
+		name="Export Head Object",
+		description="If the model is a head model with facebones, nif export will export <model_name>.nif and <model_name>_facebones.nif.",	
+		items=(('None', "No", "Export the model as-is."),
+			   ('Auto', "Auto", "Export model.nif and model_facebones.nif separately if the model has facebone vertex groups."),),
+		default='None',
+	)
+
+
 	use_world_origin = False
 
 	def execute(self, context):
+		if self.is_head_object == "Auto":
+			root = utils_blender.GetActiveObject()
+			# Check if the selected object is a mesh
+			if root.type == 'MESH':
+				# Check if the selected object has 'faceBone_' vertex groups
+				facebone_groups = [group for group in root.vertex_groups if group.name.startswith('faceBone_')]
+
+				if len(facebone_groups) > 0:
+					rtn = NifIO.ExportNif(self, context, self, replace_facebone_vg_with_head=True)
+					if 'FINISHED' in rtn:
+						self.report({'INFO'}, "Operation successful.")
+						nif_filepath = self.filepath
+						export_folder = os.path.dirname(nif_filepath)
+						nif_name = os.path.splitext(os.path.basename(nif_filepath))[0]
+						facebone_marker = "_facebones"
+						self.filepath = os.path.join(export_folder, nif_name + facebone_marker + '.nif')
+						return NifIO.ExportNif(self, context, self, replace_facebone_vg_with_head=False)
+					else:
+						return rtn
+				else:
+					self.report({'INFO'}, "The selected object does not have facebone vertex groups. Exporting as-is.")
+			else:
+				self.report({'INFO'}, "The selected object is not a mesh. Selection of the head mesh is required using 'Export Head Object' option.")
+				
 		return NifIO.ExportNif(self, context, self)
 
 	def invoke(self, context, event):
