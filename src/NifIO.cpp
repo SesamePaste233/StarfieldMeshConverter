@@ -1033,7 +1033,9 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 		std::memset(bsgeometry->center, 0, sizeof(float) * 3);
 		bsgeometry->radius = 0;
 
-		std::memset(bsgeometry->bbox_center_expand, FLT_MAX, sizeof(float) * 6);
+		for (size_t i = 0; i < 6; ++i) {
+			bsgeometry->bbox_center_expand[i] = FLT_MAX;
+		}
 
 		auto skin_instance = dynamic_cast<nif::BSSkin::Instance*>(nif.AddBlock(nif::NiRTTI::BSSkinInstance));
 

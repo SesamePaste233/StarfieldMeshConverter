@@ -130,6 +130,36 @@ def TriangulateMesh(mesh_obj:bpy.types.Object, make_copy = True) -> bpy.types.Ob
 
 	return mesh_obj
 
+def ClearEmptyVertexGroups(obj:bpy.types.Object, vertex_groups:list[str] = None):
+	'''
+	Removes all vertex groups that have no vertices assigned to them.
+	:param obj: The object to remove empty vertex groups from.
+	:param vertex_groups: A list of vertex group names to remove. If None, all empty vertex groups will be removed.
+	'''
+	bm = bmesh.new()
+	bm.from_mesh(obj.data)
+
+	deform_layer = bm.verts.layers.deform.active
+
+	if vertex_groups == None:
+		orig_vg_indices = [vg.index for vg in obj.vertex_groups]
+	else:
+		orig_vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
+		
+	vg_indices = set()
+	for v in bm.verts:
+		d_vert = v[deform_layer]
+		vert_vg_indices = set(d_vert.keys())
+		vg_indices = vg_indices.union(vert_vg_indices)
+
+	vg_to_remove = [obj.vertex_groups[vg_index] for vg_index in orig_vg_indices if vg_index not in vg_indices]
+	
+	for vg in vg_to_remove:
+		obj.vertex_groups.remove(vg)
+
+	bm.free()
+
+
 def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False):
 	if len(vertex_groups) == 0:
 		print("No vertex groups to combine.")

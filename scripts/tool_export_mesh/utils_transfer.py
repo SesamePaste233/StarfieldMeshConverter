@@ -121,7 +121,9 @@ def GetClosestNPoints(kdtree:mathutils.kdtree.KDTree, points: list[mathutils.Vec
     return positions, indices, distances
 
 def RBFTransfer(source: Transferable, target: Transferable, neighbours: int = 15, smoothing = 0, epsilon = None, kernel = 'Gaussian', use_normals = True, surface_depth = 0.1, scale = 1):
-    
+    '''
+    Radial Basis Function Transfer.
+    '''
     inv_scale = 1/scale
     
     positions = source.PositionsNumpy
@@ -162,10 +164,7 @@ def RBFTransfer(source: Transferable, target: Transferable, neighbours: int = 15
     
 def IDWTransfer(source: Transferable, target: Transferable, neighbours: int = 15, smoothing = 0, epsilon = None, degrees = 5, kernel = 'Gaussian', use_normals = True, surface_depth = 0.1, scale = 1):
     '''
-    Transfer data from source to target using RBF interpolation.
-        source: Transferable
-        target: Transferable
-        neighbours: int
+    Inverse Distance Weighting Transfer.    
     '''
     inv_scale = 1/scale
     if len(source.positions) == 0 or len(target.positions) == 0:

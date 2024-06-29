@@ -407,7 +407,7 @@ int main() {
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\LupusMaleHead.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\test.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;
