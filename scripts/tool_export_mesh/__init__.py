@@ -126,7 +126,7 @@ class ExportCustomMesh(bpy.types.Operator):
 			utils_blender.SetSelectObjects(original_selected)
 			utils_blender.SetActiveObject(original_active)
 			_file_name, _ =os.path.splitext(self.filepath)
-			morph_success = MorphIO.ExportMorph(self,context, _file_name + ".dat", self)
+			morph_success, _ = MorphIO.ExportMorph(self,context, _file_name + ".dat", self)
 			if 'FINISHED' in morph_success:
 				self.report({'INFO'}, "Operation successful.")
 
@@ -386,7 +386,7 @@ class ExportCustomNif(bpy.types.Operator):
 	export_material: bpy.props.BoolProperty(
 		name="Export Material",
 		description="Export material data to .mat",
-		default=True,
+		default=False,
 	)
 
 	export_sf_mesh_open_folder: bpy.props.BoolProperty(
@@ -505,7 +505,8 @@ class ExportCustomMorph(bpy.types.Operator):
 	)
 
 	def execute(self, context):
-		return MorphIO.ExportMorph(self, context, self.filepath, self)
+		rtn, _ = MorphIO.ExportMorph(self, context, self.filepath, self)
+		return rtn
 
 	def invoke(self, context, event):
 		self.filename = "morph.dat"
@@ -528,15 +529,18 @@ class ExportSFMeshOperator(bpy.types.Operator):
 			original_active = utils_blender.GetActiveObject()
 			original_selected = utils_blender.GetSelectedObjs(True)
 			active_object_name = bpy.context.active_object.name
-			success,_,_,_ = MeshIO.ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.mesh'), self)
+			success,num_verts_in_mesh,_,_ = MeshIO.ExportMesh(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.mesh'), self)
 
 			if 'FINISHED' in success and context.scene.export_morph:
 				utils_blender.SetSelectObjects(original_selected)
 				utils_blender.SetActiveObject(original_active)
-				morph_success = MorphIO.ExportMorph(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.dat'), self)
+				morph_success, num_verts_in_morph = MorphIO.ExportMorph(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.dat'), self)
 				
 				if 'FINISHED' in morph_success:
-					self.report({'INFO'}, "Operation successful.")
+					if num_verts_in_mesh != num_verts_in_morph:
+						self.report({'WARNING'}, "The number of vertices in the mesh and morph data do not match. This may cause issues in the game.")
+					else:
+						self.report({'INFO'}, "Operation successful.")
 
 				return morph_success
 			

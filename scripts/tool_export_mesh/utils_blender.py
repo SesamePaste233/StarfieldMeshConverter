@@ -145,7 +145,7 @@ def ClearEmptyVertexGroups(obj:bpy.types.Object, vertex_groups:list[str] = None)
 		orig_vg_indices = [vg.index for vg in obj.vertex_groups]
 	else:
 		orig_vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
-		
+
 	vg_indices = set()
 	for v in bm.verts:
 		d_vert = v[deform_layer]
@@ -160,7 +160,7 @@ def ClearEmptyVertexGroups(obj:bpy.types.Object, vertex_groups:list[str] = None)
 	bm.free()
 
 
-def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False):
+def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False, combine_mode = 'ADD'):
 	if len(vertex_groups) == 0:
 		print("No vertex groups to combine.")
 		return
@@ -189,14 +189,19 @@ def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:
 	for v in bm.verts:
 		d_vert = v[deform_layer]
 		weights = [d_vert[vg_index] for vg_index in vg_indices if vg_index in d_vert]
-		combined_vg.add([v.index], sum(weights), 'ADD')
+		if combine_mode == 'ADD':
+			new_weight = sum(weights)
+		elif combine_mode == 'MAX':
+			new_weight = max(weights)
+		combined_vg.add([v.index], new_weight, 'REPLACE')
 
 	bm.to_mesh(obj.data)
 	bm.free()
 
 	if delete_old:
 		for vg_name in vertex_groups:
-			obj.vertex_groups.remove(obj.vertex_groups[vg_name])
+			if vg_name != new_name:
+				obj.vertex_groups.remove(obj.vertex_groups[vg_name])
 		
 
 
@@ -206,138 +211,137 @@ def ApplyTransform(mesh_obj:bpy.types.Object):
 	SetActiveObject(prev_active)
 
 def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_triangulation = True):
-	if old_obj and old_obj.type == 'MESH':
-		
-		if old_obj.data.uv_layers == None or len(old_obj.data.uv_layers) == 0 or old_obj.data.uv_layers.active == None:
-			print(f"Your model has no active UV map! Please create one before exporting.")
-			return None, None
-
-		if old_obj.data.shape_keys != None and old_obj.data.shape_keys.key_blocks != None:
-			key_blocks = old_obj.data.shape_keys.key_blocks
-			if key_blocks[0].name == 'Basis':
-				keys = old_obj.data.shape_keys.key_blocks.keys()
-				shape_key_index = keys.index('Basis')
-				old_obj.active_shape_key_index = shape_key_index
-
-		new_obj = old_obj.copy()
-		new_obj.data = old_obj.data.copy()
-		new_obj.animation_data_clear()
-		bpy.context.collection.objects.link(new_obj)
-		bpy.context.view_layer.objects.active = new_obj
-
-		SetActiveObject(new_obj, True)
-		if convert_to_mesh:
-			bpy.ops.object.convert(target='MESH')
-
-		new_obj.data.validate()
-
-		# Mesh clean up
-		if new_obj.mode != 'EDIT':
-			bpy.ops.object.mode_set(mode='EDIT')
-
-		# Select all
-		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-		bpy.ops.mesh.select_all(action='SELECT')
-		bpy.ops.mesh.delete_loose()
-		bpy.ops.mesh.select_all(action='DESELECT')
-
-		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-		
-		# Select all edges
-		bpy.ops.mesh.select_all(action='SELECT')
-		
-		# Switch to Edge Select mode in UV Editor
-		bpy.ops.uv.select_all(action='SELECT')
-		
-		bpy.ops.uv.seams_from_islands()
-		
-		bpy.ops.object.mode_set(mode='OBJECT')
-
-		base_obj = new_obj.copy()
-		base_obj.data = new_obj.data.copy()
-		base_obj.animation_data_clear()
-		bpy.context.collection.objects.link(base_obj)
-		bpy.context.view_layer.objects.active = base_obj
-
-		SetActiveObject(base_obj, True)
-		bpy.ops.object.mode_set(mode='EDIT')
-		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-		bpy.ops.mesh.select_all(action='DESELECT')
-		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
-		bpy.ops.mesh.remove_doubles()
-		bpy.ops.object.mode_set(mode='OBJECT')
-
-		SetActiveObject(new_obj, True)
-		bpy.ops.object.mode_set(mode='EDIT')
-		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
-		bpy.ops.mesh.select_all(action='DESELECT')
-		bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
-
-		__obj = bpy.context.edit_object
-		__me = __obj.data
-
-		__bm = bmesh.from_edit_mesh(__me)
-		for __e in __bm.edges:
-			if __e.select:
-				__e.smooth = False
-
-
-		bmesh.update_edit_mesh(__me)
-		
-		__bm.free()
-
-		bpy.ops.mesh.edge_split(type='EDGE')
-		
-		bpy.ops.mesh.select_all(action='DESELECT')
-		
-		bpy.ops.object.mode_set(mode='OBJECT')
-
-		if use_world_origin:
-			bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-		
-		selected_obj = new_obj
-		
-		# Create a BMesh from the selected object
-		bm = bmesh.new()
-		bm.from_mesh(selected_obj.data)
-		
-		seams = [e for e in bm.edges if e.seam or not e.smooth]
-
-		# split on seams
-		bmesh.ops.split_edges(bm, edges=seams)
-
-		if do_triangulation:
-			bmesh.ops.triangulate(bm, faces=bm.faces)
-
-		bm.to_mesh(selected_obj.data)
-		bm.free()
-		
-		bpy.ops.object.select_all(action='DESELECT')
-		selected_obj.select_set(True)
-
-		bpy.ops.object.shade_smooth(use_auto_smooth=True)
-
-		modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
-		modifier2.object = base_obj
-		#modifier2.vertex_group = double_faces_vg.name
-		#modifier2.invert_vertex_group = True
-		modifier2.use_loop_data = True
-		modifier2.data_types_loops = {'CUSTOM_NORMAL'}
-		modifier2.use_max_distance = True
-		modifier2.max_distance = 0.001
-		modifier2.loop_mapping = "NEAREST_POLYNOR"
-
-		#modifier3 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
-
-		bpy.ops.object.modifier_apply(modifier=modifier2.name)
-		#bpy.ops.object.modifier_apply(modifier=modifier3.name)
-		
-		bpy.data.meshes.remove(base_obj.data)
-		
-		return old_obj, selected_obj
-	else:
+	if not (old_obj and old_obj.type == 'MESH'):
 		print("No valid object is selected.")
 		return None, None
+	
+	if old_obj.data.uv_layers == None or len(old_obj.data.uv_layers) == 0 or old_obj.data.uv_layers.active == None:
+		print(f"Your model has no active UV map! Please create one before exporting.")
+		return None, None
+
+	if old_obj.data.shape_keys != None and old_obj.data.shape_keys.key_blocks != None:
+		key_blocks = old_obj.data.shape_keys.key_blocks
+		if key_blocks[0].name == 'Basis':
+			keys = old_obj.data.shape_keys.key_blocks.keys()
+			shape_key_index = keys.index('Basis')
+			old_obj.active_shape_key_index = shape_key_index
+
+	new_obj = old_obj.copy()
+	new_obj.data = old_obj.data.copy()
+	new_obj.animation_data_clear()
+	bpy.context.collection.objects.link(new_obj)
+	bpy.context.view_layer.objects.active = new_obj
+
+	SetActiveObject(new_obj, True)
+	if convert_to_mesh:
+		bpy.ops.object.convert(target='MESH', merge_customdata=False) # A rare bug causing inconsistence between model and morph
+
+	new_obj.data.validate()
+
+	# Mesh clean up
+	if new_obj.mode != 'EDIT':
+		bpy.ops.object.mode_set(mode='EDIT')
+
+	# Select all
+	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+	bpy.ops.mesh.select_all(action='SELECT')
+	bpy.ops.mesh.delete_loose()
+	bpy.ops.mesh.select_all(action='DESELECT')
+
+	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+	
+	# Select all edges
+	bpy.ops.mesh.select_all(action='SELECT')
+	
+	# Switch to Edge Select mode in UV Editor
+	bpy.ops.uv.select_all(action='SELECT')
+	
+	bpy.ops.uv.seams_from_islands()
+	
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	base_obj = new_obj.copy()
+	base_obj.data = new_obj.data.copy()
+	base_obj.animation_data_clear()
+	bpy.context.collection.objects.link(base_obj)
+	bpy.context.view_layer.objects.active = base_obj
+
+	SetActiveObject(base_obj, True)
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+	bpy.ops.mesh.select_all(action='DESELECT')
+	bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
+	bpy.ops.mesh.remove_doubles()
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	SetActiveObject(new_obj, True)
+	bpy.ops.object.mode_set(mode='EDIT')
+	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+	bpy.ops.mesh.select_all(action='DESELECT')
+	bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
+
+	__obj = bpy.context.edit_object
+	__me = __obj.data
+
+	__bm = bmesh.from_edit_mesh(__me)
+	for __e in __bm.edges:
+		if __e.select:
+			__e.smooth = False
+
+
+	bmesh.update_edit_mesh(__me)
+	
+	__bm.free()
+
+	bpy.ops.mesh.edge_split(type='EDGE')
+	
+	bpy.ops.mesh.select_all(action='DESELECT')
+	
+	bpy.ops.object.mode_set(mode='OBJECT')
+
+	if use_world_origin:
+		bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+	
+	selected_obj = new_obj
+	
+	# Create a BMesh from the selected object
+	bm = bmesh.new()
+	bm.from_mesh(selected_obj.data)
+	
+	seams = [e for e in bm.edges if e.seam or not e.smooth]
+
+	# split on seams
+	bmesh.ops.split_edges(bm, edges=seams)
+
+	if do_triangulation:
+		bmesh.ops.triangulate(bm, faces=bm.faces)
+
+	bm.to_mesh(selected_obj.data)
+	bm.free()
+	
+	bpy.ops.object.select_all(action='DESELECT')
+	selected_obj.select_set(True)
+
+	bpy.ops.object.shade_smooth(use_auto_smooth=True)
+
+	modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
+	modifier2.object = base_obj
+	#modifier2.vertex_group = double_faces_vg.name
+	#modifier2.invert_vertex_group = True
+	modifier2.use_loop_data = True
+	modifier2.data_types_loops = {'CUSTOM_NORMAL'}
+	modifier2.use_max_distance = True
+	modifier2.max_distance = 0.001
+	modifier2.loop_mapping = "NEAREST_POLYNOR"
+
+	#modifier3 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
+
+	bpy.ops.object.modifier_apply(modifier=modifier2.name)
+	#bpy.ops.object.modifier_apply(modifier=modifier3.name)
+	
+	bpy.data.meshes.remove(base_obj.data)
+	
+	return old_obj, selected_obj
 	
 def IsReadOnly(obj):
 	return read_only_marker in obj.name

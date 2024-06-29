@@ -294,13 +294,13 @@ def ExportMorph(options, context, export_file_path, operator):
 
 	if target_obj == None or target_obj.type != 'MESH':
 		operator.report({'WARNING'}, f"Must select a mesh object or [MorphExport] node to export.")
-		return {"CANCELLED"}
+		return {"CANCELLED"}, None
 
 	if target_obj.data.shape_keys == None or target_obj.data.shape_keys.key_blocks == None:
 		operator.report({'INFO'}, f"No enough shape keys to export. Exporting empty morph file.")
 		target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, False)
 		if target_obj == None:
-			return {"CANCELLED"}
+			return {"CANCELLED"}, None
 
 		verts_count = len(proxy_obj.data.vertices)
 		
@@ -312,14 +312,14 @@ def ExportMorph(options, context, export_file_path, operator):
 			utils_blender.SetActiveObject(target_obj)
 
 			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
-			return {"CANCELLED"}
+			return {"CANCELLED"}, None
 
 		bpy.data.meshes.remove(proxy_obj.data)
 		
 		utils_blender.SetActiveObject(target_obj)
 
 		operator.report({'INFO'}, f"Export morph successful.")
-		return {"FINISHED"}
+		return {"FINISHED"}, len(proxy_obj.data.vertices)
 	
 	num_shape_keys = len(target_obj.data.shape_keys.key_blocks)
 	#print(list(target_obj.data.shape_keys.key_blocks))
@@ -328,7 +328,7 @@ def ExportMorph(options, context, export_file_path, operator):
 		operator.report({'INFO'}, f"No enough shape keys to export. Exporting empty morph file.")
 		target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, False)
 		if target_obj == None:
-			return {"CANCELLED"}
+			return {"CANCELLED"}, None
 		
 		verts_count = len(proxy_obj.data.vertices)
 
@@ -340,25 +340,25 @@ def ExportMorph(options, context, export_file_path, operator):
 			utils_blender.SetActiveObject(target_obj)
 
 			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
-			return {"CANCELLED"}
+			return {"CANCELLED"}, None
 
 		bpy.data.meshes.remove(proxy_obj.data)
 		
 		utils_blender.SetActiveObject(target_obj)
 
 		operator.report({'INFO'}, f"Export morph successful.")
-		return {"FINISHED"}
+		return {"FINISHED"}, len(proxy_obj.data.vertices)
 	
 	if key_blocks[0].name != 'Basis':
 		operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
-		return {"CANCELLED"}
+		return {"CANCELLED"}, None
 	
 	if len(s_objs) > 0:
 		n_objs = []
 		for s_obj in s_objs:
 			s_obj, n_obj = utils_blender.PreprocessAndProxy(s_obj, False, False)
 			if s_obj == None:
-				return {"CANCELLED"}
+				return {"CANCELLED"}, None
 			n_objs.append(n_obj)
 
 		utils_blender.SetSelectObjects(n_objs)
@@ -369,7 +369,7 @@ def ExportMorph(options, context, export_file_path, operator):
 	if ref_obj != None:
 		if ref_obj.data.shape_keys == None or ref_obj.data.shape_keys.key_blocks == None:
 			operator.report({'WARNING'}, f"Reference object has no shape keys.")
-			return {"CANCELLED"}
+			return {"CANCELLED"}, None
 
 		ref_num_shape_keys = len(ref_obj.data.shape_keys.key_blocks)
 		print(list(ref_obj.data.shape_keys.key_blocks))
@@ -377,7 +377,7 @@ def ExportMorph(options, context, export_file_path, operator):
 		
 		if ref_num_shape_keys < num_shape_keys:
 			operator.report({'WARNING'}, f"Reference objects don't have enough keys.")
-			return {"CANCELLED"}
+			return {"CANCELLED"}, None
 		else:
 			key_mapping = [-1 for i in range(num_shape_keys)]
 			for _key in key_blocks:
@@ -385,7 +385,7 @@ def ExportMorph(options, context, export_file_path, operator):
 				ref_key_index = ref_key_blocks.keys().index(_key.name)
 				if ref_key_index == -1:
 					operator.report({'WARNING'}, f"Reference objects don't have some keys: {_key.name}")
-					return {"CANCELLED"}
+					return {"CANCELLED"}, None
 				key_mapping[_key_index] = ref_key_index
 
 			for ref_key in ref_key_blocks:
@@ -393,7 +393,7 @@ def ExportMorph(options, context, export_file_path, operator):
 
 	target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, False)
 	if target_obj == None:
-		return {"CANCELLED"}
+		return {"CANCELLED"}, None
 
 	verts_count = len(proxy_obj.data.vertices)
 	key_blocks = proxy_obj.data.shape_keys.key_blocks
@@ -506,14 +506,14 @@ def ExportMorph(options, context, export_file_path, operator):
 		utils_blender.SetActiveObject(target_obj)
 
 		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
-		return {"CANCELLED"}
+		return {"CANCELLED"}, None
 
 	bpy.data.meshes.remove(proxy_obj.data)
 	
 	utils_blender.SetActiveObject(target_obj)
 
 	operator.report({'INFO'}, f"Export morph successful. Time taken: {time_end - time_start:.2f}/{time_end2 - time_end:.2} seconds.")
-	return {"FINISHED"}
+	return {"FINISHED"}, len(proxy_obj.data.vertices)
 
 def CreateMorphObjSetDefault(options, context, basis_obj, target_objs: list, operator):
 	basis_obj.shape_key_clear()
