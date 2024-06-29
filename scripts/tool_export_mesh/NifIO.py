@@ -33,6 +33,8 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		material = bpy.data.materials.new(name=data['mat_path'])
 		loaded = False
 
+		use_internal_geom_data = bool(data['use_internal_geom_data'])
+
 		lod = 0
 		for mesh_info in data['geo_mesh_lod']:
 			if options.max_lod != 0 and lod == options.max_lod:
@@ -50,21 +52,26 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 						break
 			
 			lod += 1
-			if os.path.isfile(mesh_filepath):
-				rtn = MeshIO.ImportMesh(mesh_filepath, options, context, operator, factory_path)
-				
-				if 'FINISHED' in rtn:
-					imported_obj = utils_blender.GetActiveObject()
-					_objects.append(imported_obj)
-					_objects[-1].name = geo_name
-					if options.max_lod > 1:
-						_objects[-1].name += f'_lod{lod}'
-					imported_obj.data.materials.append(material)
-					loaded = True
-				else:
-					operator.report({'WARNING'}, f'{factory_path}.mesh cannot be loaded.')
-			else:
+			if not os.path.isfile(mesh_filepath) and not use_internal_geom_data:
 				operator.report({'WARNING'}, f'{mesh_filepath} doesn\'t exist. Please make sure you have the geometry files as loose files.')
+				continue
+
+			if use_internal_geom_data:
+				rtn = MeshIO.MeshFromJson(mesh_info['mesh_data'], options, context, operator)
+			else:
+				rtn = MeshIO.ImportMesh(mesh_filepath, options, context, operator, factory_path)
+			
+			if 'FINISHED' not in rtn:
+				operator.report({'WARNING'}, f'Failed to load mesh for {geo_name}.')
+				continue
+
+			imported_obj = utils_blender.GetActiveObject()
+			_objects.append(imported_obj)
+			_objects[-1].name = geo_name
+			if options.max_lod > 1:
+				_objects[-1].name += f'_lod{lod}'
+			imported_obj.data.materials.append(material)
+			loaded = True
 		
 		if options.geo_bounding_debug:
 			bound_sphere = data["geo_bounding_sphere"]
@@ -118,7 +125,6 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 						skeleton_obj_dict[skeleton].extend(_objects)
 					else:
 						skeleton_obj_dict[skeleton] = _objects
-
 	else:
 		is_node = True
 		node_name = armature_dict['name']
@@ -197,7 +203,6 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 
 	for child_dict in armature_dict['children']:
 		TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, additional_assets_folder, context, operator, nif_name, connect_pts)
-
 
 def ImportNif(file_path, options, context, operator):
 	nif_armature.LoadAllSkeletonLookup()
@@ -302,7 +307,7 @@ def ImportNif(file_path, options, context, operator):
 
 	return {'FINISHED'}, best_skel, obj_list
 
-def ExportNif(options, context, operator):
+def ExportNif(options, context, operator, replace_facebone_vg_with_head = False):
 	nif_armature.LoadAllSkeletonLookup()
 	original_selected = utils_blender.GetSelectedObjs(True)
 	nif_filepath = options.filepath
@@ -439,11 +444,21 @@ def ExportNif(options, context, operator):
 		else:
 			utils_blender.SetSelectObjects([])
 			utils_blender.SetActiveObject(mesh_obj)
-		rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True)
-		
-		if 'FINISHED' not in rtn:
-			operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
-			continue
+
+		geom_data = None
+		if options.use_internal_geom_data:
+			rtn, message, geom_data = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, replace_facebone_vg_with_head)
+			verts_count = geom_data['num_verts']
+			indices_count = geom_data['num_indices']
+			bone_list = geom_data['vertex_group_names']
+			if 'FINISHED' not in rtn:
+				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Message: {message}Skipping...')
+				continue
+		else:
+			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, replace_facebone_vg_with_head)
+			if 'FINISHED' not in rtn:
+				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
+				continue
 
 		has_skinned_geometry = True
 		
@@ -465,6 +480,9 @@ def ExportNif(options, context, operator):
 			else:
 				operator.report({'WARNING'}, f'Morph export for multiple geometries in one nif is not supported!')
 
+		mesh_data['use_internal_geom_data'] = 1 if options.use_internal_geom_data else 0
+		mesh_data['scale_factor'] = options.mesh_scale
+		mesh_lod_info['mesh_data'] = geom_data
 		mesh_lod_info['factory_path'] = factory_name
 		mesh_lod_info['num_indices'] = indices_count
 		mesh_lod_info['num_vertices'] = verts_count

@@ -314,7 +314,7 @@ def ExportMorph(options, context, export_file_path, operator):
 
 	if target_obj.data.shape_keys == None or target_obj.data.shape_keys.key_blocks == None:
 		operator.report({'INFO'}, f"No enough shape keys to export. Exporting empty morph file.")
-		target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, operator, False)
+		target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, False)
 		if target_obj == None:
 			return {"CANCELLED"}
 
@@ -342,7 +342,7 @@ def ExportMorph(options, context, export_file_path, operator):
 	key_blocks = target_obj.data.shape_keys.key_blocks
 	if num_shape_keys < 2:
 		operator.report({'INFO'}, f"No enough shape keys to export. Exporting empty morph file.")
-		target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, operator, False)
+		target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, False)
 		if target_obj == None:
 			return {"CANCELLED"}
 		
@@ -372,7 +372,7 @@ def ExportMorph(options, context, export_file_path, operator):
 	if len(s_objs) > 0:
 		n_objs = []
 		for s_obj in s_objs:
-			s_obj, n_obj = utils_blender.PreprocessAndProxy(s_obj, False, operator, False)
+			s_obj, n_obj = utils_blender.PreprocessAndProxy(s_obj, False, False)
 			if s_obj == None:
 				return {"CANCELLED"}
 			n_objs.append(n_obj)
@@ -407,7 +407,7 @@ def ExportMorph(options, context, export_file_path, operator):
 			for ref_key in ref_key_blocks:
 				ref_key.value = 0
 
-	target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, operator, False)
+	target_obj, proxy_obj = utils_blender.PreprocessAndProxy(target_obj, options.use_world_origin, False)
 	if target_obj == None:
 		return {"CANCELLED"}
 
@@ -573,7 +573,7 @@ def CreateMorphObjSet(options, context, basis_obj, ref_objs, target_objs: list, 
 	if len(ref_objs) > 0:
 		n_objs = []
 		for s_obj in ref_objs:
-			s_obj, n_obj = utils_blender.PreprocessAndProxy(s_obj, False, operator, False)
+			s_obj, n_obj = utils_blender.PreprocessAndProxy(s_obj, False, False)
 			if s_obj == None:
 				return {"CANCELLED"}
 			n_objs.append(n_obj)
@@ -617,7 +617,7 @@ def CreateMorphObjSet(options, context, basis_obj, ref_objs, target_objs: list, 
 	utils_blender.move_object_to_collection([morph_node], prev_coll)
 	utils_blender.move_object_to_parent([morph_node], basis_obj)
 
-	basis_obj, proxy_basis_obj = utils_blender.PreprocessAndProxy(basis_obj, False, operator, False, False)
+	basis_obj, proxy_basis_obj = utils_blender.PreprocessAndProxy(basis_obj, False, False, False)
 	
 	if basis_obj == None:
 		return {"CANCELLED"}

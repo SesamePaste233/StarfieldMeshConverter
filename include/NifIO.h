@@ -213,11 +213,14 @@ namespace nif {
 
 		mesh::MeshIO* GetMesh(const std::string& mesh_factory_path) const;
 
-		mesh::MeshIO* GetMesh(const nif::BSGeometry* geometry_node) const {
+		mesh::MeshIO* GetMesh(const nif::BSGeometry* geometry_node, int lod_index = 0) const {
 			if (geometry_node->meshes.empty()) {
 				return nullptr;
 			}
-			return GetMesh(geometry_node->meshes[0].mesh_path);
+			if (geometry_node->_use_internal_geom_data()) {
+				return new mesh::MeshIO(geometry_node->meshes[lod_index].mesh_data);
+			}
+			return GetMesh(geometry_node->meshes[lod_index].mesh_path);
 		};
 
 		void DumpUnkBinary(const std::string& folder_path) const {
@@ -700,6 +703,7 @@ namespace nif {
 				uint32_t num_indices = 0;
 				uint32_t num_vertices = 0;
 				std::string factory_path = "";
+				mesh::MeshIO mesh_data;
 			};
 
 			NiSimpleGeometryTemplate() = default;
@@ -719,6 +723,8 @@ namespace nif {
 			};
 
 			struct GeoInfo {
+				bool use_internal_geom_data = false;
+
 				MeshInfo geo_mesh_lod[4];
 
 				float bounding_sphere[4] = { 0,0,0,0 };

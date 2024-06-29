@@ -2,6 +2,8 @@
 #include "Common.h"
 #include "MeshIO.h"
 
+#include <sstream>
+
 class WavefrontWriter
 {
 public:
@@ -19,6 +21,24 @@ public:
             return false;
         }
 
+        std::string obj_content;
+        if (!WriteString(obj_content, obj_name, indices, positions, UV_list, normals)) {
+			std::cerr << "Error writing obj content." << std::endl;
+			return false;
+		}
+
+        objFile << obj_content;
+
+		objFile.close();
+
+		return true;
+    }
+
+    template <class _indices_t, class _positions_t>
+    bool WriteString(std::string& obj_content, const std::string obj_name, const std::vector<_indices_t>& indices, const std::vector<_positions_t>& positions, const std::vector<std::vector<float>>& UV_list, const std::vector<std::vector<float>>& normals)
+    {
+        std::stringstream objFile(obj_content);
+
         objFile << "# Wavefront OBJ file" << std::endl;
 
         objFile << "o " << obj_name << std::endl;
@@ -26,7 +46,7 @@ public:
         int c = 0;
         // Write vertices
         int vertex_count = 0;
-        for (c = 0; c < positions.size(); c+=3) {
+        for (c = 0; c < positions.size(); c += 3) {
             objFile << "v "
                 << positions[c] << " " << positions[c + 1] << " " << positions[c + 2]
                 << std::endl;
@@ -45,6 +65,7 @@ public:
 
         // Write faces
         int face_count = 0;
+
         for (int i = 0; i < indices.size(); i += 3) {
             objFile << "f " << indices[i] + 1 << "/" << indices[i] + 1 << "/" << indices[i] + 1 << " "
                 << indices[i + 1] + 1 << "/" << indices[i + 1] + 1 << "/" << indices[i + 1] + 1 << " "
@@ -52,6 +73,10 @@ public:
                 << std::endl;
             face_count++;
         }
+
+        obj_content = objFile.str();
+
         return true;
     }
+
 };

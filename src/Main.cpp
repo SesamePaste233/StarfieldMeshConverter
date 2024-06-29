@@ -13,95 +13,6 @@ using namespace DirectX;
 using namespace mesh;
 using namespace morph;
 
-int blenderToMesh(int argc, char* argv[]) {
-	// Check if the user provided the correct number of command-line arguments
-	if (argc != 8) {
-		std::cerr << "Usage: " << argv[0] << " -mesh input_json.json output_mesh.mesh scale bool_smooth_edge_normal bool_normalize_weights bool_do_optimization" << std::endl;
-		return 1; // Return an error code
-	}
-
-	// Extract command-line arguments
-	std::string inputJson = argv[2];
-	std::string outputMesh = argv[3];
-	float scale = std::stof(argv[4]);
-	bool smooth_edge_normal = std::stoi(argv[5]);
-	bool normalize_weights = std::stoi(argv[6]);
-	bool do_optimization = std::stoi(argv[7]);
-
-	// Create a MeshIO object
-	MeshIO reader;
-
-	uint32_t opt = MeshIO::Options::GenerateTangentIfNA /*| MeshIO::Options::FlipTangent*/;
-	if (normalize_weights) {
-		opt |= MeshIO::Options::NormalizeWeight;
-	}
-	if (smooth_edge_normal) {
-		opt |= MeshIO::Options::SmoothEdgeNormal;
-	}
-	if (do_optimization) {
-		opt |= MeshIO::Options::DoOptimize;
-	}
-
-	// Print options
-	std::cout << "# Options: " << std::endl;
-	std::cout << "# Scale: " << std::to_string(scale) << std::endl;
-	std::cout << "# Smooth edge normal: " << std::to_string(smooth_edge_normal) << std::endl;
-	std::cout << "# Normalize weights: " << std::to_string(normalize_weights) << std::endl;
-	std::cout << "# Do optimization: " << std::to_string(do_optimization) << std::endl;
-
-	// Load the mesh from the input JSON file
-	if (!reader.Load(inputJson, scale, opt)) {
-		std::cerr << "Failed to load mesh from " << inputJson << std::endl;
-		return 2; // Return an error code
-	}
-
-	// Serialize the mesh to the output file
-	if (!reader.Serialize(outputMesh)) {
-		std::cerr << "Failed to serialize mesh to " << outputMesh << std::endl;
-		return 3; // Return an error code
-	}
-
-	std::cout << "Mesh loaded from " << inputJson << " and serialized to " << outputMesh << std::endl;
-
-	return 0; // Return success
-}
-
-int meshToBlender(int argc, char* argv[]) {
-	// Check if the user provided the correct number of command-line arguments
-	if (argc != 4) {
-		std::cerr << "Usage: " << argv[0] << " -blender input_mesh.mesh output_name" << std::endl;
-		return 1; // Return an error code
-	}
-
-	// Extract command-line arguments
-	std::string inputMesh = argv[2];
-	std::string outputName = argv[3];
-
-	// Get the name of the input mesh file without the extension
-	size_t const p(inputMesh.find_last_of('.'));
-	size_t const lastSlash = inputMesh.find_last_of("/\\");
-	std::string const name(inputMesh.substr(lastSlash + 1, p));
-
-	// Create a MeshIO object
-	MeshIO reader;
-
-	// Load the mesh from the input mesh file
-	if (!reader.Deserialize(inputMesh)) {
-		std::cerr << "Failed to load mesh from " << inputMesh << std::endl;
-		return 4; // Return an error code
-	}
-
-	// Save the mesh to the output file
-	if (!reader.SaveOBJ(outputName, name)) {
-		std::cerr << "Failed to save mesh to " << outputName << std::endl;
-		return 5; // Return an error code
-	}
-
-	std::cout << "Mesh loaded from " << inputMesh << " and saved to " << outputName << std::endl;
-
-	return 0; // Return success
-}
-
 int main1(int argc, char* argv[]){
 	// Check if the user provided the correct number of command-line arguments
 	if (argc != 4) {
@@ -192,7 +103,7 @@ int __main(int argc, char* argv[]) {
 
 void importnif_main() {
 	nif::NifIO nif;
-	std::string input_file("C:\\repo\\MeshConverter\\naked_m.nif");
+	std::string input_file("C:\\repo\\MeshConverter\\new_nif_test.nif");
 
 	if (!nif.Deserialize(input_file)) {
 		std::cerr << "Failed to load nif from " << input_file << std::endl;
@@ -223,7 +134,7 @@ void importnif_main() {
 	return;
 }
 
-void main() {
+void importmorph_main() {
 	MorphIO reader;
 	reader.Deserialize("C:\\repo\\MeshConverter\\morph.dat");
 
@@ -438,12 +349,12 @@ void phnifmain() {
 	//}
 }
 
-int asdmain() {
+int main() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\SpaceSuit_Recon_LowerBody_01_F_0_LOD_1.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\test.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

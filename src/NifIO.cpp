@@ -92,6 +92,10 @@ bool nif::NifIO::Serialize(const std::string filename)
 	
 	utils::writeString(file, block_buffer.str());
 
+	// To align with nifskope
+	uint8_t buffer[8] = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	utils::writeStream(file, buffer, 8);
+
 	return true;
 }
 
@@ -171,15 +175,18 @@ bool nif::NifIO::WriteHeader(std::ostream& file)
 		utils::writeAsHex(file, this->header.num_blocks);
 		utils::writeAsHex(file, this->header.BS_version);
 
-		uint8_t length = this->header.author.length();
+		uint8_t length = this->header.author.length() + 1;
+		uint8_t _placeholder = 0x00;
 		utils::writeAsHex(file, length);
 		utils::writeString(file, this->header.author);
+		utils::writeAsHex(file, _placeholder);
 
 		utils::writeAsHex(file, this->header.unk1);
 
-		length = this->header.process_script.length();
+		length = this->header.process_script.length() + 1;
 		utils::writeAsHex(file, length);
 		utils::writeString(file, this->header.process_script);
+		utils::writeAsHex(file, _placeholder);
 
 		length = this->header.unk2.length();
 		utils::writeAsHex(file, length);
@@ -694,6 +701,10 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 
 		auto& geo_info = this->geo_infos[bone.geometry_index];
 
+		if (geo_info.use_internal_geom_data) {
+			bsgeo->_set_use_internal_geom_data(true);
+		}
+
 		auto shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(nif.AddBlock(nif::NiRTTI::BSLightingShaderProperty, geo_info.mat_path));
 
 		bsgeo->shader_property = nif.block_manager.FindBlock(shader_property);
@@ -727,6 +738,8 @@ bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 			mesh_data.num_indices = mesh_info.num_indices;
 
 			mesh_data.path_length = mesh_info.factory_path.length();
+
+			mesh_data.mesh_data = mesh_info.mesh_data;
 
 			bsgeo->meshes.push_back(mesh_data);
 		}
@@ -783,6 +796,8 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::FromNif(const
 			return rtti;
 		}
 
+		geo_info.use_internal_geom_data = bs_geo->_use_internal_geom_data();
+
 		std::memcpy(geo_info.bounding_sphere, bs_geo->center, 3 * sizeof(float));
 
 		geo_info.bounding_sphere[3] = bs_geo->radius;
@@ -813,6 +828,10 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::FromNif(const
 
 			mesh_info.num_indices = mesh.num_indices;
 
+			if (geo_info.use_internal_geom_data) {
+				mesh_info.mesh_data = mesh.mesh_data;
+			}
+
 			geo_info.geo_mesh_lod[i] = mesh_info;
 
 			i++;
@@ -838,6 +857,8 @@ nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 	for (auto& geo_info : this->geo_infos) {
 		nlohmann::json bsgeometry_result;
 
+		bsgeometry_result["use_internal_geom_data"] = int(geo_info.use_internal_geom_data);
+
 		bsgeometry_result["geo_mesh_lod"] = nlohmann::json::array();
 
 		for (int i = 0; i < 4; ++i) {
@@ -850,6 +871,10 @@ nlohmann::json nif::ni_template::NiSimpleGeometryTemplate::Serialize() const
 			mesh_info["factory_path"] = mesh.factory_path;
 			mesh_info["num_indices"] = mesh.num_indices;
 			mesh_info["num_vertices"] = mesh.num_vertices;
+
+			if (geo_info.use_internal_geom_data) {
+				mesh.mesh_data.SerializeToJson(mesh_info["mesh_data"]);
+			}
 
 			bsgeometry_result["geo_mesh_lod"].push_back(mesh_info);
 		}
@@ -892,11 +917,21 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 	for (auto& data : _data["geometries"]) {
 		GeoInfo geo_info;
 
+		float scale_factor = 1.0;
+		if (data["use_internal_geom_data"] == 1) {
+			geo_info.use_internal_geom_data = true;
+			scale_factor = data["scale_factor"];
+		}
+
 		if (data.find("geo_mesh_lod") != data.end()) {
 			for (int i = 0; i < 4; ++i) {
 				const nlohmann::json& mesh_info = data["geo_mesh_lod"][i];
 				if (mesh_info.is_null())
 					continue;
+
+				if (geo_info.use_internal_geom_data) {
+					geo_info.geo_mesh_lod[i].mesh_data.LoadFromJson(mesh_info["mesh_data"], scale_factor, mesh::MeshIO::Options::NormalizeWeight);
+				}
 
 				geo_info.geo_mesh_lod[i].factory_path = mesh_info["factory_path"];
 				geo_info.geo_mesh_lod[i].num_indices = mesh_info["num_indices"];
@@ -998,7 +1033,9 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 		std::memset(bsgeometry->center, 0, sizeof(float) * 3);
 		bsgeometry->radius = 0;
 
-		std::memset(bsgeometry->bbox_center_expand, FLT_MAX, sizeof(float) * 6);
+		for (size_t i = 0; i < 6; ++i) {
+			bsgeometry->bbox_center_expand[i] = FLT_MAX;
+		}
 
 		auto skin_instance = dynamic_cast<nif::BSSkin::Instance*>(nif.AddBlock(nif::NiRTTI::BSSkinInstance));
 

@@ -185,7 +185,7 @@ import time
 
 _texture_format: dict[str, str] = {
     "COLOR": "BC7_UNORM",
-    "NORMAL": "BC5_SNORM",
+    "NORMAL": "R8G8B8A8_SNORM",
     "OPACITY": "BC4_UNORM",
     "AO": "BC4_UNORM",
     "METAL": "BC4_UNORM",
@@ -216,7 +216,8 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
         cmd += ["-srgbi"]
 
     if _is_normal_map(texture_index):
-        cmd += ["-inverty"]
+        #cmd += ["-inverty"]
+        pass
 
     cmd += [
         "-f", _get_texture_format(texture_index),

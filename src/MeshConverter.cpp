@@ -67,14 +67,9 @@ uint32_t ExportEmptyMorph(uint32_t n_verts, const char* output_file)
 }
 
 
-const char* ImportMesh(const char* input_file, const char* output_name)
+const char* ImportMesh(const char* input_file)
 {
 	std::string inputMesh(input_file);
-	std::string outputName(output_name);
-
-	size_t const p(inputMesh.find_last_of('.'));
-	size_t const lastSlash = inputMesh.find_last_of("/\\");
-	std::string const name(inputMesh.substr(lastSlash + 1, p));
 
 	// Create a MeshIO object
 	mesh::MeshIO reader;
@@ -87,7 +82,7 @@ const char* ImportMesh(const char* input_file, const char* output_name)
 
 	// Save the mesh to the output file
 	std::string JsonData;
-	if (!reader.SerializeToJson(JsonData, outputName, name)) {
+	if (!reader.SerializeToJsonStr(JsonData)) {
 		std::cerr << "Failed to serialize mesh to json" << std::endl;
 		return ""; // Return an error code
 	}

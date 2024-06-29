@@ -22,7 +22,7 @@ _dll_import_nif.argtypes = [ctypes.c_char_p, ctypes.c_bool, ctypes.c_char_p]
 _dll_import_nif.restype = ctypes.c_char_p
 
 _dll_import_mesh = _dll.ImportMesh
-_dll_import_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+_dll_import_mesh.argtypes = [ctypes.c_char_p]
 _dll_import_mesh.restype = ctypes.c_char_p
 
 _dll_import_morph = _dll.ImportMorph
@@ -109,8 +109,8 @@ def ExportEmptyMorphFromJson(num_vertices: int, output_file: str) -> DLLReturnCo
     rtn = _dll_export_empty_morph(num_vertices, output_file.encode('utf-8'))
     return DLLReturnCode(rtn)
 
-def ImportMeshAsJson(input_file: str, intermediate_obj_filename: str) -> str:
-    return _dll_import_mesh(input_file.encode('utf-8'), intermediate_obj_filename.encode('utf-8')).decode('utf-8')
+def ImportMeshAsJson(input_file: str) -> str:
+    return _dll_import_mesh(input_file.encode('utf-8')).decode('utf-8')
 
 def ImportMorphAsJson(input_file: str) -> str:
     return _dll_import_morph(input_file.encode('utf-8')).decode('utf-8')

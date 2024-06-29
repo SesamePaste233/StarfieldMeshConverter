@@ -130,16 +130,86 @@ def TriangulateMesh(mesh_obj:bpy.types.Object, make_copy = True) -> bpy.types.Ob
 
 	return mesh_obj
 
+def ClearEmptyVertexGroups(obj:bpy.types.Object, vertex_groups:list[str] = None):
+	'''
+	Removes all vertex groups that have no vertices assigned to them.
+	:param obj: The object to remove empty vertex groups from.
+	:param vertex_groups: A list of vertex group names to remove. If None, all empty vertex groups will be removed.
+	'''
+	bm = bmesh.new()
+	bm.from_mesh(obj.data)
+
+	deform_layer = bm.verts.layers.deform.active
+
+	if vertex_groups == None:
+		orig_vg_indices = [vg.index for vg in obj.vertex_groups]
+	else:
+		orig_vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
+		
+	vg_indices = set()
+	for v in bm.verts:
+		d_vert = v[deform_layer]
+		vert_vg_indices = set(d_vert.keys())
+		vg_indices = vg_indices.union(vert_vg_indices)
+
+	vg_to_remove = [obj.vertex_groups[vg_index] for vg_index in orig_vg_indices if vg_index not in vg_indices]
+	
+	for vg in vg_to_remove:
+		obj.vertex_groups.remove(vg)
+
+	bm.free()
+
+
+def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False):
+	if len(vertex_groups) == 0:
+		print("No vertex groups to combine.")
+		return
+
+	# Check if new_name already exists
+	combined_vg = None
+	if new_name in [vg.name for vg in obj.vertex_groups]:
+		combined_vg = obj.vertex_groups[new_name]
+	else:
+		combined_vg = obj.vertex_groups.new(name = new_name)
+
+	# Check if all vertex groups exist
+	for vg_name in vertex_groups:
+		if vg_name not in [vg.name for vg in obj.vertex_groups]:
+			print(f"Vertex group {vg_name} does not exist in the object.")
+			return
+		
+	combine_vg_index = combined_vg.index
+	vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
+		
+	bm = bmesh.new()
+	bm.from_mesh(obj.data)
+	
+	deform_layer = bm.verts.layers.deform.active
+
+	for v in bm.verts:
+		d_vert = v[deform_layer]
+		weights = [d_vert[vg_index] for vg_index in vg_indices if vg_index in d_vert]
+		combined_vg.add([v.index], sum(weights), 'ADD')
+
+	bm.to_mesh(obj.data)
+	bm.free()
+
+	if delete_old:
+		for vg_name in vertex_groups:
+			obj.vertex_groups.remove(obj.vertex_groups[vg_name])
+		
+
+
 def ApplyTransform(mesh_obj:bpy.types.Object):
 	prev_active = SetActiveObject(mesh_obj)
 	bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 	SetActiveObject(prev_active)
 
-def PreprocessAndProxy(old_obj, use_world_origin, operator, convert_to_mesh = True, do_triangulation = True):
+def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_triangulation = True):
 	if old_obj and old_obj.type == 'MESH':
 		
 		if old_obj.data.uv_layers == None or len(old_obj.data.uv_layers) == 0 or old_obj.data.uv_layers.active == None:
-			operator.report({'ERROR'}, f"Your model has no active UV map! Please create one before exporting.")
+			print(f"Your model has no active UV map! Please create one before exporting.")
 			return None, None
 
 		if old_obj.data.shape_keys != None and old_obj.data.shape_keys.key_blocks != None:

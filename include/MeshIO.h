@@ -32,6 +32,11 @@ namespace mesh {
 			float radius = 0.1;
 		};
 
+		struct BSCullData {
+			float center[3] = { 0,0,0 };
+			float expand[3] = { 0,0,0 };
+		};
+
 		MeshIO() {
 			Clear();
 		};
@@ -41,15 +46,19 @@ namespace mesh {
 		// Read a mesh from a file
 		bool Deserialize(const std::string filename);
 
+		bool Deserialize(std::istream& stream);
+
 		bool Serialize(const std::string filename);
 
-		bool Load(const std::string filename, const float scale_factor = 1.f, const uint32_t options = Options::None);
+		bool Serialize(std::ostream& stream);
 
 		bool LoadFromString(const std::string json_data, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
-		bool SaveOBJ(const std::string filename, const std::string obj_name);
+		bool LoadFromJson(const nlohmann::json& jsonData, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
-		bool SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name);
+		bool SerializeToJsonStr(std::string& json_data) const;
+
+		bool SerializeToJson(nlohmann::json& jsonData) const;
 
 		bool PostProcess(const uint32_t options = Options::None);
 
@@ -112,7 +121,7 @@ namespace mesh {
 		std::vector<DirectX::Meshlet> meshlets;
 
 		uint32_t num_culldata;
-		std::vector<DirectX::CullData> culldata;
+		std::vector<BSCullData> culldata;
 
 		uint32_t num_smooth_group;
 		std::vector<uint16_t> smooth_group;

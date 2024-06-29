@@ -22,6 +22,19 @@ bool MeshIO::Deserialize(const std::string filename)
 		return false;
 	}
 
+	// Deserialize the mesh
+	if (!this->Deserialize(file))
+	{
+		return false;
+	}
+
+	file.close();
+
+	return true;
+}
+
+bool mesh::MeshIO::Deserialize(std::istream& file)
+{
 	// Load the mesh from the file
 	uint32_t magic = utils::read<uint32_t>(file)[0];
 	/*if (magic != 1) {
@@ -104,7 +117,7 @@ bool MeshIO::Deserialize(const std::string filename)
 	for (int i = 0; i < num_tangents; i++) {
 		auto t = utils::read<uint32_t>(file)[0];
 		float w = 0;
-		auto tangent = utils::decodeDEC3N_w(t,w);
+		auto tangent = utils::decodeDEC3N_w(t, w);
 		this->tangents.emplace_back(tangent);
 		this->tangent_signs.emplace_back(w);
 	}
@@ -112,12 +125,12 @@ bool MeshIO::Deserialize(const std::string filename)
 	std::cout << "Offset of Weights: " << std::hex << file.tellg() << std::endl;
 
 	this->num_weights = utils::read<uint32_t>(file)[0];
-	auto num_shape_keys = 0;
+	auto num_entires = 0;
 	if (this->num_weights != 0) {
-		num_shape_keys = this->num_vertices;
+		num_entires = this->num_vertices;
 	}
 
-	for (int i = 0; i < num_shape_keys; i++) {
+	for (int i = 0; i < num_entires; i++) {
 		vertex_weight vw = new bone_binding[num_weightsPerVertex];
 
 		for (int j = 0; j < num_weightsPerVertex; j++) {
@@ -170,18 +183,14 @@ bool MeshIO::Deserialize(const std::string filename)
 
 	this->num_culldata = utils::read<uint32_t>(file)[0];
 	for (int i = 0; i < num_meshlets; i++) {
-		CullData cd;
-		auto data = utils::read<float>(file, 4);
-		cd.BoundingSphere.Center = XMFLOAT3(data[0], data[1], data[2]);
-		cd.BoundingSphere.Radius = data[3];
-
-		auto data2 = utils::read<uint32_t>(file)[0];
-		cd.NormalCone.v = data2;
-
-		auto data3 = utils::read<float>(file)[0];
-		cd.ApexOffset = data3;
+		auto buffer = utils::readBytes(file, sizeof(BSCullData));
+		BSCullData cd;
+		memcpy(&cd, buffer, sizeof(BSCullData));
 
 		this->culldata.emplace_back(cd);
+
+		// Release buffer
+		delete[] buffer;
 	}
 	// Print max border
 	std::cout << "Border: " << std::to_string(this->max_border) << std::endl;
@@ -222,7 +231,20 @@ bool MeshIO::Serialize(const std::string filename)
 		return false;
 	}
 
-	uint32_t magic = 1;
+	if (!this->Serialize(file))
+	{
+		std::cout << "Error: Failed to serialize mesh." << std::endl;
+		return false;
+	}
+
+	file.close();
+
+	return true;
+}
+
+bool mesh::MeshIO::Serialize(std::ostream& file)
+{
+	uint32_t magic = 2;
 	utils::writeAsHex(file, magic);
 
 	uint32_t dummy = 0;
@@ -283,7 +305,7 @@ bool MeshIO::Serialize(const std::string filename)
 		}
 		utils::writeAsHex(file, dummy);
 	}
-	
+
 	if (export_uvs) {
 		this->num_uv1 = this->UV_list1.size();
 		utils::writeAsHex(file, this->num_uv1);
@@ -309,7 +331,7 @@ bool MeshIO::Serialize(const std::string filename)
 		utils::writeAsHex(file, dummy);
 		utils::writeAsHex(file, dummy);
 	}
-	
+
 	if (export_vert_colors) {
 		this->num_vert_colors = this->vert_colors.size();
 		utils::writeAsHex(file, this->num_vert_colors);
@@ -324,7 +346,7 @@ bool MeshIO::Serialize(const std::string filename)
 	else {
 		utils::writeAsHex(file, dummy);
 	}
-	
+
 	if (export_normals) {
 		this->num_normals = this->normals.size();
 		utils::writeAsHex(file, this->num_normals);
@@ -337,12 +359,12 @@ bool MeshIO::Serialize(const std::string filename)
 	else {
 		utils::writeAsHex(file, dummy);
 	}
-	
-	if(export_tangents){
+
+	if (export_tangents) {
 		this->num_tangents = this->tangents.size();
 		utils::writeAsHex(file, this->num_tangents);
 
-		for (int i = 0; i < this->num_vertices;++i) {
+		for (int i = 0; i < this->num_vertices; ++i) {
 			auto t = utils::encodeDEC3N(this->tangents[i], this->tangent_signs[i]);
 			utils::writeAsHex(file, t);
 		}
@@ -387,13 +409,8 @@ bool MeshIO::Serialize(const std::string filename)
 		this->num_culldata = this->culldata.size();
 		utils::writeAsHex(file, this->num_culldata);
 
-		for (auto culldata : this->culldata) {
-			utils::writeAsHex(file, culldata.BoundingSphere.Center.x);
-			utils::writeAsHex(file, culldata.BoundingSphere.Center.y);
-			utils::writeAsHex(file, culldata.BoundingSphere.Center.z);
-			utils::writeAsHex(file, culldata.BoundingSphere.Radius);
-			utils::writeAsHex(file, culldata.NormalCone.v);
-			utils::writeAsHex(file, culldata.ApexOffset);
+		for (auto& culldata : this->culldata) {
+			utils::writeStream(file, &culldata, sizeof(BSCullData));
 		}
 	}
 	else {
@@ -548,219 +565,6 @@ bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_facto
 	return true;
 }
 
-bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const uint32_t options) {
-	this->Clear();
-	
-	std::ifstream file(jsonBlenderFile);
-	if (!file.is_open()) {
-		std::cout << "Error: Failed to open JSON file." << std::endl;
-		return false;
-	}
-
-	json jsonData;
-	file >> jsonData;  
-	file.close();
-
-	if (!this->GeometryFromJson(jsonData, scale_factor)) {
-		std::cout << "Error: Failed to load JSON file." << std::endl;
-		return false;
-	}
-
-	const json& normalsData = jsonData["normals"];
-
-	if (normalsData.is_array()) {
-		// Check if length of normalsData is equal to the number of vertices
-		if (normalsData.size() > 0 && normalsData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'normals' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_normals = normalsData.size();
-		for (const auto& n : normalsData) {
-			if (n.is_array()) {
-				std::vector<float> n_l;
-				float norm = 0;
-				for (const auto& element : n) {
-					if (element.is_number()) {
-						float _n = element;
-						n_l.push_back(_n);
-						norm += _n * _n;
-					}
-				}
-				norm = std::sqrt(norm);
-				this->normals.push_back({ n_l[0] / norm, n_l[1] / norm, n_l[2] / norm });
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'normals' is not an array." << std::endl;
-		return false;
-	}
-
-	// Load tangents
-	const json& tangentsData = jsonData["tangents"];
-
-	if (tangentsData.is_array()) {
-		// Check if length of tangentsData is equal to the number of vertices
-		if (tangentsData.size() > 0 && tangentsData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'tangents' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_tangents = tangentsData.size();
-		for (const auto& t : tangentsData) {
-			if (t.is_array()) {
-				std::vector<float> t_l{t[0], t[1], t[2]};
-				this->tangents.push_back(t_l);
-				this->tangent_signs.push_back(t[3]);
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'tangents' is not an array." << std::endl;
-		return false;
-	}
-
-	const json& vertColorData = jsonData["vertex_color"];
-
-	if (vertColorData.is_array()) {
-		// Check if length of vertColorData is equal to the number of vertices
-		if (vertColorData.size() > 0 && vertColorData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'vertex_color' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_vert_colors = vertColorData.size();
-		for (const auto& vc : vertColorData) {
-			if (vc.is_array()) {
-				std::vector<uint8_t> vc_l;
-				for (const auto& element : vc) {
-					if (element.is_number()) {
-						float _vc = element;
-						vc_l.push_back(uint8_t(_vc * 255));
-					}
-				}
-				this->vert_colors.push_back({ vc_l[0],vc_l[1],vc_l[2],vc_l[3] });
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'vertex_color' is not an array." << std::endl;
-		return false;
-	}
-
-	const json& weightData = jsonData["vertex_weights"];
-
-	if (weightData.is_array()) {
-		// Check if length of weightData is equal to the number of vertices
-		if (weightData.size() > 0 && weightData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'vertex_weights' is not equal to the number of vertices." << std::endl;
-			std::cout << "Length of 'vertex_weights': " << weightData.size() << std::endl;
-			std::cout << "Number of vertices: " << this->num_vertices << std::endl;
-			return false;
-		}
-
-		size_t num_bones = 0;
-		for (const auto& vw : weightData) {
-			if (vw.is_array()) {
-				if (vw.size() > this->num_weightsPerVertex) {
-					this->num_weightsPerVertex = vw.size();
-				}
-				for (auto& elem : vw) {
-					if (elem[0] > num_bones) {
-						num_bones = elem[0];
-					}
-				}
-			}
-		}
-		num_bones += 1;
-
-		this->num_weights = weightData.size() * this->num_weightsPerVertex;
-		this->weight_indices.resize(num_bones);
-
-		for (const auto& vw : weightData) {
-			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
-			memset(vw_l, 0, sizeof(bone_binding)* this->num_weightsPerVertex);
-
-			std::vector<std::vector<double>> bb_raw;
-			std::vector<std::vector<uint16_t>> bb_l;
-			double sum_weight = 0;
-			for (const auto& element : vw) {
-
-				std::vector<double> bb_per_vert_per_bone_raw;
-
-
-				for (const auto& e : element) {
-					double _e = e;
-					bb_per_vert_per_bone_raw.push_back(_e);
-				}
-
-				sum_weight += bb_per_vert_per_bone_raw[1];
-				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
-					
-				bb_raw.emplace_back(bb_per_vert_per_bone_raw);
-			}
-
-			int _i = 0;
-			for (auto& bb_per_vert_per_bone_raw : bb_raw) {
-				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
-				uint16_t weight = 0;
-
-				this->weight_indices[bone_id].push_back(_i);
-
-				uint16_t _Max = uint16_t(-1);
-				if (options & Options::NormalizeWeight) {
-					double _w = bb_per_vert_per_bone_raw[1] / sum_weight;
-
-					// Make sure the weights is never going to overflow
-					if (_w > _Max)
-						weight = _Max;
-					else if (_w < 0)
-						weight = uint16_t(0);
-					else
-						weight = uint16_t(_w);
-
-					_Max = _Max - weight;
-
-				}
-				else {
-					weight = uint16_t(bb_per_vert_per_bone_raw[1]);
-				}
-
-				vw_l[_i].bone = bone_id;
-				vw_l[_i].weight = weight;
-
-				++_i;
-			}
-
-			this->weights.push_back(vw_l);
-			
-		}
-	}
-	else {
-		std::cout << "Error: 'vertex_weights' is not an array." << std::endl;
-		return false;
-	}
-
-	const json& smoothGroupData = jsonData["smooth_group"];
-
-	if (smoothGroupData.is_array()) {
-		this->num_smooth_group = smoothGroupData.size();
-		// Read indices from the smooth group data
-		for (const auto& sg : smoothGroupData) {
-			if (sg.is_number()) {
-				this->smooth_group.push_back(sg);
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'smooth_group' is not an array." << std::endl;
-		return false;
-	}
-
-	return this->PostProcess(options);
-}
-
 bool MeshIO::LoadFromString(const std::string json_data, const float scale_factor, const uint32_t options) {
 	this->Clear();
 
@@ -768,6 +572,11 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 
 	std::cout << "Loading mesh from string..." << std::endl;
 
+	return this->LoadFromJson(jsonData, scale_factor, options);
+}
+
+bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scale_factor, const uint32_t options)
+{
 	if (!this->GeometryFromJson(jsonData, scale_factor)) {
 		std::cout << "Error: Failed to load JSON file." << std::endl;
 		return false;
@@ -885,7 +694,8 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 		this->num_weights = weightData.size() * this->num_weightsPerVertex;
 		this->weight_indices.resize(num_bones);
 
-		for (const auto& vw : weightData) {
+		uint32_t vertex_index = 0;
+ 		for (const auto& vw : weightData) {
 			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
 			memset(vw_l, 0, sizeof(bone_binding) * this->num_weightsPerVertex);
 
@@ -914,7 +724,7 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
 				uint16_t weight = 0;
 
-				this->weight_indices[bone_id].push_back(_i);
+				this->weight_indices[bone_id].push_back(vertex_index);
 
 				uint16_t _Max = uint16_t(-1);
 				if (options & Options::NormalizeWeight) {
@@ -942,7 +752,7 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 			}
 
 			this->weights.push_back(vw_l);
-
+			vertex_index++;
 		}
 	}
 	else {
@@ -971,39 +781,31 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 	return this->PostProcess(options);
 }
 
-bool MeshIO::SaveOBJ(const std::string filename, const std::string obj_name) {
-	//remove the suffix of the filename
-	std::string new_filename = filename;
+bool mesh::MeshIO::SerializeToJsonStr(std::string& json_data) const
+{
+	json jsonData;
 
-	std::string json_data;
-	if (!this->SerializeToJson(json_data, filename, obj_name)) {
-		std::cout << "Error: Failed to serialize to JSON." << std::endl;
+	if (!SerializeToJson(jsonData)) {
 		return false;
 	}
 
-	std::ofstream file(new_filename + ".json");
-
-	if (!file.is_open()) {
-		std::cout << "Error: Failed to open JSON file." << std::endl;
-		return false;
-	}
-
-	file << json_data;
+	// Write the json data to file
+	json_data = jsonData.dump(4);
 
 	return true;
 }
 
-bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string filename, const std::string obj_name)
+bool mesh::MeshIO::SerializeToJson(nlohmann::json& jsonData) const
 {
-	std::string new_filename = filename;
+	std::string obj_content;
 
 	WavefrontWriter wfw;
-	if (!wfw.Write(new_filename + ".obj", obj_name, this->indices, this->positions, this->UV_list1, this->normals)) {
+	if (!wfw.WriteString(obj_content, "DEFAULT", this->indices, this->positions, this->UV_list1, this->normals)) {
 		return false;
 	}
 
-	// Save tangent vectors in json format
-	json jsonData;
+	jsonData["obj_content"] = obj_content;
+
 	int tangents_count = 0;
 
 	if (this->num_uv2 > 0) {
@@ -1087,22 +889,16 @@ bool mesh::MeshIO::SerializeToJson(std::string& json_data, const std::string fil
 	json culldata = json::array();
 	for (auto cd : this->culldata) {
 		json cd_l = json::array();
-		cd_l.push_back(cd.BoundingSphere.Center.x);
-		cd_l.push_back(cd.BoundingSphere.Center.y);
-		cd_l.push_back(cd.BoundingSphere.Center.z);
-		cd_l.push_back(cd.BoundingSphere.Radius);
-		cd_l.push_back(cd.NormalCone.x);
-		cd_l.push_back(cd.NormalCone.y);
-		cd_l.push_back(cd.NormalCone.z);
-		cd_l.push_back(cd.NormalCone.w);
-		cd_l.push_back(cd.ApexOffset);
+		cd_l.push_back(cd.center[0]);
+		cd_l.push_back(cd.center[1]);
+		cd_l.push_back(cd.center[2]);
+		cd_l.push_back(cd.expand[0]);
+		cd_l.push_back(cd.expand[1]);
+		cd_l.push_back(cd.expand[2]);
 		culldata.push_back(cd_l);
 		++culldata_count;
 	}
 	jsonData["culldata"] = culldata;
-
-	// Write the json data to file
-	json_data = jsonData.dump(4);
 
 	return true;
 }
@@ -1445,14 +1241,18 @@ bool MeshIO::GenerateTangents(const uint32_t& options) {
 }
 
 bool MeshIO::GenerateMeshlets() {
+	size_t max_vertices = 96; // 96 vertices per meshlet
+	size_t max_prims = 128; // 96 primitives per meshlet
+
 	std::vector<Meshlet>& meshlets = this->meshlets;
 	meshlets.clear();
 	std::vector<uint8_t> uniqueVertexIB;
 	std::vector<MeshletTriangle> primitiveIndices;
+
 	if (FAILED(ComputeMeshlets(indices.data(), this->num_triangles,
 		DX_positions.data(), this->num_vertices,
 		nullptr,
-		meshlets, uniqueVertexIB, primitiveIndices)))
+		meshlets, uniqueVertexIB, primitiveIndices, max_vertices, max_prims)))
 	{
 		std::cout << "Error: Failed to generate meshlets for the mesh." << std::endl;
 		return false;
@@ -1469,31 +1269,78 @@ bool MeshIO::GenerateMeshlets() {
 
 	// Convert meshlet triangles to normal triangles
 	std::vector<uint16_t> indices_l;
+	std::vector<std::vector<float>> meshlet_centers;
+	std::vector<std::vector<float>> meshlet_expands;
+
 	for (auto& _mesh_let : meshlets) {
+
+		std::vector<float> xs, ys, zs;
 		for (int i = 0; i < _mesh_let.PrimCount; i++) {
-			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i0]);
-			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i1]);
-			indices_l.push_back(uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i2]);
+			uint16_t id0 = uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i0];
+			uint16_t id1 = uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i1];
+			uint16_t id2 = uniqueVertexIndices[_mesh_let.VertOffset + primitiveIndices[_mesh_let.PrimOffset + i].i2];
+			indices_l.push_back(id0);
+			indices_l.push_back(id1);
+			indices_l.push_back(id2);
+			
+			xs.emplace_back(DX_positions[id0].x);
+			xs.emplace_back(DX_positions[id1].x);
+			xs.emplace_back(DX_positions[id2].x);
+
+			ys.emplace_back(DX_positions[id0].y);
+			ys.emplace_back(DX_positions[id1].y);
+			ys.emplace_back(DX_positions[id2].y);
+
+			zs.emplace_back(DX_positions[id0].z);
+			zs.emplace_back(DX_positions[id1].z);
+			zs.emplace_back(DX_positions[id2].z);
 		}
+
+		float min_x = *std::min_element(xs.begin(), xs.end());
+		float max_x = *std::max_element(xs.begin(), xs.end());
+		float min_y = *std::min_element(ys.begin(), ys.end());
+		float max_y = *std::max_element(ys.begin(), ys.end());
+		float min_z = *std::min_element(zs.begin(), zs.end());
+		float max_z = *std::max_element(zs.begin(), zs.end());
+
+		std::vector<float> center = { (min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2 };
+		std::vector<float> expand = { max_x - center[0], max_y - center[1], max_z - center[2] };
+
+		meshlet_centers.emplace_back(center);
+		meshlet_expands.emplace_back(expand);
 	}
 	
 	std::swap(this->indices, indices_l);
 
 
-	std::vector<CullData>& cull = this->culldata;
+	std::vector<BSCullData>& cull = this->culldata;
 	cull.clear();
 	cull.resize(meshlets.size());
 
-	if (FAILED(ComputeCullData(DX_positions.data(), this->num_vertices,
+	/*if (FAILED(ComputeCullData(DX_positions.data(), this->num_vertices,
 		meshlets.data(), meshlets.size(),
 		uniqueVertexIndices, vertIndices,
 		primitiveIndices.data(), primitiveIndices.size(), cull.data())))
 	{
 		std::cout << "Error: Failed to generate cull data for the mesh." << std::endl;
 		return false;
+	}*/
+
+	for (size_t i = 0; i < this->num_meshlets; ++i) {
+		memcpy(cull[i].center, meshlet_centers[i].data(), sizeof(float) * 3);
+		memcpy(cull[i].expand, meshlet_expands[i].data(), sizeof(float) * 3);
 	}
 
 	this->num_culldata = this->culldata.size();
+
+	// Mock up PrimOffset in meshlets
+	uint32_t prev_primOffset = 0;
+	uint32_t prev_primCount = 0;
+	for (size_t i = 0; i < this->num_meshlets; ++i) {
+		meshlets[i].PrimOffset = prev_primOffset + ((3 * prev_primCount + 3) & ~3);
+		prev_primOffset = meshlets[i].PrimOffset;
+		prev_primCount = meshlets[i].PrimCount;
+	}
 
 	return true;
 }
