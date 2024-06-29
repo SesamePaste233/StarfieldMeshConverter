@@ -125,12 +125,12 @@ bool mesh::MeshIO::Deserialize(std::istream& file)
 	std::cout << "Offset of Weights: " << std::hex << file.tellg() << std::endl;
 
 	this->num_weights = utils::read<uint32_t>(file)[0];
-	auto num_shape_keys = 0;
+	auto num_entires = 0;
 	if (this->num_weights != 0) {
-		num_shape_keys = this->num_vertices;
+		num_entires = this->num_vertices;
 	}
 
-	for (int i = 0; i < num_shape_keys; i++) {
+	for (int i = 0; i < num_entires; i++) {
 		vertex_weight vw = new bone_binding[num_weightsPerVertex];
 
 		for (int j = 0; j < num_weightsPerVertex; j++) {
@@ -565,219 +565,6 @@ bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_facto
 	return true;
 }
 
-bool MeshIO::Load(const std::string jsonBlenderFile, const float scale_factor, const uint32_t options) {
-	this->Clear();
-	
-	std::ifstream file(jsonBlenderFile);
-	if (!file.is_open()) {
-		std::cout << "Error: Failed to open JSON file." << std::endl;
-		return false;
-	}
-
-	json jsonData;
-	file >> jsonData;  
-	file.close();
-
-	if (!this->GeometryFromJson(jsonData, scale_factor)) {
-		std::cout << "Error: Failed to load JSON file." << std::endl;
-		return false;
-	}
-
-	const json& normalsData = jsonData["normals"];
-
-	if (normalsData.is_array()) {
-		// Check if length of normalsData is equal to the number of vertices
-		if (normalsData.size() > 0 && normalsData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'normals' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_normals = normalsData.size();
-		for (const auto& n : normalsData) {
-			if (n.is_array()) {
-				std::vector<float> n_l;
-				float norm = 0;
-				for (const auto& element : n) {
-					if (element.is_number()) {
-						float _n = element;
-						n_l.push_back(_n);
-						norm += _n * _n;
-					}
-				}
-				norm = std::sqrt(norm);
-				this->normals.push_back({ n_l[0] / norm, n_l[1] / norm, n_l[2] / norm });
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'normals' is not an array." << std::endl;
-		return false;
-	}
-
-	// Load tangents
-	const json& tangentsData = jsonData["tangents"];
-
-	if (tangentsData.is_array()) {
-		// Check if length of tangentsData is equal to the number of vertices
-		if (tangentsData.size() > 0 && tangentsData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'tangents' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_tangents = tangentsData.size();
-		for (const auto& t : tangentsData) {
-			if (t.is_array()) {
-				std::vector<float> t_l{t[0], t[1], t[2]};
-				this->tangents.push_back(t_l);
-				this->tangent_signs.push_back(t[3]);
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'tangents' is not an array." << std::endl;
-		return false;
-	}
-
-	const json& vertColorData = jsonData["vertex_color"];
-
-	if (vertColorData.is_array()) {
-		// Check if length of vertColorData is equal to the number of vertices
-		if (vertColorData.size() > 0 && vertColorData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'vertex_color' is not equal to the number of vertices." << std::endl;
-			return false;
-		}
-
-		this->num_vert_colors = vertColorData.size();
-		for (const auto& vc : vertColorData) {
-			if (vc.is_array()) {
-				std::vector<uint8_t> vc_l;
-				for (const auto& element : vc) {
-					if (element.is_number()) {
-						float _vc = element;
-						vc_l.push_back(uint8_t(_vc * 255));
-					}
-				}
-				this->vert_colors.push_back({ vc_l[0],vc_l[1],vc_l[2],vc_l[3] });
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'vertex_color' is not an array." << std::endl;
-		return false;
-	}
-
-	const json& weightData = jsonData["vertex_weights"];
-
-	if (weightData.is_array()) {
-		// Check if length of weightData is equal to the number of vertices
-		if (weightData.size() > 0 && weightData.size() != this->num_vertices) {
-			std::cout << "Error: Length of 'vertex_weights' is not equal to the number of vertices." << std::endl;
-			std::cout << "Length of 'vertex_weights': " << weightData.size() << std::endl;
-			std::cout << "Number of vertices: " << this->num_vertices << std::endl;
-			return false;
-		}
-
-		size_t num_bones = 0;
-		for (const auto& vw : weightData) {
-			if (vw.is_array()) {
-				if (vw.size() > this->num_weightsPerVertex) {
-					this->num_weightsPerVertex = vw.size();
-				}
-				for (auto& elem : vw) {
-					if (elem[0] > num_bones) {
-						num_bones = elem[0];
-					}
-				}
-			}
-		}
-		num_bones += 1;
-
-		this->num_weights = weightData.size() * this->num_weightsPerVertex;
-		this->weight_indices.resize(num_bones);
-
-		for (const auto& vw : weightData) {
-			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
-			memset(vw_l, 0, sizeof(bone_binding)* this->num_weightsPerVertex);
-
-			std::vector<std::vector<double>> bb_raw;
-			std::vector<std::vector<uint16_t>> bb_l;
-			double sum_weight = 0;
-			for (const auto& element : vw) {
-
-				std::vector<double> bb_per_vert_per_bone_raw;
-
-
-				for (const auto& e : element) {
-					double _e = e;
-					bb_per_vert_per_bone_raw.push_back(_e);
-				}
-
-				sum_weight += bb_per_vert_per_bone_raw[1];
-				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
-					
-				bb_raw.emplace_back(bb_per_vert_per_bone_raw);
-			}
-
-			int _i = 0;
-			for (auto& bb_per_vert_per_bone_raw : bb_raw) {
-				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
-				uint16_t weight = 0;
-
-				this->weight_indices[bone_id].push_back(_i);
-
-				uint16_t _Max = uint16_t(-1);
-				if (options & Options::NormalizeWeight) {
-					double _w = bb_per_vert_per_bone_raw[1] / sum_weight;
-
-					// Make sure the weights is never going to overflow
-					if (_w > _Max)
-						weight = _Max;
-					else if (_w < 0)
-						weight = uint16_t(0);
-					else
-						weight = uint16_t(_w);
-
-					_Max = _Max - weight;
-
-				}
-				else {
-					weight = uint16_t(bb_per_vert_per_bone_raw[1]);
-				}
-
-				vw_l[_i].bone = bone_id;
-				vw_l[_i].weight = weight;
-
-				++_i;
-			}
-
-			this->weights.push_back(vw_l);
-			
-		}
-	}
-	else {
-		std::cout << "Error: 'vertex_weights' is not an array." << std::endl;
-		return false;
-	}
-
-	const json& smoothGroupData = jsonData["smooth_group"];
-
-	if (smoothGroupData.is_array()) {
-		this->num_smooth_group = smoothGroupData.size();
-		// Read indices from the smooth group data
-		for (const auto& sg : smoothGroupData) {
-			if (sg.is_number()) {
-				this->smooth_group.push_back(sg);
-			}
-		}
-	}
-	else {
-		std::cout << "Error: 'smooth_group' is not an array." << std::endl;
-		return false;
-	}
-
-	return this->PostProcess(options);
-}
-
 bool MeshIO::LoadFromString(const std::string json_data, const float scale_factor, const uint32_t options) {
 	this->Clear();
 
@@ -907,7 +694,8 @@ bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scal
 		this->num_weights = weightData.size() * this->num_weightsPerVertex;
 		this->weight_indices.resize(num_bones);
 
-		for (const auto& vw : weightData) {
+		uint32_t vertex_index = 0;
+ 		for (const auto& vw : weightData) {
 			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
 			memset(vw_l, 0, sizeof(bone_binding) * this->num_weightsPerVertex);
 
@@ -936,7 +724,7 @@ bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scal
 				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
 				uint16_t weight = 0;
 
-				this->weight_indices[bone_id].push_back(_i);
+				this->weight_indices[bone_id].push_back(vertex_index);
 
 				uint16_t _Max = uint16_t(-1);
 				if (options & Options::NormalizeWeight) {
@@ -964,7 +752,7 @@ bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scal
 			}
 
 			this->weights.push_back(vw_l);
-
+			vertex_index++;
 		}
 	}
 	else {

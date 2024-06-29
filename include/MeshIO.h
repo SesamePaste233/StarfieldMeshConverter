@@ -52,8 +52,6 @@ namespace mesh {
 
 		bool Serialize(std::ostream& stream);
 
-		bool Load(const std::string filename, const float scale_factor = 1.f, const uint32_t options = Options::None);
-
 		bool LoadFromString(const std::string json_data, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
 		bool LoadFromJson(const nlohmann::json& jsonData, const float scale_factor = 1.f, const uint32_t options = Options::None);
