@@ -99,7 +99,16 @@ class Transferable:
 
         # Set weights to 0 if the distance is too large
         self.weights[distances > 3 * sigma] = 0
-            
+    
+    def CopyClosest(self, target, closest_range: float = 0.005):
+        tar_kdtree = target.KDTree
+        _, closest_points, distances = GetClosestNPoints(tar_kdtree, self.PositionsMathutils, 1)
+        closest_points = [rtn[0] for rtn in closest_points]
+        distances = [rtn[0] for rtn in distances]
+        for i in range(len(self.positions)):
+            if distances[i] < closest_range:
+                self.data[i] = target.data[closest_points[i]]
+
     def Save(self, path:str):
         np.savez(path, positions=self.positions, data=self.data)
 
@@ -245,7 +254,7 @@ def TransferableToMeshShapeKey(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey
             shapekey.data[i].co = v.co + source.DataMathutils[i]
         
 
-def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, shape_key_name_lst:list[str], falloff_sigma = 0.1, create_if_not_exist:bool = True, dont_create_if_unobvious:bool = True):
+def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, shape_key_name_lst:list[str], falloff_sigma = 0.1, copy_range = 0.005, create_if_not_exist:bool = True, dont_create_if_unobvious:bool = True):
     source = MeshToTransferable(source_obj)
     target = MeshToTransferable(target_obj)
 
@@ -279,7 +288,13 @@ def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, 
                 print(f"Shapekey {shape_key_name} is unobvious, removed.")
                 continue
 
+        if copy_range > 0:
+            target.CopyClosest(source, copy_range)
+
         TransferableToMeshShapeKey(target_obj, target_shapekey, target)
+
+    source.ResetCache()
+    target.ResetCache()
 
 
 if __name__ == "__main__":
@@ -292,4 +307,4 @@ if __name__ == "__main__":
 
     shape_key_name_lst = [sk.name for sk in selected_obj.data.shape_keys.key_blocks if sk.name != "Basis"]
 
-    TransferShapekeys(selected_obj, active_obj, shape_key_name_lst, falloff_sigma=0.15)
+    TransferShapekeys(selected_obj, active_obj, shape_key_name_lst, falloff_sigma=0.15, copy_range=0.005)

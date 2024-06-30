@@ -314,12 +314,13 @@ def ExportMorph(options, context, export_file_path, operator):
 			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 			return {"CANCELLED"}, None
 
+		num_verts = len(proxy_obj.data.vertices)
 		bpy.data.meshes.remove(proxy_obj.data)
 		
 		utils_blender.SetActiveObject(target_obj)
 
 		operator.report({'INFO'}, f"Export morph successful.")
-		return {"FINISHED"}, len(proxy_obj.data.vertices)
+		return {"FINISHED"}, num_verts
 	
 	num_shape_keys = len(target_obj.data.shape_keys.key_blocks)
 	#print(list(target_obj.data.shape_keys.key_blocks))
@@ -342,12 +343,13 @@ def ExportMorph(options, context, export_file_path, operator):
 			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 			return {"CANCELLED"}, None
 
+		num_verts = len(proxy_obj.data.vertices)
 		bpy.data.meshes.remove(proxy_obj.data)
 		
 		utils_blender.SetActiveObject(target_obj)
 
 		operator.report({'INFO'}, f"Export morph successful.")
-		return {"FINISHED"}, len(proxy_obj.data.vertices)
+		return {"FINISHED"}, num_verts
 	
 	if key_blocks[0].name != 'Basis':
 		operator.report({'WARNING'}, f"The first shape key should always be the basis and named \'Basis\'.")
@@ -508,12 +510,13 @@ def ExportMorph(options, context, export_file_path, operator):
 		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 		return {"CANCELLED"}, None
 
+	num_verts = len(proxy_obj.data.vertices)
 	bpy.data.meshes.remove(proxy_obj.data)
 	
 	utils_blender.SetActiveObject(target_obj)
 
 	operator.report({'INFO'}, f"Export morph successful. Time taken: {time_end - time_start:.2f}/{time_end2 - time_end:.2} seconds.")
-	return {"FINISHED"}, len(proxy_obj.data.vertices)
+	return {"FINISHED"}, num_verts
 
 def CreateMorphObjSetDefault(options, context, basis_obj, target_objs: list, operator):
 	basis_obj.shape_key_clear()
