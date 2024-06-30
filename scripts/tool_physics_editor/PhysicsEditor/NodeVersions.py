@@ -1,4 +1,4 @@
-import version
+from submodule_version import Version
 
 __node_versions__: dict[str:tuple[int, int, int]] = {
     'hclLinksFromMesh': (1,0,1),
@@ -8,8 +8,8 @@ __node_versions__: dict[str:tuple[int, int, int]] = {
     'hclParticlesFromMesh': (1,0,1),
 }
 
-def get_node_script_version(bl_idname: str) -> version.Version:
+def get_node_script_version(bl_idname: str) -> Version:
     if bl_idname in __node_versions__:
-        return version.Version(__node_versions__[bl_idname])
+        return Version(__node_versions__[bl_idname])
     else:
-        return version.Version((1,0,0))
+        return Version((1,0,0))

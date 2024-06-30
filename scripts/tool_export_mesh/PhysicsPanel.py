@@ -11,12 +11,14 @@ import addon_utils
 
 import MeshConverter
 
+import version
+
 class ExportPhysicsDataOperator(bpy.types.Operator):
 	bl_idname = "object.physics_data_export"
 	bl_label = "Export As Portable"
 
 	def execute(self, context):
-		if context.scene.sf_physics_editor_version != context.scene.geometry_bridge_version:
+		if version.compare_versions(context.scene.geometry_bridge_version, context.scene.sf_physics_editor_version, 'tool_physics_editor'):
 			self.report({'ERROR'}, "Physics editor version does not match geometry bridge version.")
 			return {'CANCELLED'}
 		

@@ -6,7 +6,7 @@ dir = os.path.dirname(os.path.realpath(__file__))
 if dir not in sys.path:
 	sys.path.append(dir)
 
-from version import __plugin_version__, Version
+from submodule_version import __plugin_version__, Version
 
 import PhysicsEditor.Utilities.utils_node as utils_node
 
@@ -18,7 +18,7 @@ import PhysicsEditor.ActivateVisOperator as ActivateVisOperator
 bl_info = {
 	"name": "Starfield Havok Physics Editor",
 	"author": "SesamePaste",
-	"version": (0, 16, 0),
+	"version": (0, 17, 0),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
 	"description": "Export havok physics data for starfield. Requires \"Starfield Geometry Bridge\" of the same version installed.",
