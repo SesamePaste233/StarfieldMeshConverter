@@ -1057,9 +1057,6 @@ def morphPanelUpdateMorphIndex(self, context):
 
     name = active.name
 
-    if obj.data.shape_keys and obj.data.shape_keys.key_blocks.find(name) != None:
-        obj.active_shape_key_index = obj.data.shape_keys.key_blocks.find(name)
-
     if f"COL_{name}" in mesh.attributes:
         mesh.attributes.active_color = mesh.attributes.get(f"COL_{name}")
 
