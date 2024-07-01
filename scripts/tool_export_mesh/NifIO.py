@@ -471,10 +471,13 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 				utils_blender.SetSelectObjects(original_selected)
 				utils_blender.SetActiveObject(mesh_obj)
 
-				morph_success = MorphIO.ExportMorph(options, context, result_morph_path, operator)
+				morph_success, num_vertices_in_morph = MorphIO.ExportMorph(options, context, result_morph_path, operator)
 
 				if 'FINISHED' in morph_success:
-					operator.report({'INFO'}, f"Morph export for {mesh_obj.name} successful.")
+					if verts_count != num_vertices_in_morph:
+						operator.report({'WARNING'}, f"Number of vertices in morph doesn't match with the base mesh for {mesh_obj.name}. Please report to the author.")
+					else:
+						operator.report({'INFO'}, f"Morph export for {mesh_obj.name} successful.")
 				else:
 					operator.report({'WARNING'}, f"Morph export for {mesh_obj.name} failed.")
 			else:

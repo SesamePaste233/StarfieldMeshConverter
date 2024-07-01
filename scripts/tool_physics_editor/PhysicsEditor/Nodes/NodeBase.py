@@ -1,5 +1,5 @@
 import bpy
-from version import __plugin_version__, make_version, Version
+from submodule_version import __plugin_version__, make_version, Version
 from PhysicsEditor.NodeVersions import get_node_script_version
 
 import PhysicsEditor.Utilities.utils_node as utils_node

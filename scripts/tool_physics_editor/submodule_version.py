@@ -37,4 +37,26 @@ def make_version(version: str) -> Version:
     v.version = tuple(map(int, version.split('.')))
     return v
 
-__plugin_version__ = Version((0, 15, 0))
+import addon_utils
+import os
+import sys
+
+main_module_name = 'tool_export_mesh'
+mods = addon_utils.modules()
+
+path = None
+compare_versions = lambda main_version_str, sub_module_version_str, sub_module_name: False
+check_compatibility = lambda submodule_name, raise_if_not_found = False: False
+
+for mod in mods:
+    if mod.__name__ == main_module_name:
+        path = os.path.dirname(mod.__file__)
+        
+if path:
+    sys.path.append(os.path.abspath(path))
+    
+    import version
+    compare_versions = version.compare_versions
+    check_compatibility = version.check_compatibility
+
+__plugin_version__ = Version((0, 1, 0))

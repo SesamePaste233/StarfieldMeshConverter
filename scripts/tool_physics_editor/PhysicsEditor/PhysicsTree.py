@@ -18,6 +18,8 @@ import PhysicsEditor.Nodes.Drivers as Drivers
 
 import PhysicsEditor.Utilities.utils_node as utils_node
 
+from submodule_version import compare_versions
+
 def update_tree(self, context):
     self.update_tree(context)
 
@@ -35,7 +37,7 @@ class PhysicsTree(NodeTree):
     @classmethod
     def poll(cls, context):
         _, enabled = addon_utils.check("tool_export_mesh")
-        return enabled and context.scene.sf_physics_editor_version == context.scene.geometry_bridge_version
+        return enabled and compare_versions(context.scene.geometry_bridge_version, context.scene.sf_physics_editor_version, 'tool_physics_editor')
 
     def update(self):
         for link in self.links:
