@@ -471,9 +471,9 @@ class ImportCustomMorph(bpy.types.Operator):
 		description="Import Morph as multiple objects, allows greater freedom in morph editing.",
 		default=False
 	)
-	morph_panel: bpy.props.BoolProperty(
-		name="Use morph panel",
-		description="Import to morph panel (next to the shape-keys panel)",
+	use_attributes: bpy.props.BoolProperty(
+		name="Import attributes",
+		description="Import normals, tangents and colors as attributes.",
 		default=False
 	)
 	debug_delta_normal: bpy.props.BoolProperty(
@@ -586,7 +586,7 @@ class shapeKeyList(bpy.types.PropertyGroup):
 class TransferShapeKeys(bpy.types.Operator):
 	bl_idname = "object.transfer_shape_keys"
 	bl_label = "Transfer shape-keys"
-	bl_description = "Transfer shape-keys from selected object to active"
+	bl_description = "Transfer shape-keys from active object to selected"
 	bl_options = {'UNDO'}
 
 	falloff_sigma: bpy.props.FloatProperty(
@@ -742,9 +742,13 @@ class ExportSFMeshPanel(bpy.types.Panel):
 
 class MorphListRecalculateNormals(bpy.types.Operator):
     bl_idname = "object.morph_list_recalculate_normals"
-    bl_label = "Recalculate normals"
-    bl_description = ""
-
+    bl_label = "Recalculate Normals"
+    bl_description = "Recalculate normals and tangents deltas for this shape-key."
+	
+    @classmethod
+    def poll(cls, context):
+        return True
+	
     def execute(self, context):
         obj = context.object
 
@@ -756,137 +760,38 @@ class MorphListRecalculateNormals(bpy.types.Operator):
             self.report({'ERROR'}, "Shape-key for recalculating normals not found.")
             return {'CANCELLED'}
 
-        self.report({'INFO'}, f"Recalculated normals for {obj.morph_list[obj.morph_list_index].name}")
+        self.report({'INFO'}, f"Recalculated normals for {obj.data.shape_keys.key_blocks[obj.active_shape_key_index].name}")
 		
         return {'FINISHED'}
 
     def invoke(self, context, event):
-        return self.execute(context)
+        return context.window_manager.invoke_props_dialog(self)
 
-class MorphListFromShapeKeys(bpy.types.Operator):
-    bl_idname = "object.morph_list_from_shape_keys"
-    bl_label = "Create from shape-keys"
-    bl_description = ""
+def menu_func_morphs(self, context):
+	layout = self.layout
+	layout.separator()
 
-    def execute(self, context):
-        obj = context.object
+	col = layout.column()
 
-        bpy.ops.ed.undo_push()
+	obj = context.object
 
-        if obj.data.shape_keys == None or obj.data.shape_keys != None and len(obj.data.shape_keys.key_blocks) == 1:
-            self.report({'ERROR'}, "No shape-keys found")
-            return {'CANCELLED'}
-        
-        morph_names = [morph.name for morph in obj.morph_list]
-        shape_key_names = [sk.name for idx, sk in enumerate(obj.data.shape_keys.key_blocks) if idx != 0 and sk.name not in morph_names]
-        
-        if shape_key_names == []:
-            self.report({'ERROR'}, "All shape-keys are already in morph list")
-            return {'CANCELLED'}
-        
-        for sk_name in shape_key_names:
-            utils_blender.morphPanelAdd(obj, sk_name)
+	if obj.data.shape_keys == None or len(obj.data.shape_keys.key_blocks) == 0:
+		return
+	
+	if obj.active_shape_key_index == 0:
+		return
 
-        return {'FINISHED'}
+	sk = obj.data.shape_keys.key_blocks[obj.active_shape_key_index]
+	col.label(text="Attributes")
 
-    def invoke(self, context, event):
-        return self.execute(context)
-
-class MorphPanelRemove(bpy.types.Operator):
-    bl_idname = "object.morph_panel_remove"
-    bl_label = "Remove morph"
-    bl_description = "Removes morph from the list and associated object attributes"
-
-    def execute(self, context):
-        obj = context.object
-
-        bpy.ops.ed.undo_push()
-
-        morphPanelRemoveActive(obj)
-
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-        return self.execute(context)
-
-class MorphPanelAdd(bpy.types.Operator):
-    bl_idname = "object.morph_panel_add"
-    bl_label = "Create new"
-    bl_description = ""
-
-    def execute(self, context):
-        obj = context.object
-        items = [item.name for item in context.object.morph_list if item.name.startswith("NewMorph")]
-
-        counter = len(items)
-
-        bpy.ops.ed.undo_push()
-
-        utils_blender.morphPanelAdd(obj, f"NewMorph.{counter}" if counter != 0 else "NewMorph")
-        
-        return {'FINISHED'}
-
-    def invoke(self, context, event):
-
-        return self.execute(context)
-
-class SGB_PT_Morphs(bpy.types.Panel):
-    bl_idname = "SGB_PT_Morphs"
-
-    bl_label = "Starfield Morphs"
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = "Item"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
-    bl_context = "data"
-
-    def draw(self, context):
-        layout = self.layout
-        obj = context.object
-
-        layout.template_list(
-            "SGB_UL_MorphPanelList",
-            "",
-            context.object, "morph_list",
-            context.object, "morph_list_index")
-
-        row = layout.row(align=True)
-        row.operator("object.morph_panel_add")
-        row.operator("object.morph_panel_remove")
-
-        row = layout.row(align=True)
-        col = row.column()
-
-        morph_item = obj.morph_list[obj.morph_list_index] if obj.morph_list != -1 and len(obj.morph_list) != obj.morph_list_index else None
-        sk = obj.data.shape_keys
-
-        if morph_item != None:
-            col.label(text=f"NRM attribute: {'Found' if obj.data.attributes.get(f'NRM_{morph_item.name}') != None else 'Not found'}")
-            col.label(text=f"COL attribute: {'Found' if obj.data.attributes.get(f'COL_{morph_item.name}') != None else 'Not found'}")
-            col.label(text=f"Shape key: {'Found' if sk != None and sk.key_blocks.find(morph_item.name) != None else 'Not found'}")
-            col.operator("object.morph_list_recalculate_normals")
-
-        layout.label(text="Utilities")
-        layout.operator("object.morph_list_from_shape_keys")
-        layout.operator("object.transfer_shape_keys")
-
-class MorphPanelList(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty(name="Morph name", default="", update=utils_blender.morphPanelUpdateName)
-    morph_value: bpy.props.FloatProperty(name="Morph value", max=1.0, min=0.0, update=utils_blender.morphPanelUpdateMorphValue)
-
-class SGB_UL_MorphPanelList(bpy.types.UIList):
-    bl_idname = "SGB_UL_MorphPanelList"
-    layout_type = "DEFAULT"
-
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.scale_x = 1.1
-            layout.prop(item, "name", text="", emboss=False)
-            layout.separator(factor=-1.0)
-            layout.row().prop(item, 'morph_value', text="", slider=True),
-            layout.scale_x = 0.7
+	row = layout.row(align=True)
+	row.label(text=f"NRM: {'Found' if obj.data.attributes.get(f'NRM_{sk.name}') != None else 'Not found'}")
+	row.label(text=f"TAN: {'Found' if obj.data.attributes.get(f'TAN_{sk.name}') != None else 'Not found'}")
+	row.label(text=f"COL: {'Found' if obj.data.attributes.get(f'COL_{sk.name}') != None else 'Not found'}")
+	
+	row = layout.row(align=True)
+	#row.operator("object.morph_list_recalculate_normals")
+	row.operator(TransferShapeKeys.bl_idname)
 
 def morphPanelRemoveActive(obj):
     if obj.morph_list_index == len(obj.morph_list):
@@ -1033,23 +938,6 @@ def register():
 		default=False,
 	)
 
-	bpy.utils.register_class(MorphPanelList)
-
-	bpy.types.Object.morph_list = bpy.props.CollectionProperty(
-		type=MorphPanelList
-	)
-
-	bpy.types.Object.morph_list_index = bpy.props.IntProperty(
-		name="Morph list index",
-		default=0,
-		update=utils_blender.morphPanelUpdateMorphIndex
-	)
-
-	bpy.utils.register_class(MorphListFromShapeKeys)
-	bpy.utils.register_class(SGB_UL_MorphPanelList)
-	bpy.utils.register_class(SGB_PT_Morphs)
-	bpy.utils.register_class(MorphPanelAdd)
-	bpy.utils.register_class(MorphPanelRemove)
 	bpy.utils.register_class(MorphListRecalculateNormals)
 	bpy.utils.register_class(ExportCustomMesh)
 	bpy.utils.register_class(ImportCustomMesh)
@@ -1069,6 +957,7 @@ def register():
 	bpy.types.TOPBAR_MT_file_import.append(menu_func_import_nif)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_morph)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export_nif)
+	bpy.types.DATA_PT_shape_keys.append(menu_func_morphs)
 
 	PhysicsPanel.register()
 	MaterialPanel.register()
@@ -1085,12 +974,6 @@ def unregister():
 	bpy.utils.unregister_class(ImportCustomMorph)
 	bpy.utils.unregister_class(ExportCustomMorph)
 	bpy.utils.unregister_class(ExportCustomNif)
-	bpy.utils.unregister_class(MorphPanelList)
-	bpy.utils.unregister_class(MorphListFromShapeKeys)
-	bpy.utils.unregister_class(SGB_UL_MorphPanelList)
-	bpy.utils.unregister_class(SGB_PT_Morphs)
-	bpy.utils.unregister_class(MorphPanelAdd)
-	bpy.utils.unregister_class(MorphPanelRemove)
 	bpy.utils.unregister_class(MorphListRecalculateNormals)
 	bpy.utils.unregister_class(SGB_UL_ShapeKeyListItems)
 	bpy.utils.unregister_class(shapeKeyList)
@@ -1101,6 +984,7 @@ def unregister():
 	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_morph)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_morph)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_nif)
+	bpy.types.DATA_PT_shape_keys.remove(menu_func_morphs)
 	del bpy.types.Scene.geometry_bridge_version
 	del bpy.types.Scene.export_mesh_folder_path
 	del bpy.types.Scene.assets_folder
