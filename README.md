@@ -1,5 +1,5 @@
 # MeshConverter
-A blender plugin that converts your fancy model into Starfield's .mesh format in a single click.
+A blender plugin that exports models, morph, geometry and physics data for Starfield in a single click.
 
 ## Mod Page
 https://www.nexusmods.com/starfield/mods/4360
