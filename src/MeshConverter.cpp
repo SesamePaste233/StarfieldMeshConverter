@@ -149,6 +149,49 @@ uint32_t CreateNif(const char* json_data, const char* output_file, const char* a
 	return 0;
 }
 
+uint32_t EditNifBSGeometries(const char* base_nif_path, const char* json_data, const char* output_file, const char* assets_folder, bool edit_mat_path) {
+	nif::NifIO base_nif;
+	base_nif.SetAssetsPath(assets_folder);
+		
+	base_nif.Deserialize(base_nif_path);
+
+	nif::NifIO nif;
+	nif.SetAssetsPath(assets_folder);
+
+	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
+
+	nlohmann::json jsonData = nlohmann::json::parse(json_data);
+
+	auto rtti = temp->Deserialize(jsonData);
+
+	if (rtti == nif::ni_template::RTTI::None) {
+		std::cerr << "Failed to deserialize json to template." << std::endl;
+		return 10; // Return an error code
+	}
+	else {
+		std::cout << "Template deserialized to template RTTI: " << (uint32_t)rtti << std::endl;
+	}
+
+	if (!nif.FromTemplate(nif::ni_template::slice_cast(temp, rtti))) {
+		std::cerr << "Failed to convert template to nif." << std::endl;
+		return 11; // Return an error code
+	}
+
+	if (!base_nif.MergeAllBSGeometryAdditive(nif, edit_mat_path)) {
+		std::cerr << "Failed to edit nif geometries." << std::endl;
+		return 16; // Return an error code
+	}
+
+	if (!base_nif.Serialize(output_file)) {
+		std::cerr << "Failed to save nif to file." << std::endl;
+		return 12; // Return an error code
+	}
+
+	std::cout << "Nif serialized to " << output_file << std::endl;
+
+	return 0;
+}
+
 const char* ImportNif(const char* input_file, bool export_havok_readable, const char* readable_filepath)
 {
 	nif::NifIO nif;

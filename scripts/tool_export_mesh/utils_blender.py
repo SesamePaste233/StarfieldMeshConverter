@@ -62,6 +62,15 @@ def _update_path(utils_p):
 	utils_path = bpy.path.abspath(utils_p)
 	return utils_path
 
+def SetBSGeometryName(obj:bpy.types.Object, name:str):
+	obj['BSGeometry_Name'] = name
+
+def GetBSGeometryName(obj:bpy.types.Object):
+	if 'BSGeometry_Name' in obj.keys():
+		return obj['BSGeometry_Name']
+	else:
+		return obj.name
+
 def SetSelectObjects(objs):
 	original_selected = bpy.context.selected_objects
 	bpy.ops.object.select_all(action='DESELECT')
@@ -159,8 +168,94 @@ def ClearEmptyVertexGroups(obj:bpy.types.Object, vertex_groups:list[str] = None)
 
 	bm.free()
 
+def HomographyWarp(mesh_obj:bpy.types.Object, source_pts, target_pts, mask_vg_name = None, invert_mask = False, as_shape_key = False, shape_key_name = 'HOMOGRAPHY_WARP'):
+	'''
+	Warp the mesh using homography transformation.
+	:param mesh_obj: The mesh object to warp.
+	:param source_pts: The source points.
+	:param target_pts: The target points.
+	:param mask_vg_name: The vertex group name to mask the warping.
+	'''
+	# If has this shape key, remove it
+	if as_shape_key and shape_key_name in [sk.name for sk in mesh_obj.data.shape_keys.key_blocks]:
+		mesh_obj.shape_key_remove(mesh_obj.data.shape_keys.key_blocks[shape_key_name])
 
-def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False, combine_mode = 'ADD'):
+	matrix_world = np.array(mesh_obj.matrix_world)
+	matrix_world_inv = np.linalg.inv(matrix_world)
+
+	mask_vg_index = None
+	if mask_vg_name != None:
+		if mask_vg_name not in [vg.name for vg in mesh_obj.vertex_groups]:
+			print(f"Vertex group {mask_vg_name} does not exist in the object.")
+		else:
+			mask_vg_index = mesh_obj.vertex_groups[mask_vg_name].index
+
+	# Use bmesh to triangulate the mesh
+	bm = bmesh.new()
+	bm.from_mesh(mesh_obj.data)
+
+	deform_layer = bm.verts.layers.deform.active
+
+	if mask_vg_index != None:
+		if invert_mask:
+			mask_vg_verts = [(v, 1 - v[deform_layer][mask_vg_index]) if mask_vg_index in v[deform_layer].keys() else (v, 1) for v in bm.verts]
+		else:
+			mask_vg_verts = [(v, v[deform_layer][mask_vg_index]) for v in bm.verts if mask_vg_index in v[deform_layer].keys()]
+	else:
+		mask_vg_verts = [(v, 1) for v in bm.verts]
+
+	# Get the homography matrix
+	H = utils_math.estimate_homography_3d(np.array(source_pts), np.array(target_pts))
+
+	# Warp the mesh
+	vertices = np.array([v.co for v, _ in mask_vg_verts])
+	weights = np.array([weight for _, weight in mask_vg_verts])
+
+	# Convert to homogeneous coordinates
+	vertices_homogeneous = np.hstack((vertices, np.ones((vertices.shape[0], 1))))
+
+	# Apply the world transformation
+	transformed_vertices = (matrix_world @ vertices_homogeneous.T)
+
+	# Apply the homography transformation
+	transformed_vertices_homography = (H @ transformed_vertices).T
+
+	# Normalize the coordinates to convert back to 3D
+	transformed_vertices_homography /= transformed_vertices_homography[:, 3][:, np.newaxis]
+
+	# Apply the inverse world transformation
+	final_transformed_vertices = (matrix_world_inv @ transformed_vertices_homography.T).T
+
+	# Linear interpolation between the original and transformed positions
+	interpolated_vertices = (1 - weights)[:, np.newaxis] * vertices + weights[:, np.newaxis] * final_transformed_vertices[:, :3]
+
+	for i, (v, _) in enumerate(mask_vg_verts):
+		v.co = interpolated_vertices[i, :3]
+
+	if not as_shape_key:
+		bm.to_mesh(mesh_obj.data)
+	else:
+		# Create a shape key
+		# If no basis shape key, create one
+		if mesh_obj.data.shape_keys == None:
+			mesh_obj.shape_key_add(name='Basis')
+		shape_key = mesh_obj.shape_key_add(name=shape_key_name)
+		shape_key.data.foreach_set('co', [co for v in bm.verts for co in v.co])
+		shape_key.value = 1
+	bm.free()
+
+def HomographyWarpFromBoxes(mesh_obj:bpy.types.Object, source_box:bpy.types.Object, target_box:bpy.types.Object, mask_vg_name = None, invert_mask = False, as_shape_key = False, shape_key_name = 'HOMOGRAPHY_WARP'):
+	# Make sure the boxes have the same number of vertices (8)
+	if len(source_box.data.vertices) != len(target_box.data.vertices) or len(source_box.data.vertices) != 8:
+		print("Boxes must have the same number of vertices which is 8.")
+		return
+	
+	source_pts = [source_box.matrix_world @ v.co for v in source_box.data.vertices]
+	target_pts = [target_box.matrix_world @ v.co for v in target_box.data.vertices]
+
+	HomographyWarp(mesh_obj, source_pts, target_pts, mask_vg_name, invert_mask, as_shape_key, shape_key_name)
+
+def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False, skip_if_not_exist = True, combine_mode = 'ADD'):
 	if len(vertex_groups) == 0:
 		print("No vertex groups to combine.")
 		return
@@ -175,9 +270,16 @@ def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:
 	# Check if all vertex groups exist
 	for vg_name in vertex_groups:
 		if vg_name not in [vg.name for vg in obj.vertex_groups]:
-			print(f"Vertex group {vg_name} does not exist in the object.")
-			return
-		
+			if skip_if_not_exist:
+				vertex_groups.remove(vg_name)
+			else:
+				print(f"Vertex group {vg_name} does not exist in the object.")
+				return
+	
+	if len(vertex_groups) == 0:
+		print("No vertex groups to combine.")
+		return
+
 	combine_vg_index = combined_vg.index
 	vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
 		

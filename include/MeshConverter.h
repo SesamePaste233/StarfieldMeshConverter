@@ -31,6 +31,8 @@ extern "C" {
 
 	DLL uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder);
 
+	DLL uint32_t EditNifBSGeometries(const char* base_nif, const char* json_data, const char* output_file, const char* assets_folder, bool edit_mat_path);
+
 	DLL const char* ImportNif(const char* input_file, bool export_havok_readable, const char* readable_filepath);
 
 	DLL uint32_t ComposePhysicsData(const char* json_data, uint32_t platform, const char* transcript_path, const char* output_file, bool export_readable);

@@ -457,6 +457,176 @@ mesh::MeshIO* nif::NifIO::GetMesh(const std::string& mesh_factory_path) const
 	return reader;
 }
 
+bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::BSGeometry* geometry_node, std::string target_geometry_name, bool edit_mat_path)
+{
+	auto target_geometry_candidates = GetRTTIBlocks(nif::NiRTTI::BSGeometry, true, target_geometry_name);
+
+	if (target_geometry_candidates.empty()) {
+		std::cout << "Target geometry not found" << std::endl;
+		return false;
+	}
+
+	for (auto target_geometry : target_geometry_candidates) {
+		auto bsgeo = dynamic_cast<nif::BSGeometry*>(target_geometry);
+		std::memcpy(bsgeo->translation, geometry_node->translation, 3 * sizeof(float));
+		std::memcpy(bsgeo->rotation, geometry_node->rotation, 9 * sizeof(float));
+		bsgeo->scale = geometry_node->scale;
+		std::memcpy(bsgeo->center, geometry_node->center, 3 * sizeof(float));
+		bsgeo->radius = geometry_node->radius;
+		std::memcpy(bsgeo->bbox_center_expand, geometry_node->bbox_center_expand, 6 * sizeof(float));
+
+		if (geometry_node->_use_internal_geom_data()) {
+			bsgeo->_set_use_internal_geom_data(true);
+		}
+
+		bsgeo->meshes.clear();
+		bsgeo->meshes.insert(bsgeo->meshes.end(), geometry_node->meshes.begin(), geometry_node->meshes.end());
+
+		bool light_shader_properties_valid = true;
+		auto src_light_shader_properties = src_nif.GetReferencedBlocks(geometry_node, nif::NiRTTI::BSLightingShaderProperty);
+		auto light_shader_properties = GetReferencedBlocks(bsgeo, nif::NiRTTI::BSLightingShaderProperty);
+		if (src_light_shader_properties.size() != 1) {
+			std::cout << "Invalid source nif. Expect one BSLightingShaderProperty node for BSGeometry: " << string_manager.GetString(geometry_node->name_index) << ". Got: " << src_light_shader_properties.size() << std::endl;
+			light_shader_properties_valid = false;
+		}
+		if (light_shader_properties.size() != 1) {
+			std::cout << "Invalid base nif. Expect one BSLightingShaderProperty node for BSGeometry: "<< string_manager.GetString(bsgeo->name_index) << ". Got: "<< light_shader_properties.size() << std::endl;
+			light_shader_properties_valid = false;
+		}
+
+		if (light_shader_properties_valid) {
+			auto light_shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(light_shader_properties[0]);
+			auto src_light_shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(src_light_shader_properties[0]);
+
+			std::string src_mat_path = src_nif.string_manager.GetString(src_light_shader_property->name_index);
+
+			light_shader_property->name_index = string_manager.AddString(src_mat_path, block_manager.FindBlock(light_shader_property));
+
+			string_manager.PurgeStrings();
+		}
+
+		bool material_id_valid = true;
+		auto source_material_id_candidates = src_nif.GetReferencedBlocks(geometry_node, nif::NiRTTI::NiIntegerExtraData, true, "MaterialID");
+		auto target_material_id_candidates = GetReferencedBlocks(bsgeo, nif::NiRTTI::NiIntegerExtraData, true, "MaterialID");
+		if (source_material_id_candidates.size() != 1) {
+			std::cout << "Invalid source nif. Expect one NiIntegerExtraData \"MaterialID\" node for BSGeometry: " << string_manager.GetString(geometry_node->name_index) << ". Got: " << source_material_id_candidates.size() << std::endl;
+			material_id_valid = false;
+		}
+		if (target_material_id_candidates.size() != 1) {
+			std::cout << "Invalid base nif. Expect one NiIntegerExtraData \"MaterialID\" node for BSGeometry: " << string_manager.GetString(bsgeo->name_index) << ". Got: " << target_material_id_candidates.size() << std::endl;
+			material_id_valid = false;
+		}
+
+		if (material_id_valid && edit_mat_path) {
+			auto src_material_id = dynamic_cast<nif::NiIntegerExtraData*>(source_material_id_candidates[0]);
+			auto target_material_id = dynamic_cast<nif::NiIntegerExtraData*>(target_material_id_candidates[0]);
+
+			target_material_id->data = src_material_id->data;
+		}
+
+		bool skin_instance_valid = false;
+		auto source_skin_instance_candidates = src_nif.GetReferencedBlocks(geometry_node, nif::NiRTTI::BSSkinInstance);
+		nif::BSSkin::Instance* skin_instance = nullptr;
+		nif::BSSkin::BoneData* bone_data = nullptr;
+
+		if (source_skin_instance_candidates.size() == 1) {
+			skin_instance = dynamic_cast<nif::BSSkin::Instance*>(source_skin_instance_candidates[0]);
+			auto source_bone_data = src_nif.GetReferencedBlocks(skin_instance, nif::NiRTTI::BSSkinBoneData);
+			if (source_bone_data.size() != 1) {
+				std::cout << "Invalid source nif. Expect one BSSkinBoneData node for BSSkinInstance: " << string_manager.GetString(skin_instance->name_index) << ". Got: " << source_bone_data.size() << std::endl;
+				skin_instance_valid = false;
+			}
+			else {
+				bone_data = dynamic_cast<nif::BSSkin::BoneData*>(source_bone_data[0]);
+				skin_instance_valid = true;
+			}
+		}
+		if (skin_instance_valid) {
+			auto target_skin_instance_candidates = GetReferencedBlocks(bsgeo, nif::NiRTTI::BSSkinInstance);
+			if (target_skin_instance_candidates.size() == 1) {
+				auto target_skin_instance = dynamic_cast<nif::BSSkin::Instance*>(target_skin_instance_candidates[0]);
+				target_skin_instance->num_bone_attachs = skin_instance->num_bone_attachs;
+				target_skin_instance->bone_attach_refs.resize(skin_instance->num_bone_attachs);//TODO
+
+				auto target_bone_data_candidates = GetReferencedBlocks(target_skin_instance, nif::NiRTTI::BSSkinBoneData);
+				if (target_bone_data_candidates.size() == 1) {
+					auto target_bone_data = dynamic_cast<nif::BSSkin::BoneData*>(target_bone_data_candidates[0]);
+					target_bone_data->num_bone_infos = bone_data->num_bone_infos;
+					target_bone_data->bone_infos.resize(bone_data->num_bone_infos);
+					std::memcpy(target_bone_data->bone_infos.data(), bone_data->bone_infos.data(), bone_data->num_bone_infos * sizeof(nif::BSSkin::BoneData::BoneInfo));
+				}
+			}
+			else if (target_skin_instance_candidates.size() == 0) {
+				std::cout << "Appending skin instance for BSGeometry: " << string_manager.GetString(bsgeo->name_index) << std::endl;
+				auto target_skin_instance = dynamic_cast<nif::BSSkin::Instance*>(AddBlock(nif::NiRTTI::BSSkinInstance));
+				auto target_bone_data = dynamic_cast<nif::BSSkin::BoneData*>(AddBlock(nif::NiRTTI::BSSkinBoneData));
+
+				target_skin_instance->skeleton_root = block_manager.FindBlock(this->GetRootNode());
+				target_skin_instance->bone_data = block_manager.FindBlock(target_bone_data);
+				target_skin_instance->num_bone_attachs = skin_instance->num_bone_attachs;
+				target_skin_instance->bone_attach_refs.resize(skin_instance->num_bone_attachs);//TODO
+
+				target_bone_data->num_bone_infos = bone_data->num_bone_infos;
+				target_bone_data->bone_infos.resize(bone_data->num_bone_infos);
+				std::memcpy(target_bone_data->bone_infos.data(), bone_data->bone_infos.data(), bone_data->num_bone_infos * sizeof(nif::BSSkin::BoneData::BoneInfo));
+				
+				bsgeo->skin_instance = block_manager.FindBlock(target_skin_instance);
+			}
+		}
+
+		bool skin_attach_valid = false;
+		auto source_skin_attach_candidates = src_nif.GetReferencedBlocks(geometry_node, nif::NiRTTI::SkinAttach, true, "SkinBMP");
+		nif::SkinAttach* skin_attach = nullptr;
+		if (source_skin_attach_candidates.size() == 1) {
+			skin_attach = dynamic_cast<nif::SkinAttach*>(source_skin_attach_candidates[0]);
+			skin_attach_valid = true;
+		}
+		if (skin_attach_valid) {
+			auto target_skin_attach_candidates = GetReferencedBlocks(bsgeo, nif::NiRTTI::SkinAttach, true, "SkinBMP");
+			if (target_skin_attach_candidates.size() == 1) {
+				auto target_skin_attach = dynamic_cast<nif::SkinAttach*>(target_skin_attach_candidates[0]);
+				target_skin_attach->num_bone_names = skin_attach->num_bone_names;
+				target_skin_attach->bone_names.clear();
+				target_skin_attach->bone_names.insert(target_skin_attach->bone_names.end(), skin_attach->bone_names.begin(), skin_attach->bone_names.end());
+			}
+			else if (target_skin_attach_candidates.size() == 0) {
+				std::cout << "Appending skin attach for BSGeometry: " << string_manager.GetString(bsgeo->name_index) << std::endl;
+				auto target_skin_attach = dynamic_cast<nif::SkinAttach*>(AddBlock(nif::NiRTTI::SkinAttach, "SkinBMP"));
+
+				target_skin_attach->num_bone_names = skin_attach->num_bone_names;
+				target_skin_attach->bone_names.clear();
+				target_skin_attach->bone_names.insert(target_skin_attach->bone_names.end(), skin_attach->bone_names.begin(), skin_attach->bone_names.end());
+
+				bsgeo->AddExtraData(block_manager.FindBlock(target_skin_attach));
+			}
+			
+		}
+	}
+
+	return true;
+}
+
+bool nif::NifIO::MergeAllBSGeometryAdditive(const nif::NifIO& src_nif, bool edit_mat_path, bool skip_if_fail)
+{
+	auto geometries = src_nif.GetRTTIBlocks(nif::NiRTTI::BSGeometry);
+
+	for (auto geometry : geometries) {
+		auto bsgeo = dynamic_cast<nif::BSGeometry*>(geometry);
+		auto name = src_nif.string_manager.GetString(bsgeo->name_index);
+		bool rtn = MergeBSGeometryAdditive(src_nif, bsgeo, name, edit_mat_path);
+		if (!rtn) {
+			std::cout << "Failed to merge geometry: " << name << std::endl;
+			if (skip_if_fail) {
+				continue;
+			}
+			else {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 uint32_t nif::NifIO::NiStringManager::AddString(const std::string& str, const uint32_t& who)
 {
 	auto id = FindString(str);
@@ -518,6 +688,53 @@ void nif::NifIO::NiStringManager::MoveString(const std::vector<uint32_t> new_ord
 
 	std::swap(header->strings, new_strings);
 	std::swap(refs, new_refs);
+}
+
+void nif::NifIO::NiStringManager::PurgeStrings()
+{
+	std::vector<uint32_t> str_indices_to_remove;
+	for (uint32_t i = 0; i < header->num_strings; i++) {
+		if (refs[i].empty()) {
+			str_indices_to_remove.push_back(i);
+		}
+	}
+
+	RemoveStrings(str_indices_to_remove);
+}
+
+void nif::NifIO::NiStringManager::RemoveStrings(const std::vector<uint32_t> indices)
+{
+	std::vector<uint32_t> new_order;
+	for (uint32_t i = 0; i < header->num_strings; i++) {
+		if (std::find(indices.begin(), indices.end(), i) == indices.end()) {
+			new_order.push_back(i);
+		}
+	}
+	new_order.insert(new_order.end(), indices.begin(), indices.end());
+
+	MoveString(new_order);
+
+	for (auto index : indices) {
+		for (auto referee : refs[index]) {
+			nif->blocks[referee]->UpdateStrings(index, nif::NiNodeBase::NO_REF);
+		}
+	}
+
+	header->strings.resize(header->num_strings - indices.size());
+	header->num_strings = header->strings.size();
+	for (auto index : indices) {
+		refs.erase(index);
+	}
+}
+
+uint32_t nif::NifIO::NiStringManager::ReplaceString(const uint32_t index, const std::string& str)
+{
+	if (index >= header->num_strings)
+		return nif::NiNodeBase::NO_REF;
+
+	header->strings[index] = str;
+
+	return index;
 }
 
 uint32_t nif::NifIO::NiBlockManager::RegisterBlock(nif::NiNodeBase* block)
@@ -1043,7 +1260,7 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 
 		skin_bonedata->num_bone_infos = num_bones;
 
-#ifndef _DEBUG
+//#ifndef _DEBUG
 		if (skin_info.request_recalc_bounding_sphere) {
 			auto mesh = nif.GetMesh(bsgeometry);
 			if (mesh == nullptr) {
@@ -1062,7 +1279,7 @@ bool nif::ni_template::NiSkinInstanceTemplate::ToNif(NifIO& nif)
 			}
 			delete mesh;
 		}
-#endif
+//#endif
 
 		skin_bonedata->bone_infos = skin_info.bone_infos;
 

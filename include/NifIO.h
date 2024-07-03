@@ -101,6 +101,12 @@ namespace nif {
 			uint32_t FindString(const std::string& str) const;
 
 			void MoveString(const std::vector<uint32_t> new_order);
+
+			void PurgeStrings();
+
+			void RemoveStrings(const std::vector<uint32_t> indices);
+
+			uint32_t ReplaceString(const uint32_t index, const std::string& str);
 		};
 
 		class NiBlockManager {
@@ -222,6 +228,10 @@ namespace nif {
 			}
 			return GetMesh(geometry_node->meshes[lod_index].mesh_path);
 		};
+
+		bool MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::BSGeometry* geometry_node, std::string target_geometry_name, bool edit_mat_path);
+		
+		bool MergeAllBSGeometryAdditive(const nif::NifIO& src_nif, bool edit_mat_path, bool skip_if_fail = true);
 
 		void DumpUnkBinary(const std::string& folder_path) const {
 			auto unknown_blocks = this->GetRTTIBlocks(NiRTTI::UnkBinaryBlock);

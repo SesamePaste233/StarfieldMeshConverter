@@ -13,6 +13,57 @@ using namespace DirectX;
 using namespace mesh;
 using namespace morph;
 
+int main() {
+	std::string assets_folder = "C:\\test";
+	std::string base_nif_path = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif";
+	std::string json_file = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif.json";
+	std::string output_file = "C:\\repo\\MeshConverter\\merge_debug.nif";
+	bool edit_mat_path = false;
+
+	nif::NifIO base_nif;
+	base_nif.SetAssetsPath(assets_folder);
+		
+	base_nif.Deserialize(base_nif_path);
+
+	nif::NifIO nif;
+	nif.SetAssetsPath(assets_folder);
+
+	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
+
+	std::ifstream file(json_file);
+	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	nlohmann::json jsonData = nlohmann::json::parse(json_data);
+
+	auto rtti = temp->Deserialize(jsonData);
+
+	if (rtti == nif::ni_template::RTTI::None) {
+		std::cerr << "Failed to deserialize json to template." << std::endl;
+		return 10; // Return an error code
+	}
+	else {
+		std::cout << "Template deserialized to template RTTI: " << (uint32_t)rtti << std::endl;
+	}
+
+	if (!nif.FromTemplate(nif::ni_template::slice_cast(temp, rtti))) {
+		std::cerr << "Failed to convert template to nif." << std::endl;
+		return 11; // Return an error code
+	}
+
+	if (!base_nif.MergeAllBSGeometryAdditive(nif, edit_mat_path)) {
+		std::cerr << "Failed to edit nif geometries." << std::endl;
+		return 16; // Return an error code
+	}
+
+	if (!base_nif.Serialize(output_file)) {
+		std::cerr << "Failed to save nif to file." << std::endl;
+		return 12; // Return an error code
+	}
+
+	std::cout << "Nif serialized to " << output_file << std::endl;
+
+	return 0;
+}
+
 int main1(int argc, char* argv[]){
 	// Check if the user provided the correct number of command-line arguments
 	if (argc != 4) {
@@ -68,38 +119,6 @@ int __main(int argc, char* argv[]) {
 	std::cout << "Json loaded from " << inputMorph << " and serialized to " << outputName << std::endl;
 	return 0;
 }
-
-//int main(int argc, char* argv[]) {
-//	// Check the first command-line argument
-//	if (argc < 2) {
-//		std::cerr << "Usage: " << argv[0] << " -blender|-mesh ..." << std::endl;
-//		return 1; // Return an error code
-//	}
-//
-//	// Check if the user wants to convert from Blender to Mesh
-//	if (strcmp(argv[1], "-game") == 0 || strcmp(argv[1], "-g") == 0) {
-//		std::cout << "Converting from Blender to Mesh" << std::endl;
-//		return blenderToMesh(argc, argv);
-//	}
-//
-//	// Check if the user wants to convert from Mesh to Blender
-//	if (strcmp(argv[1], "-blender") == 0 || strcmp(argv[1], "-b") == 0) {
-//		std::cout << "Converting from Mesh to Blender" << std::endl;
-//		return meshToBlender(argc, argv);
-//	}
-//
-//	if (strcmp(argv[1], "-blender_morph") == 0 || strcmp(argv[1], "-bm") == 0) {
-//		std::cout << "Converting from Morph to Blender" << std::endl;
-//		return morphToBlender(argc, argv);
-//	}
-//
-//	if (strcmp(argv[1], "-game_morph") == 0 || strcmp(argv[1], "-gm") == 0) {
-//		std::cout << "Converting from Blender to Morph" << std::endl;
-//		return blenderToMorph(argc, argv);
-//	}
-//
-//	return 0; // Return success
-//}
 
 void importnif_main() {
 	nif::NifIO nif;
@@ -349,7 +368,7 @@ void phnifmain() {
 	//}
 }
 
-int main() {
+int nifmain() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();

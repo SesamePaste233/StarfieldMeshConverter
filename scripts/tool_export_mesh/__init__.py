@@ -1,6 +1,8 @@
 import bpy
+from bpy_extras.io_utils import ImportHelper
 import os
 import sys
+import re
 
 dir = os.path.dirname(os.path.realpath(__file__))
 if dir not in sys.path:
@@ -101,6 +103,13 @@ class ExportCustomMesh(bpy.types.Operator):
 		description=export_items[3][2],
 		default=True
 	)
+
+	use_secondary_uv: bpy.props.BoolProperty(
+		name="Use Secondary UV",
+		description="Use the topmost non-active UV map (if possible) as secondary UV",
+		default=False
+	)
+
 	export_morph: bpy.props.BoolProperty(
 		name="Export morph data (if any)",
 		description="Export shape keys as morph keys",
@@ -197,10 +206,68 @@ class ImportCustomMesh(bpy.types.Operator):
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 
-class ImportCustomNif(bpy.types.Operator):
+
+def re_filter_update(self, context):
+	self.re_nif_file_list.clear()
+	self.re_nif_file_list_index = 0
+	self.apply_filter = False
+
+def apply_filter_update(self, context):
+	self.re_nif_file_list.clear()
+	directory = self.directory
+	max_num_scanned_files = self.max_num_scanned_files
+	max_num_selected_files = self.max_num_selected_files
+	print(directory, self.re_filter, self.negative_re_filter, self.apply_filter)
+	if self.apply_filter == True and self.re_filter != "" and directory != "": # Apply regular expression filter
+		# Get all files under the directory
+		
+		pattern = re.compile(self.re_filter, sum([getattr(re, flag) for flag in self.re_flags]))
+		negative_pattern = re.compile(self.negative_re_filter, sum([getattr(re, flag) for flag in self.negative_re_flags]))
+
+		num_scanned_files = 0
+		for root, d, f in os.walk(directory):
+			for file in f:
+				if not file.endswith('.nif'):
+					continue
+				if num_scanned_files >= max_num_scanned_files:
+					break
+				if pattern.match(file) is not None and negative_pattern.match(file) is None:
+					nif_path = os.path.join(root, file)
+					nif_file = self.re_nif_file_list.add()
+					nif_file.path = nif_path
+					nif_file.nif_name = os.path.splitext(file)[0]
+					nif_file.enabled = True
+				if len(self.re_nif_file_list) >= max_num_selected_files:
+					break
+				num_scanned_files += 1
+			
+			if num_scanned_files >= max_num_scanned_files:
+				print('WARNING', f"Scanned {max_num_scanned_files} files. The current directory has too many files!")
+				break
+			if len(self.re_nif_file_list) >= max_num_selected_files:
+				print('WARNING', f"Selected {max_num_selected_files} files. Please refine your regular expression filter.")
+				break
+
+		print('INFO', f"Scanned {num_scanned_files} files. Selected {len(self.re_nif_file_list)} files.")
+
+class SGB_UL_FileListItems(bpy.types.UIList):
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+		row = layout.row()
+		row.prop(item, "nif_name", text="", emboss=False)
+		row.prop(item, 'enabled', text="")
+
+class ImportNifFileList(bpy.types.PropertyGroup):
+	path: bpy.props.StringProperty(name="Nif Path", default="")
+	nif_name: bpy.props.StringProperty(name="Nif Name", default="")
+	enabled: bpy.props.BoolProperty(default=True)
+
+class ImportCustomNif(bpy.types.Operator, ImportHelper):
 	bl_idname = "import_scene.custom_nif"
 	bl_label = "Import Custom Nif"
 	
+	filename_ext = "."
+	use_filter_folder = True
+
 	def get_skeleton_names(self, context):
 		nif_armature.LoadAllSkeletonLookup()
 		skel_names = nif_armature.GetAvailableSkeletonNames()
@@ -280,10 +347,124 @@ class ImportCustomNif(bpy.types.Operator):
         subtype='DIR_PATH',
     )
 
+	re_filter: bpy.props.StringProperty(
+		name="Regular Expression Filter",
+		description="Apply a regular expression filter to the files under current directory.",
+		default="",
+		update=re_filter_update
+	)
+
+	negative_re_filter: bpy.props.StringProperty(
+		name="Negative Regular Expression Filter",
+		description="Apply a negative regular expression filter to the files under current directory.",
+		default="",
+		update=re_filter_update
+	)
+
+	re_flags: bpy.props.EnumProperty(
+		name="Regular Expression Flags",
+		description="Regular Expression Flags",
+		items=(
+			('IGNORECASE', "Ignore Case", "Ignore case."),
+			('MULTILINE', "Multiline", "Multiline."),
+			('DOTALL', "Dot All", "Dot All."),
+			('VERBOSE', "Verbose", "Verbose."),
+			('UNICODE', "Unicode", "Unicode."),
+			('LOCALE', "Locale", "Locale."),
+			('ASCII', "ASCII", "ASCII."),
+		),
+		default=set(),
+		options={'ENUM_FLAG'}
+	)
+
+	negative_re_flags: bpy.props.EnumProperty(
+		name="Negative Regular Expression Flags",
+		description="Negative Regular Expression Flags",
+		items=(
+			('IGNORECASE', "Ignore Case", "Ignore case."),
+			('MULTILINE', "Multiline", "Multiline."),
+			('DOTALL', "Dot All", "Dot All."),
+			('VERBOSE', "Verbose", "Verbose."),
+			('UNICODE', "Unicode", "Unicode."),
+			('LOCALE', "Locale", "Locale."),
+			('ASCII', "ASCII", "ASCII."),
+		),
+		default=set(),
+		options={'ENUM_FLAG'}
+	)
+
+	apply_filter: bpy.props.BoolProperty(
+		name="Apply Regular Expression",
+		description="Apply RE and Show the files that match the regular expression filter.",
+		default=False,
+		update=apply_filter_update
+	)
+
+	re_nif_file_list: bpy.props.CollectionProperty(
+        type=ImportNifFileList
+    )
+
+	re_nif_file_list_index: bpy.props.IntProperty(
+		default=0
+	)
+
+	max_num_scanned_files:bpy.props.IntProperty(
+		default=10000
+	)
+
+	max_num_selected_files:bpy.props.IntProperty(
+		default=64
+	)
+
+	def draw(self, context):
+		layout = self.layout
+		layout.prop(self, "assets_folder")
+		layout.prop(self, "skeleton_name")
+		layout.prop(self, "correct_rotation")
+		layout.prop(self, "max_lod")
+		layout.prop(self, "import_as_read_only")
+
+		layout.label(text="Debug Options:")
+		layout.prop(self, "debug_havok_physics")
+		layout.prop(self, "boneinfo_debug")
+		layout.prop(self, "meshlets_debug")
+		layout.prop(self, "culldata_debug")
+		layout.prop(self, "tangents_debug")
+		layout.prop(self, "geo_bounding_debug")
+
+		layout.label(text="Batch Import:")
+		layout.prop(self, "re_filter")
+		layout.prop(self, "re_flags")
+
+		layout.prop(self, "negative_re_filter")
+		layout.prop(self, "negative_re_flags")
+
+		layout.prop(self, "max_num_scanned_files", text="Max Scanned Files")
+		layout.prop(self, "max_num_selected_files", text="Max Selected Files")
+
+		row = layout.row(align=True)
+		row.prop(self, "apply_filter", text=f"Apply Filter (Count: {len(self.re_nif_file_list)})")
+		col = layout.column(align=True)
+		col.enabled = self.apply_filter
+		col.template_list(
+			listtype_name="SGB_UL_FileListItems",
+			list_id="", 
+			dataptr=self, 
+			propname="re_nif_file_list", 
+			active_dataptr=self, 
+			active_propname="re_nif_file_list_index", 
+			rows=5
+		)
+
 	def execute(self, context):
+		if self.apply_filter == True:
+			files = [file.path for file in self.re_nif_file_list if file.enabled == True]
+		else:
+			files = [file.name for file in self.files]
+
 		skeleton_obj_dict = {}
-		for current_file in self.files:
-			filepath = os.path.join(self.directory, current_file.name)
+		for current_file in files:
+			filepath = os.path.join(self.directory, current_file)
 			rtn, skel, objs = NifIO.ImportNif(filepath, self, context, self)
 			if 'CANCELLED' in rtn:
 				self.report({'WARNING'}, f'{current_file} failed to import.')
@@ -370,6 +551,13 @@ class ExportCustomNif(bpy.types.Operator):
 		description=export_items[3][2],
 		default=True
 	)
+
+	use_secondary_uv: bpy.props.BoolProperty(
+		name="Use Secondary UV",
+		description="Use the topmost non-active UV map (if possible) as secondary UV",
+		default=False
+	)
+
 	export_morph: bpy.props.BoolProperty(
 		name="Export morph data (if any)",
 		description="Export shape keys as morph keys",
@@ -413,8 +601,59 @@ class ExportCustomNif(bpy.types.Operator):
 		default='None',
 	)
 
+	additive_export: bpy.props.EnumProperty(
+		name="Base Nif from",
+		description="Modify only the BSGeometry nodes in imported nif if the selected ExportScene node is from nif import. May raise errors if the number and names of models don't match.",
+		items=(('None', "Disable", "Export the model as-is."),
+			   ('Selected', "Selected", "Overwrite selected file if applicable."),
+			   ('Root', "Root", "Overwrite nif file from Import_Nif_Path property of the root node."),
+			   ),
+		default='None',
+	)
+
+	overwrite_material_paths: bpy.props.BoolProperty(
+		name="Overwrite Material Paths",
+		description="Overwrite the material paths during additive export.",
+		default=False,
+	)
 
 	use_world_origin = False
+
+	def draw(self, context):
+		layout = self.layout
+		layout.prop(self, "export_template")
+		layout.prop(self, "mesh_scale")
+		layout.prop(self, "max_border")
+		layout.prop(self, "normalize_weights")
+
+		layout.label(text="Export Datatypes:") 
+		# Create a checkbox for each item
+		for item in export_items:
+			layout.prop(self, item[0], text=item[1])
+
+		layout.prop(self, "use_secondary_uv")
+		
+		# Draw a horizontal line
+		layout.separator()
+		layout.label(text="Additional Data:") 
+		layout.prop(self, "export_morph", text="Morph Data")
+		layout.prop(self, "physics_tree")
+		layout.prop(self, "export_material")
+		
+		layout.separator()
+		layout.label(text="Special Controls:") 
+		layout.prop(self, "use_internal_geom_data")
+		layout.prop(self, "is_head_object")
+		layout.prop(self, "export_sf_mesh_hash_result")
+
+		layout.separator()
+		layout.label(text="Additive Export:") 
+		layout.prop(self, "additive_export")
+		layout.prop(self, "overwrite_material_paths")
+
+		layout.separator()
+		layout.label(text="After Export:") 
+		layout.prop(self, "export_sf_mesh_open_folder")
 
 	def execute(self, context):
 		if self.is_head_object == "Auto":
@@ -729,6 +968,9 @@ def register():
 		default=False,
 	)
 
+	bpy.utils.register_class(SGB_UL_FileListItems)
+	bpy.utils.register_class(ImportNifFileList)
+
 	bpy.utils.register_class(ExportCustomMesh)
 	bpy.utils.register_class(ImportCustomMesh)
 	bpy.utils.register_class(ImportCustomNif)
@@ -760,12 +1002,16 @@ def unregister():
 	bpy.utils.unregister_class(ImportCustomMorph)
 	bpy.utils.unregister_class(ExportCustomMorph)
 	bpy.utils.unregister_class(ExportCustomNif)
+	bpy.types.unregister_class(SGB_UL_FileListItems)
+	bpy.types.unregister_class(ImportNifFileList)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
 	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
 	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_nif)
 	bpy.types.TOPBAR_MT_file_import.remove(menu_func_import_morph)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_morph)
 	bpy.types.TOPBAR_MT_file_export.remove(menu_func_export_nif)
+
+
 	del bpy.types.Scene.geometry_bridge_version
 	del bpy.types.Scene.export_mesh_folder_path
 	del bpy.types.Scene.assets_folder

@@ -203,7 +203,7 @@ namespace nif {
 
 		std::vector<MeshData> meshes;
 
-		size_t _size;
+		size_t _size = 0;
 
 		void Deserialize(std::istream& file) override;
 		void Serialize(std::ostream& file) override;

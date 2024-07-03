@@ -1,21 +1,22 @@
 import bpy
 import nif_armature
+import utils_blender
 
 def NifArmatureTemplate(armature_obj, bone_name_list:list, name_ignore_suffix = True):
 	mesh_data_list = []
 	nif_dict = nif_armature.CreateArmatureDict(armature_obj, bone_name_list)
 	return nif_dict
 
-def RootNodeTemplate(parent_obj, mesh_data_list, connect_pts, name_ignore_suffix = True):
+def RootNodeTemplate(parent_obj, mesh_data_list, connect_pts, ignore_suffix = True):
 	nif_dict = {}
-	if name_ignore_suffix:
-		p = parent_obj.name.rfind(".")
+	
+	name = utils_blender.GetBSGeometryName(parent_obj)
+	if ignore_suffix:
+		p = name.rfind(".")
 		if p != -1:
-			name = parent_obj.name[:p]
+			name = name[:p]
 		else:
-			name = parent_obj.name
-	else:
-		name = parent_obj.name
+			name = name
 
 	nif_dict['name'] = name
 	nif_dict['matrix'] = [[1 if i == j else 0 for i in range(4)] for j in range(4)]
@@ -44,7 +45,7 @@ def RootNodeTemplate(parent_obj, mesh_data_list, connect_pts, name_ignore_suffix
 			cpa_dict["scale"] = list(child_obj.scale)[0]
 			connect_pts.append(cpa_dict)
 		else:
-			nif_dict['children'].append(RootNodeTemplate(child_obj, mesh_data_list, connect_pts, name_ignore_suffix))
+			nif_dict['children'].append(RootNodeTemplate(child_obj, mesh_data_list, connect_pts, ignore_suffix))
 
 	return nif_dict
 

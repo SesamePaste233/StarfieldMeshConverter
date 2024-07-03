@@ -68,8 +68,10 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			imported_obj = utils_blender.GetActiveObject()
 			_objects.append(imported_obj)
 			_objects[-1].name = geo_name
+			utils_blender.SetBSGeometryName(_objects[-1], geo_name)
 			if options.max_lod > 1:
 				_objects[-1].name += f'_lod{lod}'
+				utils_blender.SetBSGeometryName(_objects[-1], geo_name + f'_lod{lod}')
 			imported_obj.data.materials.append(material)
 			loaded = True
 		
@@ -204,6 +206,8 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 	for child_dict in armature_dict['children']:
 		TraverseNodeRecursive(child_dict, Axis, collection, root_dict, options, additional_assets_folder, context, operator, nif_name, connect_pts)
 
+	return _objects
+
 def ImportNif(file_path, options, context, operator):
 	nif_armature.LoadAllSkeletonLookup()
 	ResetSkeletonObjDict()
@@ -257,7 +261,9 @@ def ImportNif(file_path, options, context, operator):
 		operator.report({'INFO'}, f'Nif has no geometry. Loaded as Armature.')
 		return {'FINISHED'}, None, None
 	else:
-		TraverseNodeRecursive(_data, None, prev_coll, _data, options, additional_assets_folders, context, operator, nifname + ' ' + nif_folder_name, connect_pts)
+		root_objs = TraverseNodeRecursive(_data, None, prev_coll, _data, options, additional_assets_folders, context, operator, nifname + ' ' + nif_folder_name, connect_pts)
+		root_objs[0]['Import_Nif_Path'] = file_path
+
 
 	operator.report({'INFO'}, f'Meshes loaded for {nifname}.')
 	
@@ -341,9 +347,12 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 	mode = "MULTI_MESH"
 	connect_pts = []
 	recur_bone_list = []
+	import_nif_path = None
 	if root.type == 'EMPTY':
 		mode = "MULTI_MESH"
 		_data = nif_template.RootNodeTemplate(root, geometries, connect_pts)
+		if 'Import_Nif_Path' in root.keys():
+			import_nif_path = root['Import_Nif_Path']
 	elif root.type == 'MESH':
 		mode = "SINGLE_MESH"
 		_data = nif_template.SingleClothTemplate(root, geometries, connect_pts)
@@ -541,7 +550,25 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 		with open(nif_filepath + '.json', 'w') as json_file:
 			json_file.write(json_data)
 
-	returncode = MeshConverter.CreateNifFromJson(json_data, nif_filepath, export_folder)
+	if options.additive_export == 'Root':
+		if import_nif_path == None:
+			operator.report({'WARNING'}, f'Either the root node is not from Nif Import or the Import_Nif_Path property is missing. Skipping...')
+			return {'CANCELLED'}
+		
+		# If import_nif_path is not a nif file or doesn't exist, return with error
+		if not import_nif_path.endswith('.nif') or not os.path.isfile(import_nif_path):
+			operator.report({'WARNING'}, f'Import_Nif_Path property from root node is not a valid nif file. Skipping...')
+			return {'CANCELLED'}
+
+		returncode = MeshConverter.EditNifBSGeometries(import_nif_path, json_data, nif_filepath, export_folder, options.overwrite_material_paths)
+	elif options.additive_export == 'Selected':
+		if not os.path.isfile(nif_filepath) or not nif_filepath.endswith('.nif'):
+			operator.report({'WARNING'}, f'You must select a nif file to enable Additive Export. Skipping...')
+			return {'CANCELLED'}
+		additive_nif_path = os.path.join(export_folder, nif_name + '_additive.nif')
+		returncode = MeshConverter.EditNifBSGeometries(nif_filepath, json_data, additive_nif_path, export_folder, options.overwrite_material_paths)
+	else:
+		returncode = MeshConverter.CreateNifFromJson(json_data, nif_filepath, export_folder)
 
 	if not returncode:
 		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")

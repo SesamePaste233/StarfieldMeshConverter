@@ -322,9 +322,9 @@ bool mesh::MeshIO::Serialize(std::ostream& file)
 
 		for (auto uv2 : this->UV_list2) {
 			auto u = utils::floatToHalf(uv2[0]);
-			auto _offset = utils::floatToHalf(uv2[1]);
+			auto v = utils::floatToHalf(uv2[1]);
 			utils::writeAsHex(file, u);
-			utils::writeAsHex(file, _offset);
+			utils::writeAsHex(file, v);
 		}
 	}
 	else {
@@ -521,6 +521,41 @@ bool MeshIO::GeometryFromJson(const json& jsonData, float scale_factor) {
 	else {
 		std::cout << "Error: 'uv_coords' is not an array." << std::endl;
 		return false;
+	}
+
+	if (jsonData.contains("uv_coords2")) {
+		const json& UVData2 = jsonData["uv_coords2"];
+
+		if (UVData2.is_array()) {
+			// Check if length of UVData is equal to the number of vertices
+			if (UVData2.size() > 0 && UVData2.size() != this->num_vertices) {
+				std::cout << "Error: Length of 'uv_coords2' is not equal to the number of vertices." << std::endl;
+				return false;
+			}
+
+			this->num_uv2 = UVData2.size();
+			for (const auto& uv : UVData2) {
+				if (uv.is_array()) {
+					if (uv.size() != 2) {
+						std::cout << "Error: Length of 'uv_coords2' is not equal to 2." << std::endl;
+						return false;
+					}
+
+					std::vector<float> uv_l;
+					for (const auto& element : uv) {
+						if (element.is_number()) {
+							float _uv = element;
+							uv_l.push_back(_uv);
+						}
+					}
+					this->UV_list2.push_back(uv_l);
+				}
+			}
+		}
+		else {
+			std::cout << "Error: 'uv_coords2' is not an array." << std::endl;
+			return false;
+		}
 	}
 
 	return true;

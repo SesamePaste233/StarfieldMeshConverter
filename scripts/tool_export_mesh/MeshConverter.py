@@ -21,6 +21,9 @@ _dll_import_nif = _dll.ImportNif
 _dll_import_nif.argtypes = [ctypes.c_char_p, ctypes.c_bool, ctypes.c_char_p]
 _dll_import_nif.restype = ctypes.c_char_p
 
+_dll_edit_nif_bsgeometries = _dll.EditNifBSGeometries
+_dll_edit_nif_bsgeometries.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
+
 _dll_import_mesh = _dll.ImportMesh
 _dll_import_mesh.argtypes = [ctypes.c_char_p]
 _dll_import_mesh.restype = ctypes.c_char_p
@@ -31,6 +34,7 @@ _dll_import_morph.restype = ctypes.c_char_p
 
 _dll_compose_physics_data = _dll.ComposePhysicsData
 _dll_compose_physics_data.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
+
 
 from enum import Enum
 
@@ -94,6 +98,8 @@ class DLLReturnCode():
                 return "Physics data build failed"
             case 15:
                 return "Failed to open output file"
+            case 16:
+                return "Failed to edit nif geometries"
             case _:
                 return "Unknown error"
 
@@ -107,6 +113,10 @@ def ExportMorphFromJson(json_data_string: str, output_file: str) -> DLLReturnCod
 
 def ExportEmptyMorphFromJson(num_vertices: int, output_file: str) -> DLLReturnCode:
     rtn = _dll_export_empty_morph(num_vertices, output_file.encode('utf-8'))
+    return DLLReturnCode(rtn)
+
+def EditNifBSGeometries(base_nif_path: str, json_data_string: str, output_file: str, assets_folder: str, edit_mat_path: bool = False) -> DLLReturnCode:
+    rtn = _dll_edit_nif_bsgeometries(base_nif_path.encode('utf-8'), json_data_string.encode('utf-8'), output_file.encode('utf-8'), assets_folder.encode('utf-8'), edit_mat_path)
     return DLLReturnCode(rtn)
 
 def ImportMeshAsJson(input_file: str) -> str:

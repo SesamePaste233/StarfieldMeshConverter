@@ -116,7 +116,19 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 		return {'CANCELLED'}, "There are floating verts in your model. Some verts don't belong to any faces.", None
 	
 	try:
+		first_uv_layer = selected_obj.data.uv_layers.active
+		second_uv_layer = None
+		if options.use_secondary_uv:
+			# Select the other uv layer that is not the first one
+			for uv_layer in selected_obj.data.uv_layers:
+				if uv_layer != first_uv_layer:
+					second_uv_layer = uv_layer
+					break
+			if second_uv_layer == None:
+				options.use_secondary_uv = False
 		data["uv_coords"] = [[] for _ in range(verts_count)]
+		if options.use_secondary_uv:
+			data["uv_coords2"] = [[] for _ in range(verts_count)]
 		Tangents = [np.array([0,0,0]) for _ in range(verts_count)]
 		Normals = [np.array([0,0,0]) for _ in range(verts_count)]
 		Bitangent_sign = [1 for _ in range(verts_count)]
@@ -125,8 +137,11 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 		
 		for face in selected_obj.data.polygons:
 			for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-				uv_coords = selected_obj.data.uv_layers.active.data[loop_idx].uv
+				uv_coords = first_uv_layer.data[loop_idx].uv
 				data["uv_coords"][vert_idx] = [uv_coords[0],1 - uv_coords[1]]
+				if options.use_secondary_uv:
+					uv_coords2 = second_uv_layer.data[loop_idx].uv
+					data["uv_coords2"][vert_idx] = [uv_coords2[0],1 - uv_coords2[1]]
 
 				Bitangent_sign[vert_idx] = selected_obj.data.loops[loop_idx].bitangent_sign 
 				Tangents[vert_idx] = np.array(selected_obj.data.loops[loop_idx].tangent) + Tangents[vert_idx]
@@ -293,11 +308,11 @@ def MeshFromJson(json_data, options, context, operator, mesh_name_override = Non
 		if len(data["uv_coords2"]) != len(mesh.vertices):
 			operator.report({'WARNING'}, f"UV2 data mismatched. Contact the author for assistance.")
 			return {'CANCELLED'}
-		uv_layer2 = bm.loops.layers.uv.new("UV2")
+		uv_layer2 = obj.data.uv_layers.new(name="UV2")
 		for f in bm.faces:
 			for vert_idx, loop_idx in zip(f.verts, f.loops):
 				uv_coords = data["uv_coords2"][vert_idx.index]
-				bm.loops[loop_idx][uv_layer2].uv = (uv_coords[0],1 - uv_coords[1])
+				uv_layer2[loop_idx].uv = (uv_coords[0],1 - uv_coords[1])
 
 	if len(data["vertex_weights"]) > 0:
 		if len(bm.verts) != len(data["vertex_weights"]):
