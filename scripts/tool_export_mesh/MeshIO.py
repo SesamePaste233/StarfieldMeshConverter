@@ -116,6 +116,9 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 		return {'CANCELLED'}, "There are floating verts in your model. Some verts don't belong to any faces.", None
 	
 	try:
+		selected_obj.data.calc_tangents()
+		selected_obj.data.calc_normals_split()
+
 		first_uv_layer = selected_obj.data.uv_layers.active
 		second_uv_layer = None
 		if options.use_secondary_uv:
@@ -126,14 +129,13 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 					break
 			if second_uv_layer == None:
 				options.use_secondary_uv = False
+				
 		data["uv_coords"] = [[] for _ in range(verts_count)]
 		if options.use_secondary_uv:
 			data["uv_coords2"] = [[] for _ in range(verts_count)]
 		Tangents = [np.array([0,0,0]) for _ in range(verts_count)]
 		Normals = [np.array([0,0,0]) for _ in range(verts_count)]
 		Bitangent_sign = [1 for _ in range(verts_count)]
-		selected_obj.data.calc_tangents()
-		selected_obj.data.calc_normals_split()
 		
 		for face in selected_obj.data.polygons:
 			for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
