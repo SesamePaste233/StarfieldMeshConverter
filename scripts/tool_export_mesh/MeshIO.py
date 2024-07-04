@@ -312,7 +312,7 @@ def MeshFromJson(json_data, options, context, operator, mesh_name_override = Non
 		for f in bm.faces:
 			for vert_idx, loop_idx in zip(f.verts, f.loops):
 				uv_coords = data["uv_coords2"][vert_idx.index]
-				uv_layer2.data[loop_idx.index].uv = (uv_coords[0],1 - uv_coords[1])
+				uv_layer2[loop_idx].uv = (uv_coords[0],1 - uv_coords[1])
 
 	if len(data["vertex_weights"]) > 0:
 		if len(bm.verts) != len(data["vertex_weights"]):
