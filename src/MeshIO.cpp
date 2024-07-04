@@ -1143,6 +1143,20 @@ void mesh::MeshIO::CalculateBoneBounding()
 	typedef Seb::Smallest_enclosing_ball<FT> Miniball;
 
 	this->bone_bounding.clear();
+
+#ifdef _DEBUG
+	// Print weight_indices
+	uint32_t bone_id = 0;
+	for (auto& indices : this->weight_indices) {
+		std::cout << "Bone: " << bone_id++ << std::endl;
+		for (auto& index : indices) {
+			std::cout << index << " ";
+		}
+		std::cout << std::endl;
+	}
+#endif
+
+
 	for (auto& indices : this->weight_indices) {
 		if (indices.size() <= 1) {
 			bone_bounding.emplace_back(BoneBoundingSphere());
@@ -1170,6 +1184,15 @@ void mesh::MeshIO::CalculateBoneBounding()
 
 		this->bone_bounding.emplace_back(bbs);
 	}
+
+#ifdef _DEBUG
+	// Print bone_bounding
+	for (auto& bb : this->bone_bounding) {
+		std::cout << "Center: " << bb.center[0] << " " << bb.center[1] << " " << bb.center[2] << std::endl;
+		std::cout << "Radius: " << bb.radius << std::endl;
+	}
+#endif
+
 }
 
 void MeshIO::UpdateDXAttr()

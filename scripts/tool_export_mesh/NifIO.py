@@ -113,6 +113,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 					for bonename, boneinfo in zip(data['bone_names'], data['bone_infos']):
 						debug_capsule[bonename] = boneinfo
 					
+					print(debug_capsule.keys())
 					nif_armature.ImportArmatureFromJson(skeleton, collection, _objects, geo_name, debug_capsule)
 
 					for bonename, boneinfo in debug_capsule.items():

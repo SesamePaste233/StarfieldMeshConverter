@@ -3,6 +3,7 @@ import os
 
 # Load the DLL
 _dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
+print("Loaded DLL from: ", os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
 print(_dll)
 # Define the function signature
 _dll_export_mesh = _dll.ExportMesh

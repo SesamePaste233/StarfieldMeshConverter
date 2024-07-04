@@ -420,7 +420,7 @@ def MeshFromJson(json_data, options, context, operator, mesh_name_override = Non
 				elif CULLDATA_VERSION == 2:
 					min_max_bounds = data['culldata'][i][:6]
 
-					box = utils_blender.BoxFromCenterExpand(f"CullCone_{i}", min_max_bounds[:3], min_max_bounds[3:])
+					box = utils_blender.BoxFromCenterExpand(f"CullBBox_{i}", min_max_bounds[:3], min_max_bounds[3:])
 					box.show_bounds = True
 					box.display_type = 'BOUNDS'
 					box.display_bounds_type = 'BOX'

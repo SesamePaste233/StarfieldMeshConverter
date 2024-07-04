@@ -263,6 +263,7 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 	if parent_bone != None:
 		b.parent = parent_bone
 
+	print(armature_dict['name'])
 	if debug_capsule != None and armature_dict['name'] in debug_capsule:
 		center = debug_capsule[armature_dict['name']]['center']
 
@@ -322,7 +323,7 @@ def ImportArmatureFromJson(skeleton_name: str, collection: bpy.types.Collection,
 	with open(skeleton_path, 'r') as json_file:
 		data = json.load(json_file)
 
-		return CreateArmature(data, skin_objs, collection, armature_name, debug_capsule)
+	return CreateArmature(data, skin_objs, collection, armature_name, debug_capsule)
 
 def CreateArmatureDictRecursive(cur_bone, edit_bones, bone_list: list) -> dict:
 	armature_dict = {}

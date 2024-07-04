@@ -13,7 +13,7 @@ using namespace DirectX;
 using namespace mesh;
 using namespace morph;
 
-int main() {
+int addimain() {
 	std::string assets_folder = "C:\\test";
 	std::string base_nif_path = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif";
 	std::string json_file = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif.json";
@@ -368,12 +368,12 @@ void phnifmain() {
 	//}
 }
 
-int nifmain() {
+int main() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\test.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\Outfit_Akila_Security_UpperBody_M_0.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

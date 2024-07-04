@@ -61,11 +61,11 @@ def check_compatibility(submodule_name: str, raise_if_not_found: bool = False) -
     submodule_version = None
     for mod in mods:
         if mod.__name__ == main_name:
-            main_plugin_version = mod.bl_info['version']
+            main_plugin_version = Version(mod.bl_info['version'])
         elif mod.__name__ == submodule_name:
-            submodule_version = mod.bl_info['version']
+            submodule_version = Version(mod.bl_info['version'])
 
-    return compare_versions(main_plugin_version, submodule_version, submodule_name)
+    return compare_versions(main_plugin_version.as_str(), submodule_version.as_str(), submodule_name)
         
 import functools
 
@@ -86,5 +86,6 @@ def compare_versions(main_version_str: str, sub_module_version_str: str, sub_mod
             return sub_module_version in extra_compatible_versions[sub_module_name]
         
     return False
+        
 
 __plugin_version__ = Version((0, 1, 0))
