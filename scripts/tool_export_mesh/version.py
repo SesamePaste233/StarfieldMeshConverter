@@ -71,6 +71,9 @@ import functools
 
 @functools.lru_cache(maxsize=16)
 def compare_versions(main_version_str: str, sub_module_version_str: str, sub_module_name: str) -> bool:
+    '''
+        return True if the sub_module_version is compatible with the main_version
+    '''
     main_version = make_version(main_version_str).as_tuple()
     sub_module_version = make_version(sub_module_version_str).as_tuple()
 

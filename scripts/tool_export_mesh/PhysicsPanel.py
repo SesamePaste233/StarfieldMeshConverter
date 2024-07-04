@@ -18,7 +18,7 @@ class ExportPhysicsDataOperator(bpy.types.Operator):
 	bl_label = "Export As Portable"
 
 	def execute(self, context):
-		if version.compare_versions(context.scene.geometry_bridge_version, context.scene.sf_physics_editor_version, 'tool_physics_editor'):
+		if version.compare_versions(context.scene.geometry_bridge_version, context.scene.sf_physics_editor_version, 'tool_physics_editor') is False:
 			self.report({'ERROR'}, "Physics editor version does not match geometry bridge version.")
 			return {'CANCELLED'}
 		
