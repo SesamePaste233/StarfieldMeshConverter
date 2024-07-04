@@ -283,14 +283,16 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 	filename_ext = "."
 	use_filter_folder = True
 
-	def get_skeleton_names(self, context):
-		nif_armature.LoadAllSkeletonLookup()
-		skel_names = nif_armature.GetAvailableSkeletonNames()
-		items = [(' ', 'CHOOSE YOUR SKELETON', 'Auto match skeleton.')]
-		for name in skel_names:
-			items.append((name, name, name))
-		return tuple(items)
-
+	def get_skeleton_names(default_display_value="None", default_display_name="None"):
+		def get_skeleton_names_impl(self, context):
+			nif_armature.LoadAllSkeletonLookup()
+			skel_names = nif_armature.GetAvailableSkeletonNames()
+			items = [(' ', default_display_value, default_display_name)]
+			for name in skel_names:
+				items.append((name, name, name))
+			return tuple(items)
+		return get_skeleton_names_impl
+	
 	filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
 
 	assets_folder: bpy.props.StringProperty(subtype="FILE_PATH")
@@ -319,7 +321,7 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 	skeleton_name: bpy.props.EnumProperty(
 		name="Skeleton Template",
 		description="",
-		items=get_skeleton_names,
+		items=get_skeleton_names("CHOOSE YOUR SKELETON", "Auto match skeleton in database"),
 		default=0,
 	)
 	boneinfo_debug: bpy.props.BoolProperty(
@@ -342,11 +344,24 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 		description="Debug option. DO NOT USE.",
 		default=False
 	)
+
 	skeleton_register_name: bpy.props.StringProperty(
 		name="Register Skeleton As",
 		description="Debug option. DO NOT USE.",
 		default="",
 	)
+	skeleton_register_name_overwrite: bpy.props.EnumProperty(
+		name="Register Skeleton As",
+		description="Debug option. DO NOT USE.",
+		items=get_skeleton_names("None", "Do not overwrite registered skeleton."),
+		default=0,
+	)
+	skeleton_register_overwrite: bpy.props.BoolProperty(
+		name="Overwrite Existing Skeleton",
+		description="Debug option. DO NOT USE.",
+		default=True
+	)
+
 	geo_bounding_debug: bpy.props.BoolProperty(
 		name="Debug Min Max Bounding",
 		description="Debug option. DO NOT USE.",
@@ -438,6 +453,13 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 		layout.prop(self, "correct_rotation")
 		layout.prop(self, "max_lod")
 		layout.prop(self, "import_as_read_only")
+
+		layout.label(text="Register Skeleton To Database:")
+		if self.skeleton_register_overwrite:
+			layout.prop(self, "skeleton_register_name_overwrite")
+		else:
+			layout.prop(self, "skeleton_register_name")
+		layout.prop(self, "skeleton_register_overwrite")
 
 		layout.label(text="Debug Options:")
 		layout.prop(self, "debug_havok_physics")

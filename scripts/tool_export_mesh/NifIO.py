@@ -254,8 +254,10 @@ def ImportNif(file_path, options, context, operator):
 
 	if "geometries" not in _data.keys():
 		
-		if options.skeleton_register_name != "":
-			nif_armature.RegisterSkeleton(options.skeleton_register_name, _data)
+		register_skel_name:str = options.skeleton_register_name_overwrite if options.skeleton_register_overwrite else options.skeleton_register_name
+		
+		if register_skel_name != "" and register_skel_name != " ":
+			nif_armature.RegisterSkeleton(register_skel_name, _data, options.skeleton_register_overwrite)
 
 		nif_armature.CreateArmature(_data, None, prev_coll, "Armature")
 		operator.report({'INFO'}, f'Nif has no geometry. Loaded as Armature.')

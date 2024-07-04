@@ -35,15 +35,17 @@ def SkeletonLookup(skeleton_name:str):
 def SkeletonRegistered(skeleton_name:str):
 	return skeleton_name in skeleton_lookup.keys()
 
-def RegisterSkeleton(skeleton_name:str, skeleton_data:dict):
+def RegisterSkeleton(skeleton_name:str, skeleton_data:dict, overwrite = False):
 	global skeleton_lookup
-	if SkeletonRegistered(skeleton_name):
+	if not overwrite and SkeletonRegistered(skeleton_name):
 		return False
 	
 	with open(os.path.join(utils_blender.PluginAssetsFolderPath(), skeleton_name + '.json'), 'w') as file:
 		file.write(json.dumps(skeleton_data))
 
-	skeleton_names.append(skeleton_name)
+	if skeleton_name not in skeleton_names:
+		skeleton_names.append(skeleton_name)
+
 	skeleton_lookup[skeleton_name] = {}
 	LoadLookupRecursive(skeleton_data, skeleton_lookup[skeleton_name])
 	
@@ -52,6 +54,27 @@ def RegisterSkeleton(skeleton_name:str, skeleton_data:dict):
 			skeleton_pivots[skeleton_name] = possible_pivot
 			break
 	
+	skeleton_dict = {}
+	skeleton_dict['skeleton_names'] = skeleton_names
+	skeleton_dict['skeleton_pivot'] = skeleton_pivots
+
+	skeleton_folder = utils_blender.PluginAssetsFolderPath()
+	with open(os.path.join(skeleton_folder, "_skeleton_list_.meta"), 'w') as file:
+		file.write(json.dumps(skeleton_dict, indent = 4))
+
+	return True
+
+def UnregisterSkeleton(skeleton_name:str):
+	global skeleton_lookup
+	if not SkeletonRegistered(skeleton_name):
+		return False
+
+	os.remove(os.path.join(utils_blender.PluginAssetsFolderPath(), skeleton_name + '.json'))
+
+	skeleton_names.remove(skeleton_name)
+	del skeleton_lookup[skeleton_name]
+	del skeleton_pivots[skeleton_name]
+
 	skeleton_dict = {}
 	skeleton_dict['skeleton_names'] = skeleton_names
 	skeleton_dict['skeleton_pivot'] = skeleton_pivots

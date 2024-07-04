@@ -34,13 +34,38 @@ class OBJECT_OT_import_skeleton_from_assets(bpy.types.Operator):
     def invoke(self, context: Context, event: bpy.types.Event) -> Set[int] | Set[str]:
         return context.window_manager.invoke_props_dialog(self)
 
+class OBJECT_OT_remove_skeleton_from_assets(bpy.types.Operator):
+    '''Remove skeleton from assets'''
+    bl_idname = "object.remove_skeleton_from_assets"
+    bl_label = "Remove Skeleton From Assets"
+
+    skeleton_name_enum: bpy.props.EnumProperty(
+        name="Skeleton Name",
+        description="Skeleton Name",
+        items=get_skeleton_names,
+        default=0,
+    )
+
+    def execute(self, context: Context) -> Set[int] | Set[str]:
+        if self.skeleton_name_enum == 'NONE':
+            return {'CANCELLED'}
+
+        nif_armature.UnregisterSkeleton(self.skeleton_name_enum)
+        return {'FINISHED'}
+    
+    def invoke(self, context: Context, event: bpy.types.Event) -> Set[int] | Set[str]:
+        return context.window_manager.invoke_props_dialog(self)
+
 def menu_func_import(self, context: Context) -> None:
     self.layout.operator(OBJECT_OT_import_skeleton_from_assets.bl_idname, text="Skeleton From Assets")
+    self.layout.operator(OBJECT_OT_remove_skeleton_from_assets.bl_idname, text="Remove Skeleton From Assets")
 
 def register():
     bpy.utils.register_class(OBJECT_OT_import_skeleton_from_assets)
+    bpy.utils.register_class(OBJECT_OT_remove_skeleton_from_assets)
     bpy.types.VIEW3D_MT_add.append(menu_func_import)
 
 def unregister():
     bpy.types.VIEW3D_MT_add.remove(menu_func_import)
     bpy.utils.unregister_class(OBJECT_OT_import_skeleton_from_assets)
+    bpy.utils.unregister_class(OBJECT_OT_remove_skeleton_from_assets)
