@@ -1146,14 +1146,14 @@ void mesh::MeshIO::CalculateBoneBounding()
 
 #ifdef _DEBUG
 	// Print weight_indices
-	uint32_t bone_id = 0;
+	/*uint32_t bone_id = 0;
 	for (auto& indices : this->weight_indices) {
 		std::cout << "Bone: " << bone_id++ << std::endl;
 		for (auto& index : indices) {
 			std::cout << index << " ";
 		}
 		std::cout << std::endl;
-	}
+	}*/
 #endif
 
 
@@ -1187,10 +1187,10 @@ void mesh::MeshIO::CalculateBoneBounding()
 
 #ifdef _DEBUG
 	// Print bone_bounding
-	for (auto& bb : this->bone_bounding) {
+	/*for (auto& bb : this->bone_bounding) {
 		std::cout << "Center: " << bb.center[0] << " " << bb.center[1] << " " << bb.center[2] << std::endl;
 		std::cout << "Radius: " << bb.radius << std::endl;
-	}
+	}*/
 #endif
 
 }

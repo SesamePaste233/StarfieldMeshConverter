@@ -13,11 +13,11 @@ using namespace DirectX;
 using namespace mesh;
 using namespace morph;
 
-int addimain() {
-	std::string assets_folder = "C:\\test";
-	std::string base_nif_path = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif";
+int main() {
+	std::string assets_folder = "C:\\Users\\26553\\AppData\\Roaming\\Blender Foundation\\Blender\\3.5\\scripts\\addons\\tool_export_mesh\\Result\\Helmets";
+	std::string base_nif_path = "C:\\test\\meshes\\clothes\\outfit_first_mech_pilot_01\\outfit_first_mech_pilot_01_helmet_m.nif";
 	std::string json_file = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif.json";
-	std::string output_file = "C:\\repo\\MeshConverter\\merge_debug.nif";
+	std::string output_file = "C:\\Users\\26553\\AppData\\Roaming\\Blender Foundation\\Blender\\3.5\\scripts\\addons\\tool_export_mesh\\Result\\Helmets\\outfit_first_mech_pilot_01_helmet_m.nif";
 	bool edit_mat_path = false;
 
 	nif::NifIO base_nif;
@@ -368,7 +368,7 @@ void phnifmain() {
 	//}
 }
 
-int main() {
+int nifmain() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();

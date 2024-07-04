@@ -420,7 +420,7 @@ std::vector<nif::NiNodeBase*> nif::NifIO::GetReferencedBlocks(const nif::NiNodeB
 
 	for (auto& ref : references) {
 		auto block = this->block_manager.GetBlock(ref);
-		if (RTTI == nif::NiRTTI::None) {
+		if (block && RTTI == nif::NiRTTI::None) {
 			result.push_back(block);
 		}
 		else if (block && block->GetRTTI() == RTTI) {
@@ -428,6 +428,30 @@ std::vector<nif::NiNodeBase*> nif::NifIO::GetReferencedBlocks(const nif::NiNodeB
 				continue;
 
 			result.push_back(block);
+		}
+	}
+
+	return result;
+}
+
+std::vector<nif::NiNodeBase*> nif::NifIO::GetParentBlocks(const NiNodeBase* child, const NiRTTI& RTTI, const bool use_name, const std::string& name) const
+{
+	std::vector<nif::NiNodeBase*> result;
+
+	const auto child_index = this->block_manager.FindBlock(child);
+	if (child_index == -1)
+		return result;
+
+	for (auto referee : this->block_manager.refs.at(child_index)) {
+		auto referee_block = this->block_manager.GetBlock(referee);
+		if (referee_block && RTTI == nif::NiRTTI::None) {
+			result.push_back(referee_block);
+		}
+		else if (referee_block && referee_block->GetRTTI() == RTTI) {
+			if (use_name && this->string_manager.GetString(referee_block->name_index) != name)
+				continue;
+
+			result.push_back(referee_block);
 		}
 	}
 
@@ -494,7 +518,7 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 			light_shader_properties_valid = false;
 		}
 
-		if (light_shader_properties_valid) {
+		if (light_shader_properties_valid && edit_mat_path) {
 			auto light_shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(light_shader_properties[0]);
 			auto src_light_shader_property = dynamic_cast<nif::BSLightingShaderProperty*>(src_light_shader_properties[0]);
 
@@ -502,6 +526,7 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 
 			light_shader_property->name_index = string_manager.AddString(src_mat_path, block_manager.FindBlock(light_shader_property));
 
+			this->UpdateStringReference(light_shader_property);
 			string_manager.PurgeStrings();
 		}
 
@@ -522,6 +547,40 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 			auto target_material_id = dynamic_cast<nif::NiIntegerExtraData*>(target_material_id_candidates[0]);
 
 			target_material_id->data = src_material_id->data;
+		}
+
+		std::vector<std::pair<std::string, std::string>> original_bone_attach_ref_pairs;
+		bool skin_attach_valid = false;
+		auto source_skin_attach_candidates = src_nif.GetReferencedBlocks(geometry_node, nif::NiRTTI::SkinAttach, true, "SkinBMP");
+		nif::SkinAttach* skin_attach = nullptr;
+		if (source_skin_attach_candidates.size() == 1) {
+			skin_attach = dynamic_cast<nif::SkinAttach*>(source_skin_attach_candidates[0]);
+			skin_attach_valid = true;
+		}
+		if (skin_attach_valid) {
+			auto target_skin_attach_candidates = GetReferencedBlocks(bsgeo, nif::NiRTTI::SkinAttach, true, "SkinBMP");
+			if (target_skin_attach_candidates.size() == 1) {
+				auto target_skin_instance_candidates = GetReferencedBlocks(bsgeo, nif::NiRTTI::BSSkinInstance);
+				if (target_skin_instance_candidates.size() == 1) {
+					auto target_skin_instance = dynamic_cast<nif::BSSkin::Instance*>(target_skin_instance_candidates[0]);
+					original_bone_attach_ref_pairs = target_skin_instance->GetBoneAttachRefStringPairs(*this);
+				}
+				auto target_skin_attach = dynamic_cast<nif::SkinAttach*>(target_skin_attach_candidates[0]);
+				target_skin_attach->num_bone_names = skin_attach->num_bone_names;
+				target_skin_attach->bone_names.clear();
+				target_skin_attach->bone_names.insert(target_skin_attach->bone_names.end(), skin_attach->bone_names.begin(), skin_attach->bone_names.end());
+			}
+			else if (target_skin_attach_candidates.size() == 0) {
+				std::cout << "Appending skin attach for BSGeometry: " << string_manager.GetString(bsgeo->name_index) << std::endl;
+				auto target_skin_attach = dynamic_cast<nif::SkinAttach*>(AddBlock(nif::NiRTTI::SkinAttach, "SkinBMP"));
+
+				target_skin_attach->num_bone_names = skin_attach->num_bone_names;
+				target_skin_attach->bone_names.clear();
+				target_skin_attach->bone_names.insert(target_skin_attach->bone_names.end(), skin_attach->bone_names.begin(), skin_attach->bone_names.end());
+
+				bsgeo->AddExtraData(block_manager.FindBlock(target_skin_attach));
+			}
+
 		}
 
 		bool skin_instance_valid = false;
@@ -546,7 +605,8 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 			if (target_skin_instance_candidates.size() == 1) {
 				auto target_skin_instance = dynamic_cast<nif::BSSkin::Instance*>(target_skin_instance_candidates[0]);
 				target_skin_instance->num_bone_attachs = skin_instance->num_bone_attachs;
-				target_skin_instance->bone_attach_refs.resize(skin_instance->num_bone_attachs);//TODO
+				target_skin_instance->bone_attach_refs.clear();
+				target_skin_instance->bone_attach_refs.insert(target_skin_instance->bone_attach_refs.end(), skin_instance->bone_attach_refs.begin(), skin_instance->bone_attach_refs.end());
 
 				auto target_bone_data_candidates = GetReferencedBlocks(target_skin_instance, nif::NiRTTI::BSSkinBoneData);
 				if (target_bone_data_candidates.size() == 1) {
@@ -564,7 +624,8 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 				target_skin_instance->skeleton_root = block_manager.FindBlock(this->GetRootNode());
 				target_skin_instance->bone_data = block_manager.FindBlock(target_bone_data);
 				target_skin_instance->num_bone_attachs = skin_instance->num_bone_attachs;
-				target_skin_instance->bone_attach_refs.resize(skin_instance->num_bone_attachs);//TODO
+				target_skin_instance->bone_attach_refs.clear();
+				target_skin_instance->bone_attach_refs.insert(target_skin_instance->bone_attach_refs.end(), skin_instance->bone_attach_refs.begin(), skin_instance->bone_attach_refs.end());
 
 				target_bone_data->num_bone_infos = bone_data->num_bone_infos;
 				target_bone_data->bone_infos.resize(bone_data->num_bone_infos);
@@ -574,33 +635,7 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 			}
 		}
 
-		bool skin_attach_valid = false;
-		auto source_skin_attach_candidates = src_nif.GetReferencedBlocks(geometry_node, nif::NiRTTI::SkinAttach, true, "SkinBMP");
-		nif::SkinAttach* skin_attach = nullptr;
-		if (source_skin_attach_candidates.size() == 1) {
-			skin_attach = dynamic_cast<nif::SkinAttach*>(source_skin_attach_candidates[0]);
-			skin_attach_valid = true;
-		}
-		if (skin_attach_valid) {
-			auto target_skin_attach_candidates = GetReferencedBlocks(bsgeo, nif::NiRTTI::SkinAttach, true, "SkinBMP");
-			if (target_skin_attach_candidates.size() == 1) {
-				auto target_skin_attach = dynamic_cast<nif::SkinAttach*>(target_skin_attach_candidates[0]);
-				target_skin_attach->num_bone_names = skin_attach->num_bone_names;
-				target_skin_attach->bone_names.clear();
-				target_skin_attach->bone_names.insert(target_skin_attach->bone_names.end(), skin_attach->bone_names.begin(), skin_attach->bone_names.end());
-			}
-			else if (target_skin_attach_candidates.size() == 0) {
-				std::cout << "Appending skin attach for BSGeometry: " << string_manager.GetString(bsgeo->name_index) << std::endl;
-				auto target_skin_attach = dynamic_cast<nif::SkinAttach*>(AddBlock(nif::NiRTTI::SkinAttach, "SkinBMP"));
-
-				target_skin_attach->num_bone_names = skin_attach->num_bone_names;
-				target_skin_attach->bone_names.clear();
-				target_skin_attach->bone_names.insert(target_skin_attach->bone_names.end(), skin_attach->bone_names.begin(), skin_attach->bone_names.end());
-
-				bsgeo->AddExtraData(block_manager.FindBlock(target_skin_attach));
-			}
-			
-		}
+		
 	}
 
 	return true;
@@ -608,6 +643,7 @@ bool nif::NifIO::MergeBSGeometryAdditive(const nif::NifIO& src_nif, const nif::B
 
 bool nif::NifIO::MergeAllBSGeometryAdditive(const nif::NifIO& src_nif, bool edit_mat_path, bool skip_if_fail)
 {
+	std::cout << "Merging geometries" << std::endl;
 	auto geometries = src_nif.GetRTTIBlocks(nif::NiRTTI::BSGeometry);
 
 	for (auto geometry : geometries) {
@@ -704,6 +740,12 @@ void nif::NifIO::NiStringManager::PurgeStrings()
 
 void nif::NifIO::NiStringManager::RemoveStrings(const std::vector<uint32_t> indices)
 {
+	for (auto index : indices) {
+		for (auto referee : refs[index]) {
+			nif->blocks[referee]->UpdateStrings(index, nif::NiNodeBase::NO_REF);
+		}
+	}
+
 	std::vector<uint32_t> new_order;
 	for (uint32_t i = 0; i < header->num_strings; i++) {
 		if (std::find(indices.begin(), indices.end(), i) == indices.end()) {
@@ -714,17 +756,27 @@ void nif::NifIO::NiStringManager::RemoveStrings(const std::vector<uint32_t> indi
 
 	MoveString(new_order);
 
-	for (auto index : indices) {
-		for (auto referee : refs[index]) {
-			nif->blocks[referee]->UpdateStrings(index, nif::NiNodeBase::NO_REF);
+	header->strings.resize(header->num_strings - indices.size());
+	header->num_strings = header->strings.size();
+	
+	for (auto indices_to_remove = new_order.size() - 1; indices_to_remove >= header->num_strings; indices_to_remove--) {
+		refs.erase(indices_to_remove);
+	}
+
+}
+
+void nif::NifIO::NiStringManager::RemoveReferee(const uint32_t index)
+{
+	if (index >= header->num_blocks)
+		return;
+
+	for (auto& ref : refs) {
+		auto it = std::find(ref.second.begin(), ref.second.end(), index);
+		if (it != ref.second.end()) {
+			ref.second.erase(it);
 		}
 	}
 
-	header->strings.resize(header->num_strings - indices.size());
-	header->num_strings = header->strings.size();
-	for (auto index : indices) {
-		refs.erase(index);
-	}
 }
 
 uint32_t nif::NifIO::NiStringManager::ReplaceString(const uint32_t index, const std::string& str)
@@ -805,100 +857,19 @@ uint32_t nif::NifIO::NiBlockManager::FindBlockByName(const std::string& name) co
 	return nif::NiNodeBase::NO_REF;
 }
 
-//bool nif::ni_template::NiRootSceneTemplate::ToNif(NifIO& nif)
-//{
-//	nif.Clear();
-//	if (root_node == nullptr)
-//		return false;
-//
-//	auto f = [&nif](nif::NiNode* parent, NodeInfo* cur_node)->nif::NiNode* {
-//		auto cur_ni_node = dynamic_cast<nif::NiNode*>(nif.AddBlock("NiNode", cur_node->name));
-//
-//		cur_ni_node->flags = cur_node->flags;
-//
-//		std::memcpy(cur_ni_node->rotation, cur_node->rotation, 9 * sizeof(float));
-//
-//		std::memcpy(cur_ni_node->translation, cur_node->translation, 3 * sizeof(float));
-//
-//		cur_ni_node->scale = cur_node->scale;
-//
-//		if (parent)
-//			parent->AddChild(nif.block_manager.FindBlock(cur_ni_node));
-//
-//		return cur_ni_node;
-//		};
-//
-//	Traverse<nif::NiNode*>(nullptr, this->root_node, f);
-//
-//	return true;
-//}
-//
-//nif::ni_template::RTTI nif::ni_template::NiRootSceneTemplate::FromNif(const NifIO& nif)
-//{
-//	auto root_node = nif.GetRootNode();
-//
-//	if (!root_node) {
-//		std::cout << "Warning: Nif format incorrect. Expect a single root node named \"ExportScene\"." << std::endl;
-//		return RTTI::None;
-//	}
-//
-//	this->root_node->name = nif.string_manager.GetString(root_node->name_index);
-//
-//	this->root_node->flags = root_node->flags;
-//
-//	std::memcpy(this->root_node->rotation, root_node->rotation, 9 * sizeof(float));
-//
-//	std::memcpy(this->root_node->translation, root_node->translation, 3 * sizeof(float));
-//
-//	this->root_node->scale = root_node->scale;
-//
-//	return RTTI::NiRootScene;
-//}
-//
-//nlohmann::json nif::ni_template::NiRootSceneTemplate::Serialize() const
-//{
-//	nlohmann::json result;
-//
-//	result["root_name"] = this->root_name;
-//	result["root_flags"] = this->root_flags;
-//	for (int i = 0; i < 3; i++) {
-//		result["root_rotation_matrix"][i] = this->root_rotation_matrix[i];
-//	}
-//	for (int i = 0; i < 3; i++) {
-//		result["root_translation"][i] = this->root_translation[i];
-//	}
-//	result["root_scale"] = this->root_scale;
-//
-//	return result;
-//}
-//
-//bool nif::ni_template::NiRootSceneTemplate::Deserialize(nlohmann::json data)
-//{
-//	if (data.find("root_name") != data.end())
-//		this->root_name = data["root_name"];
-//
-//	if (data.find("root_flags") != data.end())
-//		this->root_flags = data["root_flags"];
-//
-//	if (data.find("root_rotation_matrix") != data.end()) {
-//		for (int i = 0; i < 3; i++) {
-//			this->root_rotation_matrix[i][0] = data["root_rotation_matrix"][i][0];
-//			this->root_rotation_matrix[i][1] = data["root_rotation_matrix"][i][1];
-//			this->root_rotation_matrix[i][2] = data["root_rotation_matrix"][i][2];
-//		}
-//	}
-//
-//	if (data.find("root_translation") != data.end()) {
-//		for (int i = 0; i < 3; i++) {
-//			this->root_translation[i] = data["root_translation"][i];
-//		}
-//	}
-//
-//	if (data.find("root_scale") != data.end())
-//		this->root_scale = data["root_scale"];
-//
-//	return true;
-//}
+void nif::NifIO::NiBlockManager::RemoveReferee(const uint32_t index)
+{
+	if (index >= header->num_blocks)
+		return;
+
+	for (auto& ref : refs) {
+		auto it = std::find(ref.second.begin(), ref.second.end(), index);
+		if (it != ref.second.end()) {
+			ref.second.erase(it);
+		}
+	}
+
+}
 
 bool nif::ni_template::NiSimpleGeometryTemplate::ToNif(NifIO& nif)
 {
@@ -1350,23 +1321,34 @@ nif::ni_template::RTTI nif::ni_template::NiSkinInstanceTemplate::FromNif(const N
 			return rtti;
 		}
 
-		auto skin_attach = dynamic_cast<SkinAttach*>(skin_attachs[0]);
-
-		for (int i = 0; i < skin_attach->num_bone_names; i++) {
-			skin_info.bone_names.push_back(skin_attach->bone_names[i]);
-		}
-
 		auto skin_instances = nif.GetReferencedBlocks(bs_geo, nif::NiRTTI::BSSkinInstance);
 
 		if (skin_instances.size() == 0) {
 			std::cout << "Warning: No skin instance found for geometry " << bone.name << std::endl;
 			continue;
-		}else if (skin_instances.size() != 1) {
+		}
+		else if (skin_instances.size() != 1) {
 			std::cout << "Warning: Only support nif with a single skin instance." << std::endl;
 			return rtti;
 		}
 
 		auto skin_instance = dynamic_cast<BSSkin::Instance*>(skin_instances[0]);
+
+		auto skin_attach = dynamic_cast<SkinAttach*>(skin_attachs[0]);
+
+		auto string_pairs = skin_instance->GetBoneAttachRefStringPairs(nif);
+
+		for (int i = 0; i < skin_attach->num_bone_names; i++) {
+			std::string raw_name = skin_attach->bone_names[i];
+			auto& pair = string_pairs[i];
+			if (pair.second != "" && pair.first == raw_name) {
+				skin_info.bone_names.push_back(pair.second);
+			}
+			else {
+				skin_info.bone_names.push_back(raw_name);
+			}
+		}
+
 
 		for (auto refs : skin_instance->bone_attach_refs) {
 			auto block = nif.block_manager.GetBlock(refs);
@@ -1590,6 +1572,13 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 
 	bsxflags->flags = this->bsx_flags;
 
+	if (!this->transcript_path.empty()) {
+		if (!hkreflex::hkTypeTranscriptor::SetTranscriptPath(this->transcript_path)) {
+			std::cout << "Failed to set transcript path." << std::endl;
+			return false;
+		}
+	}
+
 	if (!this->physics_data.empty()) {
 		auto bscloth = dynamic_cast<nif::BSClothExtraData*>(nif.AddBlock(nif::NiRTTI::BSClothExtraData));
 
@@ -1598,11 +1587,6 @@ bool nif::ni_template::NiArmatureTemplate::ToNif(NifIO& nif)
 		hkphysics::hkPhysicsDataBuilder builder;
 
 		builder.build_target_platform = hkphysics::hkPhysicsDataBuilder::Platform::HCL_PLATFORM_X64;
-
-		if (!hkreflex::hkTypeTranscriptor::SetTranscriptPath(this->transcript_path)) {
-			std::cout << "Failed to set transcript path." << std::endl;
-			return false;
-		}
 
 		if (!builder.ParseJson(this->physics_data) || !builder.build_target_finished) {
 			std::cout << "Physics data build failed." << std::endl;

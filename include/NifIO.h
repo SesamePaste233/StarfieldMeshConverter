@@ -106,6 +106,8 @@ namespace nif {
 
 			void RemoveStrings(const std::vector<uint32_t> indices);
 
+			void RemoveReferee(const uint32_t index);
+
 			uint32_t ReplaceString(const uint32_t index, const std::string& str);
 		};
 
@@ -128,6 +130,8 @@ namespace nif {
 			uint32_t FindBlock(const NiNodeBase* block) const;
 
 			uint32_t FindBlockByName(const std::string& name) const;
+
+			void RemoveReferee(const uint32_t index);
 		};
 
 		bool Deserialize(const std::string filename);
@@ -148,16 +152,32 @@ namespace nif {
 
 		NiNodeBase* AddBlock(const nif::NiRTTI rtti, const std::string block_name = "");
 
+		std::string GetBlockName(const uint32_t index) const {
+			if (index >= header.num_blocks) {
+				return "";
+			}
+			if (blocks[index]->name_index >= header.strings.size()) {
+				return "";
+			}
+			return header.strings[blocks[index]->name_index];
+		}
+		std::string GetBlockName(const NiNodeBase* block) const {
+			return GetBlockName(block_manager.FindBlock(block));
+		}
 
 		void UpdateBlockReference(NiNodeBase* block) {
+			auto block_index = block_manager.FindBlock(block);
+			block_manager.RemoveReferee(block_index);
 			for (const auto& ref : block->GetBlockReference()) {
 				block_manager.AddReference(ref, block_manager.FindBlock(block));
 			}
 		};
 
 		void UpdateStringReference(NiNodeBase* block) {
+			auto block_index = block_manager.FindBlock(block);
+			string_manager.RemoveReferee(block_index);
 			for (const auto& ref : block->GetStringReference()) {
-				string_manager.AddReference(ref, block_manager.FindBlock(block));
+				string_manager.AddReference(ref, block_index);
 			}
 		};
 
@@ -207,6 +227,8 @@ namespace nif {
 		};
 
 		std::vector<NiNodeBase*> GetReferencedBlocks(const NiNodeBase* referer, const NiRTTI& RTTI = NiRTTI::None, const bool use_name = false, const std::string& name = "") const;
+
+		std::vector<NiNodeBase*> GetParentBlocks(const NiNodeBase* child, const NiRTTI& RTTI = NiRTTI::None, const bool use_name = false, const std::string& name = "") const;
 
 		void SetAssetsPath(const std::string& path) {
 			// Append "geometries" to the path if it doesn't end with it
@@ -442,6 +464,9 @@ namespace nif {
 
 				if (data.contains("physics_data")) {
 					physics_data = data["physics_data"];
+				}
+
+				if (data.contains("transcript_path")) {
 					transcript_path = data["transcript_path"];
 				}
 

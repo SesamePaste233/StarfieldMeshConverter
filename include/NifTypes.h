@@ -4,6 +4,8 @@
 #include "MeshIO.h"
 
 namespace nif {
+	class NifIO;
+
 	enum class NiRTTI {
 		None = 0,
 		NiNodeBase,
@@ -380,6 +382,11 @@ namespace nif {
 			NiRTTI GetRTTI() const override {
 				return NiRTTI::BSSkinInstance;
 			};
+			
+			std::vector<std::pair<std::string, std::string>> GetBoneAttachRefStringPairs(const nif::NifIO& belonged_nif) const;
+
+			void FromBoneAttachRefStringPairs(const std::vector<std::pair<std::string, std::string>>& pairs, nif::NifIO& belonged_nif, bool not_found_ok = true);
+
 			std::vector<uint32_t> GetBlockReference() const override {
 				std::vector<uint32_t> refs;
 				if (skeleton_root != NO_REF) {
@@ -387,6 +394,11 @@ namespace nif {
 				}
 				if (bone_data != NO_REF) {
 					refs.push_back(bone_data);
+				}
+				for (auto ref : bone_attach_refs) {
+					if (ref != NO_REF) {
+						refs.push_back(ref);
+					}
 				}
 				return refs;
 			};

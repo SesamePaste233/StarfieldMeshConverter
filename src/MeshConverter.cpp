@@ -150,6 +150,7 @@ uint32_t CreateNif(const char* json_data, const char* output_file, const char* a
 }
 
 uint32_t EditNifBSGeometries(const char* base_nif_path, const char* json_data, const char* output_file, const char* assets_folder, bool edit_mat_path) {
+	
 	nif::NifIO base_nif;
 	base_nif.SetAssetsPath(assets_folder);
 		

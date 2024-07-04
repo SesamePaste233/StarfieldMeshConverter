@@ -451,7 +451,7 @@ def IsReadOnly(obj):
 def IsMesh(obj):
 	return obj.type == 'MESH'
 
-def GetSelectedObjs(exclude_active = True):
+def GetSelectedObjs(exclude_active = True) -> list[bpy.types.Object]:
 	l = []
 	for obj in bpy.context.selected_objects:
 		if not exclude_active or obj != bpy.context.active_object:

@@ -1,4 +1,5 @@
 #include "NifTypes.h"
+#include "NifIO.h"
 
 void nif::NiNode::Deserialize(std::istream& file)
 {
@@ -275,6 +276,95 @@ void nif::BSSkin::Instance::Serialize(std::ostream& file)
 size_t nif::BSSkin::Instance::GetSize()
 {
 	return 16 + 4 * (this->num_bone_attachs + this->num_bone_scales);
+}
+
+std::vector<std::pair<std::string, std::string>> nif::BSSkin::Instance::GetBoneAttachRefStringPairs(const nif::NifIO& belonged_nif) const
+{
+	std::vector<std::pair<std::string, std::string>> ret;
+	auto parent_candidates = belonged_nif.GetParentBlocks(this, NiRTTI::BSGeometry);
+	if (parent_candidates.size() != 1) {
+		throw std::runtime_error("Failed to find parent geometry block.");
+	}
+
+	auto bsgeo = dynamic_cast<BSGeometry*>(parent_candidates[0]);
+
+	auto skin_attachs = belonged_nif.GetReferencedBlocks(bsgeo, NiRTTI::SkinAttach, true, "SkinBMP");
+	if (skin_attachs.size() != 1) {
+		throw std::runtime_error("Failed to find skin attach block.");
+	}
+	auto skin_attach = dynamic_cast<SkinAttach*>(skin_attachs[0]);
+
+	if (skin_attach->num_bone_names != this->num_bone_attachs) {
+		throw std::runtime_error("Bone attach count mismatch.");
+	}
+
+	uint32_t i = 0;
+	for (auto attach_ref : bone_attach_refs) {
+		ret.push_back(std::make_pair(skin_attach->bone_names[i], belonged_nif.GetBlockName(attach_ref)));
+		++i;
+	}
+
+	return ret;
+}
+
+void nif::BSSkin::Instance::FromBoneAttachRefStringPairs(const std::vector<std::pair<std::string, std::string>>& pairs, nif::NifIO& belonged_nif, bool not_found_ok) {
+	std::vector<std::pair<std::string, std::string>> ret;
+	auto parent_candidates = belonged_nif.GetParentBlocks(this, NiRTTI::BSGeometry);
+	if (parent_candidates.size() != 1) {
+		throw std::runtime_error("Failed to find parent geometry block.");
+	}
+
+	auto bsgeo = dynamic_cast<BSGeometry*>(parent_candidates[0]);
+
+	auto skin_attachs = belonged_nif.GetReferencedBlocks(bsgeo, NiRTTI::SkinAttach, true, "SkinBMP");
+	if (skin_attachs.size() != 1) {
+		throw std::runtime_error("Failed to find skin attach block.");
+	}
+	auto skin_attach = dynamic_cast<SkinAttach*>(skin_attachs[0]);
+
+	if (skin_attach->num_bone_names != this->num_bone_attachs) {
+		throw std::runtime_error("Bone attach count mismatch.");
+	}
+
+	this->bone_attach_refs.clear();
+	this->bone_attach_refs.resize(skin_attach->num_bone_names, this->NO_REF);
+	for (auto& pair : pairs) {
+		auto& bone_name = pair.first;
+		auto& attach_name = pair.second;
+		if (attach_name == "") {
+			continue;
+		}
+		for (size_t i = 0; i < skin_attach->num_bone_names; ++i) {
+			if (skin_attach->bone_names[i] != bone_name) {
+				continue;
+			}
+			auto ref_candidates = belonged_nif.GetRTTIBlocks(NiRTTI::NiNode, true, attach_name);
+			if (ref_candidates.size() != 1) {
+				if (not_found_ok) {
+					std::cout << "Failed to find block ref for " << attach_name << ". There are :" << ref_candidates.size() << std::endl;
+					continue;
+				}
+				else {
+					throw std::runtime_error("Failed to find block ref for " + attach_name);
+				}
+			}
+			auto ref = belonged_nif.block_manager.FindBlock(ref_candidates[0]);
+			if (ref == this->NO_REF) {
+				if (not_found_ok) {
+					std::cout << "Failed to find block ref for " << attach_name << std::endl;
+					continue;
+				}
+				else {
+					throw std::runtime_error("Failed to find block ref for " + attach_name);
+				}
+			}
+			this->bone_attach_refs[i] = ref;
+			break;
+		}
+	}
+	this->num_bone_attachs = (uint32_t)this->bone_attach_refs.size();
+
+	belonged_nif.UpdateBlockReference(this);
 }
 
 void nif::BSLightingShaderProperty::Deserialize(std::istream& file)

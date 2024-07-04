@@ -282,13 +282,12 @@ def ImportNif(file_path, options, context, operator):
 	print(best_skel, obj_list)
 
 	# Havok skeleton
-	if options.debug_havok_physics and'havok_skeleton' in _data.keys():
+	if options.load_havok_skeleten and'havok_skeleton' in _data.keys():
 		havok_skel = _data['havok_skeleton']
 		skel_coll = bpy.data.collections.new("HavokSkeleton")
 		bpy.context.scene.collection.children.link(skel_coll)
-		hkaSkele = nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, "hkaSkeleton")
+		hkaSkele = nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, f"{nifname}_hkaSkeleton")
 		best_skel = None
-		obj_list = []
 		
 		# DEBUG: Save the JSON data to a file
 		#with open(utils.export_mesh_folder_path + '/hkaSkeletonDebug.json', 'w') as json_file:
@@ -447,7 +446,8 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 			factory_name = mesh_folder + '\\' + mesh_name + ".mesh"
 
 		result_file_folder = os.path.join(export_folder, 'geometries', mesh_folder)
-		os.makedirs(result_file_folder, exist_ok = True)
+		if not options.use_internal_geom_data:
+			os.makedirs(result_file_folder, exist_ok = True)
 		result_file_path = os.path.join(result_file_folder, mesh_name + ".mesh")
 
 		if mode == "SINGLE_MESH":
@@ -535,6 +535,7 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 
 	_data['connection_points_p'] = connect_pts
 
+	_data['transcript_path'] = MeshConverter.GetTranscriptPath()
 	if has_physics_graph:
 		if not has_skinned_geometry or not physics_armature_attached:
 			operator.report({'WARNING'}, f'Nif export doesn\'t have a skinned mesh that is weighted to the very same skeleton in Physics Editor. Physics data will be ignored.')
@@ -542,7 +543,6 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 			physics_data, error_msg = PhysicsConverter.get_physics_data(physics_graph)
 			if physics_data != None:
 				_data['physics_data'] = physics_data
-				_data['transcript_path'] = MeshConverter.GetTranscriptPath()
 			else:
 				operator.report({'WARNING'}, error_msg)
 	#print(_data)
@@ -563,6 +563,9 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 			operator.report({'WARNING'}, f'Import_Nif_Path property from root node is not a valid nif file. Skipping...')
 			return {'CANCELLED'}
 
+		print(import_nif_path)
+		print(nif_filepath)
+		print(export_folder)
 		returncode = MeshConverter.EditNifBSGeometries(import_nif_path, json_data, nif_filepath, export_folder, options.overwrite_material_paths)
 	elif options.additive_export == 'Selected':
 		if not os.path.isfile(nif_filepath) or not nif_filepath.endswith('.nif'):

@@ -293,13 +293,13 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 			return tuple(items)
 		return get_skeleton_names_impl
 	
-	filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
+	filter_glob: bpy.props.StringProperty(default="*.nif;*.niflst", options={'HIDDEN'})
 
 	assets_folder: bpy.props.StringProperty(subtype="FILE_PATH")
 
 	debug_havok_physics: bpy.props.BoolProperty(
-		name="Visualize Havok Cloth Sim Data",
-		description="Reinterpret Havok Cloth Sim Data as mesh objects and capsules.",
+		name="Debug Havok Cloth Sim Data",
+		description="Reinterpret Havok Cloth Sim Data as mesh objects and capsules. (Requires Load Havok Skeleton)",
 		default=False
 	)
 
@@ -323,6 +323,11 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 		description="",
 		items=get_skeleton_names("CHOOSE YOUR SKELETON", "Auto match skeleton in database"),
 		default=0,
+	)
+	load_havok_skeleten: bpy.props.BoolProperty(
+		name="Load Havok Skeleton (if any)",
+		description="Load Havok Skeleton (if any)",
+		default=True
 	)
 	boneinfo_debug: bpy.props.BoolProperty(
 		name="Debug BoneInfo",
@@ -446,6 +451,33 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 		default=64
 	)
 
+	def FAKE_BUTTON_generate_re_filtered_files_txt_update(self, context):
+		if self.FAKE_BUTTON_generate_re_filtered_files_txt == True:
+			if len(self.re_nif_file_list) == 0:
+				self.FAKE_BUTTON_generate_re_filtered_files_txt = False
+				return
+			
+			txt_file_path = os.path.join(self.directory, "filtered_nif_files.niflst")
+			with open(txt_file_path, 'w') as f:
+				for file in self.re_nif_file_list:
+					if file.enabled == True:
+						f.write(file.path + '\n')
+
+			def draw(self, context):
+				self.layout.label(text="Refresh file list")
+				self.layout.label(text=f"Saved filtered nif files list to {txt_file_path}")
+
+			bpy.context.window_manager.popup_menu(draw, title = "Saved!", icon = 'INFO')
+
+			self.FAKE_BUTTON_generate_re_filtered_files_txt = False
+
+	FAKE_BUTTON_generate_re_filtered_files_txt: bpy.props.BoolProperty(
+		name="Generate Filtered Files List",
+		description="Generate a txt file that contains the filtered nif files.",
+		default=False,
+		update=FAKE_BUTTON_generate_re_filtered_files_txt_update
+	)
+
 	def draw(self, context):
 		layout = self.layout
 		layout.prop(self, "assets_folder")
@@ -453,6 +485,7 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 		layout.prop(self, "correct_rotation")
 		layout.prop(self, "max_lod")
 		layout.prop(self, "import_as_read_only")
+		layout.prop(self, "load_havok_skeleten")
 
 		layout.label(text="Register Skeleton To Database:")
 		if self.skeleton_register_overwrite:
@@ -492,21 +525,36 @@ class ImportCustomNif(bpy.types.Operator, ImportHelper):
 			active_propname="re_nif_file_list_index", 
 			rows=5
 		)
+		row.prop(self, "FAKE_BUTTON_generate_re_filtered_files_txt", text="Save List", icon='TEXT')
 
 	def execute(self, context):
 		if self.apply_filter == True:
 			files = [file.path for file in self.re_nif_file_list if file.enabled == True]
+			self.apply_filter = False
 		else:
-			files = [file.name for file in self.files]
+			files = [os.path.join(self.directory, file.name) for file in self.files]
+
+		# If file ends with .txt, it's a list of nif files
+		for current_file in files:
+			if current_file.endswith('.niflst'):
+				with open(current_file, 'r') as f:
+					for line in f.readlines():
+						txt_file_path = line.strip()
+						# Check if the file exists and is a nif file
+						if txt_file_path.endswith('.nif') and os.path.exists(txt_file_path):
+							files.append(txt_file_path)
 
 		skeleton_obj_dict = {}
 		for current_file in files:
-			filepath = os.path.join(self.directory, current_file)
+			filepath = current_file
 			rtn, skel, objs = NifIO.ImportNif(filepath, self, context, self)
 			if 'CANCELLED' in rtn:
-				self.report({'WARNING'}, f'{current_file} failed to import.')
+				self.report({'WARNING'}, f'{os.path.basename(current_file)} failed to import.')
 			elif skel != None and objs != None and len(objs) > 0:
-				skeleton_obj_dict[skel] = objs
+				if skel in skeleton_obj_dict:
+					skeleton_obj_dict[skel] += objs
+				else:
+					skeleton_obj_dict[skel] = objs
 		
 		for skel, objs in skeleton_obj_dict.items():
 			prev_coll = bpy.data.collections.new(skel)
@@ -695,6 +743,9 @@ class ExportCustomNif(bpy.types.Operator):
 	def execute(self, context):
 		if self.is_head_object == "Auto":
 			root = utils_blender.GetActiveObject()
+			if not root:
+				self.report({'ERROR'}, "No object selected.")
+				return {'CANCELLED'}
 			# Check if the selected object is a mesh
 			if root.type == 'MESH':
 				# Check if the selected object has 'faceBone_' vertex groups
@@ -714,10 +765,40 @@ class ExportCustomNif(bpy.types.Operator):
 						return rtn
 				else:
 					self.report({'INFO'}, "The selected object does not have facebone vertex groups. Exporting as-is.")
+					return NifIO.ExportNif(self, context, self)
 			else:
 				self.report({'INFO'}, "The selected object is not a mesh. Selection of the head mesh is required using 'Export Head Object' option.")
+				return NifIO.ExportNif(self, context, self)
+		else:
+			selected_objects = utils_blender.GetSelectedObjs(False)
+			if len(selected_objects) == 0:
+				self.report({'ERROR'}, "No object selected.")
+				return {'CANCELLED'}
+			
+			if len(selected_objects) < 2 or not all([obj.type == 'EMPTY' for obj in selected_objects]):
+				return NifIO.ExportNif(self, context, self)
+			
+			for obj in selected_objects:
+				utils_blender.SetActiveObject(obj)
+				export_file_name = obj.name
+				if obj.get('Import_Nif_Path') == None:
+					export_file_name = os.path.basename(obj['Import_Nif_Path'])
+				elif obj.users_collection and len(obj.users_collection) > 0:
+					coll = obj.users_collection[0]
+					export_file_name = coll.name
 				
-		return NifIO.ExportNif(self, context, self)
+				if not export_file_name.endswith('.nif'):
+					export_file_name += '.nif'
+
+				self.filepath = os.path.join(os.path.dirname(self.filepath), export_file_name)
+				self.use_secondary_uv = True
+
+				rtn = NifIO.ExportNif(self, context, self)
+				if 'CANCELLED' in rtn:
+					self.report({'WARNING'}, f"Failed to export {obj.name}.")
+					continue
+			
+		return {'FINISHED'}
 
 	def invoke(self, context, event):
 		_obj = context.active_object
