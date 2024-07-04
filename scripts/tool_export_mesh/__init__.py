@@ -222,10 +222,20 @@ def apply_filter_update(self, context):
 	max_num_selected_files = self.max_num_selected_files
 	print(directory, self.re_filter, self.negative_re_filter, self.apply_filter)
 	if self.apply_filter == True and self.re_filter != "" and directory != "": # Apply regular expression filter
-		# Get all files under the directory
 		
-		pattern = re.compile(self.re_filter, sum([getattr(re, flag) for flag in self.re_flags]))
-		negative_pattern = re.compile(self.negative_re_filter, sum([getattr(re, flag) for flag in self.negative_re_flags]))
+		# Get all files under the directory
+		try:
+			pattern = re.compile(self.re_filter, sum([getattr(re, flag) for flag in self.re_flags]))
+		except re.error as e:
+			return
+
+		negative_pattern = None
+		if self.negative_re_filter != "":
+			try:
+				negative_pattern = re.compile(self.negative_re_filter, sum([getattr(re, flag) for flag in self.negative_re_flags]))
+			except re.error as e:
+				negative_pattern = None
+
 
 		num_scanned_files = 0
 		for root, d, f in os.walk(directory):
@@ -234,7 +244,9 @@ def apply_filter_update(self, context):
 					continue
 				if num_scanned_files >= max_num_scanned_files:
 					break
-				if pattern.match(file) is not None and negative_pattern.match(file) is None:
+				if pattern.match(file) is not None:
+					if negative_pattern != None and negative_pattern.match(file) is not None:
+						continue
 					nif_path = os.path.join(root, file)
 					nif_file = self.re_nif_file_list.add()
 					nif_file.path = nif_path
