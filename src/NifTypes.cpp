@@ -167,7 +167,7 @@ void nif::BSGeometry::Serialize(std::ostream& file)
 			utils::writeAsHex(file, this->meshes[i].flags);
 
 			if (this->_use_internal_geom_data()){
-				//this->meshes[i].mesh_data.Serialize(file);
+				this->meshes[i].mesh_data.Serialize(file);
 			}
 			else {
 				this->meshes[i].path_length = (uint32_t)this->meshes[i].mesh_path.length();
