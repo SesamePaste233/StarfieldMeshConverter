@@ -40,7 +40,8 @@ def make_version(version: str) -> Version:
     return v
 
 __extra_compatible_dict__ = {
-    (1, 0, 0): {'tool_physics_editor': [(0, 17, 0)]}
+    (1, 1, 0): {'tool_physics_editor': [(0, 17, 0)]},
+    (1, 0, 0): {'tool_physics_editor': [(0, 17, 0)]},
 }
 
 def check_compatibility(submodule_name: str, raise_if_not_found: bool = False) -> bool:
