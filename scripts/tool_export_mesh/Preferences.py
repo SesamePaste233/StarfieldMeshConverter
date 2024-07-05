@@ -2,6 +2,7 @@ import bpy
 import os
 import shutil
 import utils_blender as utils_blender
+import functools
 
 class ChooseFileForPreferencesOperator(bpy.types.Operator):
     bl_idname = "object.choose_file_for_preferences"
@@ -39,6 +40,27 @@ class ChooseFileForPreferencesOperator(bpy.types.Operator):
         layout = self.layout
         layout.label(text="Choose File for Preferences")
 
+class InstallModulesOperator(bpy.types.Operator):
+    bl_idname = "object.install_modules_sgb"
+    bl_label = "Install Modules"
+
+    #files: bpy.props.CollectionProperty(type=bpy.types.OperatorFileListElement)
+
+    def execute(self, context):
+        preferences = utils_blender.get_preferences()
+        # Install scipy
+        try:
+            import scipy
+        except ImportError:
+            import pip
+            pip.main(['install', 'scipy', '--user'])
+            preferences.scipy_installed = True
+        return {'FINISHED'}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Install Modules")
+
 class SGBPreferences(bpy.types.AddonPreferences):
     bl_idname = "tool_export_mesh"
 
@@ -49,6 +71,19 @@ class SGBPreferences(bpy.types.AddonPreferences):
         description="Path to texconv.exe"
     )
 
+    scipy_installed: bpy.props.BoolProperty(
+        name="Scipy",
+        default=False,
+        description="Whether scipy is installed"
+    )
+
+    def _check_scipy_installed(self):
+        try:
+            import scipy
+            self.scipy_installed = True
+        except ImportError:
+            self.scipy_installed = False
+
     def draw(self, context):
         layout = self.layout
         sublayout = layout.column(heading="Texconv Path")
@@ -56,10 +91,25 @@ class SGBPreferences(bpy.types.AddonPreferences):
         sublayout.prop(self, "texconv_path")
         layout.operator("object.choose_file_for_preferences")
 
+        self._check_scipy_installed()
+
+        row = layout.row()
+        row.enabled = False
+        row.label(text="Required Modules:")
+        row.prop(self, "scipy_installed")
+
+        row = layout.row()
+        row.operator("object.install_modules_sgb")
+        row.enabled = not all([self.scipy_installed])
+
+
+
 def register():
     bpy.utils.register_class(SGBPreferences)
     bpy.utils.register_class(ChooseFileForPreferencesOperator)
+    bpy.utils.register_class(InstallModulesOperator)
 
 def unregister():
     bpy.utils.unregister_class(SGBPreferences)
     bpy.utils.unregister_class(ChooseFileForPreferencesOperator)
+    bpy.utils.unregister_class(InstallModulesOperator)

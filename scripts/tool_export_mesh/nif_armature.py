@@ -35,6 +35,17 @@ def SkeletonLookup(skeleton_name:str):
 def SkeletonRegistered(skeleton_name:str):
 	return skeleton_name in skeleton_lookup.keys()
 
+def LoadSkeletonData(skeleton_name:str):
+	if not SkeletonRegistered(skeleton_name=skeleton_name):
+		raise ValueError(f"Skeleton {skeleton_name} is not registered.")
+		return None
+	
+	skeleton_data = None
+	with open(os.path.join(utils_blender.PluginAssetsFolderPath(), skeleton_name + '.json'), 'r') as file:
+		skeleton_data = json.load(file)
+
+	return skeleton_data
+
 def RegisterSkeleton(skeleton_name:str, skeleton_data:dict, overwrite = False):
 	global skeleton_lookup
 	if not overwrite and SkeletonRegistered(skeleton_name):
@@ -248,7 +259,10 @@ def MatchSkeletonAdvanced(bone_list:list, obj_name:str, name_first = False):
 	else:
 		return None, None
 
-def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_capsule = None):
+def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_capsule = None, additive_armature_dict = None):
+	if additive_armature_dict == None or armature_dict['name'] != additive_armature_dict['name']:
+		additive_armature_dict = None
+
 	b = edit_bones.new(utils_blender.RenamingBone(armature_dict['name']))
 	b.head = tuple(armature_dict['head'])
 	b.tail = tuple(armature_dict['tail'])
@@ -277,11 +291,25 @@ def CreateArmatureRecursive(armature_dict:dict, parent_bone, edit_bones, debug_c
 
 		debug_capsule[armature_dict['name']]['world_center'] = transformed_start_3d
 
+	children_dict = {}
 	if 'children' in armature_dict.keys():
-		for child_dict in armature_dict['children']:
-			CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule)
+		for child in armature_dict['children']:
+			children_dict[child['name']] = child
 
-def CreateArmature(armature_dict: dict, skin_objects: bpy.types.Object, collection: bpy.types.Collection, armature_name = None, debug_capsule = None):
+	additive_children_dict = {}
+	if additive_armature_dict != None and 'children' in additive_armature_dict.keys():
+		for child in additive_armature_dict['children']:
+			additive_children_dict[child['name']] = child
+
+	for child_name, child_dict in {**additive_children_dict, **children_dict}.items():
+		if child_name in children_dict.keys() and child_name in additive_children_dict.keys():
+			CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule, additive_children_dict[child_name])
+		elif child_name in children_dict.keys() and child_name not in additive_children_dict.keys():
+			CreateArmatureRecursive(child_dict, b, edit_bones, debug_capsule)
+		elif child_name not in children_dict.keys() and child_name in additive_children_dict.keys():
+			CreateArmatureRecursive(additive_children_dict[child_name], b, edit_bones, debug_capsule)
+
+def CreateArmature(armature_dict: dict, skin_objects: bpy.types.Object, collection: bpy.types.Collection, armature_name = None, debug_capsule = None, additive_armature_dict = None):
 	old_active = utils_blender.GetActiveObject()
 	old_selected = utils_blender.GetSelectedObjs(True)
 
@@ -293,7 +321,7 @@ def CreateArmature(armature_dict: dict, skin_objects: bpy.types.Object, collecti
 	bpy.ops.object.mode_set(mode='EDIT', toggle=False)
 	edit_bones = arm_obj.data.edit_bones
 
-	CreateArmatureRecursive(armature_dict, None, edit_bones, debug_capsule)
+	CreateArmatureRecursive(armature_dict, None, edit_bones, debug_capsule, additive_armature_dict)
 
 	bpy.ops.object.mode_set(mode='OBJECT')
 

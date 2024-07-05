@@ -29,7 +29,6 @@ import ImportSkeleOp as ImportSkeleOp
 
 import Preferences as Preferences
 
-import utils_transfer as transfer
 
 #import imp
 #imp.reload(utils_blender)
@@ -41,7 +40,7 @@ import utils_transfer as transfer
 
 bl_info = {
 	"name": "Starfield Geometry Bridge",
-	"author": "SesamePaste",
+	"author": "SesamePaste & Deveris",
 	"version": (1, 0, 0),
 	"blender": (3, 5, 0),
 	"location": "File > Import-Export",
@@ -993,6 +992,7 @@ class TransferShapeKeys(bpy.types.Operator):
 		)
 
 	def execute(self, context):
+		import utils_transfer as transfer
 		reference = context.object
 		target_list = [o for o in utils_blender.GetSelectedObjs(True) if o.type == "MESH"]
 

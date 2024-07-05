@@ -286,7 +286,9 @@ def ImportNif(file_path, options, context, operator):
 		havok_skel = _data['havok_skeleton']
 		skel_coll = bpy.data.collections.new("HavokSkeleton")
 		bpy.context.scene.collection.children.link(skel_coll)
-		hkaSkele = nif_armature.CreateArmature(havok_skel, obj_list, skel_coll, f"{nifname}_hkaSkeleton")
+		default_skel_dict = nif_armature.LoadSkeletonData(best_skel)
+		wrapped_hka_skel = {'name': 'HumanExportRoot', 'children': [havok_skel]}
+		hkaSkele = nif_armature.CreateArmature(default_skel_dict, obj_list, skel_coll, f"{nifname}_hkaSkeleton", debug_capsule=None, additive_armature_dict=wrapped_hka_skel)
 		best_skel = None
 		
 		# DEBUG: Save the JSON data to a file
