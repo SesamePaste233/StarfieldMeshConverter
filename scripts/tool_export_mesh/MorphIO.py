@@ -143,14 +143,14 @@ def ImportMorph(options, context, operator, result_objs = []):
 			if debug_mode or options.as_multiple:
 				offsets[i] = [morph_data[n][i][0],morph_data[n][i][1],morph_data[n][i][2]]
 				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
-				delta_normals[i] = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
-				delta_tangents[i] = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
+				delta_normals[i] = [morph_data[n][i][4][0],morph_data[n][i][4][1],morph_data[n][i][4][2]]
+				delta_tangents[i] = [morph_data[n][i][5][0],morph_data[n][i][5][1],morph_data[n][i][5][2]]
 			
 			if options.use_attributes:
 				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
 
-				target_obj.data.attributes.get(f"NRM_{sk.name}").data[i].vector = [morph_data[n][i][4],morph_data[n][i][5],morph_data[n][i][6]]
-				target_obj.data.attributes.get(f"TAN_{sk.name}").data[i].vector = [morph_data[n][i][7],morph_data[n][i][8],morph_data[n][i][9]]
+				target_obj.data.attributes.get(f"NRM_{sk.name}").data[i].vector = [morph_data[n][i][4][0],morph_data[n][i][4][1],morph_data[n][i][4][2]]
+				target_obj.data.attributes.get(f"TAN_{sk.name}").data[i].vector = [morph_data[n][i][5][0],morph_data[n][i][5][1],morph_data[n][i][5][2]]
 
 		if options.use_attributes:
 			utils_blender.SetVertColorPerVert(target_obj, target_vert_colors)
@@ -204,14 +204,14 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 
 	if len(_morph_objs) < 2:
 		operator.report({'WARNING'}, f'You don\'t have enough morph object to export. Expecting one Basis and at least one morph key.')
-		return {'CANCELLED'}
+		return {'CANCELLED'}, None
 
 	for morph_obj in _morph_objs:
 		morph_name = GetMorphObjMorphName(morph_obj)
 		if morph_name == 'Basis':
 			if has_basis:
 				operator.report({'WARNING'}, f'Two basis object present.')
-				return {'CANCELLED'}
+				return {'CANCELLED'}, None
 			basis_obj = morph_obj
 			has_basis = True
 		else:
@@ -220,12 +220,12 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 
 	if has_basis == False:
 		operator.report({'WARNING'}, f'You don\'t have any basis mesh.')
-		return {'CANCELLED'}
+		return {'CANCELLED'}, None
 
 	morph_name_non_overlapping = list(set(morph_names))
 	if len(morph_name_non_overlapping) != len(morph_names):
 		operator.report({'WARNING'}, f'Two identical morph key names present.')
-		return {'CANCELLED'}
+		return {'CANCELLED'}, None
 
 	assert(len(morph_objs) == len(morph_names))
 
@@ -238,7 +238,7 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 	if len(invalid_morph_objs) != 0:
 		utils_blender.SetSelectObjects(invalid_morph_objs)
 		operator.report({'WARNING'}, f'Selected {len(invalid_morph_objs)} shapes have a different number of verts than basis shape.')
-		return {'CANCELLED'}
+		return {'CANCELLED'}, None
 	
 	# Begin exporting
 
@@ -265,7 +265,7 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 		nan_ps = np.isnan(sk_positions.flatten())
 		if nan_ps.any():
 			operator.report({'WARNING'}, f'Found NaN(s) in shape: {sk_obj.name} at vert id: {[i for i in range(verts_count) if nan_ps[i * 3]]}.')
-			return {'CANCELLED'}
+			return {'CANCELLED'}, None
 
 		sk_normals, sk_tangents, _ = utils_blender.GetNormalTangents(sk_obj.data, True, True, vid_lid_list)
 		sk_v_colors, has_color = utils_blender.GetVertColorPerVert(sk_obj)
@@ -273,8 +273,8 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 			no_color_objs_in_group.append(sk_obj.name)
 
 		d_P = (sk_positions - basis_positions).tolist()
-		d_N = (sk_normals - basis_normals).tolist()
-		d_T = (basis_tangentsigns[:, np.newaxis] * (sk_tangents - basis_tangents)).tolist()
+		d_N = utils_math.bounded_vector_substraction(basis_normals, sk_normals).tolist()
+		d_T = (basis_tangentsigns[:, np.newaxis] * utils_math.bounded_vector_substraction(basis_tangents, sk_tangents)).tolist()
 		morphData[n] = [[d_p[0], d_p[1], d_p[2], utils_blender.ColorToRGB888(sk_v_colors[i]), d_n, d_t] for i, d_p, d_n, d_t in zip(range(verts_count), d_P, d_N, d_T)]
 
 	if len(no_color_objs_in_group) != 0 and len(no_color_objs_in_group) != len(morph_objs):
@@ -293,10 +293,10 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 
 	if not returncode:
 		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
-		return {"CANCELLED"}
+		return {"CANCELLED"}, None
 
 	operator.report({'INFO'}, f"Export morph successful.")
-	return {"FINISHED"}
+	return {"FINISHED"}, verts_count
 
 def ExportMorph(options, context, export_file_path, operator):
 	export_path = export_file_path

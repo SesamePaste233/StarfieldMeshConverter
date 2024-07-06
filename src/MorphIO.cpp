@@ -396,7 +396,7 @@ bool morph::MorphIO::SerializeToJson(std::string& json_data)
 	for (int i = 0; i < this->num_shape_keys; i++) {
 		jsonData["morphData"].push_back(json::array());
 		for (int j = 0; j < this->num_vertices; j++) {
-			jsonData["morphData"][i].push_back(json::array({ 0, 0, 0, json::array({255,255,255}), 0, 0, 0, 0, 0, 0}));
+			jsonData["morphData"][i].push_back(json::array({ 0.f, 0.f, 0.f, json::array({255,255,255}), json::array({0.f,0.f,0.f}), json::array({0.f,0.f,0.f}) }));
 		}
 	}
 
@@ -415,14 +415,10 @@ bool morph::MorphIO::SerializeToJson(std::string& json_data)
 			jsonData["morphData"][id][i][3] = json::array({ r, g, b });
 
 			auto delta_norm = utils::decodeDEC3N(data.x);
-			jsonData["morphData"][id][i][4] = delta_norm[0];
-			jsonData["morphData"][id][i][5] = delta_norm[1];
-			jsonData["morphData"][id][i][6] = delta_norm[2];
+			jsonData["morphData"][id][i][4] = json::array({ delta_norm[0], delta_norm[1], delta_norm[2] });
 
 			auto delta_tan = utils::decodeDEC3N(data.y);
-			jsonData["morphData"][id][i][7] = delta_tan[0];
-			jsonData["morphData"][id][i][8] = delta_tan[1];
-			jsonData["morphData"][id][i][9] = delta_tan[2];
+			jsonData["morphData"][id][i][5] = json::array({ delta_tan[0], delta_tan[1], delta_tan[2] });
 			//jsonData["morphData"][id][i][10] = w;
 
 			// print w

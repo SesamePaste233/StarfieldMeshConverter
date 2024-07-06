@@ -256,55 +256,55 @@ def HomographyWarpFromBoxes(mesh_obj:bpy.types.Object, source_box:bpy.types.Obje
 	HomographyWarp(mesh_obj, source_pts, target_pts, mask_vg_name, invert_mask, as_shape_key, shape_key_name)
 
 def CombineVertexGroups(obj:bpy.types.Object, vertex_groups:list[str], new_name:str, delete_old = False, skip_if_not_exist = True, combine_mode = 'ADD'):
-	if len(vertex_groups) == 0:
-		print("No vertex groups to combine.")
-		return
+    if len(vertex_groups) == 0:
+        print("No vertex groups to combine.")
+        return
 
-	# Check if new_name already exists
-	combined_vg = None
-	if new_name in [vg.name for vg in obj.vertex_groups]:
-		combined_vg = obj.vertex_groups[new_name]
-	else:
-		combined_vg = obj.vertex_groups.new(name = new_name)
+    # Check if new_name already exists
+    combined_vg = None
+    if new_name in [vg.name for vg in obj.vertex_groups]:
+        combined_vg = obj.vertex_groups[new_name]
+    else:
+        combined_vg = obj.vertex_groups.new(name = new_name)
 
-	# Check if all vertex groups exist
-	for vg_name in vertex_groups:
-		if vg_name not in [vg.name for vg in obj.vertex_groups]:
-			if skip_if_not_exist:
-				vertex_groups.remove(vg_name)
-			else:
-				print(f"Vertex group {vg_name} does not exist in the object.")
-				return
-	
-	if len(vertex_groups) == 0:
-		print("No vertex groups to combine.")
-		return
+    # Check if all vertex groups exist
+    skip_list = []
+    for vg_name in vertex_groups:
+        if vg_name not in [vg.name for vg in obj.vertex_groups]:
+            if skip_if_not_exist:
+                print(f"Vertex group {vg_name} does not exist in the object.")
+                skip_list.append(vg_name)
+            else:
+                print(f"Vertex group {vg_name} does not exist in the object.")
+                return
+    
+    if len(vertex_groups) == len(skip_list):
+        print("No vertex groups to combine.")
+        return
 
-	combine_vg_index = combined_vg.index
-	vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups]
-		
-	bm = bmesh.new()
-	bm.from_mesh(obj.data)
-	
-	deform_layer = bm.verts.layers.deform.active
+    combine_vg_index = combined_vg.index
+    vg_indices = [obj.vertex_groups[vg_name].index for vg_name in vertex_groups if vg_name not in skip_list]
+        
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    
+    deform_layer = bm.verts.layers.deform.active
 
-	for v in bm.verts:
-		d_vert = v[deform_layer]
-		weights = [d_vert[vg_index] for vg_index in vg_indices if vg_index in d_vert]
-		if combine_mode == 'ADD':
-			new_weight = sum(weights)
-		elif combine_mode == 'MAX':
-			new_weight = max(weights)
-		combined_vg.add([v.index], new_weight, 'REPLACE')
+    for v in bm.verts:
+        d_vert = v[deform_layer]
+        weights = [d_vert[vg_index] for vg_index in vg_indices if vg_index in d_vert]
+        if combine_mode == 'ADD':
+            new_weight = sum(weights)
+        elif combine_mode == 'MAX':
+            new_weight = max(weights)
+        combined_vg.add([v.index], new_weight, 'REPLACE')
 
-	bm.to_mesh(obj.data)
-	bm.free()
+    bm.free()
 
-	if delete_old:
-		for vg_name in vertex_groups:
-			if vg_name != new_name:
-				obj.vertex_groups.remove(obj.vertex_groups[vg_name])
-		
+    if delete_old:
+        for vg_name in vertex_groups:
+            if vg_name != new_name:
+                obj.vertex_groups.remove(obj.vertex_groups[vg_name])
 
 
 def ApplyTransform(mesh_obj:bpy.types.Object):

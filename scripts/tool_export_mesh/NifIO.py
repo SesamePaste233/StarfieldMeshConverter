@@ -474,6 +474,8 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
 				continue
 
+		print("Bone list: ", bone_list)
+
 		has_skinned_geometry = True
 		
 		if options.export_morph:

@@ -87,3 +87,18 @@ def estimate_homography_3d(src_points, dst_points):
 
 	return H
 
+def bounded_vector_substraction(n0: np.ndarray, nt: np.ndarray) -> np.ndarray:
+    '''
+    Substracts two vectors while keeping the result in the range of abs(max(result)) <= 1 .
+        n0: np.array([x,y,z]) * n_row
+        nt: np.array([x,y,z]) * n_row
+        return: dn = k * nt - n0 * n_row, s.t. abs(max(dn)) <= 1
+    '''
+    k_limit = n0/nt + np.abs(1/nt)
+    k_limit = np.hstack((k_limit, np.ones((k_limit.shape[0], 1))))
+
+    k = np.min(k_limit, axis=1)
+
+    dn = k[:, np.newaxis] * nt - n0
+
+    return dn
