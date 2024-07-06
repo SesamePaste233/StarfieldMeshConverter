@@ -486,10 +486,13 @@ def ExportMorph(options, context, export_file_path, operator):
 		
 		normals, tangents, _ = utils_blender.GetNormalTangents(me, True, True, vid_lid_list)
 
+		d_N = utils_math.bounded_vector_substraction(basis_normals, normals)
+		d_T = basis_tangentsigns[:, np.newaxis] * utils_math.bounded_vector_substraction(basis_tangents, tangents)
+
 		for i in range(verts_count):
 			jsondata["morphData"][n][i][3] = [255,255,255] # Target vert color
-			jsondata["morphData"][n][i][4] = list(normals[i] - basis_normals[i])
-			jsondata["morphData"][n][i][5] = list(basis_tangentsigns[i] * (tangents[i] - basis_tangents[i]))
+			jsondata["morphData"][n][i][4] = list(d_N[i])
+			jsondata["morphData"][n][i][5] = list(d_T[i])
 
 		bpy.data.meshes.remove(me)
 		

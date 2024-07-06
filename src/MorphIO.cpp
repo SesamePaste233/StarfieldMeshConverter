@@ -233,66 +233,9 @@ bool MorphIO::Load(const std::string jsonMorphFile, const uint32_t options)
 		return false;
 	}
 
-	json jsonData;
-	file >> jsonData;
-	file.close();
+	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-	// Read shape key names
-	this->num_shape_keys = jsonData["shapeKeys"].size();
-	for (auto& shapeKey : jsonData["shapeKeys"]) {
-		this->morph_names.push_back(shapeKey);
-	}
-
-	// Read morph data
-	this->num_morph_data = 0;
-	this->num_vertices = jsonData["numVertices"];
-	for (int i = 0; i < this->num_vertices; i++) {
-		std::vector<morph_data> _morph_data;
-		std::vector<uint32_t> _morph_key_selection;
-		for (int j = 0; j < this->num_shape_keys; j++) {
-			auto& morphData = jsonData["morphData"][j][i];
-
-			if (abs(float(morphData[0])) > 1e-4 || abs(float(morphData[1])) > 1e-4 || abs(float(morphData[2])) > 1e-4) {
-				morph_data _data{};
-				_morph_key_selection.push_back(j);
-				_data._offset[0] = utils::floatToHalf(morphData[0]);
-				_data._offset[1] = utils::floatToHalf(morphData[1]);
-				_data._offset[2] = utils::floatToHalf(morphData[2]);
-				_data.target_vert_color = utils::encodeRGB565(morphData[3][0], morphData[3][1], morphData[3][2]);
-				_data.x = utils::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
-				_data.y = utils::encodeDEC3N({ float(morphData[5][0]),float(morphData[5][1]) ,float(morphData[5][2]) }, 1);
-				_morph_data.push_back(_data);
-				this->morph_data_raw.push_back(_data);
-				this->num_morph_data++;
-			}
-
-		}
-		this->per_vert_morph_data.push_back(_morph_data);
-		this->per_vert_morph_key_indices.push_back(_morph_key_selection);
-	}
-
-	this->num_offsets = this->num_vertices;
-	uint32_t offset = 0;
-	for(int i = 0; i < this->num_vertices; i++) {
-		IOffset _offset_data{};
-		_offset_data._offset = offset;
-		
-		//auto binary = utils::fill_binary(this->num_shape_keys);
-		auto binary = utils::positions_to_binary(this->per_vert_morph_key_indices[i]);
-
-		_offset_data._marker[0] = static_cast<morph_key_selection>(binary[0]);
-		_offset_data._marker[1] = static_cast<morph_key_selection>(binary[1]);
-		_offset_data._marker[2] = static_cast<morph_key_selection>(binary[2]);
-		_offset_data._marker[3] = static_cast<morph_key_selection>(binary[3]);
-
-		// Free binary memory
-		delete[] binary;
-
-		this->offsets_list.push_back(_offset_data);
-		offset += this->per_vert_morph_key_indices[i].size();
-	}
-
-	return this->PostProcess(options);
+	return this->LoadFromString(json_data, options);
 }
 
 bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t options)

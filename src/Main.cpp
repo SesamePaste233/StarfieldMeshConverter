@@ -13,7 +13,7 @@ using namespace DirectX;
 using namespace mesh;
 using namespace morph;
 
-int main() {
+int addimain() {
 	std::string assets_folder = "C:\\Users\\26553\\AppData\\Roaming\\Blender Foundation\\Blender\\3.5\\scripts\\addons\\tool_export_mesh\\Result\\Helmets";
 	std::string base_nif_path = "C:\\test\\meshes\\clothes\\outfit_first_mech_pilot_01\\outfit_first_mech_pilot_01_helmet_m.nif";
 	std::string json_file = "C:\\repo\\MeshConverter\\outfit_first_mech_pilot_01_helmet_m.nif.json";
@@ -95,7 +95,7 @@ int main1(int argc, char* argv[]){
 	return 0; // Return success
 }
 
-int __main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
 	
 	// Extract command-line arguments
 	std::string inputMorph = "C:\\repo\\MeshConverter\\morph.dat.json";
