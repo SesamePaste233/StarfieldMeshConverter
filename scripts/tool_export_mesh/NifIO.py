@@ -31,6 +31,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 		data = root_dict["geometries"][armature_dict["geometry_index"]]
 		geo_name = armature_dict['name']
 		material = bpy.data.materials.new(name=data['mat_path'])
+		material.use_nodes = True
 		loaded = False
 
 		use_internal_geom_data = bool(data['use_internal_geom_data'])
