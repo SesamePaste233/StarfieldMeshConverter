@@ -13,6 +13,16 @@ class Transferable:
         self.normals = []
         self.data = []
         self.weights = []
+        self.unique_indices_np: np.ndarray = None
+
+    @functools.lru_cache(4)
+    def _calc_unique(self):
+        positions_np = np.array(self.positions)
+        _, unique_indices = np.unique(positions_np, axis=0, return_index=True)
+        self.unique_indices = unique_indices
+    
+    def Unique(self):
+        self._calc_unique()
 
     def AddEmptyData(self, position:mathutils.Vector, normal:mathutils.Vector):
         self.positions.append([position.x, position.y, position.z])
@@ -138,8 +148,12 @@ def RBFTransfer(source: Transferable, target: Transferable, neighbours: int = 15
     inv_scale = 1/scale
     
     positions = source.PositionsNumpy
+    if source.unique_indices_np is not None:
+        positions = positions[source.unique_indices_np]
 
     data = source.DataNumpy
+    if source.unique_indices_np is not None:
+        data = data[source.unique_indices_np]
 
     if use_normals:
         positions_enhanced = source.PositionsEnhanced(surface_depth)
@@ -258,6 +272,7 @@ def TransferableToMeshShapeKey(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey
 
 def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, shape_key_name_lst:list[str], falloff_sigma = 0.1, copy_range = 0.005, create_if_not_exist:bool = True, dont_create_if_unobvious:bool = True):
     source = MeshToTransferable(source_obj)
+    source.Unique()
     target = MeshToTransferable(target_obj)
 
     #source_bvh_tree = mathutils.bvhtree.BVHTree.FromObject(source_obj, bpy.context.evaluated_depsgraph_get())

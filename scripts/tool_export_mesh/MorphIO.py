@@ -400,11 +400,12 @@ def ExportMorph(options, context, export_file_path, operator):
 			key_mapping = [-1 for i in range(num_shape_keys)]
 			for _key in key_blocks:
 				_key_index = key_blocks.keys().index(_key.name)
-				ref_key_index = ref_key_blocks.keys().index(_key.name)
-				if ref_key_index == -1:
+				if _key.name not in ref_key_blocks:
 					operator.report({'WARNING'}, f"Reference objects don't have some keys: {_key.name}")
-					return {"CANCELLED"}, None
-				key_mapping[_key_index] = ref_key_index
+					#return {"CANCELLED"}, None
+				else:
+					ref_key_index = ref_key_blocks.keys().index(_key.name)
+					key_mapping[_key_index] = ref_key_index
 
 			for ref_key in ref_key_blocks:
 				ref_key.value = 0
@@ -461,11 +462,17 @@ def ExportMorph(options, context, export_file_path, operator):
 		bpy.ops.object.mode_set(mode='EDIT')
 		proxy_obj.active_shape_key_index = shape_key_index
 		target_obj.active_shape_key_index = shape_key_index
+		
+		do_smooth_perimeter = True
 		if ref_obj:
-			ref_obj.active_shape_key_index = key_mapping[shape_key_index]
-			for key in ref_key_blocks:
-				key.value = 0
-			ref_key_blocks[cur_key.name].value = 1
+			active_sk_index = key_mapping[shape_key_index]
+			if active_sk_index == -1:
+				do_smooth_perimeter = False	
+			else:
+				ref_obj.active_shape_key_index = active_sk_index
+				for key in ref_key_blocks:
+					key.value = 0
+				ref_key_blocks[cur_key.name].value = 1
 
 		for key in original_shape_keys:
 			key.value = 0
@@ -482,7 +489,8 @@ def ExportMorph(options, context, export_file_path, operator):
 		utils_blender.SetActiveObject(me_obj)
 		bpy.ops.object.shade_smooth(use_auto_smooth=True)
 
-		utils_blender.SmoothPerimeterNormal(me_obj, [ref_obj], True, target_obj, loop_mapping_base="NEAREST_POLYNOR")
+		if do_smooth_perimeter:
+			utils_blender.SmoothPerimeterNormal(me_obj, [ref_obj], True, target_obj, loop_mapping_base="NEAREST_POLYNOR")
 		
 		normals, tangents, _ = utils_blender.GetNormalTangents(me, True, True, vid_lid_list)
 

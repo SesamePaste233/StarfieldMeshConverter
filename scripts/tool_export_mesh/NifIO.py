@@ -317,7 +317,7 @@ def ImportNif(file_path, options, context, operator):
 
 	return {'FINISHED'}, best_skel, obj_list
 
-def ExportNif(options, context, operator, replace_facebone_vg_with_head = False):
+def ExportNif(options, context, operator, head_object_mode = 'None'):
 	nif_armature.LoadAllSkeletonLookup()
 	original_selected = utils_blender.GetSelectedObjs(True)
 	nif_filepath = options.filepath
@@ -461,7 +461,7 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 
 		geom_data = None
 		if options.use_internal_geom_data:
-			rtn, message, geom_data = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, replace_facebone_vg_with_head)
+			rtn, message, geom_data = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, head_object_mode)
 			verts_count = geom_data['num_verts']
 			indices_count = geom_data['num_indices']
 			bone_list = geom_data['vertex_group_names']
@@ -469,7 +469,7 @@ def ExportNif(options, context, operator, replace_facebone_vg_with_head = False)
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Message: {message}Skipping...')
 				continue
 		else:
-			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, replace_facebone_vg_with_head)
+			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, head_object_mode)
 			if 'FINISHED' not in rtn:
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
 				continue

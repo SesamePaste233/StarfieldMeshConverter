@@ -29,6 +29,7 @@ import ImportSkeleOp as ImportSkeleOp
 
 import Preferences as Preferences
 
+import BoneRegionsPanel as BoneRegionsPanel
 
 #import imp
 #imp.reload(utils_blender)
@@ -166,6 +167,7 @@ class ExportCustomMesh(bpy.types.Operator):
 		self.export_sf_mesh_open_folder = context.scene.export_sf_mesh_open_folder
 		self.export_sf_mesh_hash_result = context.scene.export_sf_mesh_hash_result
 		self.export_morph = context.scene.export_morph
+		self.use_secondary_uv = context.scene.use_secondary_uv
 
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
@@ -751,7 +753,7 @@ class ExportCustomNif(bpy.types.Operator):
 				facebone_groups = [group for group in root.vertex_groups if group.name.startswith('faceBone_')]
 
 				if len(facebone_groups) > 0:
-					rtn = NifIO.ExportNif(self, context, self, replace_facebone_vg_with_head=True)
+					rtn = NifIO.ExportNif(self, context, self, head_object_mode='Base')
 					if 'FINISHED' in rtn:
 						self.report({'INFO'}, "Operation successful.")
 						nif_filepath = self.filepath
@@ -759,7 +761,7 @@ class ExportCustomNif(bpy.types.Operator):
 						nif_name = os.path.splitext(os.path.basename(nif_filepath))[0]
 						facebone_marker = "_facebones"
 						self.filepath = os.path.join(export_folder, nif_name + facebone_marker + '.nif')
-						return NifIO.ExportNif(self, context, self, replace_facebone_vg_with_head=False)
+						return NifIO.ExportNif(self, context, self, head_object_mode='FaceBone')
 					else:
 						return rtn
 				else:
@@ -1291,6 +1293,11 @@ def register():
 		description="Export into [hex1]\\[hex2].mesh instead of [model_name].mesh",
 		default=False,
 	)
+	bpy.types.Scene.use_secondary_uv = bpy.props.BoolProperty(
+		name="Use Secondary UV",
+		description="Use the topmost non-active UV map (if possible) as secondary UV",
+		default=False
+	)
 
 	bpy.utils.register_class(SGB_UL_FileListItems)
 	bpy.utils.register_class(ImportNifFileList)
@@ -1306,7 +1313,7 @@ def register():
 	bpy.utils.register_class(SGB_UL_ShapeKeyListItems)
 	bpy.utils.register_class(shapeKeyList)
 	bpy.utils.register_class(TransferShapeKeys)
-	bpy.utils.register_class(ExportSFMeshPanel)
+	#bpy.utils.register_class(ExportSFMeshPanel)
 	bpy.utils.register_class(ExportCustomNif)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 	bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
@@ -1320,11 +1327,12 @@ def register():
 	MaterialPanel.register()
 	ImportSkeleOp.register()
 	Preferences.register()
+	BoneRegionsPanel.register()
 
 def unregister():
 	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
 	bpy.utils.unregister_class(ExportSFMeshOperator)
-	bpy.utils.unregister_class(ExportSFMeshPanel)
+	#bpy.utils.unregister_class(ExportSFMeshPanel)
 	bpy.utils.unregister_class(ExportCustomMesh)
 	bpy.utils.unregister_class(ImportCustomMesh)
 	bpy.utils.unregister_class(ImportCustomNif)
@@ -1358,11 +1366,13 @@ def unregister():
 	del bpy.types.Scene.export_sf_mesh_open_folder
 	del bpy.types.Scene.export_sf_mesh_hash_result
 	del bpy.types.Scene.export_morph
+	del bpy.types.Scene.use_secondary_uv
 
 	PhysicsPanel.unregister()
 	MaterialPanel.unregister()
 	ImportSkeleOp.unregister()
 	Preferences.unregister()
+	BoneRegionsPanel.unregister()
 
 if __name__ == "__main__":
 	register()
