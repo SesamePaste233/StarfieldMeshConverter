@@ -392,7 +392,7 @@ def ApplyTransform(mesh_obj:bpy.types.Object):
 	bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 	SetActiveObject(prev_active)
 
-def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_triangulation = True):
+def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_triangulation = True, auto_add_sharp = False):
 	if not (old_obj and old_obj.type == 'MESH'):
 		print("No valid object is selected.")
 		return None, None
@@ -492,18 +492,19 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_tri
 
 	bpy.ops.object.shade_smooth(use_auto_smooth=True)
 
-	modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
-	modifier2.object = base_obj
-	#modifier2.vertex_group = double_faces_vg.name
-	#modifier2.invert_vertex_group = True
-	modifier2.use_loop_data = True
-	modifier2.data_types_loops = {'CUSTOM_NORMAL'}
-	modifier2.use_max_distance = True
-	modifier2.max_distance = 0.001
-	modifier2.loop_mapping = "NEAREST_POLYNOR"
+	if auto_add_sharp:
+		modifier2 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
+		modifier2.object = base_obj
+		#modifier2.vertex_group = double_faces_vg.name
+		#modifier2.invert_vertex_group = True
+		modifier2.use_loop_data = True
+		modifier2.data_types_loops = {'CUSTOM_NORMAL'}
+		modifier2.use_max_distance = True
+		modifier2.max_distance = 0.001
+		modifier2.loop_mapping = "NEAREST_POLYNOR"
 
-	#modifier3 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
-	bpy.ops.object.modifier_apply(modifier=modifier2.name)
+		#modifier3 = selected_obj.modifiers.new(name = selected_obj.name, type='DATA_TRANSFER')
+		bpy.ops.object.modifier_apply(modifier=modifier2.name)
 
 	# Create a BMesh from the selected object
 	bm = bmesh.new()

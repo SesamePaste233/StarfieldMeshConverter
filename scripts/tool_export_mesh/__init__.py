@@ -128,6 +128,11 @@ class ExportCustomMesh(bpy.types.Operator):
 		description="Export into [hex1]\\[hex2].mesh instead of [name].mesh",
 		default=False,
 	)
+	auto_add_sharp: bpy.props.BoolProperty(
+		name="Split by Split Normals",
+		description="Detect Sharp Edges automatically and split along then using split normals info",
+		default=False
+	)
 
 	def execute(self,context):
 		original_active = utils_blender.GetActiveObject()
@@ -703,6 +708,12 @@ class ExportCustomNif(bpy.types.Operator):
 		default=False,
 	)
 
+	auto_add_sharp: bpy.props.BoolProperty(
+		name="Split by Split Normals",
+		description="Detect Sharp Edges automatically and split along then using split normals info",
+		default=False
+	)
+
 	use_world_origin = False
 
 	def draw(self, context):
@@ -718,6 +729,7 @@ class ExportCustomNif(bpy.types.Operator):
 			layout.prop(self, item[0], text=item[1])
 
 		layout.prop(self, "use_secondary_uv")
+		layout.prop(self, "auto_add_sharp")
 		
 		# Draw a horizontal line
 		layout.separator()
@@ -865,6 +877,11 @@ class ExportCustomMorph(bpy.types.Operator):
 		name="Use world origin",
 		description="Use world instead of object origin as output geometry's origin.",
 		default=True
+	)
+	auto_add_sharp: bpy.props.BoolProperty(
+		name="Split by Split Normals",
+		description="Detect Sharp Edges automatically and split along then using split normals info",
+		default=False
 	)
 
 	def execute(self, context):
@@ -1078,6 +1095,7 @@ class ExportSFMeshPanel(bpy.types.Panel):
 		layout.prop(context.scene, "max_border", text="Compression Border")
 		layout.prop(context.scene, "use_world_origin", text="Use world origin")
 		layout.prop(context.scene, "normalize_weights", text="Normalize weights")
+		layout.prop(context.scene, "auto_add_sharp")
 		
 		
 		layout.label(text="Export Datatypes:") 
@@ -1298,6 +1316,11 @@ def register():
 		description="Use the topmost non-active UV map (if possible) as secondary UV",
 		default=False
 	)
+	bpy.types.Scene.auto_add_sharp = bpy.props.BoolProperty(
+		name="Split by Split Normals",
+		description="Detect Sharp Edges automatically and split along then using split normals info",
+		default=False
+	)
 
 	bpy.utils.register_class(SGB_UL_FileListItems)
 	bpy.utils.register_class(ImportNifFileList)
@@ -1367,6 +1390,7 @@ def unregister():
 	del bpy.types.Scene.export_sf_mesh_hash_result
 	del bpy.types.Scene.export_morph
 	del bpy.types.Scene.use_secondary_uv
+	del bpy.types.Scene.auto_add_sharp
 
 	PhysicsPanel.unregister()
 	MaterialPanel.unregister()

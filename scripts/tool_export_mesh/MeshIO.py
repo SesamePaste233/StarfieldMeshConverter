@@ -33,7 +33,7 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	if not (old_obj and old_obj.type == 'MESH'):
 		return {'CANCELLED'}, "Selected object is not a mesh.", None
 
-	old_obj, selected_obj = utils_blender.PreprocessAndProxy(old_obj, options.use_world_origin)
+	old_obj, selected_obj = utils_blender.PreprocessAndProxy(old_obj, options.use_world_origin, auto_add_sharp=options.auto_add_sharp)
 
 	if 'DOUBLE_FACES_VERTS' in selected_obj.vertex_groups:
 		double_faces_vg = selected_obj.vertex_groups['DOUBLE_FACES_VERTS']
