@@ -123,6 +123,7 @@ class ExportMaterialPanel(bpy.types.Panel):
         sub_layout.label(text="Texture Maps")
         for texture_item in MaterialConverter.TextureIndex.__members__.values():
             sub_layout.prop(context.scene, f"sf_export_material_{texture_item.name}")
+            sub_layout.prop(context.scene, f"sf_export_material_{texture_item.name}_size")
 
         sub_layout.label(text="Alpha Settings")
         box = sub_layout.box()
@@ -203,6 +204,19 @@ def register():
             update=update_texture_at_index(texture_item),
             poll = lambda self, obj: obj.size[0] * obj.size[1],
         ))
+        setattr(bpy.types.Scene, f"sf_export_material_{texture_item.name}_size",
+        bpy.props.EnumProperty(
+            name="Size",
+            items=[
+                ("None", "Default", ""),
+                ("512", "512", ""),
+                ("1024", "1024", ""),
+                ("2048", "2048", ""),
+                ("3072", "3072", ""),
+                ("4096", "4096", ""),
+            ],
+            default="None",
+        ))
     bpy.types.Scene.sf_export_material_alpha_thresh = bpy.props.FloatProperty(
         name="Alpha Threshold",
         default=0.0,
@@ -242,6 +256,7 @@ def unregister():
     del bpy.types.Scene.sf_export_material_ShaderModel
     for texture_item in MaterialConverter.TextureIndex.__members__.values():
         delattr(bpy.types.Scene, f"sf_export_material_{texture_item.name}")
+        delattr(bpy.types.Scene, f"sf_export_material_{texture_item.name}_size")
     del bpy.types.Scene.sf_export_material_alpha_thresh
     del bpy.types.Scene.sf_export_material_alpha_blend_channel
     del bpy.types.Scene.sf_export_material_folder

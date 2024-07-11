@@ -13,7 +13,7 @@ class TextureIndex(enum.Enum):
     METAL = 4
     AO = 5
     HEIGHT = 6
-    #EMISSIVE = 7
+    EMISSIVE = 7
     #TRANSMISSIVE = 8
 
 class BlendVertexColorChannel(enum.Enum):
@@ -80,7 +80,7 @@ class MatFile:
             TextureIndex.METAL.value: None,
             TextureIndex.AO.value: None,
             TextureIndex.HEIGHT.value: None,
-            #TextureIndex.EMISSIVE.value: None,
+            TextureIndex.EMISSIVE.value: None,
             #TextureIndex.TRANSMISSIVE.value: None,
             #TextureIndex.UNKNOWN.value: None
         }
@@ -349,9 +349,13 @@ def ExportMat(mat_name, options, context, operator, mat_folder, texture_rootfold
 
     for texture_item in TextureIndex.__members__.values():
         texture_map = options[f"sf_export_material_{texture_item.name}"]
+        texture_size_str = getattr(options, f"sf_export_material_{texture_item.name}_size")
+        texture_size = None
+        if texture_size_str != "None":
+            texture_size = int(texture_size_str)
         if texture_map is not None and isinstance(texture_map, bpy.types.Image):
             texture_path = os.path.join(texture_rootfolder, texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.png")
-            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path, not utils_blender.is_plugin_debug_mode())
+            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path, not utils_blender.is_plugin_debug_mode(), texture_size)
             
             mat.setTexturePath(texture_item, os.path.join("Data", texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.dds"))
 

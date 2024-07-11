@@ -1313,7 +1313,7 @@ def register():
 	bpy.utils.register_class(SGB_UL_ShapeKeyListItems)
 	bpy.utils.register_class(shapeKeyList)
 	bpy.utils.register_class(TransferShapeKeys)
-	#bpy.utils.register_class(ExportSFMeshPanel)
+	bpy.utils.register_class(ExportSFMeshPanel)
 	bpy.utils.register_class(ExportCustomNif)
 	bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 	bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
@@ -1332,7 +1332,7 @@ def register():
 def unregister():
 	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
 	bpy.utils.unregister_class(ExportSFMeshOperator)
-	#bpy.utils.unregister_class(ExportSFMeshPanel)
+	bpy.utils.unregister_class(ExportSFMeshPanel)
 	bpy.utils.unregister_class(ExportCustomMesh)
 	bpy.utils.unregister_class(ImportCustomMesh)
 	bpy.utils.unregister_class(ImportCustomNif)

@@ -185,15 +185,16 @@ import time
 
 _texture_format: dict[str, str] = {
     "COLOR": "BC7_UNORM",
-    "NORMAL": "R8G8B8A8_SNORM",
+    "NORMAL": "R8G8_SNORM",
     "OPACITY": "BC4_UNORM",
     "AO": "BC4_UNORM",
     "METAL": "BC4_UNORM",
     "ROUGH": "BC4_UNORM",
     "HEIGHT": "BC4_UNORM",
+    "EMISSIVE": "BC7_UNORM",
 }
 
-_srgb: list = ["COLOR"]
+_srgb: list = ["COLOR", "EMISSIVE"]
 
 def _get_texture_format(texture_index:MaterialConverter.TextureIndex) -> str:
     if texture_index.name not in _texture_format:
@@ -206,7 +207,7 @@ def _is_srgb(texture_index:MaterialConverter.TextureIndex) -> bool:
 def _is_normal_map(texture_index:MaterialConverter.TextureIndex) -> bool:
     return texture_index.name == "NORMAL"
 
-def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.TextureIndex, png_path:str):
+def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.TextureIndex, png_path:str, size:int = None):
     if not png_path.endswith('.png'):
         raise ValueError("Input image is not a PNG file")
 
@@ -227,6 +228,9 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
         png_path
     ]
 
+    if size is not None:
+        cmd += ["-w", f"{int(size)}", "-h", f"{int(size)}"]
+
     try:
         subprocess.run(cmd, check=True, shell=True)
         return True
@@ -234,7 +238,7 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
         print(f"Export dds error: {e.stderr}")
         return False
     
-def export_texture_map_to_dds(image:bpy.types.Image, texture_index:MaterialConverter.TextureIndex, path:str, texconv_path:str, remove_png:bool = True):
+def export_texture_map_to_dds(image:bpy.types.Image, texture_index:MaterialConverter.TextureIndex, path:str, texconv_path:str, remove_png:bool = True, size:int = None):
     if image is None:
         return False
     if not path.endswith('.dds'):
@@ -251,7 +255,7 @@ def export_texture_map_to_dds(image:bpy.types.Image, texture_index:MaterialConve
         print(f"Export texture map {image.name} to png success: {time_end - time_start:.2f}s")
     
     time_start = time.time()
-    success = convert_image_to_dds(texconv_path, texture_index, png_path)
+    success = convert_image_to_dds(texconv_path, texture_index, png_path, size)
     time_end = time.time()
 
     if not success:
