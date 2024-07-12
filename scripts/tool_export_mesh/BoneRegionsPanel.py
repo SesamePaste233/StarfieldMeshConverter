@@ -36,6 +36,9 @@ def forward(self, context):
 
     # Change Bone Pose
     armature:bpy.types.Object = bpy.context.scene.br_driven_armature
+    if armature is None:
+         return
+    
     for i, bone_name in enumerate(br_data().bone_names):
         bone:bpy.types.PoseBone = armature.pose.bones.get(bone_name)
         if bone is not None:
@@ -94,7 +97,7 @@ def br_edit_mode_update(self, context):
 def FAKE_BUTTON_load_bone_regions_update(self, context):
     if self.FAKE_BUTTON_load_bone_regions:
         try:
-            BoneRegionsReader.__bone_regions_data__.import_from_file(self.bone_regions_file_path, self.bone_regions_mapping_file_path)
+            BoneRegionsReader.__bone_regions_data__.import_from_file(bpy.path.abspath(self.bone_regions_file_path), bpy.path.abspath(self.bone_regions_mapping_file_path))
             self.br_regions_forward_list.clear()
             for region_name in BoneRegionsReader.__bone_regions_data__.face_region_names:
                 entry_group = self.br_regions_forward_list.add()
@@ -103,8 +106,7 @@ def FAKE_BUTTON_load_bone_regions_update(self, context):
                     entry_group.entries.add().name = pheno_name
         
         except Exception as e:
-            wm = bpy.context.window_manager
-            wm.popup_menu(name="ERROR", title="Error", message=str(e))
+            print("ERROR", str(e))
             BoneRegionsReader.__bone_regions_data__.clear()        
         self.FAKE_BUTTON_load_bone_regions = False
 
@@ -112,8 +114,7 @@ def FAKE_BUTTON_load_bone_regions_update(self, context):
 def FAKE_BUTTON_apply_bone_regions_update(self, context):
     if self.FAKE_BUTTON_apply_bone_regions:
         if self.br_driven_armature is None:
-            wm = bpy.context.window_manager
-            wm.popup_menu(name="ERROR", title="Error", message="Driven Armature not set.")
+            print("ERROR", "Driven Armature not set.")
             self.FAKE_BUTTON_apply_bone_regions = False
             return
 
@@ -139,9 +140,9 @@ def FAKE_BUTTON_refresh_bone_regions_update(self, context):
         for face_region_collection in context.scene.br_regions_forward_list:
             for entry in face_region_collection.entries:
                 entry.value = 0.0
-        BoneRegionsReader.__bone_regions_data__.import_from_file(self.bone_regions_file_path, self.bone_regions_mapping_file_path)
+        BoneRegionsReader.__bone_regions_data__.import_from_file(bpy.path.abspath(self.bone_regions_file_path), bpy.path.abspath(self.bone_regions_mapping_file_path))
         try:
-            BoneRegionsReader.__bone_regions_data__.import_from_file(self.bone_regions_file_path, self.bone_regions_mapping_file_path)
+            BoneRegionsReader.__bone_regions_data__.import_from_file(bpy.path.abspath(self.bone_regions_file_path), bpy.path.abspath(self.bone_regions_mapping_file_path))
             self.br_regions_forward_list.clear()
             for region_name in BoneRegionsReader.__bone_regions_data__.face_region_names:
                 entry_group = self.br_regions_forward_list.add()
@@ -150,8 +151,7 @@ def FAKE_BUTTON_refresh_bone_regions_update(self, context):
                     entry_group.entries.add().name = pheno_name
         
         except Exception as e:
-            wm = bpy.context.window_manager
-            wm.popup_menu(name="ERROR", title="Error", message=str(e))
+            print("ERROR", str(e))
             BoneRegionsReader.__bone_regions_data__.clear()
         
         self.FAKE_BUTTON_refresh_bone_regions = False

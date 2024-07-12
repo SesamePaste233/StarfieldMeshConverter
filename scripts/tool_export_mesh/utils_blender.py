@@ -453,7 +453,7 @@ def PreprocessAndProxy(old_obj, use_world_origin, convert_to_mesh = True, do_tri
 	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
 	bpy.ops.mesh.select_all(action='DESELECT')
 	bpy.ops.mesh.select_non_manifold(extend=False, use_boundary=True, use_multi_face = False,use_non_contiguous = False, use_verts = False)
-	bpy.ops.mesh.remove_doubles()
+	bpy.ops.mesh.remove_doubles(use_sharp_edge_from_normals=True)
 	bpy.ops.object.mode_set(mode='OBJECT')
 
 	SetActiveObject(new_obj, True)
