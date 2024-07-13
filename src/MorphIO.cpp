@@ -242,7 +242,11 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 {
 	this->Clear();
 
+	auto start_time = clock();
 	json jsonData = json::parse(json_data);
+	auto end_time = clock();
+
+	std::cout << "Morph data JSON parsing in " << (end_time - start_time) << "ms" << std::endl;
 
 	// Read shape key names
 	this->num_shape_keys = jsonData["shapeKeys"].size();
@@ -257,17 +261,20 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 		std::vector<morph_data> _morph_data;
 		std::vector<uint32_t> _morph_key_selection;
 		for (int j = 0; j < this->num_shape_keys; j++) {
-			auto& morphData = jsonData["morphData"][j][i];
+			auto& delta_positions = jsonData["deltaPositions"][j][i];
+			auto& target_colors = jsonData["targetColors"][j][i];
+			auto& delta_normals = jsonData["deltaNormals"][j][i];
+			auto& delta_tangents = jsonData["deltaTangents"][j][i];
 
-			if (abs(float(morphData[0])) > 1e-4 || abs(float(morphData[1])) > 1e-4 || abs(float(morphData[2])) > 1e-4) {
+			if (abs(float(delta_positions[0])) > 1e-4 || abs(float(delta_positions[1])) > 1e-4 || abs(float(delta_positions[2])) > 1e-4) {
 				morph_data _data{};
 				_morph_key_selection.push_back(j);
-				_data._offset[0] = utils::floatToHalf(morphData[0]);
-				_data._offset[1] = utils::floatToHalf(morphData[1]);
-				_data._offset[2] = utils::floatToHalf(morphData[2]);
-				_data.target_vert_color = utils::encodeRGB565(morphData[3][0], morphData[3][1], morphData[3][2]);
-				_data.x = utils::encodeDEC3N({ float(morphData[4][0]),float(morphData[4][1]) ,float(morphData[4][2]) }, 1);
-				_data.y = utils::encodeDEC3N({ float(morphData[5][0]),float(morphData[5][1]) ,float(morphData[5][2]) }, 1);
+				_data._offset[0] = utils::floatToHalf(delta_positions[0]);
+				_data._offset[1] = utils::floatToHalf(delta_positions[1]);
+				_data._offset[2] = utils::floatToHalf(delta_positions[2]);
+				_data.target_vert_color = utils::encodeRGB565(target_colors[0], target_colors[1], target_colors[2]);
+				_data.x = utils::encodeDEC3N({ float(delta_normals[0]),float(delta_normals[1]) ,float(delta_normals[2]) }, 1);
+				_data.y = utils::encodeDEC3N({ float(delta_tangents[0]),float(delta_tangents[1]) ,float(delta_tangents[2]) }, 1);
 				_morph_data.push_back(_data);
 				this->morph_data_raw.push_back(_data);
 				this->num_morph_data++;
@@ -298,6 +305,9 @@ bool morph::MorphIO::LoadFromString(const std::string json_data, const uint32_t 
 		this->offsets_list.push_back(_offset_data);
 		offset += this->per_vert_morph_key_indices[i].size();
 	}
+
+	auto end_time2 = clock();
+	std::cout << "Morph loaded from JSON in " << (end_time2 - start_time) << "ms" << std::endl;
 
 	return this->PostProcess(options);
 }

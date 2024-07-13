@@ -461,13 +461,13 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 
 		geom_data = None
 		if options.use_internal_geom_data:
-			rtn, message, geom_data = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, head_object_mode)
+			rtn, message, geom_data = MeshIO.MeshToJson_alt(mesh_obj, options, bone_list_filter, True, head_object_mode)
+			if 'FINISHED' not in rtn:
+				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Message: {message}. Skipping...')
+				continue
 			verts_count = geom_data['num_verts']
 			indices_count = geom_data['num_indices']
 			bone_list = geom_data['vertex_group_names']
-			if 'FINISHED' not in rtn:
-				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Message: {message}Skipping...')
-				continue
 		else:
 			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, head_object_mode)
 			if 'FINISHED' not in rtn:
@@ -487,7 +487,7 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 				utils_blender.SetSelectObjects(original_selected)
 				utils_blender.SetActiveObject(mesh_obj)
 
-				morph_success, num_vertices_in_morph = MorphIO.ExportMorph(options, context, result_morph_path, operator)
+				morph_success, num_vertices_in_morph = MorphIO.ExportMorph_alt(options, context, result_morph_path, operator)
 
 				if 'FINISHED' in morph_success:
 					if verts_count != num_vertices_in_morph:

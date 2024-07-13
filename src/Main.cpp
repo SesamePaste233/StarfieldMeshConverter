@@ -95,7 +95,7 @@ int main1(int argc, char* argv[]){
 	return 0; // Return success
 }
 
-int main(int argc, char* argv[]) {
+int morphmain(int argc, char* argv[]) {
 	
 	// Extract command-line arguments
 	std::string inputMorph = "C:\\repo\\MeshConverter\\morph.dat.json";
@@ -368,12 +368,12 @@ void phnifmain() {
 	//}
 }
 
-int nifmain() {
+int main() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
 
-	std::ifstream file("C:\\repo\\MeshConverter\\Outfit_Akila_Security_UpperBody_M_0.nif.json");
+	std::ifstream file("C:\\repo\\MeshConverter\\LykaChestPlate.nif.json");
 	std::string json_data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 	std::cout << json_data << std::endl;

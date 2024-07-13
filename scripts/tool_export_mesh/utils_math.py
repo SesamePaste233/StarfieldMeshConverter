@@ -1,4 +1,5 @@
 import numpy as np
+import mathutils
 
 def GramSchmidtOrthogonalize(tangent, normal):
 	# Project the tangent vector onto the normal vector
@@ -18,11 +19,15 @@ def GramSchmidtOrthogonalize(tangent, normal):
 
 	return normalized_orthogonal_tangent
 
-def Normalize(vec):
-	n = np.linalg.norm(np.array(vec))
-	if n == 0:
-		return vec
-	return [v/n for v in vec]
+def NormalizeVec(vec):
+	vectors = np.array(vec)
+	norms = np.linalg.norm(vectors)
+	np.divide(vectors, norms, out=vectors, where=norms != 0)
+	return vectors
+
+def NormalizeRows(matrix:np.ndarray) -> None:
+	norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+	np.divide(matrix, norms, out=matrix, where=norms != 0)
 
 def GetBoneTransformToTriangle(pivot1: np.ndarray, pivot2: np.ndarray, center: np.ndarray, bone_transform: np.ndarray):
 	'''
@@ -103,3 +108,49 @@ def bounded_vector_substraction(n0: np.ndarray, nt: np.ndarray) -> np.ndarray:
 	dn = k[:, np.newaxis] * nt - n0
 
 	return dn
+
+def batch_rotation_matrices(vec1_stack:np.ndarray, vec2_stack:np.ndarray):
+    """
+    Compute rotation matrices that align each pair of vectors from vec1_stack to vec2_stack.
+    
+    :param vec1_stack: An array of shape (N, 3) representing N source vectors.
+    :param vec2_stack: An array of shape (N, 3) representing N destination vectors.
+    :return: An array of shape (N, 3, 3) containing the rotation matrices.
+    """
+    assert vec1_stack.shape == vec2_stack.shape, "Input stacks must have the same shape."
+    assert vec1_stack.shape[1] == 3, "Each vector must be 3-dimensional."
+    
+    num_vectors = vec1_stack.shape[0]
+    
+    vs = np.cross(vec1_stack, vec2_stack)
+    cs = np.einsum('ij,ij->i', vec1_stack, vec2_stack)
+    ss = np.linalg.norm(vs, axis=1)
+
+    # Compute the skew-symmetric cross-product matrix
+    kmat = np.zeros((num_vectors, 3, 3))
+    kmat[:, 0, 1] = -vs[:, 2]
+    kmat[:, 0, 2] = vs[:, 1]
+    kmat[:, 1, 0] = vs[:, 2]
+    kmat[:, 1, 2] = -vs[:, 0]
+    kmat[:, 2, 0] = -vs[:, 1]
+    kmat[:, 2, 1] = vs[:, 0]
+    
+    # Compute the rotation matrix
+    mask = ss != 0
+    R = np.eye(3)[np.newaxis].repeat(num_vectors, axis=0)
+
+    masked_kmat = kmat[mask]
+    dot_kmat = np.einsum('ijk,ikl->ijl', masked_kmat, masked_kmat)
+    multiplier = ((1 - cs[mask]) / (ss[mask] ** 2))[..., np.newaxis, np.newaxis]
+    R[mask] += masked_kmat + dot_kmat * multiplier
+    return R
+
+def apply_mat_to_all(matrix:mathutils.Matrix, vectors:np.ndarray) -> np.ndarray:
+	"""Given matrix m and vectors [v1,v2,...], computes [m@v1,m@v2,...]"""
+	# Linear part
+	m = matrix.to_3x3() if len(matrix) == 4 else matrix
+	res = np.matmul(vectors, np.array(m.transposed()))
+	# Translation part
+	if len(matrix) == 4:
+		res += np.array(matrix.translation)
+	return res

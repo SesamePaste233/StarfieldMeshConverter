@@ -34,17 +34,20 @@ uint32_t ExportMorph(const char* json_data, const char* output_file)
 	// Equivalent to blenderToMorph
 	morph::MorphIO morphReader;
 
+	auto start_time = clock();
 	if (!morphReader.LoadFromString(json_data, morph::MorphIO::Options::None)) {
 		std::cerr << "Failed to load morph from blender." << std::endl;
 		return 8; // Return an error code
 	}
+	auto end_time = clock();
+	std::cout << "Morph loaded from blender in " << (end_time - start_time) << "ms" << std::endl;
 	
 	if (!morphReader.Serialize(output_file)) {
 		std::cerr << "Failed to save morph to file." << std::endl;
 		return 9; // Return an error code
 	}
-
-	std::cout << "Morph loaded from blender and serialized to " << output_file << std::endl;
+	auto end_time2 = clock();
+	std::cout << "Morph serialized to " << output_file << " in " << (end_time2 - end_time) << "ms" << std::endl;
 
 	return 0;
 }

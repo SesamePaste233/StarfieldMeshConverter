@@ -8,6 +8,7 @@ import time
 
 import utils_blender
 import utils_math
+import utils_primitive
 import MeshConverter
 
 def IsMorphExportNode(obj):
@@ -176,7 +177,7 @@ def ImportMorph(options, context, operator, result_objs = []):
 			bpy.ops.object.mode_set(mode='OBJECT')
 			me.use_auto_smooth = True
 			me.vertex_colors.new(name='col')
-			me.normals_split_custom_set_from_vertices([utils_math.Normalize([n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]]) for n, dn in zip(normals, delta_normals)])
+			me.normals_split_custom_set_from_vertices([utils_math.NormalizeVec([n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]]) for n, dn in zip(normals, delta_normals)])
 			utils_blender.SetVertColorPerVert(me_obj, target_vert_colors)
 			utils_blender.move_object_to_collection([me_obj], prev_coll)
 			utils_blender.move_object_to_parent([me_obj], morph_node)
@@ -297,6 +298,72 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 
 	operator.report({'INFO'}, f"Export morph successful.")
 	return {"FINISHED"}, verts_count
+
+def ExportMorph_alt(options, context, export_file_path, operator):
+	export_path = export_file_path
+
+	target_obj = utils_blender.GetActiveObject()
+	s_objs = utils_blender.GetSelectedObjs(True)
+	ref_obj = None
+
+	if IsMorphExportNode(target_obj):
+		return ExportMorphFromSet(options, context, export_file_path, target_obj, operator)
+
+
+	p_options = utils_primitive.Primitive.Options()
+	p_options.gather_morph_data = True
+	p_options.use_global_positions = options.use_world_origin
+	
+	new_obj = target_obj.copy()
+	new_obj.data = target_obj.data.copy()
+	bm = bmesh.new()
+	bm.from_mesh(new_obj.data)
+	bmesh.ops.triangulate(bm, faces=bm.faces[:])
+	bm.to_mesh(new_obj.data)
+	bm.free()
+
+	time_start = time.time()
+
+	primitive = utils_primitive.Primitive(new_obj, p_options)
+
+	try:
+		primitive.gather()
+		jsondata = primitive.to_morph_json_dict()
+	except utils_primitive.AtomicException as e:
+		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None
+	except Exception as e:
+		return {'CANCELLED'}, f"An error occurred: {e}", None
+
+	time_end = time.time()
+
+	json_data = json.dumps(jsondata)
+
+	time_end1 = time.time()
+
+	if utils_blender.is_plugin_debug_mode():
+		debug_json_data = json.dumps(jsondata, indent=2)
+		with open(export_path + ".json", 'w') as f:
+			f.write(debug_json_data)
+
+	returncode = MeshConverter.ExportMorphFromJson(json_data, export_path)
+
+	time_end2 = time.time()
+
+	if not returncode:
+		bpy.data.meshes.remove(new_obj.data)
+		
+		utils_blender.SetActiveObject(target_obj)
+
+		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
+		return {"CANCELLED"}, None
+
+	bpy.data.meshes.remove(new_obj.data)
+
+	utils_blender.SetActiveObject(target_obj)
+
+	operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f} + Serialize: {time_end1 - time_end:.2} + Dll: {time_end2 - time_end1:.2} seconds.")
+	return {"FINISHED"}, jsondata['numVertices']
+
 
 def ExportMorph(options, context, export_file_path, operator):
 	export_path = export_file_path

@@ -143,7 +143,7 @@ class ExportCustomMesh(bpy.types.Operator):
 			utils_blender.SetSelectObjects(original_selected)
 			utils_blender.SetActiveObject(original_active)
 			_file_name, _ =os.path.splitext(self.filepath)
-			morph_success, _ = MorphIO.ExportMorph(self,context, _file_name + ".dat", self)
+			morph_success, _ = MorphIO.ExportMorph_alt(self,context, _file_name + ".dat", self)
 			if 'FINISHED' in morph_success:
 				self.report({'INFO'}, "Operation successful.")
 
@@ -885,7 +885,7 @@ class ExportCustomMorph(bpy.types.Operator):
 	)
 
 	def execute(self, context):
-		rtn, _ = MorphIO.ExportMorph(self, context, self.filepath, self)
+		rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self)
 		return rtn
 
 	def invoke(self, context, event):
@@ -914,7 +914,7 @@ class ExportSFMeshOperator(bpy.types.Operator):
 			if 'FINISHED' in success and context.scene.export_morph:
 				utils_blender.SetSelectObjects(original_selected)
 				utils_blender.SetActiveObject(original_active)
-				morph_success, num_verts_in_morph = MorphIO.ExportMorph(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.dat'), self)
+				morph_success, num_verts_in_morph = MorphIO.ExportMorph_alt(context.scene, context, os.path.join(context.scene.export_mesh_folder_path, utils.sanitize_filename(active_object_name) + '.dat'), self)
 				
 				if 'FINISHED' in morph_success:
 					if num_verts_in_mesh != num_verts_in_morph:

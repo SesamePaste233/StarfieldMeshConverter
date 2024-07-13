@@ -652,7 +652,7 @@ def GetNormalTangents(mesh, with_tangent = True, fast_mode = False, fast_mode_li
 					Bitangent_sign[vert_idx] = mesh.loops[loop_idx].bitangent_sign
 					Tangents[vert_idx] = Tangents[vert_idx] + np.array(mesh.loops[loop_idx].tangent)
 
-		_Normals = [utils_math.Normalize(n) for n in Normals]
+		_Normals = [utils_math.NormalizeVec(n) for n in Normals]
 
 		if with_tangent:
 			_Tangents = [utils_math.GramSchmidtOrthogonalize(t, np.array(n)) for t, n in zip(Tangents, _Normals)]

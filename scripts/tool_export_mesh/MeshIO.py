@@ -12,7 +12,68 @@ import utils_common as utils
 import utils_math
 import MeshConverter
 
+import utils_primitive
+
+import time
+
+def MeshToJson_alt(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
+	start_time = time.time()
+	
+	if not (obj and obj.type == 'MESH'):
+		return {'CANCELLED'}, "Selected object is not a mesh.", None
+	
+	# Duplicate the object and triangulate the mesh
+	new_obj = obj.copy()
+	new_obj.data = obj.data.copy()
+	bm = bmesh.new()
+	bm.from_mesh(new_obj.data)
+	bmesh.ops.triangulate(bm, faces=bm.faces[:])
+	bm.to_mesh(new_obj.data)
+	bm.free()
+
+	p_options = utils_primitive.Primitive.Options()
+	p_options.gather_morph_data = False
+	p_options.gather_weights_data = options.WEIGHTS
+	p_options.use_global_positions = options.use_world_origin
+	
+	p_options.prune_empty_vertex_groups = prune_empty_vertex_groups
+
+	if options.use_secondary_uv:
+		uv_layer = obj.data.uv_layers.active
+		for _uv_layer in obj.data.uv_layers:
+			if _uv_layer != uv_layer:
+				p_options.secondary_uv_layer_index = obj.data.uv_layers.find(_uv_layer.name)
+				break
+
+	if head_object_mode == 'Base':
+		facebone_vg_names = [vg.name for vg in obj.vertex_groups if vg.name.startswith("faceBone_")]
+		p_options.vertex_group_merge_source = facebone_vg_names
+		p_options.vertex_group_merge_target = "C_Head"
+
+	for vg in obj.vertex_groups:
+		if vg.name not in bone_list_filter:
+			p_options.vertex_group_ignore.append(vg.name)
+
+	primitive = utils_primitive.Primitive(new_obj, p_options)
+
+	try:
+		primitive.gather()
+		data = primitive.to_mesh_json_dict()
+	except utils_primitive.AtomicException as e:
+		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None
+	except Exception as e:
+		return {'CANCELLED'}, f"An error occurred: {e}", None
+
+	# Cleanup
+	bpy.data.meshes.remove(new_obj.data)	
+
+	print(f"MeshToJson_alt took {time.time() - start_time} seconds")
+	return {'FINISHED'}, "", data
+
+
 def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
+	start_time = time.time()
+	
 	# Initialize dictionaries to store data
 	data = {
 		"max_border": options.max_border,
@@ -152,7 +213,7 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 				Tangents[vert_idx] = np.array(selected_obj.data.loops[loop_idx].tangent) + Tangents[vert_idx]
 				Normals[vert_idx] = np.array(selected_obj.data.loops[loop_idx].normal) + Normals[vert_idx]
 
-		data["normals"] = [list(utils_math.Normalize(n)) for n in Normals]
+		data["normals"] = [list(utils_math.NormalizeVec(n)) for n in Normals]
 		data["tangents"] = [list(utils_math.GramSchmidtOrthogonalize(t, np.array(n))) + [3 if f < 0 else 0] for t, n, f in zip(Tangents, data["normals"], Bitangent_sign)]
 
 		for _l in data["uv_coords"]:
@@ -219,6 +280,7 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	
 	bpy.data.meshes.remove(selected_obj.data)
 
+	print(f"MeshToJson took {time.time() - start_time} seconds")
 	return {'FINISHED'}, "", data
 
 def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
@@ -237,16 +299,13 @@ def ExportMesh(options, context, filepath: str, operator, bone_list_filter = Non
 	else:
 		result_file_path = export_mesh_file_path
 	
-	rtn, message, data = MeshToJson(active_object, options, bone_list_filter, prune_empty_vertex_groups, head_object_mode)
+	rtn, message, data = MeshToJson_alt(active_object, options, bone_list_filter, prune_empty_vertex_groups, head_object_mode)
 
 	if rtn != {'FINISHED'}:
 		operator.report({'ERROR'}, message)
 		return returncode, 0, 0, None
 
 	json_data = json.dumps(data)
-
-	#with open(result_file_path + '.json', 'w') as json_file:
-	#	json_file.write(json_data)
 	
 	returncode = MeshConverter.ExportMeshFromJson(json_data, result_file_path, options.mesh_scale, False, options.normalize_weights, False)
 
