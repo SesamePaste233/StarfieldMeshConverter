@@ -23,6 +23,14 @@ extern "C" {
 	DLL uint32_t ExportMorph(const char* json_data,
 		const char* output_file);
 
+	DLL uint32_t ExportMorphNumpy(const char* json_data,
+		const char* output_file,
+		const float* delta_positions,
+		const float* target_colors,
+		const float* delta_normals,
+		const float* delta_tangents
+	);
+
 	DLL uint32_t ExportEmptyMorph(uint32_t n_verts, const char* output_file);
 
 	DLL const char * ImportMesh(const char* input_file);

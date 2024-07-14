@@ -328,7 +328,7 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 
 	try:
 		primitive.gather()
-		jsondata = primitive.to_morph_json_dict()
+		jsondata = primitive.to_morph_numpy_dict()
 	except utils_primitive.AtomicException as e:
 		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None
 	except Exception as e:
@@ -336,16 +336,16 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 
 	time_end = time.time()
 
-	json_data = json.dumps(jsondata)
+	#json_data = json.dumps(jsondata)
 
 	time_end1 = time.time()
 
-	if utils_blender.is_plugin_debug_mode():
-		debug_json_data = json.dumps(jsondata, indent=2)
-		with open(export_path + ".json", 'w') as f:
-			f.write(debug_json_data)
+	#if utils_blender.is_plugin_debug_mode():
+	#	debug_json_data = json.dumps(jsondata, indent=2)
+	#	with open(export_path + ".json", 'w') as f:
+	#		f.write(debug_json_data)
 
-	returncode = MeshConverter.ExportMorphFromJson(json_data, export_path)
+	returncode = MeshConverter.ExportMorphFromNumpy(jsondata, export_path)
 
 	time_end2 = time.time()
 

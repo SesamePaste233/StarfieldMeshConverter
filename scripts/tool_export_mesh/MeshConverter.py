@@ -1,5 +1,7 @@
 import ctypes
 import os
+import json
+import numpy as np
 
 # Load the DLL
 _dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
@@ -11,6 +13,9 @@ _dll_export_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, c
 
 _dll_export_morph = _dll.ExportMorph
 _dll_export_morph.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+
+_dll_export_morph_numpy = _dll.ExportMorphNumpy
+_dll_export_morph_numpy.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float)]
 
 _dll_export_empty_morph = _dll.ExportEmptyMorph
 _dll_export_empty_morph.argtypes = [ctypes.c_uint32, ctypes.c_char_p]
@@ -110,6 +115,31 @@ def ExportMeshFromJson(json_data_string: str, output_file: str, max_border: floa
 
 def ExportMorphFromJson(json_data_string: str, output_file: str) -> DLLReturnCode:
     rtn = _dll_export_morph(json_data_string.encode('utf-8'), output_file.encode('utf-8'))
+    return DLLReturnCode(rtn)
+
+def ExportMorphFromNumpy(numpy_dict: dict, output_file: str) -> DLLReturnCode:
+    header = {"numVertices":numpy_dict["numVertices"], "shapeKeys":numpy_dict["shapeKeys"]}
+    header_json_str = json.dumps(header)
+
+    assert numpy_dict['deltaPositions'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"deltaPositions shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['deltaPositions'].shape}"
+    assert numpy_dict['targetColors'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"targetColors shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['targetColors'].shape}"
+    assert numpy_dict['deltaNormals'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"deltaNormals shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['deltaNormals'].shape}"
+    assert numpy_dict['deltaTangents'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"deltaTangents shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['deltaTangents'].shape}"
+    
+    # Check types
+    assert numpy_dict['deltaPositions'].dtype == np.float32, f"deltaPositions dtype is not float32 but {numpy_dict['deltaPositions'].dtype}"
+    assert numpy_dict['targetColors'].dtype == np.float32, f"targetColors dtype is not float32 but {numpy_dict['targetColors'].dtype}"
+    assert numpy_dict['deltaNormals'].dtype == np.float32, f"deltaNormals dtype is not float32 but {numpy_dict['deltaNormals'].dtype}"
+    assert numpy_dict['deltaTangents'].dtype == np.float32, f"deltaTangents dtype is not float32 but {numpy_dict['deltaTangents'].dtype}"
+    
+    rtn = _dll_export_morph_numpy(
+        header_json_str.encode('utf-8'), 
+        output_file.encode('utf-8'), 
+        numpy_dict['deltaPositions'].ctypes.data_as(ctypes.POINTER(ctypes.c_float)), 
+        numpy_dict['targetColors'].ctypes.data_as(ctypes.POINTER(ctypes.c_float)), 
+        numpy_dict['deltaNormals'].ctypes.data_as(ctypes.POINTER(ctypes.c_float)), 
+        numpy_dict['deltaTangents'].ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        )
     return DLLReturnCode(rtn)
 
 def ExportEmptyMorphFromJson(num_vertices: int, output_file: str) -> DLLReturnCode:

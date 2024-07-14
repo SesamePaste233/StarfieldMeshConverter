@@ -28,7 +28,7 @@ class Primitive():
 
             # Less frequently changed options
             self.atomic_max_number = 65535
-            self.weight_cutoff_threshold = 1/65535
+            self.weight_cutoff_threshold = 0.0001
             self.max_weights_per_vertex = 8
             self.prune_empty_vertex_groups = True
 
@@ -67,15 +67,16 @@ class Primitive():
         }
         self.vertex_morph_data = {
             "shapeKeys": [],
-            "deltaPositions": [],
-            "targetColors": [],
-            "deltaNormals": [],
-            "deltaTangents": []
+            "deltaPositions": None,
+            "targetColors": None,
+            "deltaNormals": None,
+            "deltaTangents": None
         }
         self.triangles = None
 
         self.atomic_vertices = np.empty(len(self.blender_mesh.loops), dtype=self._atomic_attributes)
-        self.loop_id_to_atomic = np.array(range(len(self.blender_mesh.loops)), dtype=np.uint32)
+        self.atomic_to_loop_id = None # Mapping from atomic vertex id to loop id
+        self.loop_id_to_atomic = None # Mapping from loop id to atomic vertex id
 
         self.gather_color_data = True
         self.color_data_source_index = -1
@@ -119,11 +120,11 @@ class Primitive():
 
     @functools.cached_property
     def morph_normals(self):
-        return [raw_morph_normals[self.loop_id_to_atomic] for raw_morph_normals in self.raw_morph_normals]
+        return [raw_morph_normals[self.atomic_to_loop_id] for raw_morph_normals in self.raw_morph_normals]
     
     @functools.cached_property
     def morph_tangents(self):
-        return [raw_morph_tangents[self.loop_id_to_atomic] for raw_morph_tangents in self.raw_morph_tangents]
+        return [raw_morph_tangents[self.atomic_to_loop_id] for raw_morph_tangents in self.raw_morph_tangents]
     
     @functools.cached_property
     def morph_position_deltas(self):
@@ -131,11 +132,11 @@ class Primitive():
 
     @functools.cached_property
     def morph_normal_deltas(self):
-        return [raw_morph_normal_deltas[self.loop_id_to_atomic] for raw_morph_normal_deltas in self.raw_morph_normal_deltas]
+        return [raw_morph_normal_deltas[self.atomic_to_loop_id] for raw_morph_normal_deltas in self.raw_morph_normal_deltas]
     
     @functools.cached_property
     def morph_tangent_deltas(self):
-        return [raw_morph_tangent_deltas[self.loop_id_to_atomic] for raw_morph_tangent_deltas in self.raw_morph_tangent_deltas]
+        return [raw_morph_tangent_deltas[self.atomic_to_loop_id] for raw_morph_tangent_deltas in self.raw_morph_tangent_deltas]
 
     def gather(self):
         if not self.scan_object_for_data():
@@ -302,7 +303,7 @@ class Primitive():
             self.atomic_vertices['color_a'] = colors[3]
 
     def deduplicate_atomics(self, raise_exception = True):
-        self.atomic_vertices, self.loop_id_to_atomic = np.unique(self.atomic_vertices, return_inverse=True)
+        self.atomic_vertices, self.atomic_to_loop_id, self.loop_id_to_atomic = np.unique(self.atomic_vertices, return_index=True, return_inverse=True)
 
         print("Final vertices count: " + str(len(self.atomic_vertices)))
 
@@ -412,10 +413,10 @@ class Primitive():
 
     def gather_morphs(self):
         self.vertex_morph_data["shapeKeys"] = [key_block.name for key_block in self.key_blocks]
-        self.vertex_morph_data["deltaPositions"] = [dp.tolist() for dp in self.morph_position_deltas]
-        self.vertex_morph_data['targetColors'] = [[[255,255,255] for _ in range(len(self.atomic_vertices))] for _ in range(len(self.key_blocks))]
-        self.vertex_morph_data["deltaNormals"] = [dn.tolist() for dn in self.morph_normal_deltas]
-        self.vertex_morph_data["deltaTangents"] = [dt.tolist() for dt in self.morph_tangent_deltas]
+        self.vertex_morph_data["deltaPositions"] = np.array(self.morph_position_deltas)
+        self.vertex_morph_data['targetColors'] = np.ones((len(self.key_blocks), len(self.atomic_vertices), 3), dtype=np.float32) * 255
+        self.vertex_morph_data["deltaNormals"] = np.array(self.morph_normal_deltas, dtype=np.float32)
+        self.vertex_morph_data["deltaTangents"] = np.array(self.morph_tangent_deltas, dtype=np.float32)
 
     def gather_triangles(self):
         self.blender_mesh.calc_loop_triangles()
@@ -564,7 +565,21 @@ class Primitive():
 
     def to_morph_json_dict(self):
         if not self.options.gather_morph_data:
-            raise MorphUncalculatedException("Primitive.to_morph_json() called without gather_morph_data option set to True")
+            raise MorphUncalculatedException("Primitive.to_morph_json_dict() called without gather_morph_data option set to True")
+            return None
+        data = {
+            "numVertices": len(self.atomic_vertices),
+            "shapeKeys": self.vertex_morph_data["shapeKeys"],
+            "deltaPositions": self.vertex_morph_data["deltaPositions"].tolist(),
+            "targetColors": self.vertex_morph_data["targetColors"].tolist(),
+            "deltaNormals": self.vertex_morph_data["deltaNormals"].tolist(),
+            "deltaTangents": self.vertex_morph_data["deltaTangents"].tolist()
+        }
+        return data
+    
+    def to_morph_numpy_dict(self):
+        if not self.options.gather_morph_data:
+            raise MorphUncalculatedException("Primitive.to_morph_numpy_dict() called without gather_morph_data option set to True")
             return None
         data = {
             "numVertices": len(self.atomic_vertices),

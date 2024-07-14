@@ -52,6 +52,35 @@ uint32_t ExportMorph(const char* json_data, const char* output_file)
 	return 0;
 }
 
+uint32_t ExportMorphNumpy(const char* json_data,
+	const char* output_file,
+	const float* delta_positions,
+	const float* target_colors,
+	const float* delta_normals,
+	const float* delta_tangents
+)
+{
+	// Equivalent to blenderToMorph
+	morph::MorphIO morphReader;
+
+	auto start_time = clock();
+	if (!morphReader.LoadFromNumpy(json_data, delta_positions, target_colors, delta_normals, delta_tangents, morph::MorphIO::Options::None)) {
+		std::cerr << "Failed to load morph from blender." << std::endl;
+		return 8; // Return an error code
+	}
+	auto end_time = clock();
+	std::cout << "Morph loaded from blender in " << (end_time - start_time) << "ms" << std::endl;
+
+	if (!morphReader.Serialize(output_file)) {
+		std::cerr << "Failed to save morph to file." << std::endl;
+		return 9; // Return an error code
+	}
+	auto end_time2 = clock();
+	std::cout << "Morph serialized to " << output_file << " in " << (end_time2 - end_time) << "ms" << std::endl;
+
+	return 0;
+}
+
 uint32_t ExportEmptyMorph(uint32_t n_verts, const char* output_file)
 {
 	// Equivalent to blenderToMorph

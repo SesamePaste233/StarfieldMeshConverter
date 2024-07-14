@@ -82,6 +82,8 @@ namespace morph{
 
 		bool LoadFromString(const std::string json_data, const uint32_t options);
 
+		bool LoadFromNumpy(const std::string json_header_data, const float* delta_positions, const float* target_colors, const float* delta_normals, const float* delta_tangents, const uint32_t options);
+
 		bool Save(const std::string jsonMorphFile);
 
 		bool SerializeToJson(std::string& json_data);

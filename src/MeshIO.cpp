@@ -1158,10 +1158,18 @@ void mesh::MeshIO::CalculateBoneBounding()
 
 
 	for (auto& indices : this->weight_indices) {
-		if (indices.size() <= 1) {
+		if (indices.size() < 1) {
 			bone_bounding.emplace_back(BoneBoundingSphere());
-			std::cout << "Warning: Bone has less than one vertex." << std::endl;
+			std::cout << "Warning: Bone has zero vertex." << std::endl;
 			continue;
+		}
+		else if (indices.size() == 1) {
+			auto bounding_sphere = BoneBoundingSphere();
+			bounding_sphere.center[0] = this->positions[indices[0] * 3];
+			bounding_sphere.center[1] = this->positions[indices[0] * 3 + 1];
+			bounding_sphere.center[2] = this->positions[indices[0] * 3 + 2];
+			bounding_sphere.radius = 0.001;
+			bone_bounding.emplace_back(bounding_sphere);
 		}
 
 		PointVector point_set;
