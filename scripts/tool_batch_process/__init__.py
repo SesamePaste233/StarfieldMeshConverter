@@ -6,6 +6,12 @@ if dir not in sys.path:
 
 import batch_operators as batch_op
 import batch_ui as batch_ui
+import batch_utils as batch_utils
+
+#import imp
+#imp.reload(batch_ui)
+#imp.reload(batch_op)
+#imp.reload(batch_utils)
 
 bl_info = {
 	"name": "Starfield Geometry Bridge - Batch Processing",

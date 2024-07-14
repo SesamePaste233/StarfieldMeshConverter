@@ -110,20 +110,64 @@ class SGB_PT_Batch(bpy.types.Panel):
                 context.scene, "batch_list_index"
             )
 
-            layout.operator("scene.import_from_batch_list")
-
             layout.prop(
                 context.scene.assets_folder_override[context.scene.assets_folder_override.find(plugin.name)],
                 "assets_folder",
                 text=f"{plugin.name} assets"
             )
 
-            layout.separator()
+            layout.operator("scene.import_from_batch_list")
 
+class SGB_PT_BatchConfig(bpy.types.Panel):
+    bl_idname = "SGB_PT_BatchConfig"
+
+    bl_label = "Batch configuration"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Tool'
+    bl_parent_id = "SGB_PT_Batch"
+    bl_options = {'HIDE_HEADER'}
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.label(text="Process/Import configuration options")
+
+        layout = layout.box()
+
+        row = layout.row(align=True)
+        row.prop(context.scene, "batch_m")
+        row.prop(context.scene, "batch_f")
+
+        row = layout.row(align=True)
+        row.prop(context.scene, "batch_first_person_model")
+        row.prop(context.scene, "batch_world_model")
+
+        row = layout.row(align=True)
+        row.prop(context.scene, "batch_perf_morph")
+        row.prop(context.scene, "batch_chargen_morph")
+
+class SGB_PT_ArmorAddonInfo(bpy.types.Panel):
+    bl_idname = "SGB_PT_ArmorAddonInfo"
+
+    bl_label = "Armor addon info"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Tool'
+    bl_parent_id = "SGB_PT_Batch"
+    bl_options = {'HIDE_HEADER'}
+
+    def draw(self, context):
+        layout = self.layout
+
+        if len(context.scene.plugin_list) >= 1 and len(context.scene.plugin_list[bpy.context.scene.plugin_list_index].plugin_items) >= 1:
+            
+            plugin = context.scene.plugin_list[bpy.context.scene.plugin_list_index]
+            
             if len(plugin.plugin_items) >= 1:
 
                 item = bpy.context.scene.plugin_list[bpy.context.scene.plugin_list_index].plugin_items[bpy.context.scene.batch_list_index]
-                col = layout.column()
+                col = layout.box().column()
 
                 row = col.row(align=True)
                 row.label(text="File Name")
@@ -149,7 +193,19 @@ class SGB_PT_Batch(bpy.types.Panel):
                 row.label(text="Armor Addons")
                 row.scale_x = 2.3
                 row.label(text=str(len(item.armor_addons)))
-        
+
+class SGB_PT_BatchUtils(bpy.types.Panel):
+    bl_idname = "SGB_PT_BatchUtils"
+
+    bl_label = "Batch utilities"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = 'Tool'
+    bl_parent_id = "SGB_PT_Batch"
+
+    def draw(self, context):
+        layout = self.layout
+
         layout.operator("scene.gen_outfit_json")
 
 """
@@ -277,6 +333,9 @@ classes = [
     SGB_UL_BatchList,
     SGB_UL_PluginList,
     SGB_PT_Batch,
+    SGB_PT_BatchConfig,
+    SGB_PT_BatchUtils,
+    #SGB_PT_ArmorAddonInfo
 ]
 
 def register():
@@ -293,6 +352,47 @@ def register():
 
     s.active_armor_addon_index = IntProperty(name="Index", default=0)
 
+
+    """
+    Batch configuration panel
+    """
+
+    s.batch_m = BoolProperty(
+        name="M",
+        default=True,
+        description="If checked, M body type outfit will be allowed for processing and import"
+    )
+
+    s.batch_f = BoolProperty(
+        name="F",
+        default=True,
+        description="If checked, F body type outfit will be allowed for processing and import"
+    )
+
+    s.batch_first_person_model = BoolProperty(
+        name="First person",
+        default=False,
+        description="If checked, first person model be allowed for processing and import"
+    )
+
+    s.batch_world_model = BoolProperty(
+        name="World model",
+        default=True,
+        description="If checked, world model be allowed for processing and import"
+    )
+
+    s.batch_chargen_morph = BoolProperty(
+        name="Chargen morph",
+        default=True,
+        description="If checked, chargen morph be allowed for processing and import"
+    )
+
+    s.batch_perf_morph = BoolProperty(
+        name="Perf morph",
+        default=False,
+        description="If checked, performance morph be allowed for processing and import"
+    )
+
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
@@ -305,3 +405,9 @@ def unregister():
     del s.batch_list_index
     del s.assets_folder_override
     del s.active_armor_addon_index
+    del s.batch_m
+    del s.batch_f
+    del s.batch_first_person_model
+    del s.batch_world_model
+    del s.batch_chargen_morph
+    del s.batch_perf_morph

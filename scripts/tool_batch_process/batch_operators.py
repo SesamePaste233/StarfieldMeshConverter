@@ -17,7 +17,7 @@ Generate outfit JSON files.
 class GenOutfitJson(bpy.types.Operator):
     bl_idname = "scene.gen_outfit_json"
     bl_label = "Generate outfit json"
-    bl_description = "Generates outfit json files from .esm"
+    bl_description = "Generates outfit json files from .esm. Use this if you want to add more items to the plugin list."
     filename: bpy.props.StringProperty(default='')
     directory: bpy.props.StringProperty(subtype="DIR_PATH")
     filter_glob: bpy.props.StringProperty(default="*.esm;*.esp", options={'HIDDEN'})
@@ -113,6 +113,13 @@ class ImportFromBatchList(bpy.types.Operator):
         self.debug_delta_tangent = False
         self.as_multiple = False
         self.use_attributes = False
+
+        self.batch_m = bpy.context.scene.batch_m
+        self.batch_f = bpy.context.scene.batch_f
+        self.batch_first_person_model = bpy.context.scene.batch_first_person_model
+        self.batch_world_model = bpy.context.scene.batch_world_model
+        self.batch_chargen_morph = bpy.context.scene.batch_chargen_morph
+        self.batch_perf_morph = bpy.context.scene.batch_perf_morph
 
         plugin_item = plugin.plugin_items[bpy.context.scene.batch_list_index]
 

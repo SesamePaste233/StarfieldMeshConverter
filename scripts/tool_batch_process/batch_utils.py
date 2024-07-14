@@ -35,13 +35,30 @@ def importFromBatchList(self, context, batch_list_item):
         for idx, model in enumerate(models):
             if len(model) == 0:
                 continue
-
-            nif = model[0].nif
             
+            world_model = idx % 2 == 0
+            fp_model = not world_model
+
+            excl_m = idx <= 1 and self.batch_m == False
+            excl_f = idx >= 2 and self.batch_f == False
+            
+            excl_world = world_model and self.batch_world_model == False
+            excl_fp = fp_model and self.batch_first_person_model == False
+
+            excl_match = any((
+                excl_m, excl_f,
+                excl_world, excl_fp
+            ))
+
+            if excl_match:
+                continue
+
             if idx <= 1:
                 self.skeleton_name = "skeleton_male"
             else:
                 self.skeleton_name = "skeleton_female"
+
+            nif = model[0].nif
 
             NifIO.ImportNif(
                 os.path.join(assets, "meshes", nif),
@@ -49,13 +66,19 @@ def importFromBatchList(self, context, batch_list_item):
                 context,
                 self
             )
-
-            if model[0].chargen_morph in ["", None]:
-                continue
             
-            self.filepath = os.path.join(assets, model[0].chargen_morph, "morph.dat")
+            morphs = []
 
-            MorphIO.ImportMorph(self, context, self)
+            if self.batch_chargen_morph and model[0].chargen_morph != "":
+                morphs.append(os.path.join(assets, model[0].chargen_morph, "morph.dat"))
+
+            if self.batch_perf_morph and model[0].performance_morph != "":
+                morphs.append(os.path.join(assets, model[0].performance_morph, "morph.dat"))
+            
+            for morph in morphs:
+                self.filepath = morph
+
+                MorphIO.ImportMorph(self, context, self)
 
             for obj in [obj for obj in bpy.context.scene.objects if obj in bpy.context.selected_objects]:
                 obj.select_set(False)
