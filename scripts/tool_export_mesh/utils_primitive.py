@@ -405,7 +405,7 @@ class Primitive():
                 vertex_weight_data = [x for x in vertex_weight_data if x[1] != 0]
                 
                 if len(vertex_weight_data) > self.options.max_weights_per_vertex:
-                    vertex_weight_data = sorted(vertex_weight_data, key=lambda x: x[1], reverse=True)[:max_weights_per_vertex]
+                    vertex_weight_data = sorted(vertex_weight_data, key=lambda x: x[1], reverse=True)[:self.options.max_weights_per_vertex]
                 elif len(vertex_weight_data) == 0:
                     vertex_weight_data.append([0, 0])
 

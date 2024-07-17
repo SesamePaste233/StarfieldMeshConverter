@@ -332,88 +332,112 @@ def update_func(self, context):
 
 	utils.save("cached_paths", 'export_mesh_folder_path', 'assets_folder')
 
-# Register the operators and menu entries
-def register():
-	utils.load("cached_paths")
-	bpy.types.Scene.sgb_debug_mode = bpy.props.BoolProperty(
+def __prop_wrapper(prop_func, *args, **kwargs):
+	def _wrapper_inner(**kwargs_inner):
+		return prop_func(*args, **kwargs, **kwargs_inner)
+	return _wrapper_inner
+
+utils.load("cached_paths")
+
+__scene_global_attrs__ = {
+	"sgb_debug_mode": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Debug Mode",
 		description="Debug option. DO NOT USE.",
 		default=False
-	)
-
-	bpy.types.Scene.geometry_bridge_version = bpy.props.StringProperty(
+	),
+	"geometry_bridge_version": __prop_wrapper(
+		bpy.props.StringProperty,
 		name="__geometry_bridge_version__",
 		default = f"{bl_info['version'][0]}.{bl_info['version'][1]}.{bl_info['version'][2]}",
-	)
-
-	bpy.types.Scene.export_mesh_folder_path = bpy.props.StringProperty(
+	),
+	"export_mesh_folder_path": __prop_wrapper(
+		bpy.props.StringProperty,
 		name="Export Folder",
 		subtype='DIR_PATH',
 		default= utils.export_mesh_folder_path,
 		update = update_func
-	)
-
-	bpy.types.Scene.assets_folder = bpy.props.StringProperty(
+	),
+	"assets_folder": __prop_wrapper(
+		bpy.props.StringProperty,
 		name="Assets Folder",
 		subtype='DIR_PATH',
 		default= utils.assets_folder,
 		update = update_func
-	)
-
-	bpy.types.Scene.max_border = bpy.props.FloatProperty(
+	),
+	"max_border": __prop_wrapper(
+		bpy.props.FloatProperty,
 		name="Compression Border",
 		description="2 for body parts, 0 (Auto) otherwise.",
 		default=0,
-	)
-
-	bpy.types.Scene.use_world_origin = bpy.props.BoolProperty(
+	),
+	"use_world_origin": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Use world origin",
 		description="Use world instead of object origin as output geometry's origin.",
 		default=True
-	)
-
-	bpy.types.Scene.WEIGHTS = bpy.props.BoolProperty(
+	),
+	"WEIGHTS": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Weights",
 		description="Export vertex weights, only work with valid armature modifiers attached to objects.",
 		default=True
-	)
-
-	bpy.types.Scene.export_morph = bpy.props.BoolProperty(
+	),
+	"export_morph": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Morph Data",
 		description="Export shape keys as morph keys",
 		default=True
-	)
-
-	bpy.types.Scene.export_sf_mesh_open_folder = bpy.props.BoolProperty(
+	),
+	"export_sf_mesh_open_folder": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Open folder",
 		default=False,
-	)
-
-	bpy.types.Scene.export_sf_mesh_hash_result = bpy.props.BoolProperty(
+	),
+	"export_sf_mesh_hash_result": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Generate hash names",
 		description="Export into [hex1]\\[hex2].mesh instead of [model_name].mesh",
 		default=False,
-	)
-
-	bpy.types.Scene.use_secondary_uv = bpy.props.BoolProperty(
+	),
+	"use_secondary_uv": __prop_wrapper(
+		bpy.props.BoolProperty,
 		name="Use Secondary UV",
 		description="Use the topmost non-active UV map (if possible) as secondary UV",
 		default=False
-	)
+	),
+}
 
+__mesh_panel_classes__ = [
+	ExportSFMeshOperator,
+	CreateAdvancedMorphEditOperator,
+	ExportSFMeshPanel,
+]
+
+__classes__ = [
+	SGB_UL_ShapeKeyListItems,
+	shapeKeyList,
+	TransferShapeKeys,
+	MorphListRecalculateNormals
+]
+
+# Register the operators and menu entries
+def register():
+
+	for attr in __scene_global_attrs__:
+		setattr(bpy.types.Scene, attr, __scene_global_attrs__[attr]())
+
+	for cls in __classes__:
+		bpy.utils.register_class(cls)
+
+	for cls in __mesh_panel_classes__:
+		bpy.utils.register_class(cls)
+
+	bpy.types.DATA_PT_shape_keys.append(menu_func_morphs)
+	
 	MeshIOOperators.register()
 	MorphIOOperators.register()
 	NifIOOperators.register()
-
-	bpy.utils.register_class(MorphListRecalculateNormals)
-	bpy.utils.register_class(ExportSFMeshOperator)
-	bpy.utils.register_class(CreateAdvancedMorphEditOperator)
-	bpy.utils.register_class(SGB_UL_ShapeKeyListItems)
-	bpy.utils.register_class(shapeKeyList)
-	bpy.utils.register_class(TransferShapeKeys)
-	bpy.utils.register_class(ExportSFMeshPanel)
-	bpy.types.DATA_PT_shape_keys.append(menu_func_morphs)
-
 	PhysicsPanel.register()
 	MaterialPanel.register()
 	ImportSkeleOp.register()
@@ -421,32 +445,22 @@ def register():
 	BoneRegionsPanel.register()
 
 def unregister():
-	bpy.utils.unregister_class(CreateAdvancedMorphEditOperator)
-	bpy.utils.unregister_class(ExportSFMeshOperator)
-	bpy.utils.unregister_class(ExportSFMeshPanel)
-	bpy.utils.unregister_class(MorphListRecalculateNormals)
-	bpy.utils.unregister_class(SGB_UL_ShapeKeyListItems)
-	bpy.utils.unregister_class(shapeKeyList)
-	bpy.utils.unregister_class(TransferShapeKeys)
+	for cls in __classes__:
+		bpy.utils.unregister_class(cls)
+
+	for cls in __mesh_panel_classes__:
+		bpy.utils.unregister_class(cls)
+
 	bpy.types.DATA_PT_shape_keys.remove(menu_func_morphs)
-	del bpy.types.Scene.sgb_debug_mode
-	del bpy.types.Scene.geometry_bridge_version
-	del bpy.types.Scene.export_mesh_folder_path
-	del bpy.types.Scene.assets_folder
-	del bpy.types.Scene.max_border
-	del bpy.types.Scene.use_world_origin
-	del bpy.types.Scene.WEIGHTS
-	del bpy.types.Scene.export_sf_mesh_open_folder
-	del bpy.types.Scene.export_sf_mesh_hash_result
-	del bpy.types.Scene.export_morph
-	del bpy.types.Scene.use_secondary_uv
+
+	for attr in __scene_global_attrs__:
+		delattr(bpy.types.Scene, attr)
 
 	PhysicsPanel.unregister()
 	MaterialPanel.unregister()
 	ImportSkeleOp.unregister()
 	Preferences.unregister()
 	BoneRegionsPanel.unregister()
-
 	MeshIOOperators.unregister()
 	MorphIOOperators.unregister()
 	NifIOOperators.unregister()
