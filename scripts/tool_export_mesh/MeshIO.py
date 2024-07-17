@@ -304,9 +304,6 @@ def MeshFromJson(json_data, options, context, operator, mesh_name_override = Non
 					w = data['tangents'][v_ix][3] / 3.0
 					col.data[l_ix].color = (w, w, w, w)
 	
-	if options.import_as_read_only:
-		obj.name = utils_blender.read_only_marker + obj.name
-
 	bm.free()
 	utils_blender.SetActiveObject(obj)
 	return {'FINISHED'}

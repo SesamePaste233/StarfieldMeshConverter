@@ -3,7 +3,6 @@ import numpy as np
 import bmesh
 import functools
 import ctypes
-import numba
 
 import utils_math
 from utils_common import timer

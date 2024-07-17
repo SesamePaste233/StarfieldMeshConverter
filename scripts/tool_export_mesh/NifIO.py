@@ -166,7 +166,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			cp_obj.scale = tuple([cp_scale,cp_scale,cp_scale])
 			cp_obj.parent = obj
 	
-	if options.correct_rotation and is_node == False and is_rigged and skeleton != None:
+	if is_node == False and is_rigged and skeleton != None:
 		skeleton_info = nif_armature.SkeletonLookup(skeleton)
 
 		for mesh_obj in _objects:
@@ -503,7 +503,7 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 				operator.report({'WARNING'}, f'Morph export for multiple geometries in one nif is not supported!')
 
 		mesh_data['use_internal_geom_data'] = 1 if options.use_internal_geom_data else 0
-		mesh_data['scale_factor'] = options.mesh_scale
+		mesh_data['scale_factor'] = 1
 		mesh_lod_info['mesh_data'] = geom_data
 		mesh_lod_info['factory_path'] = factory_name
 		mesh_lod_info['num_indices'] = indices_count
@@ -570,9 +570,6 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 			operator.report({'WARNING'}, f'Import_Nif_Path property from root node is not a valid nif file. Skipping...')
 			return {'CANCELLED'}
 
-		print(import_nif_path)
-		print(nif_filepath)
-		print(export_folder)
 		returncode = MeshConverter.EditNifBSGeometries(import_nif_path, json_data, nif_filepath, export_folder, options.overwrite_material_paths)
 	elif options.additive_export == 'Selected':
 		if not os.path.isfile(nif_filepath) or not nif_filepath.endswith('.nif'):
