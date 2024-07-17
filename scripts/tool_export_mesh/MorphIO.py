@@ -303,12 +303,9 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 	export_path = export_file_path
 
 	target_obj = utils_blender.GetActiveObject()
-	s_objs = utils_blender.GetSelectedObjs(True)
-	ref_obj = None
-
+	
 	if IsMorphExportNode(target_obj):
 		return ExportMorphFromSet(options, context, export_file_path, target_obj, operator)
-
 
 	p_options = utils_primitive.Primitive.Options()
 	p_options.gather_morph_data = True
@@ -329,10 +326,12 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 	try:
 		primitive.gather()
 		jsondata = primitive.to_morph_numpy_dict()
+	except utils_primitive.UVNotFoundException as e:
+		return {'CANCELLED'},  None
 	except utils_primitive.AtomicException as e:
-		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None
+		return {'CANCELLED'},  None
 	except Exception as e:
-		return {'CANCELLED'}, f"An error occurred: {e}", None
+		return {'CANCELLED'},  None
 
 	time_end = time.time()
 
@@ -361,7 +360,7 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 
 	utils_blender.SetActiveObject(target_obj)
 
-	operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f} + Serialize: {time_end1 - time_end:.2} + Dll: {time_end2 - time_end1:.2} seconds.")
+	operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f}  + Dll: {time_end2 - time_end1:.2} seconds.")
 	return {"FINISHED"}, jsondata['numVertices']
 
 

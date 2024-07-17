@@ -54,6 +54,30 @@ namespace mesh {
 
 		bool LoadFromString(const std::string json_data, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
+		bool LoadFromNumpy(const std::string json_header,
+			const float* ptr_positions,
+			const int64_t* ptr_indices,
+			const float* ptr_normals,
+			const float* ptr_uv1,
+			const float* ptr_uv2,
+			const float* ptr_color,
+			const float* ptr_tangents,
+			const int32_t* ptr_bitangent_signs,
+			const uint32_t options = Options::None
+		);
+
+		bool LoadFromNumpyJson(const nlohmann::json& jsonData,
+			const float* ptr_positions,
+			const int64_t* ptr_indices,
+			const float* ptr_normals,
+			const float* ptr_uv1,
+			const float* ptr_uv2,
+			const float* ptr_color,
+			const float* ptr_tangents,
+			const int32_t* ptr_bitangent_signs,
+			const uint32_t options = Options::None
+		);
+
 		bool LoadFromJson(const nlohmann::json& jsonData, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
 		bool SerializeToJsonStr(std::string& json_data) const;

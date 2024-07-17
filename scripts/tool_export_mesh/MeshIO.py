@@ -16,11 +16,11 @@ import utils_primitive
 
 import time
 
-def MeshToJson_alt(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
+def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
 	start_time = time.time()
 	
 	if not (obj and obj.type == 'MESH'):
-		return {'CANCELLED'}, "Selected object is not a mesh.", None
+		return {'CANCELLED'}, "Selected object is not a mesh.", None, None
 	
 	# Duplicate the object and triangulate the mesh
 	new_obj = obj.copy()
@@ -50,238 +50,28 @@ def MeshToJson_alt(obj, options, bone_list_filter = None, prune_empty_vertex_gro
 		p_options.vertex_group_merge_source = facebone_vg_names
 		p_options.vertex_group_merge_target = "C_Head"
 
-	for vg in obj.vertex_groups:
-		if vg.name not in bone_list_filter:
-			p_options.vertex_group_ignore.append(vg.name)
+	if bone_list_filter is not None:
+		for vg in obj.vertex_groups:
+			if vg.name not in bone_list_filter:
+				p_options.vertex_group_ignore.append(vg.name)
 
 	primitive = utils_primitive.Primitive(new_obj, p_options)
 
 	try:
 		primitive.gather()
-		data = primitive.to_mesh_json_dict()
+		matrices, data = primitive.to_mesh_numpy_dict()
+	except utils_primitive.UVNotFoundException as e:
+		return {'CANCELLED'}, "Your mesh has no active UV map.", None, None
 	except utils_primitive.AtomicException as e:
-		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None
+		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None, None
 	except Exception as e:
-		return {'CANCELLED'}, f"An error occurred: {e}", None
+		return {'CANCELLED'}, f"An error occurred: {e}", None, None
 
 	# Cleanup
 	bpy.data.meshes.remove(new_obj.data)	
 
-	print(f"MeshToJson_alt took {time.time() - start_time} seconds")
-	return {'FINISHED'}, "", data
-
-
-def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
-	start_time = time.time()
-	
-	# Initialize dictionaries to store data
-	data = {
-		"max_border": options.max_border,
-		"num_verts": 0,
-		"positions_raw": [],
-		"num_indices": 0,
-		"vertex_indices_raw": [],
-		"normals": [],
-		"uv_coords": [],
-		"vertex_color": [],
-		"vertex_group_names": [],
-		"vertex_weights": [],
-		"smooth_group": [],
-		"tangents": [],
-	}
-
-	old_obj = obj
-	if not (old_obj and old_obj.type == 'MESH'):
-		return {'CANCELLED'}, "Selected object is not a mesh.", None
-
-	old_obj, selected_obj = utils_blender.PreprocessAndProxy(old_obj, options.use_world_origin, auto_add_sharp=options.auto_add_sharp)
-
-	if 'DOUBLE_FACES_VERTS' in selected_obj.vertex_groups:
-		double_faces_vg = selected_obj.vertex_groups['DOUBLE_FACES_VERTS']
-		selected_obj.vertex_groups.remove(double_faces_vg)
-		double_faces_vg_old = old_obj.vertex_groups['DOUBLE_FACES_VERTS']
-		old_obj.vertex_groups.remove(double_faces_vg_old)
-
-	if "SMOOTH_GROUP" in selected_obj.vertex_groups:
-		smooth_group = selected_obj.vertex_groups["SMOOTH_GROUP"]
-		selected_obj.vertex_groups.remove(smooth_group)
-
-	if "SHARP_GROUP" in selected_obj.vertex_groups:
-		sharp_group = selected_obj.vertex_groups["SHARP_GROUP"]
-		selected_obj.vertex_groups.remove(sharp_group)
-
-	if bone_list_filter != None:
-		for vert_gp in selected_obj.vertex_groups:
-			if vert_gp.name not in bone_list_filter:
-				selected_obj.vertex_groups.remove(vert_gp)
-
-	if head_object_mode == 'Base':
-		facebone_vg_names = [vg.name for vg in selected_obj.vertex_groups if vg.name.startswith("faceBone_")]
-		utils_blender.CombineVertexGroups(selected_obj, facebone_vg_names, "C_Head", True)
-	elif head_object_mode == 'FaceBone':
-		facebone_vg_names = [vg.name for vg in selected_obj.vertex_groups if vg.name.startswith("faceBone_")]
-		utils_blender.SubtractVertexGroups(selected_obj, facebone_vg_names, "C_Head", True)
-
-	bm = bmesh.new()
-	bm.from_mesh(selected_obj.data)
-
-	# Extract data from the mesh
-	color_layer = bm.loops.layers.color.active
-	verts_count = 0
-	hanging_verts = []
-
-	if options.GEO:
-		positions = [list(vert.co) for vert in selected_obj.data.vertices.values()] 
-		data["positions_raw"] = utils.flatten(positions)
-
-	for v in bm.verts:
-		verts_count += 1
-		
-		has_hanging_verts = False
-		if len(v.link_loops) == 0:
-			hanging_verts.append(v.index)
-			has_hanging_verts = True
-
-		if options.VERTCOLOR and color_layer:
-			loop = v.link_loops[0]
-			data["vertex_color"].append([loop[color_layer][0],loop[color_layer][1],loop[color_layer][2],loop[color_layer][3]])
-
-	data["num_verts"] = verts_count
-
-	if verts_count >= 65535:
-		return {'CANCELLED'}, f"Your model has to many vertices. Try to reduce your vertex count.", None
-
-	if has_hanging_verts:
-		bpy.context.view_layer.objects.active = old_obj
-		old_obj.select_set(True)
-		bpy.data.meshes.remove(selected_obj.data)
-		selected_obj = bpy.context.active_object
-
-		# Ensure we are in Edit Mode
-		if selected_obj.mode != 'EDIT':
-			bpy.ops.object.mode_set(mode='EDIT')
-
-		# Deselect all
-		bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-		bpy.ops.mesh.select_all(action='DESELECT')
-
-		t_obj = bpy.context.edit_object
-		t_me = t_obj.data
-
-		t_bm = bmesh.from_edit_mesh(t_me)
-		for t_v in t_bm.verts:
-			if t_v.index in hanging_verts:
-				t_v.select = True
-		
-		bmesh.update_edit_mesh(t_me)
-
-		bpy.ops.mesh.select_linked(delimit=set())
-
-		return {'CANCELLED'}, "There are floating verts in your model. Some verts don't belong to any faces.", None
-	
-	try:
-		selected_obj.data.calc_tangents()
-		selected_obj.data.calc_normals_split()
-
-		first_uv_layer = selected_obj.data.uv_layers.active
-		second_uv_layer = None
-		if options.use_secondary_uv:
-			# Select the other uv layer that is not the first one
-			for uv_layer in selected_obj.data.uv_layers:
-				if uv_layer != first_uv_layer:
-					second_uv_layer = uv_layer
-					break
-			if second_uv_layer == None:
-				options.use_secondary_uv = False
-				
-		data["uv_coords"] = [[] for _ in range(verts_count)]
-		if options.use_secondary_uv:
-			data["uv_coords2"] = [[] for _ in range(verts_count)]
-		Tangents = [np.array([0,0,0]) for _ in range(verts_count)]
-		Normals = [np.array([0,0,0]) for _ in range(verts_count)]
-		Bitangent_sign = [1 for _ in range(verts_count)]
-		
-		for face in selected_obj.data.polygons:
-			for vert_idx, loop_idx in zip(face.vertices, face.loop_indices):
-				uv_coords = first_uv_layer.data[loop_idx].uv
-				data["uv_coords"][vert_idx] = [uv_coords[0],1 - uv_coords[1]]
-				if options.use_secondary_uv:
-					uv_coords2 = second_uv_layer.data[loop_idx].uv
-					data["uv_coords2"][vert_idx] = [uv_coords2[0],1 - uv_coords2[1]]
-
-				Bitangent_sign[vert_idx] = selected_obj.data.loops[loop_idx].bitangent_sign 
-				Tangents[vert_idx] = np.array(selected_obj.data.loops[loop_idx].tangent) + Tangents[vert_idx]
-				Normals[vert_idx] = np.array(selected_obj.data.loops[loop_idx].normal) + Normals[vert_idx]
-
-		data["normals"] = [list(utils_math.NormalizeVec(n)) for n in Normals]
-		data["tangents"] = [list(utils_math.GramSchmidtOrthogonalize(t, np.array(n))) + [3 if f < 0 else 0] for t, n, f in zip(Tangents, data["normals"], Bitangent_sign)]
-
-		for _l in data["uv_coords"]:
-			if len(_l) == 0:
-				print(data["uv_coords"], verts_count)
-				return {'CANCELLED'}, "Some verts don't have UV coords.", None
-				
-		indices_count = 0
-		if options.GEO:
-			for f in bm.faces:
-				data["vertex_indices_raw"].extend([v.index for v in f.verts])
-				indices_count += 3
-
-		data["num_indices"] = indices_count
-
-		# Extract vertex weights and bones
-		if len(selected_obj.vertex_groups) == 0:
-			options.WEIGHTS = False
-
-		if options.WEIGHTS:
-			vertex_groups = selected_obj.vertex_groups
-			if prune_empty_vertex_groups:
-				vgrp_markers = [[vg.name, -1] for vg in vertex_groups]
-			else:
-				vgrp_markers = [[vg.name, i] for vg, i in zip(vertex_groups, range(len(vertex_groups)))]
-			new_id = 0
-
-			bm.verts.layers.deform.verify()
-
-			deform = bm.verts.layers.deform.active
-			
-			data["vertex_weights"]=[]
-			_min_weight = 1 / 65534
-			for v in bm.verts:
-				g = v[deform]
-				
-				data["vertex_weights"].append([])
-				for bone_id, weight in g.items():
-					if weight > _min_weight:
-						if vgrp_markers[bone_id][1] == -1:
-							vgrp_markers[bone_id][1] = new_id
-							new_id += 1
-						data["vertex_weights"][-1].append([vgrp_markers[bone_id][1], weight])
-				
-				if len(data["vertex_weights"][-1]) > 8:
-					index_list = sorted(range(len(data["vertex_weights"][-1])), key=lambda k: data["vertex_weights"][-1][k], reverse=True)
-					data["vertex_weights"][-1] = [data["vertex_weights"][-1][i] for i in index_list[:8]]
-				
-				if len(data["vertex_weights"][-1]) == 0:
-					data["vertex_weights"][-1].append([0, 0])
-
-			vgrp_markers = sorted(vgrp_markers, key=lambda x: x[1])
-			data['vertex_group_names'] = [vg[0] for vg in vgrp_markers if vg[1] != -1]
-
-	except IndexError:
-		return {'CANCELLED'}, "The mesh may have loose vertices, try to Clean Up the mesh or contact the author.", None
-
-	# Cleanup
-	bm.to_mesh(selected_obj.data)
-	bm.free()
-
-	bpy.context.view_layer.objects.active = old_obj
-	old_obj.select_set(True)
-	
-	bpy.data.meshes.remove(selected_obj.data)
-
 	print(f"MeshToJson took {time.time() - start_time} seconds")
-	return {'FINISHED'}, "", data
+	return {'FINISHED'}, "", data, matrices
 
 def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
 	export_mesh_file_path = filepath
@@ -299,18 +89,24 @@ def ExportMesh(options, context, filepath: str, operator, bone_list_filter = Non
 	else:
 		result_file_path = export_mesh_file_path
 	
-	rtn, message, data = MeshToJson_alt(active_object, options, bone_list_filter, prune_empty_vertex_groups, head_object_mode)
+	time_start = time.time()
+
+	rtn, message, data, matrices = MeshToJson(active_object, options, bone_list_filter, prune_empty_vertex_groups, head_object_mode)
+
+	time_end = time.time()
 
 	if rtn != {'FINISHED'}:
 		operator.report({'ERROR'}, message)
-		return returncode, 0, 0, None
+		return rtn, 0, 0, None
 
-	json_data = json.dumps(data)
+	#json_data = json.dumps(data)
 	
-	returncode = MeshConverter.ExportMeshFromJson(json_data, result_file_path, options.mesh_scale, False, options.normalize_weights, False)
+	returncode = MeshConverter.ExportMeshFromNumpy({**data, **matrices}, result_file_path)
+
+	time_end1 = time.time()
 
 	if returncode:
-		operator.report({'INFO'}, "Starfield .mesh exported successfully")
+		operator.report({'INFO'}, f"Starfield .mesh exported successfully. Gather:{time_end - time_start} + Dll:{time_end1 - time_end}")
 
 		if options.export_sf_mesh_open_folder == True:
 			utils_blender.open_folder(bpy.path.abspath(export_mesh_folder_path))

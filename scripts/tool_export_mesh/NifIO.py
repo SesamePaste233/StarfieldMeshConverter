@@ -347,6 +347,8 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 		operator.report({'WARNING'}, f'Must select an empty object as Root Node or a mesh object as BSGeometry or an armature object as Skeleton.')
 		return {'CANCELLED'}
 
+	_matrices_cache = [] # Avoid release of numpy matrices
+
 	geometries = []
 	mode = "MULTI_MESH"
 	connect_pts = []
@@ -461,13 +463,14 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 
 		geom_data = None
 		if options.use_internal_geom_data:
-			rtn, message, geom_data = MeshIO.MeshToJson_alt(mesh_obj, options, bone_list_filter, True, head_object_mode)
+			rtn, message, geom_data, matrices = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, head_object_mode)
 			if 'FINISHED' not in rtn:
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Message: {message}. Skipping...')
 				continue
 			verts_count = geom_data['num_verts']
 			indices_count = geom_data['num_indices']
 			bone_list = geom_data['vertex_group_names']
+			_matrices_cache.append(matrices)
 		else:
 			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, head_object_mode)
 			if 'FINISHED' not in rtn:

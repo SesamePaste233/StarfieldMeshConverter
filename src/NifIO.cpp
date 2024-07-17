@@ -1118,7 +1118,7 @@ nif::ni_template::RTTI nif::ni_template::NiSimpleGeometryTemplate::Deserialize(n
 					continue;
 
 				if (geo_info.use_internal_geom_data) {
-					geo_info.geo_mesh_lod[i].mesh_data.LoadFromJson(mesh_info["mesh_data"], scale_factor, mesh::MeshIO::Options::NormalizeWeight);
+					geo_info.geo_mesh_lod[i].mesh_data.LoadFromNumpyJson(mesh_info["mesh_data"], nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr, mesh::MeshIO::Options::NormalizeWeight);
 				}
 
 				geo_info.geo_mesh_lod[i].factory_path = mesh_info["factory_path"];

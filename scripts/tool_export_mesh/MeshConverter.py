@@ -11,11 +11,32 @@ print(_dll)
 _dll_export_mesh = _dll.ExportMesh
 _dll_export_mesh.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_float, ctypes.c_bool, ctypes.c_bool, ctypes.c_bool]
 
+_dll_export_mesh_numpy = _dll.ExportMeshNumpy
+_dll_export_mesh_numpy.argtypes = [
+    ctypes.c_char_p, 
+    ctypes.c_char_p,
+    ctypes.POINTER(ctypes.c_float), # ptr_positions
+    ctypes.POINTER(ctypes.c_int64), # ptr_indices
+    ctypes.POINTER(ctypes.c_float), # ptr_normals
+    ctypes.POINTER(ctypes.c_float), # ptr_uv1
+    ctypes.POINTER(ctypes.c_float), # ptr_uv2
+    ctypes.POINTER(ctypes.c_float), # ptr_color
+    ctypes.POINTER(ctypes.c_float), # ptr_tangents
+    ctypes.POINTER(ctypes.c_int32), # ptr_bitangent_signs
+    ]
+
 _dll_export_morph = _dll.ExportMorph
 _dll_export_morph.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
 
 _dll_export_morph_numpy = _dll.ExportMorphNumpy
-_dll_export_morph_numpy.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float), ctypes.POINTER(ctypes.c_float)]
+_dll_export_morph_numpy.argtypes = [
+    ctypes.c_char_p, 
+    ctypes.c_char_p, 
+    ctypes.POINTER(ctypes.c_float), 
+    ctypes.POINTER(ctypes.c_float), 
+    ctypes.POINTER(ctypes.c_float), 
+    ctypes.POINTER(ctypes.c_float),
+    ]
 
 _dll_export_empty_morph = _dll.ExportEmptyMorph
 _dll_export_empty_morph.argtypes = [ctypes.c_uint32, ctypes.c_char_p]
@@ -109,8 +130,52 @@ class DLLReturnCode():
             case _:
                 return "Unknown error"
 
+_np_types_to_ctypes = {
+    np.float32: ctypes.c_float,
+    np.int64: ctypes.c_int64,
+    np.uint32: ctypes.c_uint32,
+    np.int32: ctypes.c_int32,
+}
+
+def _check_numpy_type_and_size(np_mat: np.ndarray | None, np_type, size, allow_none = False):
+    assert np_type in _np_types_to_ctypes, f"Numpy type {np_type} fails to convert to c type"
+    if allow_none and np_mat is None:
+        return ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np_type]))
+    else:
+        assert np_mat.shape == size, f"shape is not correct, expected {size}, got {np_mat.shape}"
+        assert np_mat.dtype == np_type, f"dtype is not {np_type} but {np_mat.dtype}"
+        return np_mat.ctypes.data_as(ctypes.POINTER(_np_types_to_ctypes[np_type]))
+    
+
 def ExportMeshFromJson(json_data_string: str, output_file: str, max_border: float, smooth_edge_normal: bool, normalize_weights: bool, do_optimization: bool) -> DLLReturnCode:
     rtn = _dll_export_mesh(json_data_string.encode('utf-8'), output_file.encode('utf-8'), max_border, smooth_edge_normal, normalize_weights, do_optimization)
+    return DLLReturnCode(rtn)
+
+def ExportMeshFromNumpy(numpy_dict: dict, output_file: str) -> DLLReturnCode:
+    header_dict = {key:value for key, value in numpy_dict.items() if not isinstance(value, np.ndarray)}
+    header_json_str = json.dumps(header_dict)
+
+    #ptr_pos = _check_numpy_type_and_size(numpy_dict['positions_raw'], np_type=np.float32, size=(numpy_dict["num_verts"], 3))
+    #ptr_vert_ids = _check_numpy_type_and_size(numpy_dict['vertex_indices_raw'], np_type=np.int64, size=(numpy_dict["num_indices"],))
+    #ptr_norm = _check_numpy_type_and_size(numpy_dict['normals'], np_type=np.float32, size=(numpy_dict["num_verts"], 3))
+    #ptr_uv1 = _check_numpy_type_and_size(numpy_dict['uv_coords'], np_type=np.float32, size=(numpy_dict["num_verts"], 2))
+    #ptr_uv2 = _check_numpy_type_and_size(numpy_dict['uv_coords_2'], np_type=np.float32, size=(numpy_dict["num_verts"], 2), allow_none= True)
+    #ptr_color = _check_numpy_type_and_size(numpy_dict['vertex_color'], np_type=np.float32, size=(numpy_dict["num_verts"], 4), allow_none= True)
+    #ptr_tangent = _check_numpy_type_and_size(numpy_dict['tangents'], np_type=np.float32, size=(numpy_dict["num_verts"], 3))
+    #ptr_bttangent_sign = _check_numpy_type_and_size(numpy_dict['bitangent_signs'], np_type=np.int32, size=(numpy_dict["num_verts"],))
+
+    rtn = _dll_export_mesh_numpy(
+        header_json_str.encode('utf-8'), 
+        output_file.encode('utf-8'),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.float32])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.int64])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.float32])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.float32])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.float32])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.float32])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.float32])),
+        ctypes.cast(0, ctypes.POINTER(_np_types_to_ctypes[np.int32])),
+        )
     return DLLReturnCode(rtn)
 
 def ExportMorphFromJson(json_data_string: str, output_file: str) -> DLLReturnCode:
@@ -121,24 +186,21 @@ def ExportMorphFromNumpy(numpy_dict: dict, output_file: str) -> DLLReturnCode:
     header = {"numVertices":numpy_dict["numVertices"], "shapeKeys":numpy_dict["shapeKeys"]}
     header_json_str = json.dumps(header)
 
-    assert numpy_dict['deltaPositions'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"deltaPositions shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['deltaPositions'].shape}"
-    assert numpy_dict['targetColors'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"targetColors shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['targetColors'].shape}"
-    assert numpy_dict['deltaNormals'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"deltaNormals shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['deltaNormals'].shape}"
-    assert numpy_dict['deltaTangents'].shape == (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3), f"deltaTangents shape is not correct, expected {(numpy_dict['numVertices'], len(numpy_dict['shapeKeys']), 3)}, got {numpy_dict['deltaTangents'].shape}"
-    
-    # Check types
-    assert numpy_dict['deltaPositions'].dtype == np.float32, f"deltaPositions dtype is not float32 but {numpy_dict['deltaPositions'].dtype}"
-    assert numpy_dict['targetColors'].dtype == np.float32, f"targetColors dtype is not float32 but {numpy_dict['targetColors'].dtype}"
-    assert numpy_dict['deltaNormals'].dtype == np.float32, f"deltaNormals dtype is not float32 but {numpy_dict['deltaNormals'].dtype}"
-    assert numpy_dict['deltaTangents'].dtype == np.float32, f"deltaTangents dtype is not float32 but {numpy_dict['deltaTangents'].dtype}"
-    
+    size = (len(numpy_dict["shapeKeys"]), numpy_dict["numVertices"], 3)
+    np_type = np.float32
+
+    ptr_delta_pos = _check_numpy_type_and_size(numpy_dict['deltaPositions'], np_type=np_type, size=size)
+    ptr_target_colors = _check_numpy_type_and_size(numpy_dict['targetColors'], np_type=np_type, size=size)
+    ptr_delta_norm = _check_numpy_type_and_size(numpy_dict['deltaNormals'], np_type=np_type, size=size)
+    ptr_delta_tangent = _check_numpy_type_and_size(numpy_dict['deltaTangents'], np_type=np_type, size=size)
+
     rtn = _dll_export_morph_numpy(
         header_json_str.encode('utf-8'), 
         output_file.encode('utf-8'), 
-        numpy_dict['deltaPositions'].ctypes.data_as(ctypes.POINTER(ctypes.c_float)), 
-        numpy_dict['targetColors'].ctypes.data_as(ctypes.POINTER(ctypes.c_float)), 
-        numpy_dict['deltaNormals'].ctypes.data_as(ctypes.POINTER(ctypes.c_float)), 
-        numpy_dict['deltaTangents'].ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+        ptr_delta_pos, 
+        ptr_target_colors, 
+        ptr_delta_norm, 
+        ptr_delta_tangent
         )
     return DLLReturnCode(rtn)
 

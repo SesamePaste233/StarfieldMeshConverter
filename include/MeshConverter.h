@@ -20,6 +20,18 @@ extern "C" {
 		bool normalize_weights,
 		bool do_optimization);
 
+	DLL uint32_t ExportMeshNumpy(const char* json_data,
+		const char* output_file,
+		const float* ptr_positions,
+		const int64_t* ptr_indices,
+		const float* ptr_normals,
+		const float* ptr_uv1,
+		const float* ptr_uv2,
+		const float* ptr_color,
+		const float* ptr_tangents,
+		const int32_t* ptr_bitangent_signs
+	);
+
 	DLL uint32_t ExportMorph(const char* json_data,
 		const char* output_file);
 

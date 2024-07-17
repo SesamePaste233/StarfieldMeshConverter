@@ -29,6 +29,46 @@ uint32_t ExportMesh(const char* json_data, const char* output_file, float scale,
 	return 0;
 }
 
+uint32_t ExportMeshNumpy(const char* json_data, 
+	const char* output_file,
+	const float* ptr_positions,
+	const int64_t* ptr_indices,
+	const float* ptr_normals,
+	const float* ptr_uv1,
+	const float* ptr_uv2,
+	const float* ptr_color,
+	const float* ptr_tangents,
+	const int32_t* ptr_bitangent_signs
+){
+	mesh::MeshIO reader;
+
+	uint32_t opt = mesh::MeshIO::Options::GenerateTangentIfNA;
+	opt |= mesh::MeshIO::Options::NormalizeWeight;
+
+	if (!reader.LoadFromNumpy(json_data, 
+		ptr_positions,
+		ptr_indices,
+		ptr_normals,
+		ptr_uv1,
+		ptr_uv2,
+		ptr_color,
+		ptr_tangents,
+		ptr_bitangent_signs,
+		opt
+	)) {
+		std::cerr << "Failed to load mesh from blender." << std::endl;
+		return 2; // Return an error code
+	}
+
+	if (!reader.Serialize(output_file)) {
+		std::cerr << "Failed to save mesh to file." << std::endl;
+		return 3; // Return an error code
+	}
+	std::cout << "Mesh loaded from blender and serialized to " << output_file << std::endl;
+
+	return 0;
+}
+
 uint32_t ExportMorph(const char* json_data, const char* output_file)
 {
 	// Equivalent to blenderToMorph

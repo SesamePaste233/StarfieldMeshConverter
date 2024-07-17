@@ -2,8 +2,11 @@ import bpy
 import numpy as np
 import bmesh
 import functools
+import ctypes
+import numba
 
 import utils_math
+from utils_common import timer
 
 class AtomicException(Exception):
     pass
@@ -15,6 +18,9 @@ class MorphUncalculatedException(Exception):
     pass
 
 class UVIndexException(Exception):
+    pass
+
+class UVNotFoundException(Exception):
     pass
 
 class Primitive():
@@ -92,19 +98,33 @@ class Primitive():
 
     @functools.cached_property
     def uv(self):
-        return np.array([self.atomic_vertices['uv_x'], self.atomic_vertices['uv_y']]).T
+        _uv = np.empty((len(self.atomic_vertices), 2), dtype=np.float32) # To ensure row-major order in memory
+        _uv[:, 0] = self.atomic_vertices['uv_x']
+        _uv[:, 1] = self.atomic_vertices['uv_y']
+        return _uv
     
     @functools.cached_property
     def uv_2(self):
-        return np.array([self.atomic_vertices['uv_x_2'], self.atomic_vertices['uv_y_2']]).T
+        _uv = np.empty((len(self.atomic_vertices), 2), dtype=np.float32)
+        _uv[:, 0] = self.atomic_vertices['uv_x_2']
+        _uv[:, 1] = self.atomic_vertices['uv_y_2']
+        return _uv
     
     @functools.cached_property
     def normals(self):
-        return np.array([self.atomic_vertices['normal_x'], self.atomic_vertices['normal_y'], self.atomic_vertices['normal_z']]).T
+        _normal = np.empty((len(self.atomic_vertices), 3), dtype=np.float32)
+        _normal[:, 0] = self.atomic_vertices['normal_x']
+        _normal[:, 1] = self.atomic_vertices['normal_y']
+        _normal[:, 2] = self.atomic_vertices['normal_z']
+        return _normal
 
     @functools.cached_property
     def tangents(self):
-        return np.array([self.atomic_vertices['tangent_x'], self.atomic_vertices['tangent_y'], self.atomic_vertices['tangent_z']]).T
+        _tangent = np.empty((len(self.atomic_vertices), 3), dtype=np.float32)
+        _tangent[:, 0] = self.atomic_vertices['tangent_x']
+        _tangent[:, 1] = self.atomic_vertices['tangent_y']
+        _tangent[:, 2] = self.atomic_vertices['tangent_z']
+        return _tangent
     
     @functools.cached_property
     def bitangent_sign(self):
@@ -112,7 +132,12 @@ class Primitive():
     
     @functools.cached_property
     def colors(self):
-        return np.array([self.atomic_vertices['color_r'], self.atomic_vertices['color_g'], self.atomic_vertices['color_b'], self.atomic_vertices['color_a']]).T
+        _color = np.empty((len(self.atomic_vertices), 4), dtype=np.float32)
+        _color[:, 0] = self.atomic_vertices['color_r']
+        _color[:, 1] = self.atomic_vertices['color_g']
+        _color[:, 2] = self.atomic_vertices['color_b']
+        _color[:, 3] = self.atomic_vertices['color_a']
+        return _color
 
     @functools.cached_property
     def morph_positions(self):
@@ -157,10 +182,11 @@ class Primitive():
 
         self.gather_triangles()
     
+    @timer
     def scan_object_for_data(self):
         # Check for UV data
         if not self.blender_mesh.uv_layers.active:
-            print("No UV data found on mesh")
+            raise UVNotFoundException("No active UV data found on mesh")
             return False
         
         self.uv_layer = self.blender_mesh.uv_layers.active
@@ -195,11 +221,13 @@ class Primitive():
             if not armatures:
                 print("No armature modifier found on object")
                 self.options.gather_weights_data = False
+                self.armature = None
             elif len(armatures) > 1:
                 print("Multiple armature modifiers found on object")
                 self.options.gather_weights_data = False
-            
-            self.armature = armatures[0]
+                self.armature = armatures[0]
+            else:
+                self.armature = armatures[0]
 
         if self.options.gather_morph_data:
             if self.blender_mesh.shape_keys:
@@ -236,6 +264,7 @@ class Primitive():
 
         return True
     
+    @timer
     def gather_atomics(self):
         # Gather vertex index data
         self.blender_mesh.loops.foreach_get('vertex_index', self.atomic_vertices['vertex_index'])
@@ -302,6 +331,7 @@ class Primitive():
             self.atomic_vertices['color_b'] = colors[2]
             self.atomic_vertices['color_a'] = colors[3]
 
+    @timer
     def deduplicate_atomics(self, raise_exception = True):
         self.atomic_vertices, self.atomic_to_loop_id, self.loop_id_to_atomic = np.unique(self.atomic_vertices, return_index=True, return_inverse=True)
 
@@ -315,6 +345,7 @@ class Primitive():
             
         return True
 
+    @timer
     def gather_positions(self):
         self.raw_positions = np.empty(len(self.blender_mesh.vertices) * 3, dtype=np.float32)
         self.blender_mesh.vertices.foreach_get('co', self.raw_positions)
@@ -333,6 +364,7 @@ class Primitive():
             self.raw_morph_positions.append(vs)
             self.raw_morph_position_deltas.append(vs - self.raw_positions)
 
+    @timer
     def gather_weights(self):
         vertex_groups = self.blender_object.vertex_groups
         if self.options.prune_empty_vertex_groups:
@@ -374,8 +406,7 @@ class Primitive():
                 vertex_weight_data = [x for x in vertex_weight_data if x[1] != 0]
                 
                 if len(vertex_weight_data) > self.options.max_weights_per_vertex:
-                    index_list = sorted(range(len(vertex_weight_data)), key=lambda k: vertex_weight_data[k], reverse=True)
-                    vertex_weight_data = [vertex_weight_data[i] for i in index_list[:self.options.max_weights_per_vertex]]
+                    vertex_weight_data = sorted(vertex_weight_data, key=lambda x: x[1], reverse=True)[:max_weights_per_vertex]
                 elif len(vertex_weight_data) == 0:
                     vertex_weight_data.append([0, 0])
 
@@ -396,8 +427,7 @@ class Primitive():
                         vertex_weight_data.append([vgrp_markers[bone_id][1], weight])
                 
                 if len(vertex_weight_data) > self.options.max_weights_per_vertex:
-                    index_list = sorted(range(len(vertex_weight_data)), key=lambda k: vertex_weight_data[k], reverse=True)
-                    vertex_weight_data = [vertex_weight_data[i] for i in index_list[:self.options.max_weights_per_vertex]]
+                    vertex_weight_data = sorted(vertex_weight_data, key=lambda x: x[1], reverse=True)[:self.options.max_weights_per_vertex]
                 elif len(vertex_weight_data) == 0:
                     vertex_weight_data.append([0, 0])
 
@@ -411,6 +441,7 @@ class Primitive():
 
         print("Final vertex weights count: " + str(len(self.vertex_weights_data["vertex_weights"])))
 
+    @timer
     def gather_morphs(self):
         self.vertex_morph_data["shapeKeys"] = [key_block.name for key_block in self.key_blocks]
         self.vertex_morph_data["deltaPositions"] = np.array(self.morph_position_deltas)
@@ -418,6 +449,7 @@ class Primitive():
         self.vertex_morph_data["deltaNormals"] = np.array(self.morph_normal_deltas, dtype=np.float32)
         self.vertex_morph_data["deltaTangents"] = np.array(self.morph_tangent_deltas, dtype=np.float32)
 
+    @timer
     def gather_triangles(self):
         self.blender_mesh.calc_loop_triangles()
         self.triangles = np.empty(len(self.blender_mesh.loop_triangles) * 3, dtype=np.uint32)
@@ -483,6 +515,7 @@ class Primitive():
         self._post_tangent_transform(self.raw_tangents)
 
         # Should be the same as implementation in glTF 2.0 exporter for Blender, but a lot faster (30+ times faster)
+        # Calculate morph tangents from morph normals, basis normals and basis tangents (64k verts 77 SK, 160 ms)
         self.raw_morph_tangents = []
         self.raw_morph_tangent_deltas = []
         if self.options.gather_morph_data:
@@ -543,12 +576,13 @@ class Primitive():
             if flipped:
                 self.atomic_vertices['bitangent_sign'] *= -1
 
+    @timer
     def to_mesh_json_dict(self):
         data = {
             "max_border": self.options.max_border,
             "num_verts": len(self.atomic_vertices),
             "positions_raw": self.positions.flatten().tolist(),
-            "num_indices": 3 * len(self.triangles),
+            "num_indices": len(self.triangles),
             "vertex_indices_raw": self.triangles.tolist(),
             "normals": self.normals.tolist(),
             "uv_coords": self.uv.tolist(),
@@ -563,6 +597,39 @@ class Primitive():
 
         return data
 
+    @timer
+    def to_mesh_numpy_dict(self):
+        data_matrices = {
+            "positions_raw": self.positions,# np.float32
+            "vertex_indices_raw": self.triangles, # np.int64
+            "normals": self.normals, # np.float32
+            "uv_coords": self.uv, # np.float32
+            "vertex_color": self.colors if self.gather_color_data else None, # np.float32
+            "tangents": self.tangents, # np.float32
+            "bitangent_signs": self.bitangent_sign, # np.int32
+            "uv_coords_2": self.uv_2 if self.options.secondary_uv_layer_index != -1 else None # np.float32
+        }
+        data = {
+            "max_border": self.options.max_border,
+            "num_verts": len(self.atomic_vertices),
+            "num_indices": len(self.triangles),
+            "vertex_group_names": self.vertex_weights_data["vertex_group_names"],
+            "vertex_weights": self.vertex_weights_data["vertex_weights"],
+            "ptr_positions": ctypes.addressof(self.positions.ctypes.data_as(ctypes.POINTER(ctypes.c_float)).contents), # np.float32
+            "ptr_indices": ctypes.addressof(self.triangles.ctypes.data_as(ctypes.POINTER(ctypes.c_int64)).contents), # np.int64
+            "ptr_normals": ctypes.addressof(self.normals.ctypes.data_as(ctypes.POINTER(ctypes.c_float)).contents), # np.float32
+            "ptr_uv1": ctypes.addressof(self.uv.ctypes.data_as(ctypes.POINTER(ctypes.c_float)).contents), # np.float32
+            "ptr_uv2": ctypes.addressof(self.uv_2.ctypes.data_as(ctypes.POINTER(ctypes.c_float)).contents) if self.options.secondary_uv_layer_index != -1 else 0, # np.float32
+            "ptr_color": ctypes.addressof(self.colors.ctypes.data_as(ctypes.POINTER(ctypes.c_float)).contents) if self.gather_color_data else 0, # np.float32
+            "ptr_tangents": ctypes.addressof(self.tangents.ctypes.data_as(ctypes.POINTER(ctypes.c_float)).contents), # np.float32
+            "ptr_bitangent_signs": ctypes.addressof(self.bitangent_sign.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)).contents), # np.int32
+        }
+
+        print("ptr_positions", data["ptr_positions"])
+
+        return data_matrices, data
+    
+    @timer
     def to_morph_json_dict(self):
         if not self.options.gather_morph_data:
             raise MorphUncalculatedException("Primitive.to_morph_json_dict() called without gather_morph_data option set to True")
@@ -577,6 +644,7 @@ class Primitive():
         }
         return data
     
+    @timer
     def to_morph_numpy_dict(self):
         if not self.options.gather_morph_data:
             raise MorphUncalculatedException("Primitive.to_morph_numpy_dict() called without gather_morph_data option set to True")

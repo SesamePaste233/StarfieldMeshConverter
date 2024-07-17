@@ -610,6 +610,297 @@ bool MeshIO::LoadFromString(const std::string json_data, const float scale_facto
 	return this->LoadFromJson(jsonData, scale_factor, options);
 }
 
+bool MeshIO::LoadFromNumpy(
+	const std::string json_header,
+	const float* ptr_positions,
+	const int64_t* ptr_indices,
+	const float* ptr_normals,
+	const float* ptr_uv1,
+	const float* ptr_uv2,
+	const float* ptr_color,
+	const float* ptr_tangents,
+	const int32_t* ptr_bitangent_signs,
+	const uint32_t options
+) {
+	this->Clear();
+
+	json jsonData = json::parse(json_header);
+
+	return this->LoadFromNumpyJson(jsonData, ptr_positions, ptr_indices, ptr_normals, ptr_uv1, ptr_uv2, ptr_color, ptr_tangents, ptr_bitangent_signs, options);
+}
+
+bool MeshIO::LoadFromNumpyJson(const nlohmann::json& jsonData,
+	const float* ptr_positions,
+	const int64_t* ptr_indices,
+	const float* ptr_normals,
+	const float* ptr_uv1,
+	const float* ptr_uv2,
+	const float* ptr_color,
+	const float* ptr_tangents,
+	const int32_t* ptr_bitangent_signs,
+	const uint32_t options
+) {
+	this->Clear();
+
+	std::cout << "Loading mesh from numpy..." << std::endl;
+
+	this->num_positions = jsonData["num_verts"] * 3;
+	this->num_vertices = jsonData["num_verts"];
+
+	if (this->num_vertices > uint16_t(-1)) {
+		std::cout << "Error: Number of vertices has exceeded the maximum amount of 65535. Please split the mesh into smaller pieces before encoding." << std::endl;
+		return false;
+	}
+
+	float pos_max = 0;
+
+	if (ptr_positions == nullptr) {
+		if (jsonData.contains("ptr_positions")) {
+			ptr_positions = (float*)static_cast<uintptr_t>(jsonData["ptr_positions"]);
+			std::cout << "ptr_positions: " << (uintptr_t)ptr_positions << std::endl;
+		}
+		else {
+			std::cout << "Error: 'positions' is null." << std::endl;
+			return false;
+		}
+	}
+
+	for (size_t i = 0; i < this->num_vertices; ++i) {
+		this->positions.emplace_back(ptr_positions[i * 3 + 0]);
+		if (abs(ptr_positions[i * 3 + 0]) > pos_max) pos_max = abs(ptr_positions[i * 3 + 0]);
+		this->positions.emplace_back(ptr_positions[i * 3 + 1]);
+		if (abs(ptr_positions[i * 3 + 1]) > pos_max) pos_max = abs(ptr_positions[i * 3 + 1]);
+		this->positions.emplace_back(ptr_positions[i * 3 + 2]);
+		if (abs(ptr_positions[i * 3 + 2]) > pos_max) pos_max = abs(ptr_positions[i * 3 + 2]);
+	}
+
+	// To prevent overflow
+	this->max_border = pos_max + 0.1;
+
+	float settings_max_border = jsonData["max_border"];
+	if (settings_max_border > pos_max) {
+		this->max_border = settings_max_border;
+	}
+	else {
+		if (settings_max_border != 0)
+			std::cout << "Warning: Max border too low." << std::endl;
+	}
+
+	this->indices_size = jsonData["num_indices"];
+	this->num_triangles = this->indices_size / 3;
+
+	if (ptr_indices == nullptr) {
+		if (jsonData.contains("ptr_indices")) {
+			ptr_indices = (int64_t*)static_cast<uintptr_t>(jsonData["ptr_indices"]);
+			std::cout << "ptr_indices: " << (uintptr_t)ptr_indices << std::endl;
+		}
+		else {
+			std::cout << "Error: 'indices' is null." << std::endl;
+			return false;
+		}
+	}
+
+	for (size_t i = 0; i < this->indices_size; ++i) {
+		this->indices.emplace_back(ptr_indices[i]);
+	}
+
+	if (ptr_uv1 == nullptr) {
+		if (jsonData.contains("ptr_uv1")) {
+			ptr_uv1 = (float*)static_cast<uintptr_t>(jsonData["ptr_uv1"]);
+			std::cout << "ptr_uv1: " << (uintptr_t)ptr_uv1 << std::endl;
+		}
+		else {
+			std::cout << "Error: 'uv1' is null." << std::endl;
+			return false;
+		}
+	}
+
+	this->num_uv1 = this->num_vertices;
+	for (size_t i = 0; i < this->num_uv1; ++i) {
+		std::vector<float> uv = { ptr_uv1[i * 2 + 0], ptr_uv1[i * 2 + 1] };
+		this->UV_list1.emplace_back(uv);
+	}
+
+	if (ptr_uv2 == nullptr) {
+		if (jsonData.contains("ptr_uv2")) {
+			ptr_uv2 = (float*)static_cast<uintptr_t>(jsonData["ptr_uv2"]);
+			std::cout << "ptr_uv2: " << (uintptr_t)ptr_uv2 << std::endl;
+		}
+	}
+	if (ptr_uv2 != nullptr) {
+		this->num_uv2 = this->num_vertices;
+		for (size_t i = 0; i < this->num_uv2; ++i) {
+			std::vector<float> uv = { ptr_uv2[i * 2 + 0], ptr_uv2[i * 2 + 1] };
+			this->UV_list2.emplace_back(uv);
+		}
+	}
+
+	if (ptr_normals == nullptr) {
+		if (jsonData.contains("ptr_normals")) {
+			ptr_normals = (float*)static_cast<uintptr_t>(jsonData["ptr_normals"]);
+			std::cout << "ptr_normals: " << (uintptr_t)ptr_normals << std::endl;
+		}
+		else {
+			std::cout << "Error: 'normals' is null." << std::endl;
+			return false;
+		}
+	}
+
+	this->num_normals = this->num_vertices;
+	for (size_t i = 0; i < this->num_normals; ++i) {
+		float sqr = ptr_normals[i * 3 + 0] * ptr_normals[i * 3 + 0] + ptr_normals[i * 3 + 1] * ptr_normals[i * 3 + 1] + ptr_normals[i * 3 + 2] * ptr_normals[i * 3 + 2];
+		float inv_norm = 1.0f / std::sqrt(sqr);
+		std::vector<float> n = { ptr_normals[i * 3 + 0] * inv_norm, ptr_normals[i * 3 + 1] * inv_norm, ptr_normals[i * 3 + 2] * inv_norm };
+		this->normals.emplace_back(n);
+	}
+
+	if (ptr_tangents == nullptr) {
+		if (jsonData.contains("ptr_tangents")) {
+			ptr_tangents = (float*)static_cast<uintptr_t>(jsonData["ptr_tangents"]);
+			std::cout << "ptr_tangents: " << (uintptr_t)ptr_tangents << std::endl;
+		}
+		else {
+			std::cout << "Error: 'tangents' is null." << std::endl;
+			return false;
+		}
+	}
+
+	if (ptr_bitangent_signs == nullptr) {
+		if (jsonData.contains("ptr_bitangent_signs")) {
+			ptr_bitangent_signs = (int32_t*)static_cast<uintptr_t>(jsonData["ptr_bitangent_signs"]);
+			std::cout << "ptr_bitangent_signs: " << (uintptr_t)ptr_bitangent_signs << std::endl;
+		}
+		else {
+			std::cout << "Error: 'bitangent_signs' is null." << std::endl;
+			return false;
+		}
+	}
+
+	this->num_tangents = this->num_vertices;
+	for (size_t i = 0; i < this->num_tangents; ++i) {
+		std::vector<float> t = { ptr_tangents[i * 3 + 0], ptr_tangents[i * 3 + 1], ptr_tangents[i * 3 + 2] };
+		this->tangents.emplace_back(t);
+		this->tangent_signs.emplace_back(ptr_bitangent_signs[i] < 0 ? 3 : 0);
+	}
+
+	if (ptr_color == nullptr) {
+		if (jsonData.contains("ptr_color")) {
+			ptr_color = (float*)static_cast<uintptr_t>(jsonData["ptr_color"]);
+			std::cout << "ptr_color: " << (uintptr_t)ptr_color << std::endl;
+		}
+	}
+	if (ptr_color != nullptr) {
+		this->num_vert_colors = this->num_vertices;
+		for (size_t i = 0; i < this->num_vert_colors; ++i) {
+			mesh::vertex_color c;
+			c.r = uint8_t(ptr_color[i * 4 + 0] * 255);
+			c.g = uint8_t(ptr_color[i * 4 + 1] * 255);
+			c.b = uint8_t(ptr_color[i * 4 + 2] * 255);
+			c.a = uint8_t(ptr_color[i * 4 + 3] * 255);
+			this->vert_colors.emplace_back(c);
+		}
+	}
+
+	const json& weightData = jsonData["vertex_weights"];
+
+	if (weightData.is_array()) {
+		// Check if length of weightData is equal to the number of vertices
+		if (weightData.size() > 0 && weightData.size() != this->num_vertices) {
+			std::cout << "Error: Length of 'vertex_weights' is not equal to the number of vertices." << std::endl;
+			std::cout << "Length of 'vertex_weights': " << weightData.size() << std::endl;
+			std::cout << "Number of vertices: " << this->num_vertices << std::endl;
+			return false;
+		}
+
+		size_t num_bones = 0;
+		for (const auto& vw : weightData) {
+			if (vw.is_array()) {
+				if (vw.size() > this->num_weightsPerVertex) {
+					this->num_weightsPerVertex = vw.size();
+				}
+				for (auto& elem : vw) {
+					if (elem[0] > num_bones) {
+						num_bones = elem[0];
+					}
+				}
+			}
+		}
+		num_bones += 1;
+
+		this->num_weights = weightData.size() * this->num_weightsPerVertex;
+		this->weight_indices.resize(num_bones);
+
+		uint32_t vertex_index = 0;
+		for (const auto& vw : weightData) {
+			vertex_weight vw_l = new bone_binding[this->num_weightsPerVertex];
+			memset(vw_l, 0, sizeof(bone_binding) * this->num_weightsPerVertex);
+
+			std::vector<std::vector<double>> bb_raw;
+			std::vector<std::vector<uint16_t>> bb_l;
+			double sum_weight = 0;
+			for (const auto& element : vw) {
+
+				std::vector<double> bb_per_vert_per_bone_raw;
+
+
+				for (const auto& e : element) {
+					double _e = e;
+					bb_per_vert_per_bone_raw.push_back(_e);
+				}
+
+
+				sum_weight += bb_per_vert_per_bone_raw[1];
+				bb_per_vert_per_bone_raw[1] *= uint16_t(-1);
+
+				bb_raw.emplace_back(bb_per_vert_per_bone_raw);
+			}
+
+			int _i = 0;
+			for (auto& bb_per_vert_per_bone_raw : bb_raw) {
+				uint16_t bone_id = bb_per_vert_per_bone_raw[0];
+				uint16_t weight = 0;
+
+				this->weight_indices[bone_id].push_back(vertex_index);
+
+				uint16_t _Max = uint16_t(-1);
+				if (options & Options::NormalizeWeight) {
+					double _w = bb_per_vert_per_bone_raw[1] / sum_weight;
+
+					// Make sure the weights is never going to overflow
+					if (_w > _Max)
+						weight = _Max;
+					else if (_w < 0)
+						weight = uint16_t(0);
+					else
+						weight = uint16_t(_w);
+
+					_Max = _Max - weight;
+
+				}
+				else {
+					weight = uint16_t(bb_per_vert_per_bone_raw[1]);
+				}
+
+				vw_l[_i].bone = bone_id;
+				vw_l[_i].weight = weight;
+
+				++_i;
+			}
+
+			this->weights.push_back(vw_l);
+			vertex_index++;
+		}
+	}
+	else {
+		std::cout << "Error: 'vertex_weights' is not an array." << std::endl;
+		return false;
+	}
+
+	std::cout << "Done loading mesh from numpy." << std::endl;
+
+	return this->PostProcess(options);
+}
+
 bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scale_factor, const uint32_t options)
 {
 	if (!this->GeometryFromJson(jsonData, scale_factor)) {
@@ -940,12 +1231,6 @@ bool mesh::MeshIO::SerializeToJson(nlohmann::json& jsonData) const
 
 bool mesh::MeshIO::PostProcess(const uint32_t options)
 {
-	if (options & Options::SmoothEdgeNormal) {
-		std::cout << "Smoothing edge normals..." << std::endl;
-		auto merged = NaiveEdgeSmooth();
-		std::cout << "Merged " << merged << " vertices." << std::endl;
-	}
-
 	this->UpdateDXAttr();
 
 	if (options & Options::DoOptimize) {

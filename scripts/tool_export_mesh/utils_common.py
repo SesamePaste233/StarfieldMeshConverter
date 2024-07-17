@@ -4,6 +4,18 @@ import hashlib
 import datetime
 import shutil
 import re
+from functools import wraps
+from time import time
+
+def timer(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print(f'func:{f.__name__} took: {te-ts:.4f} secs')
+        return result
+    return wrap
 
 default_assets_folder = 'YOUR_LOOSE_DATA_FOLDER'
 export_mesh_folder_path = None
