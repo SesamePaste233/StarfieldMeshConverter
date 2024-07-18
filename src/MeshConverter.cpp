@@ -187,6 +187,45 @@ const char* ImportMorph(const char* input_file)
 	return utils::make_copy(JsonData);
 }
 
+const char* ImportMorphHeader(const char* input_file) {
+	std::string inputMorph(input_file);
+
+	std::string json_header;
+	if (!morph::MorphIO::read_header(inputMorph, json_header)) {
+		std::cerr << "Failed to load morph from " << inputMorph << std::endl;
+		return ""; // Return an error code
+	}
+
+	return utils::make_copy(json_header);
+}
+
+uint32_t ImportMorphNumpy(const char* input_file,
+	float* delta_positions,
+	float* target_colors,
+	float* delta_normals,
+	float* delta_tangents
+) {
+	std::string inputMorph(input_file);
+
+	// Create a MorphIO object
+	morph::MorphIO morphReader;
+
+	// Load the morph from the input morph file
+	if (!morphReader.Deserialize(inputMorph)) {
+		std::cerr << "Failed to load morph from " << inputMorph << std::endl;
+		return 17; // Return an error code
+	}
+
+	// Save the morph to the output file
+	std::string JsonData;
+	if (!morphReader.LoadToNumpy(JsonData, delta_positions, target_colors, delta_normals, delta_tangents)) {
+		std::cerr << "Failed to serialize morph to json" << std::endl;
+		return 99;
+	}
+
+	return 0;
+}
+
 uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder)
 {
 	nif::NifIO nif;

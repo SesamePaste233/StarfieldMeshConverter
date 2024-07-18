@@ -49,6 +49,15 @@ extern "C" {
 
 	DLL const char* ImportMorph(const char* input_file);
 
+	DLL const char* ImportMorphHeader(const char* input_file);
+
+	DLL uint32_t ImportMorphNumpy(const char* input_file, 
+		float* delta_positions, 
+		float* target_colors, 
+		float* delta_normals, 
+		float* delta_tangents
+	);
+
 	DLL uint32_t CreateNif(const char* json_data, const char* output_file, const char* assets_folder);
 
 	DLL uint32_t EditNifBSGeometries(const char* base_nif, const char* json_data, const char* output_file, const char* assets_folder, bool edit_mat_path);

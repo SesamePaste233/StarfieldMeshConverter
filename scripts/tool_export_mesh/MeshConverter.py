@@ -59,6 +59,19 @@ _dll_import_morph = _dll.ImportMorph
 _dll_import_morph.argtypes = [ctypes.c_char_p]
 _dll_import_morph.restype = ctypes.c_char_p
 
+_dll_import_morph_header = _dll.ImportMorphHeader
+_dll_import_morph_header.argtypes = [ctypes.c_char_p]
+_dll_import_morph_header.restype = ctypes.c_char_p
+
+_dll_import_morph_numpy = _dll.ImportMorphNumpy
+_dll_import_morph_numpy.argtypes = [
+    ctypes.c_char_p, # morph file path
+    ctypes.POINTER(ctypes.c_float), # delta_pos
+    ctypes.POINTER(ctypes.c_float), # target_colors
+    ctypes.POINTER(ctypes.c_float), # delta_norm
+    ctypes.POINTER(ctypes.c_float), # delta_tangent
+    ]
+
 _dll_compose_physics_data = _dll.ComposePhysicsData
 _dll_compose_physics_data.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
 
@@ -127,6 +140,8 @@ class DLLReturnCode():
                 return "Failed to open output file"
             case 16:
                 return "Failed to edit nif geometries"
+            case 17:
+                return "Failed to load morph file"
             case _:
                 return "Unknown error"
 
@@ -217,6 +232,40 @@ def ImportMeshAsJson(input_file: str) -> str:
 
 def ImportMorphAsJson(input_file: str) -> str:
     return _dll_import_morph(input_file.encode('utf-8')).decode('utf-8')
+
+def ImportMorphAsNumpy(input_file: str) -> dict:
+    morph_header_json_str = _dll_import_morph_header(input_file.encode('utf-8')).decode('utf-8')
+    morph_header = json.loads(morph_header_json_str)
+    del morph_header_json_str
+    
+    num_vertices = morph_header["numVertices"]
+    num_shapes = len(morph_header["shapeKeys"])
+    size = (num_shapes, num_vertices, 3)
+    np_type = np.float32
+
+    delta_pos = np.zeros(size, dtype=np_type)
+    target_colors = np.zeros(size, dtype=np_type)
+    delta_norm = np.zeros(size, dtype=np_type)
+    delta_tangent = np.zeros(size, dtype=np_type)
+
+    ptr_delta_pos = _check_numpy_type_and_size(delta_pos, np_type=np_type, size=size)
+    ptr_target_colors = _check_numpy_type_and_size(target_colors, np_type=np_type, size=size)
+    ptr_delta_norm = _check_numpy_type_and_size(delta_norm, np_type=np_type, size=size)
+    ptr_delta_tangent = _check_numpy_type_and_size(delta_tangent, np_type=np_type, size=size)
+
+    rtn = _dll_import_morph_numpy(input_file.encode('utf-8'), ptr_delta_pos, ptr_target_colors, ptr_delta_norm, ptr_delta_tangent)
+
+    if rtn != 0:
+        raise Exception(f"Failed to load morph file: {input_file}")
+
+    return {
+        "numVertices": num_vertices,
+        "shapeKeys": morph_header["shapeKeys"],
+        "deltaPositions": delta_pos,
+        "targetColors": target_colors,
+        "deltaNormals": delta_norm,
+        "deltaTangents": delta_tangent
+    }
 
 def CreateNifFromJson(json_data_string: str, output_file: str, assets_folder_path: str) -> DLLReturnCode:
     rtn = _dll_export_nif(json_data_string.encode('utf-8'), output_file.encode('utf-8'), assets_folder_path.encode('utf-8'))

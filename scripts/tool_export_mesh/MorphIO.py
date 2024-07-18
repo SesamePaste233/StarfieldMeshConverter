@@ -26,7 +26,7 @@ def IsMorphObject(obj):
 	j = name.find(']')
 	return j > i
 
-def ImportMorph(options, context, operator, result_objs = []):
+def DEPRECATED_ImportMorph(options, context, operator, result_objs = []):
 	import_path = options.filepath
 	
 	rtn = MeshConverter.ImportMorphAsJson(import_path)
@@ -196,6 +196,56 @@ def ImportMorph(options, context, operator, result_objs = []):
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
 
+def ImportMorphFromNumpy(options, context, operator, result_objs = []):
+	import_path = options.filepath
+	
+	data = MeshConverter.ImportMorphAsNumpy(import_path)
+
+	vert_count = data["numVertices"]
+	shape_keys = list(data["shapeKeys"])
+	delta_pos = data["deltaPositions"]
+	target_colors = data["targetColors"]
+	delta_normals = data["deltaNormals"]
+	delta_tangents = data["deltaTangents"]
+
+	target_obj = bpy.context.active_object
+
+	if target_obj == None or len(target_obj.data.vertices) != vert_count:
+		target_obj = None
+		for _obj in bpy.data.objects:
+			if _obj.type == 'MESH' and utils_blender.read_only_marker not in _obj.name and len(_obj.data.vertices) == vert_count:
+				target_obj = _obj
+				break
+	
+	if target_obj == None:
+		operator.report({'WARNING'}, f"No matching mesh found for the morph.")
+		return {"CANCELLED"}
+	else:
+		if utils_blender.read_only_marker in target_obj.name and target_obj.data.shape_keys != None and len(target_obj.data.shape_keys.key_blocks) != 0:
+			operator.report({'WARNING'}, f"Target mesh is Read Only! Remove {utils_blender.read_only_marker} in the name before continue.")
+			return {"CANCELLED"}
+	
+	basis_positions = np.empty(len(target_obj.data.vertices) * 3, dtype=np.float32)
+	target_obj.data.vertices.foreach_get('co', basis_positions)
+	basis_positions = basis_positions.reshape(-1, 3)
+
+	target_obj.shape_key_clear()
+	sk_basis = target_obj.shape_key_add(name = 'Basis', from_mix=False)
+	sk_basis.interpolation = 'KEY_LINEAR'
+	target_obj.data.shape_keys.use_relative = True
+
+	for n, key_name in enumerate(shape_keys):
+		sk = target_obj.shape_key_add(name = key_name, from_mix=False)
+		sk.interpolation = 'KEY_LINEAR'
+		sk.relative_key = sk_basis
+		sk.slider_min = 0
+		sk.slider_max = 1
+
+		sk.data.foreach_set('co', (basis_positions + delta_pos[n]).flatten())
+
+	operator.report({'INFO'}, f"Import Morph Successful.")
+	return {'FINISHED'}
+
 def ExportMorphFromSet(options, context, export_file_path, morph_node, operator):
 	_morph_objs = [obj for obj in morph_node.children if IsMorphObject(obj)]
 	morph_objs = []
@@ -362,7 +412,6 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 
 	operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f}  + Dll: {time_end2 - time_end1:.2} seconds.")
 	return {"FINISHED"}, jsondata['numVertices']
-
 
 def ExportMorph(options, context, export_file_path, operator):
 	export_path = export_file_path

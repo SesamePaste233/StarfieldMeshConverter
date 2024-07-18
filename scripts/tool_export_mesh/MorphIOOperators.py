@@ -11,11 +11,6 @@ class ImportCustomMorph(bpy.types.Operator):
 	filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 	filename: bpy.props.StringProperty(default='morph.dat')
 	filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
-	as_multiple: bpy.props.BoolProperty(
-		name="As Multiple Objs",
-		description="Import Morph as multiple objects, allows greater freedom in morph editing.",
-		default=False
-	)
 	use_attributes: bpy.props.BoolProperty(
 		name="Import attributes",
 		description="Import normals, tangents and colors as attributes.",
@@ -37,7 +32,7 @@ class ImportCustomMorph(bpy.types.Operator):
 		default=False
 	)
 	def execute(self, context):
-		return MorphIO.ImportMorph(self, context, self)
+		return MorphIO.ImportMorphFromNumpy(self, context, self)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)

@@ -457,6 +457,57 @@ bool morph::MorphIO::SerializeToJson(std::string& json_data)
 	return true;
 }
 
+bool morph::MorphIO::LoadToNumpy(std::string& json_header_data, float* delta_positions, float* target_colors, float* delta_normals, float* delta_tangents)
+{
+	json jsonData;
+	// Save vertex count
+	jsonData["numVertices"] = this->num_vertices;
+
+	// Save shape key names
+	jsonData["shapeKeys"] = json::array();
+	for (auto& shapeKey : this->morph_names) {
+		jsonData["shapeKeys"].push_back(shapeKey);
+	}
+
+	json_header_data = jsonData.dump();
+
+	// Memset (needs pre-allocated ptrs from numpy)
+	std::memset(delta_positions, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
+	std::memset(target_colors, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
+	std::memset(delta_normals, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
+	std::memset(delta_tangents, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
+
+	for (int i = 0; i < this->num_vertices; i++) {
+		auto& indices = this->per_vert_morph_key_indices[i];
+		for (int j = 0; j < indices.size(); ++j) {
+			auto& id = indices[j];
+			auto& data = this->per_vert_morph_data[i][j];
+
+			size_t _entry_id = id * this->num_vertices * 3 + i * 3;
+
+			delta_positions[_entry_id + 0] = utils::halfToFloat(data._offset[0]);
+			delta_positions[_entry_id + 1] = utils::halfToFloat(data._offset[1]);
+			delta_positions[_entry_id + 2] = utils::halfToFloat(data._offset[2]);
+
+			uint8_t r, g, b;
+			utils::decodeRGB565(data.target_vert_color, r, g, b);
+
+			target_colors[_entry_id + 0] = r;
+			target_colors[_entry_id + 1] = g;
+			target_colors[_entry_id + 2] = b;
+
+			auto delta_norm = utils::decodeDEC3N(data.x);
+			std::memcpy(delta_normals + _entry_id, delta_norm.data(), 3 * sizeof(float));
+
+
+			auto delta_tan = utils::decodeDEC3N(data.y);
+			std::memcpy(delta_tangents + _entry_id, delta_tan.data(), 3 * sizeof(float));
+		}
+	}
+
+	return true;
+}
+
 bool MorphIO::PostProcess(const uint32_t options)
 {
 
@@ -507,4 +558,65 @@ void MorphIO::FakeEmpty(const uint32_t n_verts, const uint8_t n_morphs)
 		this->offsets_list.push_back(_offset_data);
 	}
 
+}
+
+bool morph::MorphIO::read_header(const std::string filename, std::string& header_str)
+{
+	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	if (extension != "dat")
+	{
+		std::cout << "Invalid file extension" << std::endl;
+		return false;
+	}
+
+	// Open the file
+	std::ifstream file;
+	file.open(filename, std::ios::binary);
+	if (!file.is_open())
+	{
+		std::cout << "Error opening file" << std::endl;
+		return false;
+	}
+
+	// Read string of length 4
+	auto head = utils::readString(file, 4);
+
+	if (head != "MDAT") {
+		std::cout << "Invalid file header" << std::endl;
+		return false;
+	}
+
+	// Read unknown uint32_t
+	auto num_axis = utils::read<uint32_t>(file)[0];
+
+	_ASSERT(num_axis == 3);
+
+	// Read number of vertices
+	auto num_vertices = utils::read<uint32_t>(file)[0];
+
+	// Read number of shape keys
+	auto num_shape_keys = utils::read<uint32_t>(file)[0];
+
+
+	std::vector<std::string> morph_names;
+
+	for (int i = 0; i < num_shape_keys; i++) {
+		uint32_t length_of_name = utils::read<uint32_t>(file)[0];
+		std::string name = utils::readString(file, length_of_name);
+		morph_names.push_back(name);
+	}
+
+	json jsonData;
+	// Save vertex count
+	jsonData["numVertices"] = num_vertices;
+
+	// Save shape key names
+	jsonData["shapeKeys"] = json::array();
+	for (auto& shapeKey : morph_names) {
+		jsonData["shapeKeys"].push_back(shapeKey);
+	}
+
+	header_str = jsonData.dump();
+
+	return true;
 }

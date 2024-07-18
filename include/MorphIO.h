@@ -88,6 +88,8 @@ namespace morph{
 
 		bool SerializeToJson(std::string& json_data);
 
+		bool LoadToNumpy(std::string& json_header_data, float* delta_positions, float* target_colors, float* delta_normals, float* delta_tangents);
+
 		bool PostProcess(const uint32_t options);
 
 		void Clear();
@@ -184,6 +186,8 @@ namespace morph{
 #endif
 
 		std::vector<std::vector<uint32_t>> per_vert_morph_key_indices;
+
+		static bool read_header(const std::string filename, std::string& header_str);
 	};
 
 }
