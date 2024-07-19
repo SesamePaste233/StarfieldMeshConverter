@@ -80,14 +80,6 @@ class ExportCustomMesh(bpy.types.Operator):
 		if os.path.isdir(os.path.dirname(self.filepath)):
 			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)
 
-		self.max_border = context.scene.max_border
-		self.use_world_origin = context.scene.use_world_origin
-		self.WEIGHTS = context.scene.WEIGHTS
-		self.export_sf_mesh_open_folder = context.scene.export_sf_mesh_open_folder
-		self.export_sf_mesh_hash_result = context.scene.export_sf_mesh_hash_result
-		self.export_morph = context.scene.export_morph
-		self.use_secondary_uv = context.scene.use_secondary_uv
-
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 

@@ -79,8 +79,8 @@ def compare_versions(main_version_str: str, sub_module_version_str: str, sub_mod
     main_version = make_version(main_version_str).as_tuple()
     sub_module_version = make_version(sub_module_version_str).as_tuple()
 
-    if sub_module_version == main_version:
-        return True
+    #if sub_module_version == main_version:
+    #    return True
 
     if main_version in __extra_compatible_dict__:
         extra_compatible_versions = __extra_compatible_dict__[main_version]

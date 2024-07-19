@@ -32,6 +32,7 @@ class Primitive():
             self.use_global_positions = False
 
             # Less frequently changed options
+            self.normal_tangent_round_precision = 3
             self.atomic_max_number = 65535
             self.weight_cutoff_threshold = 0.0001
             self.max_weights_per_vertex = 8
@@ -57,10 +58,6 @@ class Primitive():
             ('normal_x', np.float32),
             ('normal_y', np.float32),
             ('normal_z', np.float32),
-            ('tangent_x', np.float32),
-            ('tangent_y', np.float32),
-            ('tangent_z', np.float32),
-            ('bitangent_sign', np.int32),
             ('color_r', np.float32),
             ('color_g', np.float32),
             ('color_b', np.float32),
@@ -119,15 +116,11 @@ class Primitive():
 
     @functools.cached_property
     def tangents(self):
-        _tangent = np.empty((len(self.atomic_vertices), 3), dtype=np.float32)
-        _tangent[:, 0] = self.atomic_vertices['tangent_x']
-        _tangent[:, 1] = self.atomic_vertices['tangent_y']
-        _tangent[:, 2] = self.atomic_vertices['tangent_z']
-        return _tangent
+        return self.raw_tangents[self.atomic_to_loop_id]
     
     @functools.cached_property
     def bitangent_sign(self):
-        return self.atomic_vertices['bitangent_sign']
+        return self.raw_bitangent_signs[self.atomic_to_loop_id]
     
     @functools.cached_property
     def colors(self):
@@ -298,17 +291,9 @@ class Primitive():
         self.atomic_vertices['normal_z'] = normals[2]
 
         # Gather tangent data
-        self._calculate_tangents()
-        tangents = self.raw_tangents.reshape(-1, 3).T
-        self.atomic_vertices['tangent_x'] = tangents[0]
-        self.atomic_vertices['tangent_y'] = tangents[1]
-        self.atomic_vertices['tangent_z'] = tangents[2]
-
         # Gather bitangent sign data
-        _temp_arr = np.empty(len(self.blender_mesh.loops), dtype = np.int32)
-        self.blender_mesh.loops.foreach_get('bitangent_sign', _temp_arr)
-        self.atomic_vertices['bitangent_sign'] = _temp_arr
-        self._post_bitangent_transform()
+        self._calculate_tangents()
+
 
         # Gather color data
         if self.gather_color_data and self.color_data_source_index != -1 and self.color_domain:
@@ -474,7 +459,7 @@ class Primitive():
         
         self.raw_normals = self.raw_normals.reshape(-1, 3)
 
-        self.raw_normals = np.round(self.raw_normals, 4)
+        self.raw_normals = np.round(self.raw_normals, self.options.normal_tangent_round_precision)
 
         # Handle degenrated normals
         is_zero = ~self.raw_normals.any(axis=1)
@@ -488,7 +473,7 @@ class Primitive():
             for key_block in key_blocks:
                 raw_morph_normals = np.array(key_block.normals_split_get(), dtype=np.float32)
                 raw_morph_normals = raw_morph_normals.reshape(len(self.blender_mesh.loops), 3)
-                raw_morph_normals = np.round(raw_morph_normals, 4)
+                raw_morph_normals = np.round(raw_morph_normals, self.options.normal_tangent_round_precision)
 
                 # Handle degenrated normals
                 is_zero = ~raw_morph_normals.any(axis=1)
@@ -509,9 +494,14 @@ class Primitive():
         self.blender_mesh.loops.foreach_get('tangent', self.raw_tangents)
         self.raw_tangents = self.raw_tangents.reshape(len(self.blender_mesh.loops), 3)
 
-        self.raw_tangents = np.round(self.raw_tangents, 4)
+        self.raw_tangents = np.round(self.raw_tangents, self.options.normal_tangent_round_precision)
 
         self._post_tangent_transform(self.raw_tangents)
+
+        _temp_arr = np.empty(len(self.blender_mesh.loops), dtype = np.int32)
+        self.blender_mesh.loops.foreach_get('bitangent_sign', _temp_arr)
+        self.raw_bitangent_signs = _temp_arr
+        self._post_bitangent_transform()
 
         # Should be the same as implementation in glTF 2.0 exporter for Blender, but a lot faster (30+ times faster)
         # Calculate morph tangents from morph normals, basis normals and basis tangents (64k verts 77 SK, 160 ms)
@@ -526,7 +516,7 @@ class Primitive():
                 self.raw_morph_tangents.append(raw_morph_tangents)
 
                 # For DirectX compression format
-                morph_tangent_deltas = self.atomic_vertices['bitangent_sign'][:, np.newaxis] * utils_math.bounded_vector_substraction(self.raw_tangents, raw_morph_tangents)
+                morph_tangent_deltas = self.raw_bitangent_signs[:, np.newaxis] * utils_math.bounded_vector_substraction(self.raw_tangents, raw_morph_tangents)
 
                 self.raw_morph_tangent_deltas.append(morph_tangent_deltas)
 
@@ -567,13 +557,13 @@ class Primitive():
             tangent_transform = apply_matrix.to_quaternion().to_matrix()
             flipped = tangent_transform.determinant() < 0
             if flipped:
-                self.atomic_vertices['bitangent_sign'] *= -1
+                self.raw_bitangent_signs *= -1
         elif self.options.use_global_positions:
             apply_matrix = self.blender_object.matrix_world
             tangent_transform = apply_matrix.to_quaternion().to_matrix()
             flipped = tangent_transform.determinant() < 0
             if flipped:
-                self.atomic_vertices['bitangent_sign'] *= -1
+                self.raw_bitangent_signs *= -1
 
     @timer
     def to_mesh_json_dict(self):

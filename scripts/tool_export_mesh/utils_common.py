@@ -7,6 +7,11 @@ import re
 from functools import wraps
 from time import time
 
+def __prop_wrapper(prop_func, *args, **kwargs):
+	def _wrapper_inner(**kwargs_inner):
+		return prop_func(*args, **kwargs, **kwargs_inner)
+	return _wrapper_inner
+
 def timer(f):
     @wraps(f)
     def wrap(*args, **kw):

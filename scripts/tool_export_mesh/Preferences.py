@@ -3,6 +3,25 @@ import os
 import shutil
 import utils_blender as utils_blender
 import functools
+import version
+
+__sub_modules_checklist__ = [
+    'tool_physics_editor',
+    'tool_batch_process'
+]
+
+def _check_submodules():
+    report = {}
+    for submodule in __sub_modules_checklist__:
+        try:
+            if not version.check_compatibility(submodule, True):
+                report[submodule] = "Versions Not Compatible"
+            else:
+                report[submodule] = "Compatible"
+        except Exception as e:
+            report[submodule] = "Not found"
+        
+    return report
 
 class ChooseFileForPreferencesOperator(bpy.types.Operator):
     bl_idname = "object.choose_file_for_preferences"
@@ -86,9 +105,24 @@ class SGBPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+
+        report = _check_submodules()
+        column = layout.column()
+        column.label(text="Installed Submodules")
+        for submodule in report:
+            column.label(text=f"{submodule}: {report[submodule]}")
+
+        sublayout = layout.column(heading="Assets Folder Path")
+        sublayout.enabled = True
+        sublayout.prop(context.scene, "assets_folder", text="")
+
+        sublayout = layout.column(heading="Default Export Path")
+        sublayout.enabled = True
+        sublayout.prop(context.scene, "export_mesh_folder_path", text="")
+
         sublayout = layout.column(heading="Texconv Path")
         sublayout.enabled = False
-        sublayout.prop(self, "texconv_path")
+        sublayout.prop(self, "texconv_path", text="")
         layout.operator("object.choose_file_for_preferences")
 
         self._check_scipy_installed()
@@ -101,6 +135,10 @@ class SGBPreferences(bpy.types.AddonPreferences):
         row = layout.row()
         row.operator("object.install_modules_sgb")
         row.enabled = not all([self.scipy_installed])
+
+        sublayout = layout.column(heading="Debug Mode")
+        sublayout.enabled = True
+        sublayout.prop(context.scene, "sgb_debug_mode", toggle=True)
 
 
 

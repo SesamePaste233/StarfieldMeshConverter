@@ -5,8 +5,11 @@ import json
 import os
 import glob
 
+import numpy as np
+
 import utils_common as utils
 import utils_blender
+import utils_math
 
 bone_axis_correction = mathutils.Matrix.Rotation(math.radians(-90.0), 4, 'Z')
 bone_axis_correction_inv = mathutils.Matrix.Rotation(math.radians(90.0), 4, 'Z')
@@ -385,3 +388,46 @@ def CreateArmatureDict(armature_obj, bone_list: list) -> dict:
 	utils_blender.SetActiveObject(old_active)
 
 	return armature_dict
+
+def Numpy2MathutilsMatrix(matrix: np.ndarray) -> mathutils.Matrix:
+	return mathutils.Matrix(matrix.tolist())
+
+def Mathutils2NumpyMatrix(matrix: mathutils.Matrix) -> np.ndarray:
+	return np.array(matrix).reshape((4,4))
+
+def Numpy2MathutilsVector(vector: np.ndarray) -> mathutils.Vector:
+	return mathutils.Vector(vector.flatten())
+
+def Mathutils2NumpyVector(vector: mathutils.Vector) -> np.ndarray:
+	return np.array(vector).reshape((3,1))
+
+def GetTriVerts(mesh:bpy.types.Object, triangle:bpy.types.MeshPolygon):
+	pivot1_id = triangle.vertices[0]
+	pivot1_co = mesh.data.vertices[pivot1_id].co
+	pivot2_id = triangle.vertices[1]
+	pivot2_co = mesh.data.vertices[pivot2_id].co
+	pivot3_id = triangle.vertices[2]
+	pivot3_co = mesh.data.vertices[pivot3_id].co
+	return pivot1_co, pivot2_co, pivot3_co
+
+def GethclLocalBoneTransform(tri_mesh: bpy.types.Object, triangle:bpy.types.MeshPolygon, bone_world_transform:mathutils.Matrix) -> list[list[float]]:
+	pivot1_co, pivot2_co, _ = GetTriVerts(tri_mesh, triangle) 
+	p_1 = Mathutils2NumpyVector(pivot1_co)
+	p_2 = Mathutils2NumpyVector(pivot2_co)
+	center = Mathutils2NumpyVector(triangle.center)
+	bone_t = Mathutils2NumpyMatrix(bone_world_transform)
+
+	np_T = utils_math.GetBoneTransformToTriangle(p_1, p_2, center, bone_t)
+
+	return np_T.tolist()
+
+def GethclLocalBoneTransforms(tri_mesh: bpy.types.Object, armature_obj: bpy.types.Object, tri_indices: list, bone_indices: list):
+	results = []
+	for f_id, b_id in zip(tri_indices, bone_indices):
+		triangle = tri_mesh.data.polygons[f_id]
+		bone = armature_obj.data.bones[b_id]
+		bone_t = armature_obj.matrix_world @ BoneAxisCorrectionRevert(bone.matrix_local)
+		np_T = GethclLocalBoneTransform(tri_mesh, triangle, bone_t)
+		results.append(np_T)
+
+	return results

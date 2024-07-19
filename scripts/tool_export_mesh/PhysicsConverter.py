@@ -84,7 +84,7 @@ def get_physics_data(tree: bpy.types.NodeTree):
         driver = driver_data['driver']
         driver_node = tree.nodes[driver]
         processed_driver_data = driver_node.gen_driver_data(driver_data, tri_mesh, armature)
-        processed_driver_data['local_bone_transforms'] = utils_blender.GethclLocalBoneTransforms(tri_mesh, armature, processed_driver_data['face_indices'], processed_driver_data['cloth_bones'])
+        processed_driver_data['local_bone_transforms'] = nif_armature.GethclLocalBoneTransforms(tri_mesh, armature, processed_driver_data['face_indices'], processed_driver_data['cloth_bones'])
         if processed_driver_data is None:
             utils_blender.RemoveMeshObj(tri_mesh)
             return None, "Failed to process driver data"

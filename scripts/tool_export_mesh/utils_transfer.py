@@ -242,11 +242,13 @@ def idw_interpolation(X: np.ndarray, Y: np.ndarray, x: np.ndarray, p: float) -> 
     
 
 def ShapekeyDataToTransferable(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey, target:Transferable):
-    data = []
-    for i, v in enumerate(obj.data.vertices):
-        data.append(shapekey.data[i].co - v.co)
-
-    target.SetData(data)
+    size = (len(obj.data.vertices), 3)
+    target_pos = np.empty(size, dtype=np.float32)
+    basis_pos = np.empty(size, dtype=np.float32)
+    rot_transform = np.array(obj.matrix_world.to_3x3())
+    obj.data.vertices.foreach_get('co', basis_pos.ravel())
+    shapekey.data.foreach_get('co', target_pos.ravel())
+    target.SetData((target_pos - basis_pos) @ rot_transform.T)
 
 def MeshShapeKeyToTransferable(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey):
     target = Transferable()
@@ -256,18 +258,29 @@ def MeshShapeKeyToTransferable(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey
 
 def MeshToTransferable(obj:bpy.types.Object):
     target = Transferable()
-    for i, v in enumerate(obj.data.vertices):
-        target.AddEmptyData(obj.matrix_world @ v.co, v.normal)
+    pos = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
+    obj.data.vertices.foreach_get('co', pos.ravel())
+    norm = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
+    obj.data.vertices.foreach_get('normal', norm.ravel())
+    rot_transform = np.array(obj.matrix_world.to_3x3())
+    translation = np.array(obj.matrix_world.translation)
+    target.positions = (rot_transform @ pos.T + translation[:, np.newaxis]).T
+    target.normals = (rot_transform @ norm.T).T
+    #print(target.positions)
     return target
 
 def TransferableToMeshShapeKey(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey, source:Transferable):
+    basis_pos = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
+    obj.data.vertices.foreach_get('co', basis_pos.ravel())
+
+    rot_transform = np.array(obj.matrix_world.to_3x3())
     if len(source.weights) == len(source.positions):
-        for i, v, w in zip(range(len(obj.data.vertices)), obj.data.vertices, source.weights):
-            if w > 0:
-                shapekey.data[i].co = v.co + source.DataMathutils[i] * w
+        target_data = basis_pos + source.DataNumpy @ rot_transform * source.weights[:, np.newaxis]
     else:
-        for i, v in enumerate(obj.data.vertices):
-            shapekey.data[i].co = v.co + source.DataMathutils[i]
+        target_data = basis_pos + source.DataNumpy @ rot_transform
+
+    print(target_data)
+    shapekey.data.foreach_set('co', target_data.ravel())
         
 
 def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, shape_key_name_lst:list[str], falloff_sigma = 0.1, copy_range = 0.005, create_if_not_exist:bool = True, dont_create_if_unobvious:bool = True):
