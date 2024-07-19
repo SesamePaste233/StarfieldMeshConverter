@@ -26,13 +26,8 @@ class ImportCustomMorph(bpy.types.Operator):
 		description="Debug option. DO NOT USE.",
 		default=False
 	)
-	debug_padding: bpy.props.BoolProperty(
-		name="Debug Padding",
-		description="Debug option. DO NOT USE.",
-		default=False
-	)
 	def execute(self, context):
-		return MorphIO.ImportMorphFromNumpy(self, context, self)
+		return MorphIO.ImportMorphFromNumpy(self.filepath, self, self.debug_delta_normal)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
@@ -62,7 +57,6 @@ class ExportCustomMorph(bpy.types.Operator):
 		if os.path.isdir(os.path.dirname(self.filepath)):
 			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)
 
-		self.use_world_origin = context.scene.use_world_origin
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
 	

@@ -196,8 +196,8 @@ def DEPRECATED_ImportMorph(options, context, operator, result_objs = []):
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
 
-def ImportMorphFromNumpy(options, context, operator, result_objs = []):
-	import_path = options.filepath
+def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False):
+	import_path = filepath
 	
 	data = MeshConverter.ImportMorphAsNumpy(import_path)
 
@@ -228,6 +228,10 @@ def ImportMorphFromNumpy(options, context, operator, result_objs = []):
 	basis_positions = np.empty(len(target_obj.data.vertices) * 3, dtype=np.float32)
 	target_obj.data.vertices.foreach_get('co', basis_positions)
 	basis_positions = basis_positions.reshape(-1, 3)
+	if debug_delta_normal:
+		basis_normals = np.empty(len(target_obj.data.vertices) * 3, dtype=np.float32)
+		target_obj.data.vertices.foreach_get('normal', basis_normals)
+		basis_normals = basis_normals.reshape(-1, 3)
 
 	target_obj.shape_key_clear()
 	sk_basis = target_obj.shape_key_add(name = 'Basis', from_mix=False)
@@ -242,6 +246,9 @@ def ImportMorphFromNumpy(options, context, operator, result_objs = []):
 		sk.slider_max = 1
 
 		sk.data.foreach_set('co', (basis_positions + delta_pos[n]).flatten())
+
+		if debug_delta_normal:
+			utils_blender.VisualizeVectors(target_obj.data, delta_pos[n], basis_normals + delta_normals[n], key_name)
 
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
