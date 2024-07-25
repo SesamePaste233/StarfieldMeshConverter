@@ -19,4 +19,4 @@ Install it like any other blender plugin. You should find a new panel inside "To
 ## Term Of Use
 * Starfield Geometry Bridge is an open-source program meant for ***everyone***. You have the freedom to use SGB for whatever you want however you like, within this agreement, the license on github page and the law.
 * As the original author of SGB, I kindly ***suggest*** you, users of SGB, to pass on this spirit of sharing and openness whenever possible. 
-* However, if you used SGB for assets in ***Paywall Mods***, you are ***obligated*** to inform your users of the use of SGB by citing the github page. Please be responsible to your users by letting them know the use of this 3rd party tool in the making of your mod.
+* However, if you used SGB for assets in ***Paywall Mods***, you are ***obligated*** to inform your users of the use of **Reverse-Engineered Tools**. Please be responsible to your users by letting them know the use of 3rd party tools in the making of your mod.
