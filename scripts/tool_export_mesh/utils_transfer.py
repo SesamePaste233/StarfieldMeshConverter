@@ -19,7 +19,7 @@ class Transferable:
     def _calc_unique(self):
         positions_np = np.array(self.positions)
         _, unique_indices = np.unique(positions_np, axis=0, return_index=True)
-        self.unique_indices = unique_indices
+        self.unique_indices_np = unique_indices
     
     def Unique(self):
         self._calc_unique()
@@ -300,6 +300,9 @@ def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, 
         source_shapekey = source_obj.data.shape_keys.key_blocks[shape_key_name]
 
         ShapekeyDataToTransferable(source_obj, source_shapekey, source)
+
+        if target_obj.data.shape_keys is None:
+            target_obj.shape_key_add(name="Basis")
 
         if shape_key_name not in target_obj.data.shape_keys.key_blocks:
             if create_if_not_exist:

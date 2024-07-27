@@ -178,7 +178,6 @@ def menu_func_morphs(self, context):
 
 	row = layout.row(align=True)
 	row.label(text=f"NRM: {'Found' if obj.data.attributes.get(f'NRM_{sk.name}') != None else 'Not found'}")
-	row.label(text=f"TAN: {'Found' if obj.data.attributes.get(f'TAN_{sk.name}') != None else 'Not found'}")
 	row.label(text=f"COL: {'Found' if obj.data.attributes.get(f'COL_{sk.name}') != None else 'Not found'}")
 	
 	row = layout.row(align=True)

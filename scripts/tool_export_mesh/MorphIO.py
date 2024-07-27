@@ -196,7 +196,7 @@ def DEPRECATED_ImportMorph(options, context, operator, result_objs = []):
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
 
-def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False):
+def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False):
 	import_path = filepath
 	
 	data = MeshConverter.ImportMorphAsNumpy(import_path)
@@ -210,6 +210,21 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False):
 
 	target_obj = bpy.context.active_object
 
+	if force_import_on_active:
+		target_vert_count = len(target_obj.data.vertices)
+		operator.report({'WARNING'}, f"Forcing import on active object. Morph verts: {vert_count}, Target object verts: {target_vert_count}")
+		if vert_count > target_vert_count:
+			delta_pos = delta_pos[:, :target_vert_count, :]
+			target_colors = target_colors[:, :target_vert_count, :]
+			delta_normals = delta_normals[:, :target_vert_count, :]
+			delta_tangents = delta_tangents[:, :target_vert_count, :]
+		elif vert_count < target_vert_count:
+			delta_pos = np.concatenate((delta_pos, np.zeros((len(shape_keys), target_vert_count - vert_count, 3))), axis=1)
+			target_colors = np.concatenate((target_colors, np.zeros((len(shape_keys), target_vert_count - vert_count, 3))), axis=1)
+			delta_normals = np.concatenate((delta_normals, np.zeros((len(shape_keys), target_vert_count - vert_count, 3))), axis=1)
+			delta_tangents = np.concatenate((delta_tangents, np.zeros((len(shape_keys), target_vert_count - vert_count, 3))), axis=1)
+		vert_count = target_vert_count
+
 	if target_obj == None or len(target_obj.data.vertices) != vert_count:
 		target_obj = None
 		for _obj in bpy.data.objects:
@@ -218,7 +233,7 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False):
 				break
 	
 	if target_obj == None:
-		operator.report({'WARNING'}, f"No matching mesh found for the morph.")
+		operator.report({'WARNING'}, f"No matching mesh found for the morph. Expecting {vert_count} vertices in target object.")
 		return {"CANCELLED"}
 	else:
 		if utils_blender.read_only_marker in target_obj.name and target_obj.data.shape_keys != None and len(target_obj.data.shape_keys.key_blocks) != 0:

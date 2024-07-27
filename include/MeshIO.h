@@ -80,6 +80,17 @@ namespace mesh {
 
 		bool LoadFromJson(const nlohmann::json& jsonData, const float scale_factor = 1.f, const uint32_t options = Options::None);
 
+		bool LoadToNumpy(
+			float* ptr_positions,
+			int64_t* ptr_indices,
+			float* ptr_normals,
+			float* ptr_uv1,
+			float* ptr_uv2,
+			float* ptr_color,
+			float* ptr_tangents,
+			int32_t* ptr_bitangent_signs
+		);
+
 		bool SerializeToJsonStr(std::string& json_data) const;
 
 		bool SerializeToJson(nlohmann::json& jsonData) const;
@@ -171,5 +182,7 @@ namespace mesh {
 		bool export_culldata = true;
 
 		static const uint32_t                   kIndexByteCount = 2;
+
+		static bool read_header(const std::string filename, std::string& header_str);
 	};
 }

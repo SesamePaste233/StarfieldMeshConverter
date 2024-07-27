@@ -47,6 +47,19 @@ extern "C" {
 
 	DLL const char * ImportMesh(const char* input_file);
 
+	DLL const char* ImportMeshHeader(const char* input_file);
+
+	DLL uint32_t ImportMeshNumpy(const char* input_file,
+		float* positions,
+		int64_t* indices,
+		float* normals,
+		float* uv1,
+		float* uv2,
+		float* colors,
+		float* tangents,
+		int32_t* bitangent_signs
+	);
+
 	DLL const char* ImportMorph(const char* input_file);
 
 	DLL const char* ImportMorphHeader(const char* input_file);

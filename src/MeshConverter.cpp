@@ -164,6 +164,47 @@ const char* ImportMesh(const char* input_file)
 	return utils::make_copy(JsonData);
 }
 
+const char* ImportMeshHeader(const char* input_file) {
+	std::string inputMesh(input_file);
+
+	std::string json_header;
+	if (!mesh::MeshIO::read_header(inputMesh, json_header)) {
+		std::cerr << "Failed to load mesh from " << inputMesh << std::endl;
+		return ""; // Return an error code
+	}
+
+	return utils::make_copy(json_header);
+}
+
+uint32_t ImportMeshNumpy(const char* input_file,
+	float* positions,
+	int64_t* indices,
+	float* normals,
+	float* uv1,
+	float* uv2,
+	float* colors,
+	float* tangents,
+	int32_t* bitangent_signs
+) {
+	std::string inputMesh(input_file);
+
+	mesh::MeshIO meshReader;
+
+	if (!meshReader.Deserialize(inputMesh)) {
+		std::cerr << "Failed to load mesh from " << inputMesh << std::endl;
+		return 18; // Return an error code
+	}
+
+	// Save the morph to the output file
+	std::string JsonData;
+	if (!meshReader.LoadToNumpy(positions, indices, normals, uv1, uv2, colors, tangents, bitangent_signs)) {
+		std::cerr << "Failed to serialize morph to json" << std::endl;
+		return 99;
+	}
+
+	return 0;
+}
+
 const char* ImportMorph(const char* input_file)
 {
 	std::string inputMorph(input_file);

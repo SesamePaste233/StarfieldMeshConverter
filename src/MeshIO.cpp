@@ -216,8 +216,6 @@ bool mesh::MeshIO::Deserialize(std::istream& file)
 	// Print culldata number
 	std::cout << "Culldata count: " << std::to_string(this->num_culldata) << std::endl;
 
-
-
 	return true;
 }
 
@@ -1107,6 +1105,75 @@ bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scal
 	return this->PostProcess(options);
 }
 
+bool mesh::MeshIO::LoadToNumpy(
+	float* ptr_positions, 
+	int64_t* ptr_indices, 
+	float* ptr_normals, 
+	float* ptr_uv1, 
+	float* ptr_uv2, 
+	float* ptr_color, 
+	float* ptr_tangents, 
+	int32_t* ptr_bitangent_signs
+) {
+	if (ptr_positions != nullptr) {
+		for (size_t i = 0; i < this->num_vertices; ++i) {
+			ptr_positions[i * 3 + 0] = this->positions[i * 3 + 0];
+			ptr_positions[i * 3 + 1] = this->positions[i * 3 + 1];
+			ptr_positions[i * 3 + 2] = this->positions[i * 3 + 2];
+		}
+	}
+
+	if (ptr_indices != nullptr) {
+		for (size_t i = 0; i < this->indices_size; ++i) {
+			ptr_indices[i] = this->indices[i];
+		}
+	}
+
+	if (ptr_normals != nullptr) {
+		for (size_t i = 0; i < this->num_vertices; ++i) {
+			ptr_normals[i * 3 + 0] = this->normals[i][0];
+			ptr_normals[i * 3 + 1] = this->normals[i][1];
+			ptr_normals[i * 3 + 2] = this->normals[i][2];
+		}
+	}
+
+	if (ptr_uv1 != nullptr) {
+		for (size_t i = 0; i < this->num_uv1; ++i) {
+			ptr_uv1[i * 2 + 0] = this->UV_list1[i][0];
+			ptr_uv1[i * 2 + 1] = this->UV_list1[i][1];
+		}
+	}
+
+	if (ptr_uv2 != nullptr && this->num_uv2 == this->num_uv1) {
+		for (size_t i = 0; i < this->num_uv2; ++i) {
+			ptr_uv2[i * 2 + 0] = this->UV_list2[i][0];
+			ptr_uv2[i * 2 + 1] = this->UV_list2[i][1];
+		}
+	}
+
+	if (ptr_color != nullptr) {
+		for (size_t i = 0; i < this->num_vert_colors; ++i) {
+			ptr_color[i * 4 + 0] = this->vert_colors[i].r / 255;
+		}
+	}
+
+	if (ptr_tangents != nullptr) {
+		for (size_t i = 0; i < this->num_tangents; ++i) {
+			ptr_tangents[i * 3 + 0] = this->tangents[i][0];
+			ptr_tangents[i * 3 + 1] = this->tangents[i][1];
+			ptr_tangents[i * 3 + 2] = this->tangents[i][2];
+		}
+	}
+
+	if (ptr_bitangent_signs != nullptr) {
+		for (size_t i = 0; i < this->num_tangents; ++i) {
+			ptr_bitangent_signs[i] = this->tangent_signs[i];
+		}
+	}
+
+	return true;
+}
+
 bool mesh::MeshIO::SerializeToJsonStr(std::string& json_data) const
 {
 	json jsonData;
@@ -1748,4 +1815,53 @@ size_t mesh::MeshIO::NaiveEdgeSmooth()
 	}
 
 	return merged;
+}
+
+bool mesh::MeshIO::read_header(const std::string filename, std::string& header_str)
+{
+	// Check file extension, return false if extension is not .mesh
+	std::string extension = filename.substr(filename.find_last_of(".") + 1);
+	if (extension != "mesh")
+	{
+		return false;
+	}
+
+	// Open the file
+	std::ifstream file;
+	file.open(filename, std::ios::binary);
+	if (!file.is_open())
+	{
+		return false;
+	}
+
+	uint32_t magic = utils::read<uint32_t>(file)[0];
+	/*if (magic != 1) {
+		return false;
+	}*/
+
+	uint32_t indices_size = utils::read<uint32_t>(file)[0];
+
+	auto num_triangles = indices_size / 3;
+
+
+	// Skip indices_size * uint16_t bytes
+	file.seekg(indices_size * sizeof(uint16_t), std::ios::cur);
+
+	auto max_border = utils::read<float>(file)[0];
+
+	auto num_weightsPerVertex = utils::read<uint32_t>(file)[0];
+
+	auto num_vertices = utils::read<uint32_t>(file)[0];
+
+	nlohmann::json json_data;
+
+	json_data["indices_size"] = indices_size;
+	json_data["num_triangles"] = num_triangles;
+	json_data["max_border"] = max_border;
+	json_data["num_weightsPerVertex"] = num_weightsPerVertex;
+	json_data["num_vertices"] = num_vertices;
+
+	header_str = json_data.dump();
+	
+	return true;
 }

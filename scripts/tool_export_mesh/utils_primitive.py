@@ -471,6 +471,8 @@ class Primitive():
         self.raw_morph_normal_deltas = []
         if self.options.gather_morph_data:
             for key_block in key_blocks:
+                # TODO: look for custom morph normal attributes first!
+
                 raw_morph_normals = np.array(key_block.normals_split_get(), dtype=np.float32)
                 raw_morph_normals = raw_morph_normals.reshape(len(self.blender_mesh.loops), 3)
                 raw_morph_normals = np.round(raw_morph_normals, self.options.normal_tangent_round_precision)

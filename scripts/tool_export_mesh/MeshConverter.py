@@ -72,6 +72,24 @@ _dll_import_morph_numpy.argtypes = [
     ctypes.POINTER(ctypes.c_float), # delta_tangent
     ]
 
+
+_dll_import_mesh_header = _dll.ImportMeshHeader
+_dll_import_mesh_header.argtypes = [ctypes.c_char_p]
+_dll_import_mesh_header.restype = ctypes.c_char_p
+
+_dll_import_mesh_numpy = _dll.ImportMeshNumpy
+_dll_import_mesh_numpy.argtypes = [
+    ctypes.c_char_p, # morph file path
+    ctypes.POINTER(ctypes.c_float), # ptr_positions
+    ctypes.POINTER(ctypes.c_int64), # ptr_indices
+    ctypes.POINTER(ctypes.c_float), # ptr_normals
+    ctypes.POINTER(ctypes.c_float), # ptr_uv1
+    ctypes.POINTER(ctypes.c_float), # ptr_uv2
+    ctypes.POINTER(ctypes.c_float), # ptr_color
+    ctypes.POINTER(ctypes.c_float), # ptr_tangents
+    ctypes.POINTER(ctypes.c_int32), # ptr_bitangent_signs
+    ]
+
 _dll_compose_physics_data = _dll.ComposePhysicsData
 _dll_compose_physics_data.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool]
 
@@ -198,6 +216,9 @@ def ExportMorphFromJson(json_data_string: str, output_file: str) -> DLLReturnCod
     return DLLReturnCode(rtn)
 
 def ExportMorphFromNumpy(numpy_dict: dict, output_file: str) -> DLLReturnCode:
+    if not output_file.endswith('.dat'):
+        output_file += '.dat'
+
     header = {"numVertices":numpy_dict["numVertices"], "shapeKeys":numpy_dict["shapeKeys"]}
     header_json_str = json.dumps(header)
 
@@ -229,6 +250,59 @@ def EditNifBSGeometries(base_nif_path: str, json_data_string: str, output_file: 
 
 def ImportMeshAsJson(input_file: str) -> str:
     return _dll_import_mesh(input_file.encode('utf-8')).decode('utf-8')
+
+def ImportMeshAsNumpy(input_file: str) -> dict:
+    mesh_header_json_str = _dll_import_mesh_header(input_file.encode('utf-8')).decode('utf-8')
+    mesh_header = json.loads(mesh_header_json_str)
+    del mesh_header_json_str
+
+    num_vertices = mesh_header['num_vertices']
+    num_indices = mesh_header['indices_size']
+    num_triangles = mesh_header['num_triangles']
+    num_weightsPerVertex = mesh_header['num_weightsPerVertex']
+
+    max_border = mesh_header['max_border']
+
+    assert(num_triangles * 3 == num_indices)
+
+    positions = np.zeros((num_vertices, 3), dtype=np.float32)
+    indices = np.zeros((num_triangles, 3), dtype=np.int64)
+    normals = np.zeros((num_vertices, 3), dtype=np.float32)
+    uv1 = np.zeros((num_vertices, 2), dtype=np.float32)
+    uv2 = np.zeros((num_vertices, 2), dtype=np.float32)
+    color = np.zeros((num_vertices, 4), dtype=np.float32)
+    tangents = np.zeros((num_vertices, 3), dtype=np.float32)
+    bitangent_signs = np.zeros((num_vertices,), dtype=np.int32)
+
+    ptr_positions = _check_numpy_type_and_size(positions, np_type=np.float32, size=(num_vertices, 3))
+    ptr_indices = _check_numpy_type_and_size(indices, np_type=np.int64, size=(num_triangles, 3))
+    ptr_normals = _check_numpy_type_and_size(normals, np_type=np.float32, size=(num_vertices, 3))
+    ptr_uv1 = _check_numpy_type_and_size(uv1, np_type=np.float32, size=(num_vertices, 2))
+    ptr_uv2 = _check_numpy_type_and_size(uv2, np_type=np.float32, size=(num_vertices, 2))
+    ptr_color = _check_numpy_type_and_size(color, np_type=np.float32, size=(num_vertices, 4))
+    ptr_tangents = _check_numpy_type_and_size(tangents, np_type=np.float32, size=(num_vertices, 3))
+    ptr_bitangent_signs = _check_numpy_type_and_size(bitangent_signs, np_type=np.int32, size=(num_vertices,))
+
+    rtn = _dll_import_mesh_numpy(input_file.encode('utf-8'), ptr_positions, ptr_indices, ptr_normals, ptr_uv1, ptr_uv2, ptr_color, ptr_tangents, ptr_bitangent_signs)
+
+    if rtn != 0:
+        raise Exception(f"Failed to load mesh file: {input_file}")
+    
+    return {
+        "num_verts": num_vertices,
+        "num_indices": num_indices,
+        "num_triangles": num_triangles,
+        "num_weightsPerVertex": num_weightsPerVertex,
+        "max_border": max_border,
+        "positions_raw": positions,
+        "vertex_indices_raw": indices,
+        "normals": normals,
+        "uv_coords": uv1,
+        "uv_coords_2": uv2,
+        "vertex_color": color,
+        "tangents": tangents,
+        "bitangent_signs": bitangent_signs
+    }
 
 def ImportMorphAsJson(input_file: str) -> str:
     return _dll_import_morph(input_file.encode('utf-8')).decode('utf-8')
@@ -268,6 +342,10 @@ def ImportMorphAsNumpy(input_file: str) -> dict:
     }
 
 def CreateNifFromJson(json_data_string: str, output_file: str, assets_folder_path: str) -> DLLReturnCode:
+    # Check output_file extension
+    if not output_file.endswith('.nif'):
+        output_file += '.nif'
+
     rtn = _dll_export_nif(json_data_string.encode('utf-8'), output_file.encode('utf-8'), assets_folder_path.encode('utf-8'))
     return DLLReturnCode(rtn)
 
