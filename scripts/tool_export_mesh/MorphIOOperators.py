@@ -41,14 +41,45 @@ class ExportCustomMorph(bpy.types.Operator):
 	filename: bpy.props.StringProperty(default='morph.dat')
 	filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
 
-	use_world_origin: bpy.props.BoolProperty(
-		name="Use world origin",
-		description="Use world instead of object origin as output geometry's origin.",
-		default=True
+	use_world_origin = True
+
+	snapping_enabled: bpy.props.BoolProperty(
+		name="Snap Morph Data To Selected",
+		description="Snapping morph data of connecting vertices to closest verts from selected objects.",
+		default=False,
 	)
 
+	snapping_range: bpy.props.FloatProperty(
+		name="Snapping Range",
+		description="Verts from Active Object will copy morph data from verts from selected objects within Snapping Range.",
+		default=0.005,
+		min=0.0,
+		precision=4,
+	)
+
+	snap_delta_positions: bpy.props.BoolProperty(
+		name="Snap Delta Positions",
+		description="Snapping morph delta positions of connecting vertices to closest verts from selected objects.",
+		default=False,
+	)
+
+	def draw(self, context):
+		layout = self.layout
+		layout.label(text="Morph Snapping Options:")
+		layout.prop(self, "snapping_enabled")
+		box = layout.box()
+		box.prop(self, "snapping_range")
+		box.prop(self, "snap_delta_positions")
+		if self.snapping_enabled:
+			box.enabled = True
+		else:
+			box.enabled = False
+
 	def execute(self, context):
-		rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self)
+		if self.snapping_enabled:
+			rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self, self.snapping_range, self.snap_delta_positions)
+		else:
+			rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self)
 		return rtn
 
 	def invoke(self, context, event):

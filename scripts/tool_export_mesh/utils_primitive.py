@@ -4,8 +4,12 @@ import bmesh
 import functools
 import ctypes
 
+from enum import Enum, unique
+
 import utils_math
 from utils_common import timer
+
+from scipy.spatial import cKDTree
 
 class AtomicException(Exception):
     pass
@@ -22,7 +26,25 @@ class UVIndexException(Exception):
 class UVNotFoundException(Exception):
     pass
 
+class UngatheredException(Exception):
+    pass
+
 class Primitive():
+
+    @unique
+    class GatheredData(Enum):
+        POSITION = 0
+        UV = 1
+        UV2 = 2
+        NORMALS = 3
+        COLORS = 4
+        TANGENTS = 5
+        BITANGENTS = 6
+        WEIGHTS = 7
+        MORPHNORMALS = 8
+        MORPHTANGENTS = 9
+        TRIANGLES = 10
+
     class Options():
         def __init__(self):
             self.max_border = 0.0
@@ -30,6 +52,8 @@ class Primitive():
             self.gather_weights_data = False
             self.gather_morph_data = False
             self.use_global_positions = False
+
+            self.gather_tangents = True
 
             # Less frequently changed options
             self.normal_tangent_round_precision = 3
@@ -67,13 +91,7 @@ class Primitive():
             "vertex_weights": [],
             "vertex_group_names": []
         }
-        self.vertex_morph_data = {
-            "shapeKeys": [],
-            "deltaPositions": None,
-            "targetColors": None,
-            "deltaNormals": None,
-            "deltaTangents": None
-        }
+        self.shapeKeys = []
         self.triangles = None
 
         self.atomic_vertices = np.empty(len(self.blender_mesh.loops), dtype=self._atomic_attributes)
@@ -87,6 +105,8 @@ class Primitive():
         self.options = options
 
         self.key_blocks:list[bpy.types.ShapeKey] = []
+
+        self.gathered = set()
 
     @functools.cached_property
     def positions(self):
@@ -145,15 +165,23 @@ class Primitive():
     
     @functools.cached_property
     def morph_position_deltas(self):
-        return [raw_morph_position_deltas[self.atomic_vertices['vertex_index']] for raw_morph_position_deltas in self.raw_morph_position_deltas]
+        return np.array([raw_morph_position_deltas[self.atomic_vertices['vertex_index']] for raw_morph_position_deltas in self.raw_morph_position_deltas], dtype=np.float32)
+
+    @functools.cached_property
+    def morph_target_colors(self): # TODO
+        return np.ones((len(self.key_blocks), len(self.atomic_vertices), 3), dtype=np.float32) * 255
 
     @functools.cached_property
     def morph_normal_deltas(self):
-        return [raw_morph_normal_deltas[self.atomic_to_loop_id] for raw_morph_normal_deltas in self.raw_morph_normal_deltas]
+        return np.array([raw_morph_normal_deltas[self.atomic_to_loop_id] for raw_morph_normal_deltas in self.raw_morph_normal_deltas], dtype=np.float32)
     
     @functools.cached_property
     def morph_tangent_deltas(self):
-        return [raw_morph_tangent_deltas[self.atomic_to_loop_id] for raw_morph_tangent_deltas in self.raw_morph_tangent_deltas]
+        return np.array([raw_morph_tangent_deltas[self.atomic_to_loop_id] for raw_morph_tangent_deltas in self.raw_morph_tangent_deltas], dtype=np.float32)
+
+    @functools.cached_property
+    def KDTree(self):
+        return cKDTree(self.positions)
 
     def gather(self):
         if not self.scan_object_for_data():
@@ -173,6 +201,8 @@ class Primitive():
             self.gather_morphs()
 
         self.gather_triangles()
+
+        self.gathered.add(Primitive.GatheredData.TRIANGLES)
     
     @timer
     def scan_object_for_data(self):
@@ -269,6 +299,7 @@ class Primitive():
         uvs[1] = 1 - uvs[1]
         self.atomic_vertices['uv_x'] = uvs[0]
         self.atomic_vertices['uv_y'] = uvs[1]
+        self.gathered.add(Primitive.GatheredData.UV)
 
         # Gather secondary UV data if available
         if self.options.secondary_uv_layer_index != -1 and self.second_uv_layer:
@@ -279,6 +310,7 @@ class Primitive():
             uvs[1] = 1 - uvs[1]
             self.atomic_vertices['uv_x_2'] = uvs[0]
             self.atomic_vertices['uv_y_2'] = uvs[1]
+            self.gathered.add(Primitive.GatheredData.UV2)
         else:
             self.atomic_vertices['uv_x_2'] = np.zeros(len(self.blender_mesh.loops), dtype=np.float32)
             self.atomic_vertices['uv_y_2'] = np.zeros(len(self.blender_mesh.loops), dtype=np.float32)
@@ -292,8 +324,8 @@ class Primitive():
 
         # Gather tangent data
         # Gather bitangent sign data
-        self._calculate_tangents()
-
+        if self.options.gather_tangents:
+            self._calculate_tangents()
 
         # Gather color data
         if self.gather_color_data and self.color_data_source_index != -1 and self.color_domain:
@@ -314,6 +346,12 @@ class Primitive():
             self.atomic_vertices['color_g'] = colors[1]
             self.atomic_vertices['color_b'] = colors[2]
             self.atomic_vertices['color_a'] = colors[3]
+            self.gathered.add(Primitive.GatheredData.COLORS)
+        else:
+            self.atomic_vertices['color_r'] = np.zeros(len(self.blender_mesh.loops), dtype=np.float32)
+            self.atomic_vertices['color_g'] = np.zeros(len(self.blender_mesh.loops), dtype=np.float32)
+            self.atomic_vertices['color_b'] = np.zeros(len(self.blender_mesh.loops), dtype=np.float32)
+            self.atomic_vertices['color_a'] = np.zeros(len(self.blender_mesh.loops), dtype=np.float32)
 
     @timer
     def deduplicate_atomics(self, raise_exception = True):
@@ -330,11 +368,25 @@ class Primitive():
         return True
 
     @timer
+    def _test_deduplication(self, raise_exception = True):
+        _test_uv = np.unique(np.hstack([self.atomic_vertices['uv_x'], self.atomic_vertices['uv_y'], self.atomic_vertices['uv_x_2'], self.atomic_vertices['uv_y_2']]))
+        print("Final vertices count by UV: " + str(len(_test_uv)))
+
+        _test_normals = np.unique(np.hstack([self.atomic_vertices['normal_x'], self.atomic_vertices['normal_y'], self.atomic_vertices['normal_z']]))
+        print("Final vertices count by normals: " + str(len(_test_normals)))
+
+        _test_colors = np.unique(np.hstack([self.atomic_vertices['color_r'], self.atomic_vertices['color_g'], self.atomic_vertices['color_b'], self.atomic_vertices['color_a']]))
+        print("Final vertices count by colors: " + str(len(_test_colors)))
+        return True
+    
+    @timer
     def gather_positions(self):
         self.raw_positions = np.empty(len(self.blender_mesh.vertices) * 3, dtype=np.float32)
         self.blender_mesh.vertices.foreach_get('co', self.raw_positions)
         self.raw_positions = self.raw_positions.reshape(-1, 3)
         self._post_vertex_transform(self.raw_positions)
+
+        self.gathered.add(Primitive.GatheredData.POSITION)
 
         self.raw_morph_positions = []
         self.raw_morph_position_deltas = []
@@ -422,16 +474,16 @@ class Primitive():
         self.vertex_weights_data['vertex_group_names'] = [vg[0] for vg in vgrp_markers if vg[1] != -1]
 
         bm.free()
+        
+        self.gathered.add(Primitive.GatheredData.WEIGHTS)
 
         print("Final vertex weights count: " + str(len(self.vertex_weights_data["vertex_weights"])))
 
     @timer
     def gather_morphs(self):
-        self.vertex_morph_data["shapeKeys"] = [key_block.name for key_block in self.key_blocks]
-        self.vertex_morph_data["deltaPositions"] = np.array(self.morph_position_deltas)
-        self.vertex_morph_data['targetColors'] = np.ones((len(self.key_blocks), len(self.atomic_vertices), 3), dtype=np.float32) * 255
-        self.vertex_morph_data["deltaNormals"] = np.array(self.morph_normal_deltas, dtype=np.float32)
-        self.vertex_morph_data["deltaTangents"] = np.array(self.morph_tangent_deltas, dtype=np.float32)
+        self.shapeKeys = [key_block.name for key_block in self.key_blocks]
+
+        # TODO: Gather morph target colors
 
     @timer
     def gather_triangles(self):
@@ -441,6 +493,8 @@ class Primitive():
 
         # For each loop id in triangles, replace it with the corresponding atomic vertex id
         self.triangles = self.loop_id_to_atomic[self.triangles]
+
+        self.gathered.add(Primitive.GatheredData.TRIANGLES)
 
         print("Final triangles count: " + str(len(self.triangles)))
 
@@ -466,6 +520,7 @@ class Primitive():
         self.raw_normals[is_zero, 2] = 1
 
         self._post_normal_transform(self.raw_normals)
+        self.gathered.add(Primitive.GatheredData.NORMALS)
 
         self.raw_morph_normals = []
         self.raw_morph_normal_deltas = []
@@ -490,6 +545,8 @@ class Primitive():
 
                 self.raw_morph_normal_deltas.append(raw_morph_normal_deltas)
 
+            self.gathered.add(Primitive.GatheredData.MORPHNORMALS)
+
     def _calculate_tangents(self):
         self.blender_mesh.calc_tangents()
         self.raw_tangents = np.empty(len(self.blender_mesh.loops) * 3, dtype = np.float32)
@@ -500,10 +557,14 @@ class Primitive():
 
         self._post_tangent_transform(self.raw_tangents)
 
+        self.gathered.add(Primitive.GatheredData.TANGENTS)
+        
         _temp_arr = np.empty(len(self.blender_mesh.loops), dtype = np.int32)
         self.blender_mesh.loops.foreach_get('bitangent_sign', _temp_arr)
         self.raw_bitangent_signs = _temp_arr
         self._post_bitangent_transform()
+
+        self.gathered.add(Primitive.GatheredData.BITANGENTS)
 
         # Should be the same as implementation in glTF 2.0 exporter for Blender, but a lot faster (30+ times faster)
         # Calculate morph tangents from morph normals, basis normals and basis tangents (64k verts 77 SK, 160 ms)
@@ -521,6 +582,8 @@ class Primitive():
                 morph_tangent_deltas = self.raw_bitangent_signs[:, np.newaxis] * utils_math.bounded_vector_substraction(self.raw_tangents, raw_morph_tangents)
 
                 self.raw_morph_tangent_deltas.append(morph_tangent_deltas)
+
+            self.gathered.add(Primitive.GatheredData.MORPHTANGENTS)
 
     def _post_vertex_transform(self, vertices:np.ndarray) -> None:
         # Potentially rotations and flips
@@ -567,8 +630,29 @@ class Primitive():
             if flipped:
                 self.raw_bitangent_signs *= -1
 
+    def post_change_normals(self, new_normals, mask):
+        old_normals = self.normals[mask]
+        self.normals[mask] = new_normals
+
+        # Correct tangent vectors
+        batch_rot = utils_math.batch_rotation_matrices(old_normals, new_normals)
+        self.tangents[mask] = np.einsum('ijk,ik->ij', batch_rot, self.tangents[mask])
+    
+    def post_change_morph_normals(self, new_morph_normals, morph_index, mask):
+        old_normals = self.morph_normals[morph_index][mask]
+        self.morph_normals[morph_index][mask] = new_morph_normals
+        self.morph_normal_deltas[morph_index][mask] = utils_math.bounded_vector_substraction(self.normals[mask], new_morph_normals)
+        # Correct tangent vecto
+        batch_rot = utils_math.batch_rotation_matrices(old_normals, new_morph_normals)
+        self.morph_tangents[morph_index][mask] = np.einsum('ijk,ik->ij', batch_rot, self.morph_tangents[morph_index][mask])
+        self.morph_tangent_deltas[morph_index][mask] = self.bitangent_sign[mask, np.newaxis] * utils_math.bounded_vector_substraction(self.tangents[mask], self.morph_tangents[morph_index][mask])
+
     @timer
     def to_mesh_json_dict(self):
+        # Throw exception if TANGENTS or BITANGENTS not in gathered data
+        if Primitive.GatheredData.TANGENTS not in self.gathered or Primitive.GatheredData.BITANGENTS not in self.gathered:
+            raise UngatheredException("Primitive.to_mesh_json_dict() called without gather_tangents option set to True")
+            return None
         data = {
             "max_border": self.options.max_border,
             "num_verts": len(self.atomic_vertices),
@@ -590,6 +674,11 @@ class Primitive():
 
     @timer
     def to_mesh_numpy_dict(self):
+        if Primitive.GatheredData.TANGENTS not in self.gathered or Primitive.GatheredData.BITANGENTS not in self.gathered:
+            raise UngatheredException("Primitive.to_mesh_numpy_dict() called without gather_tangents option set to True")
+            return None
+
+
         data_matrices = {
             "positions_raw": self.positions,# np.float32
             "vertex_indices_raw": self.triangles, # np.int64
@@ -627,11 +716,11 @@ class Primitive():
             return None
         data = {
             "numVertices": len(self.atomic_vertices),
-            "shapeKeys": self.vertex_morph_data["shapeKeys"],
-            "deltaPositions": self.vertex_morph_data["deltaPositions"].tolist(),
-            "targetColors": self.vertex_morph_data["targetColors"].tolist(),
-            "deltaNormals": self.vertex_morph_data["deltaNormals"].tolist(),
-            "deltaTangents": self.vertex_morph_data["deltaTangents"].tolist()
+            "shapeKeys": self.shapeKeys,
+            "deltaPositions": self.morph_position_deltas.tolist(),
+            "targetColors": self.morph_target_colors.tolist(),
+            "deltaNormals": self.morph_normal_deltas.tolist(),
+            "deltaTangents": self.morph_tangent_deltas.tolist() if self.options.gather_tangents else []
         }
         return data
     
@@ -640,11 +729,95 @@ class Primitive():
         if not self.options.gather_morph_data:
             raise MorphUncalculatedException("Primitive.to_morph_numpy_dict() called without gather_morph_data option set to True")
             return None
+        if Primitive.GatheredData.MORPHTANGENTS not in self.gathered:
+            raise UngatheredException("Primitive.to_morph_numpy_dict() called without gather_tangents option set to True")
+            return None
+
         data = {
             "numVertices": len(self.atomic_vertices),
-            **self.vertex_morph_data
+            "shapeKeys": self.shapeKeys,
+            "deltaPositions": self.morph_position_deltas,
+            "targetColors": self.morph_target_colors,
+            "deltaNormals": self.morph_normal_deltas,
+            "deltaTangents": self.morph_tangent_deltas,
         }
         return data
+
+def CheckForPrimitive(blender_object:bpy.types.Object, gather_tangents = True):
+    # Mesh type
+    if blender_object.type != 'MESH':
+        return False, "Object is not a mesh"
+    
+    # Check if triangulated
+    if gather_tangents and len(blender_object.data.loop_triangles) != len(blender_object.data.loops) // 3:
+        return False, "Object is not triangulated"
+    
+    # Check if has UV
+    if not blender_object.data.uv_layers.active:
+        return False, "Object has no active UV data"
+    
+    return True, ""
+
+@timer
+def SnapPositions(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005):
+    if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
+        raise UngatheredException("SnapPositions() called with ungathered positions")
+
+    tar_kdtree: cKDTree = tar_primitive.KDTree
+
+    dists, indices = tar_kdtree.query(src_primitive.positions, k=1)
+    mask = dists < copy_range
+    indices = indices[mask]
+
+    print("Snapped verts: ", len(indices))
+
+    src_primitive.positions[mask] = tar_primitive.positions[indices]
+
+@timer
+def CopyNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005):
+    if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
+        raise UngatheredException("CopyNormalsAtSeam() called with ungathered positions")
+    if Primitive.GatheredData.NORMALS not in src_primitive.gathered or Primitive.GatheredData.NORMALS not in tar_primitive.gathered:
+        raise UngatheredException("CopyNormalsAtSeam() called with ungathered normals")
+
+    tar_kdtree: cKDTree = tar_primitive.KDTree
+
+    dists, indices = tar_kdtree.query(src_primitive.positions, k=1)
+    mask = dists < copy_range
+    indices = indices[mask]
+
+    print("Snapped verts: ", len(indices))
+
+    src_primitive.post_change_normals(tar_primitive.normals[indices], mask)
+
+@timer
+def CopyMorphNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005, snap_delta_positions = False):
+    if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
+        raise UngatheredException("CopyMorphNormalsAtSeam() called with ungathered positions")
+    if Primitive.GatheredData.MORPHNORMALS not in src_primitive.gathered or Primitive.GatheredData.MORPHNORMALS not in tar_primitive.gathered:
+        raise UngatheredException("CopyMorphNormalsAtSeam() called with ungathered morph data")
+
+    tar_kdtree: cKDTree = tar_primitive.KDTree
+
+    dists, indices = tar_kdtree.query(src_primitive.positions, k=1)
+    mask = dists < copy_range
+    indices = indices[mask]
+
+    print("Snapped verts: ", len(indices))
+
+    src_morphs = src_primitive.shapeKeys
+    tar_morphs = tar_primitive.shapeKeys
+
+    common_morphs = list(set(src_morphs) & set(tar_morphs))
+
+    print("Common morphs: ", common_morphs)
+
+    src_indices = [src_morphs.index(morph) for morph in common_morphs]
+    tar_indices = [tar_morphs.index(morph) for morph in common_morphs]
+
+    for s_m_id, t_m_id in zip(src_indices, tar_indices):
+        src_primitive.post_change_morph_normals(tar_primitive.morph_normals[t_m_id][indices], s_m_id, mask)
+        src_primitive.morph_position_deltas[s_m_id][mask] = tar_primitive.morph_position_deltas[t_m_id][indices]
 
 if __name__ == "__main__":
     import time

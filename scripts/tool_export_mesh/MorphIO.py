@@ -371,10 +371,11 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 	operator.report({'INFO'}, f"Export morph successful.")
 	return {"FINISHED"}, verts_count
 
-def ExportMorph_alt(options, context, export_file_path, operator):
+def ExportMorph_alt(options, context, export_file_path, operator, snapping_range = 0.0, snap_delta_positions = False):
 	export_path = export_file_path
 
 	target_obj = utils_blender.GetActiveObject()
+	selected_objs = utils_blender.GetSelectedObjs(True)
 	
 	if IsMorphExportNode(target_obj):
 		return ExportMorphFromSet(options, context, export_file_path, target_obj, operator)
@@ -395,14 +396,39 @@ def ExportMorph_alt(options, context, export_file_path, operator):
 
 	primitive = utils_primitive.Primitive(new_obj, p_options)
 
+	sel_primitives = []
+	if snapping_range > 0:
+		for select_obj in selected_objs:
+			rtn, reason = utils_primitive.CheckForPrimitive(select_obj, gather_tangents=False)
+			if not rtn:
+				operator.report({'WARNING'}, f"Object {select_obj.name} is not a valid primitive for snapping. Reason: {reason}")
+				continue
+
+			sel_p_options = utils_primitive.Primitive.Options()
+			sel_p_options.gather_morph_data = True
+			sel_p_options.gather_tangents = False
+			sel_p_options.use_global_positions = options.use_world_origin
+
+			sel_primitive = utils_primitive.Primitive(select_obj, sel_p_options)
+			sel_primitive.gather()
+			sel_primitives.append(sel_primitive)
+
 	try:
 		primitive.gather()
+
+		for sel_prim in sel_primitives:
+			utils_primitive.CopyMorphNormalsAtSeam(primitive, sel_prim, snapping_range, snap_delta_positions=snap_delta_positions)
+
 		jsondata = primitive.to_morph_numpy_dict()
 	except utils_primitive.UVNotFoundException as e:
+		operator.report({'WARNING'}, f"UVNotFoundException caught: {e}.")
 		return {'CANCELLED'},  None
 	except utils_primitive.AtomicException as e:
+		operator.report({'WARNING'}, f"AtomicException caught: {e}.")
 		return {'CANCELLED'},  None
 	except Exception as e:
+		print(e)
+		operator.report({'WARNING'}, f"An error occurred during gathering morph data. Message: {e}")
 		return {'CANCELLED'},  None
 
 	time_end = time.time()

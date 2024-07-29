@@ -1,5 +1,5 @@
-import mathutils
 from scipy.interpolate import Rbf, RBFInterpolator
+from scipy.spatial import cKDTree
 import numpy as np
 import functools
 
@@ -7,12 +7,16 @@ import bpy
 
 import utils_math
 
+from utils_common import timer
+
+from time import time
+
 class Transferable:
     def __init__(self) -> None:
-        self.positions = []
-        self.normals = []
-        self.data = []
-        self.weights = []
+        self.positions: np.ndarray = None
+        self.normals: np.ndarray = None
+        self.data: np.ndarray = None
+        self.weights: np.ndarray = None
         self.unique_indices_np: np.ndarray = None
 
     @functools.lru_cache(4)
@@ -23,103 +27,44 @@ class Transferable:
     
     def Unique(self):
         self._calc_unique()
-
-    def AddEmptyData(self, position:mathutils.Vector, normal:mathutils.Vector):
-        self.positions.append([position.x, position.y, position.z])
-        self.normals.append([normal.x, normal.y, normal.z])
-        self.data.append([])
-
-    def AddData(self, position:mathutils.Vector, normal:mathutils.Vector, data:float):
-        self.positions.append([position.x, position.y, position.z])
-        self.normals.append([normal.x, normal.y, normal.z])
-        self.data.append([data])
-
-    def AddListData(self, position:mathutils.Vector, normal:mathutils.Vector, data_list:list):
-        self.positions.append([position.x, position.y, position.z])
-        self.normals.append([normal.x, normal.y, normal.z])
-        self.data.append(data_list)
             
     def SetData(self, new_data):
         self.data = new_data
-        if 'DataNumpy' in self.__dict__:
-            del self.__dict__['DataNumpy']
-        if 'DataMathutils' in self.__dict__:
-            del self.__dict__['DataMathutils']
 
     def ResetCache(self):
-        if 'PositionsMathutils' in self.__dict__:
-            del self.__dict__['PositionsMathutils']
-        if 'DataMathutils' in self.__dict__:
-            del self.__dict__['DataMathutils']
-        if 'DataNumpy' in self.__dict__:
-            del self.__dict__['DataNumpy']
-        if 'PositionsNumpy' in self.__dict__:
-            del self.__dict__['PositionsNumpy']
         if 'KDTree' in self.__dict__:
             del self.__dict__['KDTree']
 
-    @functools.cached_property
-    def PositionsMathutils(self) -> list[mathutils.Vector]:
-        return [mathutils.Vector(p) for p in self.positions]
-
-    @functools.cached_property
-    def DataMathutils(self) -> list[mathutils.Vector]:
-        return [mathutils.Vector(d) for d in self.data]
-
-    @functools.cached_property
-    def PositionsNumpy(self) -> np.ndarray:
-        return np.array(self.positions)
-
     def PositionsEnhanced(self, depth:float) -> np.ndarray:
-        return self.PositionsNumpy + np.array(self.normals) * depth
+        return self.positions + np.array(self.normals) * depth
 
     @functools.cached_property
-    def DataNumpy(self) -> np.ndarray:
-        return np.array(self.data)
+    def KDTree(self) -> cKDTree:
+        return cKDTree(self.positions)
 
+    @timer
+    def GenWeightingScheme(self, target, sigma:float = 0.1, copy_range = 0.005):
+        tar_kdtree: cKDTree = target.KDTree
+        _, _, distances = GetClosestNPoints(tar_kdtree, self.positions, 1)
+        
+        distances = distances - copy_range
+        distances[distances < 0] = 0
 
-    @functools.cached_property
-    def KDTree(self):
-        kdtree = mathutils.kdtree.KDTree(len(self.positions))
-        for i, p in enumerate(self.PositionsMathutils):
-            kdtree.insert(p, i)
-        kdtree.balance()
-            
-        return kdtree
-
-    def GenWeightingScheme(self, target, sigma:float = 0.1, additional_BVHTree: mathutils.bvhtree.BVHTree = None):
-        if additional_BVHTree is not None:
-            distances = [_ for _ in range(len(self.PositionsMathutils))]
-            for i, p in enumerate(self.PositionsMathutils):
-                bvh_rtn_lst = additional_BVHTree.find_nearest_range(p, 3 * sigma)
-
-                if len(bvh_rtn_lst) == 0:
-                    distances[i] = 3 * sigma
-                    continue
-                
-                distances[i] = min([rtn[3] for rtn in bvh_rtn_lst])
-            
-            distances = np.array(distances)
-        else:
-            tar_kdtree = target.KDTree
-            _, _, distances = GetClosestNPoints(tar_kdtree, self.PositionsMathutils, 3)
-            distances = np.array(distances)
-            distances = np.sum(distances, axis=1)
-            
         # Gaussian falloff
         self.weights = np.exp(-distances**2 / (2 * sigma**2))
 
         # Set weights to 0 if the distance is too large
         self.weights[distances > 3 * sigma] = 0
     
+    @timer
     def CopyClosest(self, target, closest_range: float = 0.005):
-        tar_kdtree = target.KDTree
-        _, closest_points, distances = GetClosestNPoints(tar_kdtree, self.PositionsMathutils, 1)
-        closest_points = [rtn[0] for rtn in closest_points]
-        distances = [rtn[0] for rtn in distances]
-        for i in range(len(self.positions)):
-            if distances[i] < closest_range:
-                self.data[i] = target.data[closest_points[i]]
+        tar_kdtree: cKDTree = target.KDTree
+
+        dists, indices = tar_kdtree.query(self.positions, k=1)
+        mask = dists < closest_range
+        indices = indices[mask]
+
+        self.data[mask] = target.data[indices]
 
     def Save(self, path:str):
         np.savez(path, positions=self.positions, data=self.data)
@@ -128,30 +73,27 @@ class Transferable:
         npzfile = np.load(path)
         self.positions = npzfile['positions']
         self.data = npzfile['data']
-        
+    
+    def check_consistency(self) -> bool:
+        return len(self.positions) == len(self.data)
 
-def GetClosestNPoints(kdtree:mathutils.kdtree.KDTree, points: list[mathutils.Vector], n:int) -> list[list[int]]:
-    positions = []
-    indices = []
-    distances = []
-    for p in points:
-        rtns = kdtree.find_n(p, n)
-        positions.append([rtn[0] for rtn in rtns])
-        indices.append([rtn[1] for rtn in rtns])
-        distances.append([rtn[2] for rtn in rtns])
-    return positions, indices, distances
+def GetClosestNPoints(kdtree:cKDTree, points: np.ndarray, n:int) -> list[list[int]]:
+    dists, indices = kdtree.query(points, k=n)
+    return kdtree.data[indices], indices, dists
 
+@timer
 def RBFTransfer(source: Transferable, target: Transferable, neighbours: int = 15, smoothing = 0, epsilon = None, kernel = 'Gaussian', use_normals = True, surface_depth = 0.1, scale = 1):
     '''
     Radial Basis Function Transfer.
     '''
+    t1 = time()
     inv_scale = 1/scale
     
-    positions = source.PositionsNumpy
+    positions = source.positions
     if source.unique_indices_np is not None:
         positions = positions[source.unique_indices_np]
 
-    data = source.DataNumpy
+    data = source.data
     if source.unique_indices_np is not None:
         data = data[source.unique_indices_np]
 
@@ -167,25 +109,32 @@ def RBFTransfer(source: Transferable, target: Transferable, neighbours: int = 15
     if neighbours > n_sample:
         neighbours = n_sample
 
+    t2 = time()
+    print(f"Preparation time: {t2 - t1}")
+
     rbf = RBFInterpolator(positions * scale, data * scale, neighbors=neighbours, epsilon=epsilon, smoothing=smoothing, kernel=kernel)
 
-    if len(target.weights) == len(target.positions):
+    if target.weights is not None and len(target.weights) == len(target.positions):
         weights_larger_than_zero = target.weights > 0
 
-        target_positions = target.PositionsNumpy[weights_larger_than_zero] * scale
+        target_positions = target.positions[weights_larger_than_zero] * scale
 
         new_data = np.zeros((len(target.positions), data.shape[1]))
 
         new_data[weights_larger_than_zero] = (rbf(target_positions) * inv_scale)
 
-        target.SetData(new_data.tolist())
+        target.SetData(new_data)
 
     else:
-        target_positions = target.PositionsNumpy * scale
+        target_positions = target.positions * scale
 
         new_data = (rbf(target_positions) * inv_scale)
 
-        target.SetData(new_data.tolist())
+        target.SetData(new_data)
+
+    t3 = time()
+    print(f"RBFInterpolator time: {t3 - t2}")
+
     
 def IDWTransfer(source: Transferable, target: Transferable, neighbours: int = 15, smoothing = 0, epsilon = None, degrees = 5, kernel = 'Gaussian', use_normals = True, surface_depth = 0.1, scale = 1):
     '''
@@ -195,10 +144,10 @@ def IDWTransfer(source: Transferable, target: Transferable, neighbours: int = 15
     if len(source.positions) == 0 or len(target.positions) == 0:
         return
 
-    _, closest_points, _ = GetClosestNPoints(source.KDTree, target.PositionsMathutils, neighbours)
+    _, closest_points, _ = GetClosestNPoints(source.KDTree, target.positions, neighbours)
 
-    new_data = [_ for _ in len(target.PositionsMathutils)]
-    for i, p in enumerate(target.PositionsMathutils):
+    new_data = [_ for _ in len(target.positions)]
+    for i, p in enumerate(target.positions):
         neighbours = closest_points[i]
         neighbours_positions_raw = [source.positions[n] for n in neighbours]
         if use_normals:
@@ -239,8 +188,27 @@ def idw_interpolation(X: np.ndarray, Y: np.ndarray, x: np.ndarray, p: float) -> 
     # Interpolation
     Y_interp = np.sum(weights[:, :, np.newaxis] * Y[:, np.newaxis], axis=0)
     return Y_interp
-    
 
+
+@timer
+def MeshToTransferable(obj:bpy.types.Object):
+    target = Transferable()
+    pos = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
+    obj.data.vertices.foreach_get('co', pos.ravel())
+    pos = utils_math.apply_mat_to_all(obj.matrix_world, pos)
+
+    norm = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
+    obj.data.vertices.foreach_get('normal', norm.ravel())
+
+    normal_transform = obj.matrix_world.to_3x3().inverted_safe().transposed()
+    norm = utils_math.apply_mat_to_all(normal_transform, norm)
+
+    target.positions = pos
+    target.normals = norm
+    return target
+
+
+@timer
 def ShapekeyDataToTransferable(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey, target:Transferable):
     size = (len(obj.data.vertices), 3)
     target_pos = np.empty(size, dtype=np.float32)
@@ -250,39 +218,22 @@ def ShapekeyDataToTransferable(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey
     shapekey.data.foreach_get('co', target_pos.ravel())
     target.SetData((target_pos - basis_pos) @ rot_transform.T)
 
-def MeshShapeKeyToTransferable(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey):
-    target = Transferable()
-    for i, v in enumerate(obj.data.vertices):
-        target.AddListData(obj.matrix_world @ v.co, v.normal, shapekey.data[i].co - v.co)
-    return target
 
-def MeshToTransferable(obj:bpy.types.Object):
-    target = Transferable()
-    pos = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
-    obj.data.vertices.foreach_get('co', pos.ravel())
-    norm = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
-    obj.data.vertices.foreach_get('normal', norm.ravel())
-    rot_transform = np.array(obj.matrix_world.to_3x3())
-    translation = np.array(obj.matrix_world.translation)
-    target.positions = (rot_transform @ pos.T + translation[:, np.newaxis]).T
-    target.normals = (rot_transform @ norm.T).T
-    #print(target.positions)
-    return target
-
+@timer
 def TransferableToMeshShapeKey(obj:bpy.types.Object, shapekey:bpy.types.ShapeKey, source:Transferable):
     basis_pos = np.empty((len(obj.data.vertices), 3), dtype=np.float32)
     obj.data.vertices.foreach_get('co', basis_pos.ravel())
 
     rot_transform = np.array(obj.matrix_world.to_3x3())
-    if len(source.weights) == len(source.positions):
-        target_data = basis_pos + source.DataNumpy @ rot_transform * source.weights[:, np.newaxis]
+    if source.weights is not None and len(source.weights) == len(source.positions):
+        target_data = basis_pos + source.data @ rot_transform * source.weights[:, np.newaxis]
     else:
-        target_data = basis_pos + source.DataNumpy @ rot_transform
+        target_data = basis_pos + source.data @ rot_transform
 
-    print(target_data)
     shapekey.data.foreach_set('co', target_data.ravel())
         
 
+@timer
 def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, shape_key_name_lst:list[str], falloff_sigma = 0.1, copy_range = 0.005, create_if_not_exist:bool = True, dont_create_if_unobvious:bool = True):
     source = MeshToTransferable(source_obj)
     source.Unique()
@@ -290,7 +241,7 @@ def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, 
 
     #source_bvh_tree = mathutils.bvhtree.BVHTree.FromObject(source_obj, bpy.context.evaluated_depsgraph_get())
 
-    target.GenWeightingScheme(source, sigma = falloff_sigma)#, additional_BVHTree=source_bvh_tree)
+    target.GenWeightingScheme(source, sigma = falloff_sigma, copy_range = copy_range)#, additional_BVHTree=source_bvh_tree)
 
     for shape_key_name in shape_key_name_lst:
         if shape_key_name not in source_obj.data.shape_keys.key_blocks:
@@ -316,7 +267,7 @@ def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, 
         RBFTransfer(source, target, scale = 74, epsilon = 3, neighbours = 8, smoothing = 0, use_normals = False)
 
         if dont_create_if_unobvious:
-            if np.max(np.abs(target.DataNumpy)) < 0.001:
+            if np.max(np.abs(target.data)) < 0.001:
                 target_obj.shape_key_remove(target_shapekey)
                 print(f"Shapekey {shape_key_name} is unobvious, removed.")
                 continue
@@ -325,9 +276,7 @@ def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, 
             target.CopyClosest(source, copy_range)
 
         TransferableToMeshShapeKey(target_obj, target_shapekey, target)
-
-    source.ResetCache()
-    target.ResetCache()
+        print(f"Shapekey {shape_key_name} transferred.")
 
 
 if __name__ == "__main__":

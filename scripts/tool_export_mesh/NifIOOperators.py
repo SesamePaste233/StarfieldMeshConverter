@@ -412,11 +412,11 @@ class ExportCustomNif(bpy.types.Operator):
 		default=False
 	)
 
-	export_morph: bpy.props.BoolProperty(
-		name="Export morph data (if any)",
-		description="Export shape keys as morph keys",
-		default=False,
-	)
+	export_morph = False #: bpy.props.BoolProperty(
+#		name="Export morph data (if any)",
+#		description="Export shape keys as morph keys",
+#		default=False,
+#	)
 
 	physics_tree: bpy.props.EnumProperty(
 		name="Physics Node Tree",
@@ -485,7 +485,7 @@ class ExportCustomNif(bpy.types.Operator):
 		# Draw a horizontal line
 		layout.separator()
 		layout.label(text="Additional Data:") 
-		layout.prop(self, "export_morph", text="Morph Data")
+		#layout.prop(self, "export_morph", text="Morph Data")
 		layout.prop(self, "physics_tree")
 		layout.prop(self, "export_material")
 		
