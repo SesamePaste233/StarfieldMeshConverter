@@ -5,6 +5,7 @@ import json
 import math
 import numpy as np
 import time
+from mathutils import Vector
 
 import utils_blender
 import utils_math
@@ -196,7 +197,7 @@ def DEPRECATED_ImportMorph(options, context, operator, result_objs = []):
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
 
-def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False):
+def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False, use_attributes = False):
 	import_path = filepath
 	
 	data = MeshConverter.ImportMorphAsNumpy(import_path)
@@ -253,6 +254,11 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 	sk_basis.interpolation = 'KEY_LINEAR'
 	target_obj.data.shape_keys.use_relative = True
 
+	if use_attributes:
+		ones_column = np.zeros((data["targetColors"][0].shape[0], 1), dtype=np.float32)
+
+		loop_indices = np.array([loop.vertex_index for loop in target_obj.data.loops], dtype=np.int32)
+
 	for n, key_name in enumerate(shape_keys):
 		sk = target_obj.shape_key_add(name = key_name, from_mix=False)
 		sk.interpolation = 'KEY_LINEAR'
@@ -264,6 +270,15 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 
 		if debug_delta_normal:
 			utils_blender.VisualizeVectors(target_obj.data, delta_pos[n], basis_normals + delta_normals[n], key_name)
+		
+		if use_attributes:
+			utils_blender.addShapeKeyAttributes(target_obj, key_name, replace=True)
+
+			nrm_attr = target_obj.data.attributes[f"NRM_{key_name}"]
+			col_attr = target_obj.data.attributes[f"COL_{key_name}"]
+
+			nrm_attr.data.foreach_set('vector', delta_normals[n][loop_indices].flatten())
+			col_attr.data.foreach_set('color', np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].flatten())
 
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
