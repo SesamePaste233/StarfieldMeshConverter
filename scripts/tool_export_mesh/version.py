@@ -40,6 +40,7 @@ def make_version(version: str) -> Version:
     return v
 
 __extra_compatible_dict__ = {
+    (1, 3, 0): {'tool_physics_editor': [(0, 17, 0)]},
     (1, 2, 0): {'tool_physics_editor': [(0, 17, 0)]},
     (1, 1, 0): {'tool_physics_editor': [(0, 17, 0)]},
     (1, 0, 0): {'tool_physics_editor': [(0, 17, 0)]},

@@ -40,6 +40,19 @@ class ControlBone:
         bone.scale_minima = [data['Minima']['Scale']['x'], data['Minima']['Scale']['y'], data['Minima']['Scale']['z']]
         return bone
 
+    def set_bone_data(self, bone_data:np.ndarray, is_maxima:bool):
+        '''
+            bone_data: 9-element vector for maxima or minima
+        '''
+        if is_maxima:
+            self.position_maxima = bone_data[0:3].tolist()
+            self.rotation_maxima = bone_data[3:6].tolist()
+            self.scale_maxima = bone_data[6:9].tolist()
+        else:
+            self.position_minima = bone_data[0:3].tolist()
+            self.rotation_minima = bone_data[3:6].tolist()
+            self.scale_minima = bone_data[6:9].tolist()
+
     def to_dict(self):
         return {
             'Bone': self.bone_name,
@@ -101,6 +114,24 @@ class Slider:
             return False
         self.bones[bone.bone_name] = bone
         return True
+
+    def set_bone_data(self, bone_data:dict, is_maxima:bool, additive = False):
+        '''
+            bone_data: {
+                'bone_name1': [dx,dy,dz,dRx,dRy,dRz,dSx,dSy,dSz]
+                ...
+            }
+        '''
+        if not additive:
+            self.bones.clear()
+            
+        for bone_name, data in bone_data.items():
+            if bone_name in self.bones:
+                self.bones[bone_name].set_bone_data(data, is_maxima)
+            else:
+                bone = ControlBone(bone_name)
+                bone.set_bone_data(data, is_maxima)
+                self.bones[bone_name] = bone
 
 
     @staticmethod
@@ -174,16 +205,40 @@ class Region:
         if not self.is_sculpt_region and len(self.sliders) == 1 and "" in self.sliders and self.sliders[""].is_zero_to_one:
             return True
         return False
+    
+    def is_sculpt(self):
+        if self.is_sculpt_region and len(self.sliders) > 0 and "" not in self.sliders:
+            return True
+        return False
+    
+    def is_valid(self):
+        return self.is_phenotype() or self.is_sculpt()
+    
+    def validated(self):
+        if self.is_sculpt_region and len(self.sliders) > 0 and "" in self.sliders:
+            del self.sliders[""]
+            return True
+        else:
+            return self.is_valid()
 
     def to_matrix(self, bone_names:list[str]) -> np.ndarray:
-        if not self.is_phenotype():
-            raise ValueError("Region is not a phenotype")
-        slider = self.sliders[""]
-        matrix = np.zeros((len(bone_names), 9), dtype=np.float32)
-        for bone_name, bone in slider.bones.items():
-            index = bone_names.index(bone_name)
-            matrix[index] = bone.to_matrix()[0]
-        return matrix
+        if self.is_phenotype():
+            slider = self.sliders[""]
+            matrix = np.zeros((len(bone_names), 9), dtype=np.float32)
+            for bone_name, bone in slider.bones.items():
+                index = bone_names.index(bone_name)
+                matrix[index] = bone.to_matrix()[0]
+            return matrix
+        elif self.is_sculpt():
+            maxima = np.zeros((len(self.sliders), len(bone_names), 9), dtype=np.float32)
+            minima = np.zeros((len(self.sliders), len(bone_names), 9), dtype=np.float32)
+            for i, slider in enumerate(self.sliders.values()):
+                for bone_name, bone in slider.bones.items():
+                    index = bone_names.index(bone_name)
+                    maxima[i, index] = bone.to_matrix()[0]
+                    minima[i, index] = bone.to_matrix()[1]
+            return maxima, minima
+        raise ValueError("Region is not a phenotype")
 
 import functools
 
@@ -195,6 +250,7 @@ class BoneRegions:
         self.bone_names:list[str] = []
         self.face_region_names:list[str] = []
         self.phenotypes:list[str] = []
+        self.sculpt_regions:list[str] = []
         self._BR_tensor:np.ndarray = None
 
     @functools.cached_property 
@@ -209,6 +265,25 @@ class BoneRegions:
         arr = np.swapaxes(arr, 0, 1)
 
         return arr
+
+    @functools.cached_property
+    def _Sculpt_tensor(self):
+        '''
+            maxima = all_sliders x n_bones x 9
+            minima = all_sliders x n_bones x 9
+        '''
+        if self.is_emtpy():
+            return None
+        maxima = []
+        minima = []
+        for region in self.sculpt_regions:
+            maxima_region, minima_region = self.regions[region].to_matrix(self.bone_names)
+            maxima.append(maxima_region)
+            minima.append(minima_region)
+
+        maxima = np.concatenate(maxima, axis=0)
+        minima = np.concatenate(minima, axis=0)
+        return maxima, minima
 
     def import_from_file(self, bone_regions_file: str, bone_regions_mapping_file:str) -> None:
         self.clear()
@@ -231,14 +306,20 @@ class BoneRegions:
         self.constraints = data['Constraints']
         regions = [Region.from_dict(region, self.id_recorder) for region in data['Regions']]
         for region in regions:
-            self.regions[region.name] = region
+            region.validated()
             if region.is_phenotype():
                 self.phenotypes.append(region.name)
+                self.regions[region.name] = region
+            elif region.is_sculpt():
+                self.sculpt_regions.append(region.name)
+                self.regions[region.name] = region
+            else:
+                print(f"Region {region.name} is neither a phenotype nor a sculpt region")
 
     def export_to_file(self, file_path: str) -> None:
         data = {
             'Constraints': self.constraints,
-            'Regions': [region.to_dict() for _, region in self.regions.items()]
+            'Regions': [region.to_dict() for _, region in self.regions.items() if region.validated()]
         }
 
         with open(file_path, 'w') as file:
@@ -249,7 +330,7 @@ class BoneRegions:
         for _,region in self.regions.items():
             region._dispatch_id(self.id_recorder)
     
-    def new_region(self, name: str, is_sculpt_region, overwrite = False):
+    def new_region(self, name: str, is_sculpt_region:bool, overwrite = False):
         # Check if the region already exists
         if name in self.regions:
             if overwrite:
@@ -259,7 +340,7 @@ class BoneRegions:
         self.regions[name] = Region.new_region(name, is_sculpt_region, self.id_recorder)
         return self.regions[name]
     
-    def new_slider(self, region_name, name: str, is_zero_to_one, overwrite = False):
+    def new_slider(self, region_name: str, name: str, is_zero_to_one:bool, overwrite = False):
         # Check if the region exists
         if region_name not in self.regions:
             return None
@@ -274,7 +355,7 @@ class BoneRegions:
         region.sliders[name] = Slider.new_slider(name, is_zero_to_one, self.id_recorder)
         return region.sliders[name]
         
-    def new_slider_bone(self, region_name, slider_name, bone_name, overwrite = False):
+    def new_slider_bone(self, region_name: str, slider_name: str, bone_name: str, overwrite = False):
         # Check if the region exists
         if region_name not in self.regions:
             return None
@@ -298,7 +379,7 @@ class BoneRegions:
             return None
         return region.sliders.get(name, None)
     
-    def get_slider_bone(self, region_name, slider_name, bone_name):
+    def get_slider_bone(self, region_name: str, slider_name: str, bone_name: str):
         slider = self.get_slider(region_name, slider_name)
         if slider is None:
             return None
@@ -310,7 +391,7 @@ class BoneRegions:
             return True
         return False
 
-    def remove_slider(self, region_name, name: str):
+    def remove_slider(self, region_name: str, name: str):
         region = self.get_region(region_name)
         if region is None:
             return False
@@ -319,7 +400,7 @@ class BoneRegions:
             return True
         return False
     
-    def remove_slider_bone(self, region_name, slider_name, bone_name):
+    def remove_slider_bone(self, region_name: str, slider_name: str, bone_name: str):
         slider = self.get_slider(region_name, slider_name)
         if slider is None:
             return False
@@ -335,11 +416,22 @@ class BoneRegions:
         '''
         return np.sum(np.einsum("ijk,jl->ilk", self._Pheno_tensor, control_matrix) * self._BR_tensor, axis=1)
 
+    def _forward_sculpt(self, slider_value_vector:np.ndarray):
+        '''
+            slider_value_vector: all_sliders
+            return: n_bones x 9
+        '''
+        positive = slider_value_vector.clip(min=0)
+        negative = slider_value_vector.clip(max=0)
+        return np.einsum('ijk,i->jk', self._Sculpt_tensor[0], positive) - np.einsum('ijk,i->jk', self._Sculpt_tensor[1], negative)
+
     def AddPhenotype(self, phenotype_name:str):
         if phenotype_name not in self.regions:
             self.new_region(phenotype_name, False)
             self.new_slider(phenotype_name, "", True)
             self.phenotypes.append(phenotype_name)
+            if hasattr(self, "_Pheno_tensor"):
+                del self._Pheno_tensor
         else:
             print(f"Phenotype {phenotype_name} already exists")
         return self.regions[phenotype_name]
@@ -348,6 +440,49 @@ class BoneRegions:
         if phenotype_name in self.phenotypes:
             self.phenotypes.remove(phenotype_name)
         return self.remove_region(phenotype_name)
+
+    def SetPhenotype(self, phenotype_name:str, bone_data:dict, additive = False):
+        '''
+            bone_data: {
+                'bone_name1': [dx,dy,dz,dRx,dRy,dRz,dSx,dSy,dSz]
+                ...
+            }
+        '''
+        pheno_slider = self.get_slider(phenotype_name, "")
+        if pheno_slider is None:
+            return False
+        
+        if hasattr(self, "_Pheno_tensor"):
+            del self._Pheno_tensor
+
+        pheno_slider.set_bone_data(bone_data, True, additive)
+        return True
+
+    def AddSculptRegion(self, region_name:str, slider_name:str, is_zero_to_one:bool, create_region_if_not_exists = True):
+        region = self.get_region(region_name)
+        if region is None:
+            if not create_region_if_not_exists:
+                return None
+            region = self.new_region(region_name, True)
+        if hasattr(self, "_Sculpt_tensor"):
+            del self._Sculpt_tensor
+        slider = self.new_slider(region_name, slider_name, is_zero_to_one)
+        return slider
+    
+    def RemoveSculptRegion(self, region_name:str, slider_name:str):
+        return self.remove_slider(region_name, slider_name)
+
+    def SetSculptRegionSlider(self, region_name:str, slider_name:str, bone_data:dict, is_maxima:bool, additive = False):
+        region = self.get_region(region_name)
+        if region is None:
+            return False
+        slider = self.get_slider(region_name, slider_name)
+        if slider is None:
+            return False
+        if hasattr(self, "_Sculpt_tensor"):
+            del self._Sculpt_tensor
+        slider.set_bone_data(bone_data, is_maxima, additive)
+        return True
 
     def is_valid(self):
         for phenotype in self.phenotypes:
@@ -361,12 +496,16 @@ class BoneRegions:
     
     def clear(self):
         self.regions.clear()
+        self.id_recorder = IDRecorder()
         self.bone_names.clear()
         self.face_region_names.clear()
         self.phenotypes.clear()
+        self.sculpt_regions.clear()
         self._BR_tensor = None
         if hasattr(self, "_Pheno_tensor"):
             del self._Pheno_tensor
+        if hasattr(self, "_Sculpt_tensor"):
+            del self._Sculpt_tensor
 
     def get_input_shape(self):
         return len(self.phenotypes), len(self.face_region_names)

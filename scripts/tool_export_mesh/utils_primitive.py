@@ -759,7 +759,13 @@ def CheckForPrimitive(blender_object:bpy.types.Object, gather_tangents = True):
     return True, ""
 
 @timer
-def SnapPositions(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005):
+def SnapPositions(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005, lerp_coeff = 1.0):
+    '''
+        src_primitive: Source Shape
+        tar_primitive: Target Shape
+        copy_range: Maximum distance to snap
+        lerp_coeff: Coefficient for linear interpolation
+    '''
     if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
         raise UngatheredException("SnapPositions() called with ungathered positions")
 
@@ -771,10 +777,10 @@ def SnapPositions(src_primitive:Primitive, tar_primitive:Primitive, copy_range =
 
     print("Snapped verts: ", len(indices))
 
-    src_primitive.positions[mask] = tar_primitive.positions[indices]
+    src_primitive.positions[mask] = tar_primitive.positions[indices] * lerp_coeff + src_primitive.positions[mask] * (1 - lerp_coeff)
 
 @timer
-def CopyNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005):
+def CopyNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005, lerp_coeff = 1.0):
     if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
         raise UngatheredException("CopyNormalsAtSeam() called with ungathered positions")
     if Primitive.GatheredData.NORMALS not in src_primitive.gathered or Primitive.GatheredData.NORMALS not in tar_primitive.gathered:
@@ -788,10 +794,10 @@ def CopyNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_ran
 
     print("Snapped verts: ", len(indices))
 
-    src_primitive.post_change_normals(tar_primitive.normals[indices], mask)
+    src_primitive.post_change_normals(tar_primitive.normals[indices] * lerp_coeff + src_primitive.normals[mask] * (1 - lerp_coeff), mask)
 
 @timer
-def CopyMorphNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005, snap_delta_positions = False):
+def CopyMorphNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_range = 0.005, snap_delta_positions = False, lerp_coeff = 1.0, lerp_coeff_delta_pos = 1.0):
     if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
         raise UngatheredException("CopyMorphNormalsAtSeam() called with ungathered positions")
     if Primitive.GatheredData.MORPHNORMALS not in src_primitive.gathered or Primitive.GatheredData.MORPHNORMALS not in tar_primitive.gathered:
@@ -816,8 +822,9 @@ def CopyMorphNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, cop
     tar_indices = [tar_morphs.index(morph) for morph in common_morphs]
 
     for s_m_id, t_m_id in zip(src_indices, tar_indices):
-        src_primitive.post_change_morph_normals(tar_primitive.morph_normals[t_m_id][indices], s_m_id, mask)
-        src_primitive.morph_position_deltas[s_m_id][mask] = tar_primitive.morph_position_deltas[t_m_id][indices]
+        src_primitive.post_change_morph_normals(tar_primitive.morph_normals[t_m_id][indices] * lerp_coeff + src_primitive.morph_normals[s_m_id][mask] * (1 - lerp_coeff), s_m_id, mask)
+        if snap_delta_positions:
+            src_primitive.morph_position_deltas[s_m_id][mask] = tar_primitive.morph_position_deltas[t_m_id][indices] * lerp_coeff_delta_pos + src_primitive.morph_position_deltas[s_m_id][mask] * (1 - lerp_coeff_delta_pos)
 
 if __name__ == "__main__":
     import time

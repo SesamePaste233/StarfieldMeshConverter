@@ -371,7 +371,7 @@ def ExportMorphFromSet(options, context, export_file_path, morph_node, operator)
 	operator.report({'INFO'}, f"Export morph successful.")
 	return {"FINISHED"}, verts_count
 
-def ExportMorph_alt(options, context, export_file_path, operator, snapping_range = 0.0, snap_delta_positions = False):
+def ExportMorph_alt(options, context, export_file_path, operator, snapping_range = 0.0, snap_delta_positions = False, snap_lerp_coeff = 1.0, snap_lerp_coeff_delta_pos = 1.0):
 	export_path = export_file_path
 
 	target_obj = utils_blender.GetActiveObject()
@@ -417,7 +417,7 @@ def ExportMorph_alt(options, context, export_file_path, operator, snapping_range
 		primitive.gather()
 
 		for sel_prim in sel_primitives:
-			utils_primitive.CopyMorphNormalsAtSeam(primitive, sel_prim, snapping_range, snap_delta_positions=snap_delta_positions)
+			utils_primitive.CopyMorphNormalsAtSeam(primitive, sel_prim, snapping_range, snap_delta_positions=snap_delta_positions, lerp_coeff=snap_lerp_coeff, lerp_coeff_delta_pos=snap_lerp_coeff_delta_pos)
 
 		jsondata = primitive.to_morph_numpy_dict()
 	except utils_primitive.UVNotFoundException as e:

@@ -49,6 +49,15 @@ class ExportCustomMorph(bpy.types.Operator):
 		default=False,
 	)
 
+	snap_lerp_coeff: bpy.props.FloatProperty(
+		name="Snap Lerp Coefficient",
+		description="Lerp coefficient for snapping morph data of connecting vertices to closest verts from selected objects.",
+		default=1.0,
+		min=0.0,
+		max=1.0,
+		precision=4,
+	)
+
 	snapping_range: bpy.props.FloatProperty(
 		name="Snapping Range",
 		description="Verts from Active Object will copy morph data from verts from selected objects within Snapping Range.",
@@ -63,21 +72,36 @@ class ExportCustomMorph(bpy.types.Operator):
 		default=False,
 	)
 
+	snap_lerp_coeff_delta_positions: bpy.props.FloatProperty(
+		name="Snap Lerp Coefficient Delta Positions",
+		description="Lerp coefficient for snapping morph delta positions of connecting vertices to closest verts from selected objects.",
+		default=1.0,
+		min=0.0,
+		max=1.0,
+		precision=4,
+	)
+
 	def draw(self, context):
 		layout = self.layout
 		layout.label(text="Morph Snapping Options:")
 		layout.prop(self, "snapping_enabled")
 		box = layout.box()
 		box.prop(self, "snapping_range")
+		box.prop(self, "snap_lerp_coeff")
 		box.prop(self, "snap_delta_positions")
+		box_row = box.row()
+		box_row.prop(self, "snap_lerp_coeff_delta_positions")
+
+		box_row.enabled = False
+		box.enabled = False
 		if self.snapping_enabled:
 			box.enabled = True
-		else:
-			box.enabled = False
+			if self.snap_delta_positions:
+				box_row.enabled = True
 
 	def execute(self, context):
 		if self.snapping_enabled:
-			rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self, self.snapping_range, self.snap_delta_positions)
+			rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self, self.snapping_range, self.snap_delta_positions, self.snap_lerp_coeff, self.snap_lerp_coeff_delta_positions)
 		else:
 			rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self)
 		return rtn

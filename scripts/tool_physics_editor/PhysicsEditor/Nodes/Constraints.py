@@ -479,12 +479,16 @@ class LocalRangeConstraintNode(NodeBase.hclPhysicsNodeBase, Node):
                 # if there exists a constraint of the same type, pick it
                 for constraint in particles['constraints']:
                     if constraint['constraint'] == 'LocalRange':
-                        constraint['particles'].extend(particles_list)
-                        constraint['max_distances'].extend(max_distances)
-                        constraint['upper_normal_thresholds'].extend(upper_normal_threshold_list)
-                        constraint['lower_normal_thresholds'].extend(lower_normal_threshold_list)
-                        constraint['stiffnesses'].extend(stiffness_list)
-                        constraint['modes'].extend([self.mode for _ in particle_indices[0]])
+                        _dict = {p: (m_d, u_n_t, l_n_t, s, self.mode) for p, m_d, u_n_t, l_n_t, s in zip(particles_list, max_distances, upper_normal_threshold_list, lower_normal_threshold_list, stiffness_list)}
+                        _orig_dict = {p: (m_d, u_n_t, l_n_t, s, m) for p, m_d, u_n_t, l_n_t, s, m in zip(constraint['particles'], constraint['max_distances'], constraint['upper_normal_thresholds'], constraint['lower_normal_thresholds'], constraint['stiffnesses'], constraint['modes'])}
+                        _combined_dict = {**_dict, **_orig_dict}
+                        
+                        constraint['particles'] = list(_combined_dict.keys())
+                        constraint['max_distances'] = [v[0] for v in _combined_dict.values()]
+                        constraint['upper_normal_thresholds'] = [v[1] for v in _combined_dict.values()]
+                        constraint['lower_normal_thresholds'] = [v[2] for v in _combined_dict.values()]
+                        constraint['stiffnesses'] = [v[3] for v in _combined_dict.values()]
+                        constraint['modes'] = [v[4] for v in _combined_dict.values()]
                         constraint['apply_normal_component'] = constraint['apply_normal_component'] or self.constraint_normals
                         return particles
 

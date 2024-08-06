@@ -274,7 +274,7 @@ namespace hktypes {
 		}
 
 		inline void AddConstraintPair(uint16_t particleIndex, uint16_t referenceVertex, float maximumDistance, float maxNormalDistance, float minNormalDistance, float stiffness) {
-			if (stiffness == 1.f) {
+			/*if (stiffness == 1.f) {
 				LocalConstraint local_constraint;
 				local_constraint.particleIndex = particleIndex;
 				local_constraint.referenceVertex = referenceVertex;
@@ -292,7 +292,15 @@ namespace hktypes {
 				local_stiffness_constraint.minNormalDistance = minNormalDistance;
 				local_stiffness_constraint.stiffness = stiffness;
 				localStiffnessConstraints.push_back(local_stiffness_constraint);
-			}
+			}*/
+			LocalStiffnessConstraint local_stiffness_constraint;
+			local_stiffness_constraint.particleIndex = particleIndex;
+			local_stiffness_constraint.referenceVertex = referenceVertex;
+			local_stiffness_constraint.maximumDistance = maximumDistance;
+			local_stiffness_constraint.maxNormalDistance = maxNormalDistance;
+			local_stiffness_constraint.minNormalDistance = minNormalDistance;
+			local_stiffness_constraint.stiffness = stiffness;
+			localStiffnessConstraints.push_back(local_stiffness_constraint);
 		}
 	};
 

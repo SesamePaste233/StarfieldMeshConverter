@@ -200,7 +200,7 @@ void amain() {
 void ____main() {
 	hkphysics::hkReflDataDeserializer data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkNPCollisionObject\\2.bin", true);
+	data.Deserialize("C:\\repo\\MeshConverter\\physics_data.bin", true);
 	//data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin", true);
 
 	auto updated_transcript = data.RegisterClassesToTranscriptor();
@@ -225,19 +225,14 @@ void ____main() {
 	file1.close();
 	return;
 }
-void pmain() {
+void main() {
 	hkphysics::hkReflDataDeserializer data;
 
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
+	data.Deserialize("C:\\repo\\MeshConverter\\physics_data.bin");
 
-	/*auto literals = data.classes_to_literal(true, true, true);
+	auto class_literals = data.classes_to_literal(true, true, true);
 
-	auto instances = data.dump_root_instance();*/
-	hkphysics::hkReflDataDeserializer data1;
-
-	data1.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\cloth_test.bin");
-	
-	data.root_level_instance->assert_equals(data1.root_level_instance);
+	auto instance_literal = data.indexed_blocks[1]->dump_instances();
 
 	int i = 0;
 	utils::ProfilerGlobalOwner::GetInstance().for_each([&i](utils::DataAccessProfiler* profiler) {
@@ -246,13 +241,14 @@ void pmain() {
 		});
 
 	// Save the string into a file
-	/*std::ofstream file("C:\\repo\\MeshConverter\\include\\Generated\\hkGenerated_cloth.h");
-	file << literals;
+	std::ofstream file("C:\\repo\\MeshConverter\\UnkBlocks\\class_literals.txt");
+	file << class_literals;
 	file.close();
 
-	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances_cloth.txt");
-	file1 << instances;
-	file1.close();*/
+	std::ofstream file1("C:\\repo\\MeshConverter\\UnkBlocks\\instance_literal.txt");
+	file1 << instance_literal;
+	file1.close();
+
 	return;
 }
 
@@ -368,7 +364,7 @@ void phnifmain() {
 	//}
 }
 
-int main() {
+int nifmain() {
 	nif::NifIO nif;
 	nif.SetAssetsPath("C:\\test");
 	nif::ni_template::NiSkinInstanceTemplate* temp = new nif::ni_template::NiSkinInstanceTemplate();
