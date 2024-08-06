@@ -504,7 +504,7 @@ class Primitive():
         '''
         key_blocks = self.key_blocks if self.options.gather_morph_data else []
         if key_blocks:
-            self.raw_normals = key_blocks[0].relative_key.normals_split_get()
+            self.raw_normals = raw_corner_normals = key_blocks[0].relative_key.normals_split_get()
             self.raw_normals = np.array(self.raw_normals, dtype=np.float32)
         else:
             self.raw_normals = np.empty(len(self.blender_mesh.loops) * 3, dtype=np.float32)
@@ -525,10 +525,20 @@ class Primitive():
         self.raw_morph_normals = []
         self.raw_morph_normal_deltas = []
         if self.options.gather_morph_data:
-            for key_block in key_blocks:
-                # TODO: look for custom morph normal attributes first!
 
-                raw_morph_normals = np.array(key_block.normals_split_get(), dtype=np.float32)
+            for key_block in key_blocks:
+                
+                # If attribute is found, use it.
+                if f"NRM_{key_block.name}" in self.blender_mesh.attributes:
+                    use_attributes = True
+                    raw_morph_normal_deltas = np.array([list(v.vector) for v in self.blender_mesh.attributes[f"NRM_{key_block.name}"].data], dtype=np.float32).flatten()
+
+                    # Sum normals deltas + raw corner normals of the basis
+                    raw_morph_normals = np.array(raw_corner_normals + raw_morph_normal_deltas, dtype=np.float32)
+                else:
+                    use_attributes = False
+                    raw_morph_normals = np.array(key_block.normals_split_get(), dtype=np.float32)
+
                 raw_morph_normals = raw_morph_normals.reshape(len(self.blender_mesh.loops), 3)
                 raw_morph_normals = np.round(raw_morph_normals, self.options.normal_tangent_round_precision)
 
@@ -541,7 +551,11 @@ class Primitive():
                 self.raw_morph_normals.append(raw_morph_normals)
                 
                 # For DirectX compression format
-                raw_morph_normal_deltas = utils_math.bounded_vector_substraction(self.raw_normals, raw_morph_normals)
+                
+                # Raw morph normal deltas are already got using normal attributes,
+                # no need to get it twice.
+                if not use_attributes:
+                    raw_morph_normal_deltas = utils_math.bounded_vector_substraction(self.raw_normals, raw_morph_normals)
 
                 self.raw_morph_normal_deltas.append(raw_morph_normal_deltas)
 

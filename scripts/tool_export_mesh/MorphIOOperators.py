@@ -13,7 +13,7 @@ class ImportCustomMorph(bpy.types.Operator):
 	filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
 	use_attributes: bpy.props.BoolProperty(
 		name="Import attributes",
-		description="Import normals, tangents and colors as attributes.",
+		description="Import normals and colors as attributes.",
 		default=False
 	)
 	debug_delta_normal: bpy.props.BoolProperty(
@@ -26,8 +26,9 @@ class ImportCustomMorph(bpy.types.Operator):
 		description="Debug option. DO NOT USE.",
 		default=False
 	)
+	
 	def execute(self, context):
-		return MorphIO.ImportMorphFromNumpy(self.filepath, self, self.debug_delta_normal)
+		return MorphIO.ImportMorphFromNumpy(self.filepath, self, self.debug_delta_normal, use_attributes=self.use_attributes)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)

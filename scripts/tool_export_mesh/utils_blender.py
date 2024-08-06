@@ -1175,18 +1175,21 @@ def get_texconv_path() -> str|None:
 		return None
 	return texconv_path
 
-def addShapeKeyAttributes(obj, name):
+def addShapeKeyAttributes(obj, name, replace=False):
 
 	mesh = obj.data
 
 	if f"NRM_{name}" not in mesh.attributes:
-		mesh.attributes.new(name=f"NRM_{name}", type="FLOAT_VECTOR", domain="POINT")
-
-	if f"TAN_{name}" not in mesh.attributes:
-		mesh.attributes.new(name=f"TAN_{name}", type="FLOAT_VECTOR", domain="POINT")
+		mesh.attributes.new(name=f"NRM_{name}", domain="CORNER", type="FLOAT_VECTOR")
+	elif replace:
+		mesh.attributes.remove(mesh.attributes[f"NRM_{name}"])
+		mesh.attributes.new(name=f"NRM_{name}", domain="CORNER", type="FLOAT_VECTOR")
 
 	if f"COL_{name}" not in mesh.attributes:
-		mesh.vertex_colors.new(name=f"COL_{name}")
+		mesh.attributes.new(name=f"COL_{name}", domain="CORNER", type="FLOAT_COLOR")
+	elif replace:
+		mesh.attributes.remove(mesh.attributes[f"COL_{name}"])
+		mesh.attributes.new(name=f"COL_{name}", domain="CORNER", type="FLOAT_COLOR")
 
 def morphPanelRecalculateActiveNormals(obj):
 
