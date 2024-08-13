@@ -334,6 +334,11 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 	physics_armature_attached = False
 	has_skinned_geometry = False
 
+	if options.snapping_enabled:
+		ref_objs = original_selected
+	else:
+		ref_objs = []
+
 	export_material = options.export_material
 	if export_material:
 		mat_folder = os.path.join(export_folder, 'Materials')
@@ -463,7 +468,7 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 
 		geom_data = None
 		if options.use_internal_geom_data:
-			rtn, message, geom_data, matrices = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, head_object_mode)
+			rtn, message, geom_data, matrices = MeshIO.MeshToJson(mesh_obj, options, bone_list_filter, True, head_object_mode, ref_objects=ref_objs)
 			if 'FINISHED' not in rtn:
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Message: {message}. Skipping...')
 				continue
@@ -472,7 +477,7 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 			bone_list = geom_data['vertex_group_names']
 			_matrices_cache.append(matrices)
 		else:
-			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, head_object_mode)
+			rtn, verts_count, indices_count, bone_list = MeshIO.ExportMesh(options, context, result_file_path, operator, bone_list_filter, True, head_object_mode, ref_objects=ref_objs)
 			if 'FINISHED' not in rtn:
 				operator.report({'WARNING'}, f'Failed exporting {mesh_obj.name}. Skipping...')
 				continue
