@@ -16,7 +16,7 @@ import utils_primitive
 
 import time
 
-def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
+def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None', ref_objects = []):
 	start_time = time.time()
 	
 	if not (obj and obj.type == 'MESH'):
@@ -35,6 +35,7 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	p_options.gather_morph_data = False
 	p_options.gather_weights_data = options.WEIGHTS
 	p_options.use_global_positions = options.use_world_origin
+	p_options.max_border = options.max_border
 	
 	p_options.prune_empty_vertex_groups = prune_empty_vertex_groups
 
@@ -57,9 +58,27 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 
 	primitive = utils_primitive.Primitive(new_obj, p_options)
 
+	if len(ref_objects) >= 1:
+		print("Snapping on export mesh was enabled. Snapping the data...")
+		ref_primitives = []
+
+		for ref_obj in ref_objects:
+			rtn, reason = utils_primitive.CheckForPrimitive(ref_obj, gather_tangents=False)
+			
+			if not rtn:
+				continue
+
+			sel_p_options = utils_primitive.Primitive.Options()
+			sel_p_options.gather_morph_data = False
+			sel_p_options.gather_tangents = False
+			sel_p_options.use_global_positions = options.use_world_origin
+
+			sel_primitive = utils_primitive.Primitive(ref_obj, sel_p_options)
+			sel_primitive.gather()
+			ref_primitives.append(sel_primitive)
+
 	try:
 		primitive.gather()
-		matrices, data = primitive.to_mesh_numpy_dict()
 	except utils_primitive.UVNotFoundException as e:
 		return {'CANCELLED'}, "Your mesh has no active UV map.", None, None
 	except utils_primitive.AtomicException as e:
@@ -67,13 +86,28 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	except Exception as e:
 		return {'CANCELLED'}, f"An error occurred: {e}", None, None
 
+	if len(ref_objects) >= 1:
+		for ref_primitive in ref_primitives:
+
+			utils_primitive.CopyNormalsAtSeam(
+				primitive,
+				ref_primitive,
+				copy_range=options.snapping_range,
+				lerp_coeff=options.snap_lerp_coeff
+			)
+	
+	try:
+		matrices, data = primitive.to_mesh_numpy_dict()
+	except Exception as e:
+		return {'CANCELLED'}, f"An error occurred on at converting to numpy dict: {e}", None, None
+	
 	# Cleanup
 	bpy.data.meshes.remove(new_obj.data)	
 
 	print(f"MeshToJson took {time.time() - start_time} seconds")
 	return {'FINISHED'}, "", data, matrices
 
-def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None'):
+def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None', ref_objects = []):
 	export_mesh_file_path = filepath
 	export_mesh_folder_path = os.path.dirname(export_mesh_file_path)
 	
@@ -91,7 +125,7 @@ def ExportMesh(options, context, filepath: str, operator, bone_list_filter = Non
 	
 	time_start = time.time()
 
-	rtn, message, data, matrices = MeshToJson(active_object, options, bone_list_filter, prune_empty_vertex_groups, head_object_mode)
+	rtn, message, data, matrices = MeshToJson(active_object, options, bone_list_filter, prune_empty_vertex_groups, head_object_mode, ref_objects=ref_objects)
 
 	time_end = time.time()
 

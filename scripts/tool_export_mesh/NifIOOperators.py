@@ -388,6 +388,29 @@ class ExportCustomNif(bpy.types.Operator):
 	
 	filter_glob: bpy.props.StringProperty(default="*.nif", options={'HIDDEN'})
 
+	snapping_enabled: bpy.props.BoolProperty(
+		name="Snap Normals To Selected",
+		description="Snapping data of connecting vertices to closest verts from selected objects.",
+		default=False,
+	)
+
+	snap_lerp_coeff: bpy.props.FloatProperty(
+		name="Snap Lerp Coefficient",
+		description="Lerp coefficient for snapping data of connecting vertices to closest verts from selected objects.",
+		default=1.0,
+		min=0.0,
+		max=1.0,
+		precision=4,
+	)
+
+	snapping_range: bpy.props.FloatProperty(
+		name="Snapping Range",
+		description="Verts from Active Object will copy data from verts from selected objects within Snapping Range.",
+		default=0.005,
+		min=0.0,
+		precision=4,
+	)
+
 	export_template: bpy.props.EnumProperty(
 		name="Nif Template",
 		description="",
@@ -494,6 +517,21 @@ class ExportCustomNif(bpy.types.Operator):
 		layout.prop(self, "use_internal_geom_data")
 		layout.prop(self, "is_head_object")
 		layout.prop(self, "export_sf_mesh_hash_result")
+
+		layout.separator()
+		layout.label(text="Snapping data:") 
+		layout.prop(self, "snapping_enabled")
+
+		box = layout.box()
+
+		box.prop(self, "snapping_range")
+		box.prop(self, "snap_lerp_coeff")
+		box_row = box.row()
+
+		box_row.enabled = False
+		box.enabled = False
+		if self.snapping_enabled:
+			box.enabled = True
 
 		layout.separator()
 		layout.label(text="Additive Export:") 

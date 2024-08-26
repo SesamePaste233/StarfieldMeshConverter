@@ -556,6 +556,8 @@ class Primitive():
                 # no need to get it twice.
                 if not use_attributes:
                     raw_morph_normal_deltas = utils_math.bounded_vector_substraction(self.raw_normals, raw_morph_normals)
+                else:
+                    raw_morph_normal_deltas = np.reshape(raw_morph_normal_deltas, (-1, 3))
 
                 self.raw_morph_normal_deltas.append(raw_morph_normal_deltas)
 
