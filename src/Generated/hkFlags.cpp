@@ -9,9 +9,13 @@ bool hktypes::hkFlags<hknpCollisionFlags::Enum, int>::FromInstance(const hkrefle
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkFlags") {
-		std::cout << "hkFlags::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkFlags::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkFlags") {
+		std::cout << "hkFlags::FromInstance: Expecting hkFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -24,9 +28,13 @@ bool hktypes::hkFlags<hknpCollisionFlags::Enum, int>::ToInstance(hkreflex::hkCla
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkFlags") {
-		std::cout << "hkFlags::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkFlags::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkFlags") {
+		std::cout << "hkFlags::ToInstance: Expecting hkFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -45,9 +53,13 @@ bool hktypes::hkFlags<hknpCollisionControl::Enum, unsigned short>::FromInstance(
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkFlags") {
-		std::cout << "hkFlags::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkFlags::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkFlags") {
+		std::cout << "hkFlags::FromInstance: Expecting hkFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -60,9 +72,13 @@ bool hktypes::hkFlags<hknpCollisionControl::Enum, unsigned short>::ToInstance(hk
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkFlags") {
-		std::cout << "hkFlags::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkFlags::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkFlags") {
+		std::cout << "hkFlags::ToInstance: Expecting hkFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -81,9 +97,13 @@ bool hktypes::hkFlags<hknpShape::FlagsEnum, hkUint16>::FromInstance(const hkrefl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkFlags") {
-		std::cout << "hkFlags::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkFlags::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkFlags") {
+		std::cout << "hkFlags::FromInstance: Expecting hkFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -96,9 +116,13 @@ bool hktypes::hkFlags<hknpShape::FlagsEnum, hkUint16>::ToInstance(hkreflex::hkCl
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkFlags") {
-		std::cout << "hkFlags::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkFlags::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkFlags") {
+		std::cout << "hkFlags::ToInstance: Expecting hkFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

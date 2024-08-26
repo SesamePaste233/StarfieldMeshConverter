@@ -4,9 +4,9 @@
 
 namespace hktypes{
 	class hkReferencedObject;
-	template <typename tTYPE>
-	class ;
 	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tTYPE>
 	class ;
 
 	class hkRefCountedProperties : public hkReferencedObject {

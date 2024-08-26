@@ -5,16 +5,16 @@
 namespace hktypes{
 	class hkStringPtr;
 	class hknpCollisionFlags;
-	class hknpBodyId;
-	template <typename tTYPE>
-	class ;
-	class hknpCollisionControl;
-	template <typename tTYPE>
-	class ;
-	class hkQuaternion;
 	template <typename tTYPE>
 	class ;
 	class hkVector4;
+	class hkQuaternion;
+	class hknpCollisionControl;
+	template <typename tTYPE>
+	class ;
+	template <typename tTYPE>
+	class ;
+	class hknpBodyId;
 	template <typename tTYPE>
 	class ;
 

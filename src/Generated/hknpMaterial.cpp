@@ -13,9 +13,13 @@ bool hktypes::hknpMaterial::FromInstance(const hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial") {
-		std::cout << "hknpMaterial::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial") {
+		std::cout << "hknpMaterial::FromInstance: Expecting hknpMaterial but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -47,9 +51,13 @@ bool hktypes::hknpMaterial::TriggerType::FromInstance(const hkreflex::hkClassIns
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial::TriggerType") {
-		std::cout << "hknpMaterial::TriggerType::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::TriggerType::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial::TriggerType") {
+		std::cout << "hknpMaterial::TriggerType::FromInstance: Expecting hknpMaterial::TriggerType but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -60,9 +68,13 @@ bool hktypes::hknpMaterial::CombinePolicy::FromInstance(const hkreflex::hkClassI
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial::CombinePolicy") {
-		std::cout << "hknpMaterial::CombinePolicy::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::CombinePolicy::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial::CombinePolicy") {
+		std::cout << "hknpMaterial::CombinePolicy::FromInstance: Expecting hknpMaterial::CombinePolicy but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -73,9 +85,13 @@ bool hktypes::hknpMaterial::MassChangerCategory::FromInstance(const hkreflex::hk
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial::MassChangerCategory") {
-		std::cout << "hknpMaterial::MassChangerCategory::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::MassChangerCategory::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial::MassChangerCategory") {
+		std::cout << "hknpMaterial::MassChangerCategory::FromInstance: Expecting hknpMaterial::MassChangerCategory but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -86,9 +102,13 @@ bool hktypes::hknpMaterial::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial") {
-		std::cout << "hknpMaterial::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial") {
+		std::cout << "hknpMaterial::ToInstance: Expecting hknpMaterial but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -120,9 +140,13 @@ bool hktypes::hknpMaterial::TriggerType::ToInstance(hkreflex::hkClassInstance* i
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial::TriggerType") {
-		std::cout << "hknpMaterial::TriggerType::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::TriggerType::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial::TriggerType") {
+		std::cout << "hknpMaterial::TriggerType::ToInstance: Expecting hknpMaterial::TriggerType but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -133,9 +157,13 @@ bool hktypes::hknpMaterial::CombinePolicy::ToInstance(hkreflex::hkClassInstance*
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial::CombinePolicy") {
-		std::cout << "hknpMaterial::CombinePolicy::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::CombinePolicy::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial::CombinePolicy") {
+		std::cout << "hknpMaterial::CombinePolicy::ToInstance: Expecting hknpMaterial::CombinePolicy but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -146,9 +174,13 @@ bool hktypes::hknpMaterial::MassChangerCategory::ToInstance(hkreflex::hkClassIns
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpMaterial::MassChangerCategory") {
-		std::cout << "hknpMaterial::MassChangerCategory::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpMaterial::MassChangerCategory::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpMaterial::MassChangerCategory") {
+		std::cout << "hknpMaterial::MassChangerCategory::ToInstance: Expecting hknpMaterial::MassChangerCategory but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

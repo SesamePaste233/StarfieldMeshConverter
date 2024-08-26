@@ -8,9 +8,13 @@ bool hktypes::hkRefCountedProperties::FromInstance(const hkreflex::hkClassInstan
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRefCountedProperties") {
-		std::cout << "hkRefCountedProperties::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties") {
+		std::cout << "hkRefCountedProperties::FromInstance: Expecting hkRefCountedProperties but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -23,9 +27,13 @@ bool hktypes::hkRefCountedProperties::Entry::FromInstance(const hkreflex::hkClas
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRefCountedProperties::Entry") {
-		std::cout << "hkRefCountedProperties::Entry::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::Entry::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties::Entry") {
+		std::cout << "hkRefCountedProperties::Entry::FromInstance: Expecting hkRefCountedProperties::Entry but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -39,9 +47,13 @@ bool hktypes::hkRefCountedProperties::ToInstance(hkreflex::hkClassInstance* inst
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRefCountedProperties") {
-		std::cout << "hkRefCountedProperties::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties") {
+		std::cout << "hkRefCountedProperties::ToInstance: Expecting hkRefCountedProperties but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -54,9 +66,13 @@ bool hktypes::hkRefCountedProperties::Entry::ToInstance(hkreflex::hkClassInstanc
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRefCountedProperties::Entry") {
-		std::cout << "hkRefCountedProperties::Entry::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::Entry::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties::Entry") {
+		std::cout << "hkRefCountedProperties::Entry::ToInstance: Expecting hkRefCountedProperties::Entry but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

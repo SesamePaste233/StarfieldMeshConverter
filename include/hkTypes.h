@@ -7,6 +7,69 @@ namespace hktypes {
 	class hclSimClothData;
 	class hclObjectSpaceSkinPNOperator;
 	class hclBoneSpaceSkinPNOperator;
+	class hkVector4Holder;
+	class hkQuaternionHolder;
+	class hkMatrix4Holder;
+
+	using hkUint8 = uint8_t;
+	using hkUint16 = uint16_t;
+	using hkUint32 = uint32_t;
+	using hkUint64 = uint64_t;
+
+	using hkInt8 = int8_t;
+	using hkInt16 = int16_t;
+	using hkInt32 = int32_t;
+	using hkInt64 = int64_t;
+
+	using hkReal = float;
+	using hkHalf16 = float;
+
+	using hkStringPtr = std::string;
+	
+	using hkVector4 = hkVector4Holder;
+	using hkQuaternion = hkQuaternionHolder;
+	using hkTransform = hkMatrix4Holder;
+
+	class hkUFloat8 : public hkHolderBase {
+	public:
+		using BaseType = void;
+		uint8_t value = 0;
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hknpBodyId"; };
+		inline std::string GetTranscriptId() override { return "hknpBodyId"; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "serialAndIndex", "hkUint32" },
+			};
+		};
+	};
+
+	class hkFloat3 : public hkHolderBase {
+	public:
+		using BaseType = void;
+		float x; // Offset: 0
+		float y; // Offset: 4
+		float z; // Offset: 8
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkFloat3"; };
+		inline std::string GetTranscriptId() override { return "hkFloat3"; };
+		inline uint32_t GethkClassHash() override { return 1488974649; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "x", "float" },
+				{ "y", "float" },
+				{ "z", "float" },
+			};
+		};
+		inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();
+	};
 
 	class hkPackedVector3 : public hkHolderBase {
 	public:
@@ -58,6 +121,37 @@ namespace hktypes {
 
 		Eigen::Vector3f ToVector3f();
 		static hkVector4Holder FromVector3f(const Eigen::Vector3f vec, const float w = 0);
+	};
+
+	class hkQuaternionHolder : public hkHolderBase {
+	public:
+		using BaseType = void;
+		float values[4] = { 0,0,0,1.f };
+
+		// Extra
+		hkQuaternionHolder() = default;
+		hkQuaternionHolder(float x, float y, float z, float w) {
+			values[0] = x;
+			values[1] = y;
+			values[2] = z;
+			values[3] = w;
+		}
+
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return ""; };
+		inline std::string GetTranscriptId() override { return ""; };
+		inline uint32_t GethkClassHash() override { return 0; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+			};
+		};
+
+		Eigen::Vector4f ToVector4f();
+		static hkQuaternionHolder FromVector4f(const Eigen::Vector4f vec);
+
+		Eigen::Vector3f ToVector3f();
+		static hkQuaternionHolder FromVector3f(const Eigen::Vector3f vec, const float w = 1.f);
 	};
 
 	class hkMatrix4Holder : public hkHolderBase {
@@ -159,6 +253,46 @@ namespace hktypes {
 		hkBitField operator|(const hkBitField& other) const;
 
 		hkBitField operator|=(const hkBitField& other);
+	};
+
+	class hkRefCountedProperties : public hkReferencedObject {
+	public:
+		using BaseType = hkReferencedObject;
+		class Entry : public hkHolderBase {
+		public:
+			using BaseType = void;
+			hkReferencedObject* object; // Offset: 0
+			hkUint16 key; // Offset: 8
+			hkUint16 flags; // Offset: 10
+
+			// Extra
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+			bool ToInstance(hkreflex::hkClassInstance* instance) override;
+			inline std::string GethkClassName() override { return "hkRefCountedProperties::Entry"; };
+			inline std::string GetTranscriptId() override { return "hkRefCountedProperties::Entry"; };
+			inline uint32_t GethkClassHash() override { return 3846323405; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+					{ "object", "hkRefPtr<hkReferencedObject>" },
+					{ "key", "hkUint16" },
+					{ "flags", "hkUint16" },
+				};
+			};
+		};
+
+		std::vector<hkRefCountedProperties::Entry> entries; // Offset: 24
+
+		// Extra
+		bool FromInstance(const hkreflex::hkClassInstance* instance) override;
+		bool ToInstance(hkreflex::hkClassInstance* instance) override;
+		inline std::string GethkClassName() override { return "hkRefCountedProperties"; };
+		inline std::string GetTranscriptId() override { return "hkRefCountedProperties"; };
+		inline uint32_t GethkClassHash() override { return 4226104209; };
+		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+			return {
+				{ "entries", "hkArray<hkRefCountedProperties::Entry, hkContainerHeapAllocator>" },
+			};
+		};
 	};
 
 	class hkRootLevelContainer : public hkHolderBase {

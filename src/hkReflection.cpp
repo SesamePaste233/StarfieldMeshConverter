@@ -335,9 +335,13 @@ std::string hkreflex::hkClassBase::to_C_FromInstance()
 			c_from_instance += "\tauto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);\n\n";
 		}
 		c_from_instance += "#ifndef NO_HK_TYPENAME_CHECK\n";
-		c_from_instance += "\tif (class_instance && class_instance->type->type_name != \"" + this->type_name + "\") {\n";
-		c_from_instance += "\t\tstd::cout << \"" + this->type_name + "::FromInstance: Wrong type!\" << std::endl;\n";
+		c_from_instance += "\tif (!class_instance) {\n";
+		c_from_instance += "\t\tstd::cout << \"" + this->type_name + "::FromInstance: hkClassRecordInstance is nullptr!\" << std::endl;\n";
 		c_from_instance += "\t\tthrow;\n";
+		c_from_instance += "\t}\n";
+		c_from_instance += "\tif (class_instance->type->type_name != \"" + this->type_name + "\") {\n";
+		c_from_instance += "\t\tstd::cout << \"" + this->type_name + "::FromInstance: Expecting " + this->type_name + " but got \" << class_instance->type->type_name << std::endl;\n";
+		c_from_instance += "\t\treturn false;\n";
 		c_from_instance += "\t}\n";
 		c_from_instance += "#endif // NO_HK_TYPENAME_CHECK\n\n";
 
@@ -375,9 +379,13 @@ std::string hkreflex::hkClassBase::to_C_ToInstance()
 			c_to_instance += "\tauto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);\n\n";
 		}
 		c_to_instance += "#ifndef NO_HK_TYPENAME_CHECK\n";
-		c_to_instance += "\tif (class_instance && class_instance->type->type_name != \"" + this->type_name + "\") {\n";
-		c_to_instance += "\t\tstd::cout << \"" + this->type_name + "::ToInstance: Wrong type!\" << std::endl;\n";
+		c_to_instance += "\tif (!class_instance) {\n";
+		c_to_instance += "\t\tstd::cout << \"" + this->type_name + "::ToInstance: hkClassRecordInstance is nullptr!\" << std::endl;\n";
 		c_to_instance += "\t\tthrow;\n";
+		c_to_instance += "\t}\n";
+		c_to_instance += "\tif (class_instance->type->type_name != \"" + this->type_name + "\") {\n";
+		c_to_instance += "\t\tstd::cout << \"" + this->type_name + "::ToInstance: Expecting " + this->type_name + " but got \" << class_instance->type->type_name << std::endl;\n";
+		c_to_instance += "\t\treturn false;\n";
 		c_to_instance += "\t}\n";
 		c_to_instance += "#endif // NO_HK_TYPENAME_CHECK\n\n";
 

@@ -3,9 +3,6 @@
 
 
 namespace hktypes{
-	class hkReferencedObject;
-	template <typename tT, typename tAllocator>
-	class ;
 	template <typename tT, typename tAllocator>
 	class ;
 	template <typename tT, typename tAllocator>
@@ -13,6 +10,9 @@ namespace hktypes{
 	template <typename tT, typename tAllocator>
 	class ;
 	class hkStringPtr;
+	class hkReferencedObject;
+	template <typename tT, typename tAllocator>
+	class ;
 	class hknpBodyCinfo;
 
 	class hknpPhysicsSystemData : public hkReferencedObject {

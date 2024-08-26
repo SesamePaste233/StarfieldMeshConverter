@@ -128,6 +128,10 @@ namespace hkreflex {
 		requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
 		bool GetValue(arithmetic_t & container) const;
 
+		template<typename interget_enum_t, typename underlying_t = std::underlying_type_t<interget_enum_t>>
+		requires std::is_enum_v<interget_enum_t> && utils::_is_integer_t<underlying_t>
+		bool GetValue(interget_enum_t & container) const;
+
 		template<typename elem_t>
 		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool GetValue(std::vector<elem_t> & container) const;
@@ -135,6 +139,14 @@ namespace hkreflex {
 		template<typename elem_t, typename sub_t = std::remove_pointer_t<elem_t>>
 		requires std::is_pointer_v<elem_t> && (hktypes::_is_hk_holder_t<sub_t>)
 		bool GetValue(std::vector<elem_t> &container) const;
+
+		template<typename elem_t, uint64_t size>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
+		bool GetValue(std::array<elem_t, size> &container) const;
+
+		template<typename elem_t, uint64_t size, typename sub_t = std::remove_pointer_t<elem_t>>
+		requires std::is_pointer_v<elem_t> && (hktypes::_is_hk_holder_t<sub_t>)
+		bool GetValue(std::array<elem_t, size>& container) const;
 
 		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
 		requires std::is_pointer_v<ptr_t> /*&& (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)*/
@@ -152,6 +164,10 @@ namespace hkreflex {
 		requires utils::_is_bool_t<arithmetic_t> || utils::_is_float_t<arithmetic_t> || utils::_is_integer_t<arithmetic_t>
 		bool SetValue(arithmetic_t & container);
 
+		template<typename interget_enum_t, typename underlying_t = std::underlying_type_t<interget_enum_t>>
+		requires std::is_enum_v<interget_enum_t> && utils::_is_integer_t<underlying_t>
+		bool SetValue(interget_enum_t& container);
+
 		template<typename elem_t>
 		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 		bool SetValue(std::vector<elem_t> & container);
@@ -163,6 +179,18 @@ namespace hkreflex {
 		template<typename elem_t, typename sub_t = std::remove_pointer_t<elem_t>>
 		requires std::is_pointer_v<elem_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
 		bool SetValue(std::vector<elem_t> &container);
+
+		template<typename elem_t, uint64_t size>
+		requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
+		bool SetValue(std::array<elem_t, size> &container);
+
+		template<typename elem_t, uint64_t size>
+		requires hktypes::_is_hk_holder_t<elem_t>
+		bool SetValue(std::array<elem_t, size>& container);
+
+		template<typename elem_t, uint64_t size, typename sub_t = std::remove_pointer_t<elem_t>>
+		requires std::is_pointer_v<elem_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+		bool SetValue(std::array<elem_t, size>& container);
 
 		template<typename ptr_t, typename sub_t = std::remove_pointer_t<ptr_t>>
 		requires std::is_pointer_v<ptr_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t>)
@@ -955,6 +983,31 @@ namespace hkreflex {
 		return false;
 	}
 
+	template<typename interget_enum_t, typename underlying_t>
+	requires std::is_enum_v<interget_enum_t> && utils::_is_integer_t<underlying_t>
+	inline bool hkClassInstance::GetValue(interget_enum_t& container) const
+	{
+		if (type->kind == hkClassBase::TypeKind::Int) {
+			auto int_type = dynamic_cast<const hkClassIntInstance*>(this);
+			if (int_type->is_signed) {
+				if (!utils::_signed_integer_t<underlying_t>) {
+					std::cout << "Warning: Attempting to retrieve an unsigned value from a signed value." << std::endl;
+				}
+				container = static_cast<interget_enum_t>(int_type->svalue);
+				return true;
+			}
+			else if (!int_type->is_signed) {
+				if (!utils::_unsigned_integer_t<underlying_t>) {
+					std::cout << "Warning: Attempting to retrieve a signed value from an unsigned value." << std::endl;
+				}
+				container = static_cast<interget_enum_t>(int_type->value);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	template<typename elem_t>
 	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 	inline bool hkClassInstance::GetValue(std::vector<elem_t> & container) const
@@ -990,6 +1043,56 @@ namespace hkreflex {
 				sub_t* elem_container = static_cast<sub_t*>(hktypes::AllocateHolder(ptr_instance->ptr_instance));
 				if (ptr_instance->ptr_instance->GetValue(*elem_container)) {
 					container.push_back(elem_container);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template<typename elem_t, uint64_t size>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || hktypes::_is_hk_holder_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
+	inline bool hkClassInstance::GetValue(std::array<elem_t, size> &container) const
+	{
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto array_instance = dynamic_cast<const hkClassArrayInstance*>(this);
+			if (array_instance->array_instances.size() != size) {
+				std::cout << "Array instance size mismatch: expecting: " << size << " got: " << array_instance->array_instances.size() << std::endl;
+				return false;
+			}
+			for (size_t _i = 0; _i < size; ++_i) {
+				auto& instance = array_instance->array_instances[_i];
+				elem_t elem_container;
+				if (instance->GetValue(elem_container)) {
+					container[_i] = elem_container;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	template<typename elem_t, uint64_t size, typename sub_t>
+	requires std::is_pointer_v<elem_t> && (hktypes::_is_hk_holder_t<sub_t>)
+	bool hkClassInstance::GetValue(std::array<elem_t, size>& container) const {
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto array_instance = dynamic_cast<const hkClassArrayInstance*>(this);
+			if (array_instance->array_instances.size() != size) {
+				std::cout << "Array instance size mismatch: expecting: " << size << " got: " << array_instance->array_instances.size() << std::endl;
+				return false;
+			}
+			for (size_t _i = 0; _i < size; ++_i) {
+				auto& instance = array_instance->array_instances[_i];
+				hkClassPointerInstance* ptr_instance = dynamic_cast<hkClassPointerInstance*>(instance);
+
+				if (ptr_instance == nullptr) {
+					std::cout << "Instance is not array of pointers" << std::endl;
+					return false;
+				}
+
+				sub_t* elem_container = static_cast<sub_t*>(hktypes::AllocateHolder(ptr_instance->ptr_instance));
+				if (ptr_instance->ptr_instance->GetValue(*elem_container)) {
+					container[_i] = elem_container;
 				}
 			}
 			return true;
@@ -1081,6 +1184,34 @@ namespace hkreflex {
 		return false;
 	}
 
+	template<typename interget_enum_t, typename underlying_t>
+	requires std::is_enum_v<interget_enum_t> && utils::_is_integer_t<underlying_t>
+	inline bool hkClassInstance::SetValue(interget_enum_t& container)
+	{
+		if (type->kind == hkClassBase::TypeKind::Int) {
+			auto int_type = dynamic_cast<hkClassIntInstance*>(this);
+			if (int_type->byte_length < sizeof(underlying_t)) {
+				std::cout << "Warning: Attempting to set the value of an instance with a value of larger size. Expected size: " << int_type->byte_length << std::endl;
+			}
+
+			if (int_type->is_signed) {
+				if (!utils::_signed_integer_t<underlying_t>) {
+					std::cout << "Warning: Attempting to set a signed value from an unsigned value." << std::endl;
+				}
+				int_type->svalue = static_cast<int64_t>(container);
+				return true;
+			}
+			else if (utils::_unsigned_integer_t<underlying_t> && !int_type->is_signed) {
+				if (!utils::_unsigned_integer_t<underlying_t>) {
+					std::cout << "Warning: Attempting to set an unsigned value from a signed value." << std::endl;
+				}
+				int_type->value = static_cast<uint64_t>(container);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	template<typename elem_t>
 	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
 	inline bool hkClassInstance::SetValue(std::vector<elem_t>& container)
@@ -1163,6 +1294,125 @@ namespace hkreflex {
 	template<typename elem_t, typename sub_t>
 	requires std::is_pointer_v<elem_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
 	bool hkClassInstance::SetValue(std::vector<elem_t>& container) {
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+
+			auto array_instance_copied = *array_instance;
+			array_instance_copied.resize(0);
+
+			for (size_t i = 0; i < container.size(); i++) {
+				elem_t elem_container = container[i];
+
+				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_context);
+				if (hk_this_instance == nullptr) {
+					throw std::runtime_error("hkClassInstance::SetValue: unable to allocate instance.");
+				}
+
+				auto instance = dynamic_cast<hkreflex::hkClassPointerInstance*>(hk_this_instance);
+				if (instance == nullptr) {
+					throw std::runtime_error("hkClassInstance::SetValue: unable to cast to hkClassPointerInstance.");
+				}
+
+				if (!instance->SetValue(elem_container)) {
+					std::cout << "hkClassInstance::SetValue: Failed to set value of array instance." << std::endl;
+					return false;
+				}
+				array_instance_copied.array_instances.push_back(instance);
+			}
+
+			array_instance_copied.update_view();
+
+			*array_instance = array_instance_copied;
+
+			return true;
+		}
+		return false;
+	}
+
+	template<typename elem_t, uint64_t size>
+	requires utils::_is_string_t<elem_t> || utils::_is_bool_t<elem_t> || utils::_is_float_t<elem_t> || utils::_is_integer_t<elem_t> || utils::_is_vector_t<elem_t> || hktypes::_is_hk_array_holder_t<elem_t>
+	inline bool hkClassInstance::SetValue(std::array<elem_t, size>&container)
+	{
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+
+			auto array_instance_copied = *array_instance;
+			array_instance_copied.resize(container.size());
+
+			for (size_t i = 0; i < container.size(); i++) {
+				elem_t elem_container = container[i];
+				auto& instance = array_instance_copied.array_instances[i];
+				if (!instance->SetValue(elem_container)) {
+					std::cout << "hkClassInstance::SetValue: Failed to set value of array instance." << std::endl;
+					return false;
+				}
+			}
+
+			array_instance_copied.update_view();
+
+			*array_instance = array_instance_copied;
+
+			return true;
+		}
+		return false;
+	}
+
+	template<typename elem_t, uint64_t size>
+	requires hktypes::_is_hk_holder_t<elem_t>
+	inline bool hkClassInstance::SetValue(std::array<elem_t, size>& container) {
+		if (type->kind == hkClassBase::TypeKind::Array) {
+			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
+			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);
+
+			auto array_instance_copied = *array_instance;
+			array_instance_copied.resize(0);
+
+			for (size_t i = 0; i < container.size(); i++) {
+				elem_t elem_container = container[i];
+
+				auto hk_this_instance = hkreflex::AllocateInstance(this->type->sub_type, ref_context);
+				if (hk_this_instance == nullptr) {
+					throw std::runtime_error("hkClassInstance::SetValue: unable to allocate instance.");
+				}
+
+				if (hk_this_instance->type->kind == hkClassBase::TypeKind::Record) {
+					auto instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(hk_this_instance);
+					if (instance == nullptr) {
+						throw std::runtime_error("hkClassInstance::SetValue: unable to cast to hkClassRecordInstance.");
+					}
+
+					instance->SetupFieldInstances();
+				}
+				else if (hk_this_instance->type->kind == hkClassBase::TypeKind::Array) {
+					auto instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(hk_this_instance);
+					if (instance == nullptr) {
+						throw std::runtime_error("hkClassInstance::SetValue: unable to cast to hkClassArrayInstance.");
+					}
+				}
+				else {
+					throw std::runtime_error("hkClassInstance::SetValue: unsupported type.");
+				}
+
+				if (!hk_this_instance->SetValue(elem_container)) {
+					std::cout << "hkClassInstance::SetValue: Failed to set value of array instance." << std::endl;
+					return false;
+				}
+				array_instance_copied.array_instances.push_back(hk_this_instance);
+			}
+
+			array_instance_copied.update_view();
+
+			*array_instance = array_instance_copied;
+
+			return true;
+		}
+		return false;
+	}
+
+	template<typename elem_t, uint64_t size, typename sub_t>
+	requires std::is_pointer_v<elem_t> && (utils::_is_string_t<sub_t> || utils::_is_bool_t<sub_t> || utils::_is_float_t<sub_t> || utils::_is_integer_t<sub_t> || hktypes::_is_hk_holder_t<sub_t>)
+	bool hkClassInstance::SetValue(std::array<elem_t, size>& container) {
 		if (type->kind == hkClassBase::TypeKind::Array) {
 			auto& transcriptor = hkreflex::hkTypeTranscriptor::GetInstance();
 			auto array_instance = dynamic_cast<hkClassArrayInstance*>(this);

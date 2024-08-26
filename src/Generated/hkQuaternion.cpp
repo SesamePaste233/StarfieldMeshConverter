@@ -6,9 +6,13 @@ bool hktypes::hkQuaternion::FromInstance(const hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkQuaternion") {
-		std::cout << "hkQuaternion::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkQuaternion::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkQuaternion") {
+		std::cout << "hkQuaternion::FromInstance: Expecting hkQuaternion but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -20,9 +24,13 @@ bool hktypes::hkQuaternion::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkQuaternion") {
-		std::cout << "hkQuaternion::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkQuaternion::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkQuaternion") {
+		std::cout << "hkQuaternion::ToInstance: Expecting hkQuaternion but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

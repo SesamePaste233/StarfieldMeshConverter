@@ -1,24 +1,24 @@
 [
   {
     "alignment": 8,
-    "class_name": "hkStringPtr",
+    "class_name": "hkRootLevelContainer",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 36,
-        "name": "stringAndFlag",
+        "flags": 32,
+        "name": "namedVariants",
         "offset": 0,
-        "type_id": "char*",
+        "type_id": "hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>",
         "unk_value": 0
       }
     ],
-    "format": 131,
-    "hash": 2710609657,
-    "id": "hkStringPtr",
+    "format": 7,
+    "hash": 54921221,
+    "id": "hkRootLevelContainer",
     "optionals": 41,
     "parent_class_id": "",
-    "size": 8,
+    "size": 16,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -72,24 +72,24 @@
   },
   {
     "alignment": 8,
-    "class_name": "hkRootLevelContainer",
+    "class_name": "hkStringPtr",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 32,
-        "name": "namedVariants",
+        "flags": 36,
+        "name": "stringAndFlag",
         "offset": 0,
-        "type_id": "hkArray<hkRootLevelContainer::NamedVariant, hkContainerHeapAllocator>",
+        "type_id": "char*",
         "unk_value": 0
       }
     ],
-    "format": 7,
-    "hash": 54921221,
-    "id": "hkRootLevelContainer",
+    "format": 131,
+    "hash": 2710609657,
+    "id": "hkStringPtr",
     "optionals": 41,
     "parent_class_id": "",
-    "size": 16,
+    "size": 8,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -203,56 +203,6 @@
   },
   {
     "alignment": 8,
-    "class_name": "hkArray",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 0,
-    "id": "hkArray<T*<hclAction>, hkContainerHeapAllocator>",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "T*<hclAction>",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "T*<hclAction>",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
     "class_name": "char*",
     "declared": 1,
     "defined": 1,
@@ -351,12 +301,54 @@
     "version": 0
   },
   {
-    "class_name": "hclAction",
+    "alignment": 8,
+    "class_name": "hkArray",
     "declared": 1,
-    "defined": 0,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
     "hash": 0,
-    "id": "hclAction",
-    "template_args": []
+    "id": "hkArray<T*<hclAction>, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "T*<hclAction>",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "T*<hclAction>",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
   },
   {
     "alignment": 8,
@@ -384,43 +376,44 @@
     "version": 0
   },
   {
+    "class_name": "hclAction",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclAction",
+    "template_args": []
+  },
+  {
     "alignment": 8,
-    "class_name": "hclSimClothData::CollidableTransformMap",
+    "class_name": "hkReferencedObject",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 32,
-        "name": "transformSetIndex",
-        "offset": 0,
-        "type_id": "hkInt32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "transformIndices",
+        "flags": 37,
+        "name": "sizeAndFlags",
         "offset": 8,
-        "type_id": "hkArray<hkUint32, hkContainerHeapAllocator>",
+        "type_id": "hkUlong",
         "unk_value": 0
       },
       {
-        "flags": 32,
-        "name": "offsets",
-        "offset": 24,
-        "type_id": "hkArray<hkMatrix4, hkContainerHeapAllocator>",
+        "flags": 37,
+        "name": "refCount",
+        "offset": 16,
+        "type_id": "hkUlong",
         "unk_value": 0
       }
     ],
     "format": 7,
     "hash": 0,
-    "id": "hclSimClothData::CollidableTransformMap",
-    "optionals": 41,
-    "parent_class_id": "",
-    "size": 40,
+    "id": "hkReferencedObject",
+    "optionals": 45,
+    "parent_class_id": "hkBaseObject",
+    "size": 24,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
-    "version": 0
+    "version": 4
   },
   {
     "alignment": 8,
@@ -512,35 +505,42 @@
   },
   {
     "alignment": 8,
-    "class_name": "hkReferencedObject",
+    "class_name": "hclSimClothData::CollidableTransformMap",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 37,
-        "name": "sizeAndFlags",
-        "offset": 8,
-        "type_id": "hkUlong",
+        "flags": 32,
+        "name": "transformSetIndex",
+        "offset": 0,
+        "type_id": "hkInt32",
         "unk_value": 0
       },
       {
-        "flags": 37,
-        "name": "refCount",
-        "offset": 16,
-        "type_id": "hkUlong",
+        "flags": 32,
+        "name": "transformIndices",
+        "offset": 8,
+        "type_id": "hkArray<hkUint32, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "offsets",
+        "offset": 24,
+        "type_id": "hkArray<hkMatrix4, hkContainerHeapAllocator>",
         "unk_value": 0
       }
     ],
     "format": 7,
     "hash": 0,
-    "id": "hkReferencedObject",
-    "optionals": 45,
-    "parent_class_id": "hkBaseObject",
-    "size": 24,
+    "id": "hclSimClothData::CollidableTransformMap",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 40,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
-    "version": 4
+    "version": 0
   },
   {
     "alignment": 8,
@@ -557,6 +557,23 @@
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 144,
+    "version": 0
+  },
+  {
+    "alignment": 0,
+    "class_name": "hkUlong",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 0,
+    "hash": 0,
+    "id": "hkUlong",
+    "optionals": 0,
+    "parent_class_id": "unsigned long long",
+    "size": 0,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
     "version": 0
   },
   {
@@ -592,69 +609,55 @@
     "version": 3
   },
   {
-    "alignment": 0,
-    "class_name": "hkUlong",
+    "alignment": 4,
+    "class_name": "hkEnum",
     "declared": 1,
     "defined": 1,
-    "fields": [],
-    "format": 0,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      }
+    ],
+    "format": 32772,
     "hash": 0,
-    "id": "hkUlong",
-    "optionals": 0,
-    "parent_class_id": "unsigned long long",
-    "size": 0,
+    "id": "hkEnum<hclLocalRangeConstraintSet::ShapeType, hkUint32>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 4,
     "sub_type_id": "",
-    "template_args": [],
+    "template_args": [
+      {
+        "name": "tENUM",
+        "type_id": "hclLocalRangeConstraintSet::ShapeType",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint32",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
   {
     "alignment": 8,
-    "class_name": "hkArray",
+    "class_name": "unsigned long long",
     "declared": 1,
     "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 3786493259,
-    "id": "hkArray<hkVector4, hkContainerHeapAllocator>",
-    "optionals": 43,
+    "fields": [],
+    "format": 65540,
+    "hash": 0,
+    "id": "unsigned long long",
+    "optionals": 9,
     "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "hkVector4",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hkVector4",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
+    "size": 8,
+    "sub_type_id": "",
+    "template_args": [],
     "type_flags": 0,
     "version": 0
   },
@@ -732,55 +735,52 @@
     "version": 0
   },
   {
-    "alignment": 4,
-    "class_name": "hkEnum",
+    "alignment": 8,
+    "class_name": "hkArray",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 36,
-        "name": "storage",
+        "flags": 34,
+        "name": "m_data",
         "offset": 0,
-        "type_id": "hkUint32",
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
         "unk_value": 0
       }
     ],
-    "format": 32772,
-    "hash": 0,
-    "id": "hkEnum<hclLocalRangeConstraintSet::ShapeType, hkUint32>",
-    "optionals": 41,
+    "format": 8,
+    "hash": 3786493259,
+    "id": "hkArray<hkVector4, hkContainerHeapAllocator>",
+    "optionals": 43,
     "parent_class_id": "",
-    "size": 4,
-    "sub_type_id": "",
+    "size": 16,
+    "sub_type_id": "hkVector4",
     "template_args": [
       {
-        "name": "tENUM",
-        "type_id": "hclLocalRangeConstraintSet::ShapeType",
+        "name": "tT",
+        "type_id": "hkVector4",
         "value": 0
       },
       {
-        "name": "tSTORAGE",
-        "type_id": "hkUint32",
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
         "value": 0
       }
     ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "unsigned long long",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 65540,
-    "hash": 0,
-    "id": "unsigned long long",
-    "optionals": 9,
-    "parent_class_id": "",
-    "size": 8,
-    "sub_type_id": "",
-    "template_args": [],
     "type_flags": 0,
     "version": 0
   },
@@ -854,6 +854,14 @@
     "version": 2
   },
   {
+    "class_name": "hknpShape::FlagsEnum",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpShape::FlagsEnum",
+    "template_args": []
+  },
+  {
     "class_name": "void",
     "declared": 1,
     "defined": 0,
@@ -868,6 +876,23 @@
     "hash": 0,
     "id": "hkContainerHeapAllocator",
     "template_args": []
+  },
+  {
+    "alignment": 4,
+    "class_name": "int",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 33284,
+    "hash": 4062341138,
+    "id": "int",
+    "optionals": 9,
+    "parent_class_id": "",
+    "size": 4,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
   },
   {
     "alignment": 0,
@@ -887,17 +912,17 @@
     "version": 0
   },
   {
-    "alignment": 4,
-    "class_name": "int",
+    "alignment": 1,
+    "class_name": "char",
     "declared": 1,
     "defined": 1,
     "fields": [],
-    "format": 33284,
-    "hash": 4062341138,
-    "id": "int",
+    "format": 8196,
+    "hash": 4184862313,
+    "id": "char",
     "optionals": 9,
     "parent_class_id": "",
-    "size": 4,
+    "size": 1,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -960,19 +985,52 @@
     "version": 0
   },
   {
-    "alignment": 1,
-    "class_name": "char",
+    "alignment": 8,
+    "class_name": "hkArray",
     "declared": 1,
     "defined": 1,
-    "fields": [],
-    "format": 8196,
-    "hash": 4184862313,
-    "id": "char",
-    "optionals": 9,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 1695698019,
+    "id": "hkArray<T*<hclSimClothData>, hkContainerHeapAllocator>",
+    "optionals": 43,
     "parent_class_id": "",
-    "size": 1,
-    "sub_type_id": "",
-    "template_args": [],
+    "size": 16,
+    "sub_type_id": "T*<hclSimClothData>",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "T*<hclSimClothData>",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -1028,48 +1086,21 @@
   },
   {
     "alignment": 8,
-    "class_name": "hkArray",
+    "class_name": "T*",
     "declared": 1,
     "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 1695698019,
-    "id": "hkArray<T*<hclSimClothData>, hkContainerHeapAllocator>",
-    "optionals": 43,
+    "fields": [],
+    "format": 6,
+    "hash": 1255552449,
+    "id": "T*<hclSimClothData>",
+    "optionals": 11,
     "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "T*<hclSimClothData>",
+    "size": 8,
+    "sub_type_id": "hclSimClothData",
     "template_args": [
       {
         "name": "tT",
-        "type_id": "T*<hclSimClothData>",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
+        "type_id": "hclSimClothData",
         "value": 0
       }
     ],
@@ -1099,29 +1130,6 @@
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 2,
-    "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "T*",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 6,
-    "hash": 1255552449,
-    "id": "T*<hclSimClothData>",
-    "optionals": 11,
-    "parent_class_id": "",
-    "size": 8,
-    "sub_type_id": "hclSimClothData",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclSimClothData",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
     "version": 0
   },
   {
@@ -1442,62 +1450,6 @@
     "version": 0
   },
   {
-    "alignment": 2,
-    "class_name": "hclObjectSpaceDeformer::TwoBlendEntryBlock",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "vertexIndices",
-        "offset": 0,
-        "type_id": "T[N]<hkUint16, 16>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "boneIndices",
-        "offset": 32,
-        "type_id": "T[N]<hkUint16, 32>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "boneWeights",
-        "offset": 96,
-        "type_id": "T[N]<hkUint8, 32>",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 2865152819,
-    "id": "hclObjectSpaceDeformer::TwoBlendEntryBlock",
-    "optionals": 41,
-    "parent_class_id": "",
-    "size": 128,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 4,
-    "class_name": "float",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 1525253,
-    "hash": 0,
-    "id": "float",
-    "optionals": 9,
-    "parent_class_id": "",
-    "size": 4,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
     "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
@@ -1565,6 +1517,62 @@
     "version": 0
   },
   {
+    "alignment": 2,
+    "class_name": "hclObjectSpaceDeformer::TwoBlendEntryBlock",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "vertexIndices",
+        "offset": 0,
+        "type_id": "T[N]<hkUint16, 16>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "boneIndices",
+        "offset": 32,
+        "type_id": "T[N]<hkUint16, 32>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "boneWeights",
+        "offset": 96,
+        "type_id": "T[N]<hkUint8, 32>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 2865152819,
+    "id": "hclObjectSpaceDeformer::TwoBlendEntryBlock",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 128,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 4,
+    "class_name": "float",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 1525253,
+    "hash": 0,
+    "id": "float",
+    "optionals": 9,
+    "parent_class_id": "",
+    "size": 4,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 16400,
     "class_name": "hkVector4f",
     "declared": 1,
@@ -1582,27 +1590,40 @@
     "version": 0
   },
   {
-    "alignment": 1,
-    "class_name": "hkBool",
+    "alignment": 4,
+    "class_name": "hkRelArray",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 36,
-        "name": "bool",
+        "flags": 34,
+        "name": "offset",
         "offset": 0,
-        "type_id": "char",
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "size",
+        "offset": 4,
+        "type_id": "int",
         "unk_value": 0
       }
     ],
-    "format": 8194,
-    "hash": 2172449542,
-    "id": "hkBool",
-    "optionals": 41,
+    "format": 8,
+    "hash": 4050892480,
+    "id": "hkRelArray<hkVector4>",
+    "optionals": 43,
     "parent_class_id": "",
-    "size": 1,
-    "sub_type_id": "",
-    "template_args": [],
+    "size": 8,
+    "sub_type_id": "hkVector4",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkVector4",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -1653,6 +1674,31 @@
         "value": 0
       }
     ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 1,
+    "class_name": "hkBool",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "bool",
+        "offset": 0,
+        "type_id": "char",
+        "unk_value": 0
+      }
+    ],
+    "format": 8194,
+    "hash": 2172449542,
+    "id": "hkBool",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [],
     "type_flags": 0,
     "version": 0
   },
@@ -1728,56 +1774,6 @@
     "size": 0,
     "sub_type_id": "",
     "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "hkArray",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 3719940695,
-    "id": "hkArray<unsigned int, hkContainerHeapAllocator>",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "unsigned int",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "unsigned int",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
     "type_flags": 0,
     "version": 0
   },
@@ -1869,6 +1865,56 @@
     "size": 2,
     "sub_type_id": "",
     "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 3719940695,
+    "id": "hkArray<unsigned int, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "unsigned int",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "unsigned int",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -2078,79 +2124,6 @@
       }
     ],
     "format": 8,
-    "hash": 1734190177,
-    "id": "hkArray<T*<hclCollidable>, hkContainerHeapAllocator>",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "T*<hclCollidable>",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "T*<hclCollidable>",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 16,
-    "class_name": "hkRotationImpl",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 3112,
-    "hash": 0,
-    "id": "hkRotationImpl<float>",
-    "optionals": 11,
-    "parent_class_id": "hkMatrix3Impl<float>",
-    "size": 48,
-    "sub_type_id": "float",
-    "template_args": [
-      {
-        "name": "tFT",
-        "type_id": "float",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "hkArray",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
     "hash": 2906277312,
     "id": "hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>",
     "optionals": 43,
@@ -2256,6 +2229,79 @@
   },
   {
     "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 1734190177,
+    "id": "hkArray<T*<hclCollidable>, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "T*<hclCollidable>",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "T*<hclCollidable>",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hkRotationImpl",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 3112,
+    "hash": 0,
+    "id": "hkRotationImpl<float>",
+    "optionals": 11,
+    "parent_class_id": "hkMatrix3Impl<float>",
+    "size": 48,
+    "sub_type_id": "float",
+    "template_args": [
+      {
+        "name": "tFT",
+        "type_id": "float",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
     "class_name": "hclConstraintSet",
     "declared": 1,
     "defined": 1,
@@ -2294,46 +2340,17 @@
     "version": 1
   },
   {
-    "alignment": 8,
-    "class_name": "hclSimpleMeshBoneDeformOperator",
+    "alignment": 0,
+    "class_name": "hkInt32",
     "declared": 1,
     "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "inputBufferIdx",
-        "offset": 72,
-        "type_id": "hkUint32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "outputTransformSetIdx",
-        "offset": 76,
-        "type_id": "hkUint32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "triangleBonePairs",
-        "offset": 80,
-        "type_id": "hkArray<hclSimpleMeshBoneDeformOperator::TriangleBonePair, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "localBoneTransforms",
-        "offset": 96,
-        "type_id": "hkArray<hkMatrix4, hkContainerHeapAllocator>",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 1364889027,
-    "id": "hclSimpleMeshBoneDeformOperator",
-    "optionals": 41,
-    "parent_class_id": "hclOperator",
-    "size": 112,
+    "fields": [],
+    "format": 0,
+    "hash": 634441417,
+    "id": "hkInt32",
+    "optionals": 0,
+    "parent_class_id": "int",
+    "size": 0,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -2407,17 +2424,46 @@
     "version": 0
   },
   {
-    "alignment": 0,
-    "class_name": "hkInt32",
+    "alignment": 8,
+    "class_name": "hclSimpleMeshBoneDeformOperator",
     "declared": 1,
     "defined": 1,
-    "fields": [],
-    "format": 0,
-    "hash": 634441417,
-    "id": "hkInt32",
-    "optionals": 0,
-    "parent_class_id": "int",
-    "size": 0,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "inputBufferIdx",
+        "offset": 72,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "outputTransformSetIdx",
+        "offset": 76,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "triangleBonePairs",
+        "offset": 80,
+        "type_id": "hkArray<hclSimpleMeshBoneDeformOperator::TriangleBonePair, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "localBoneTransforms",
+        "offset": 96,
+        "type_id": "hkArray<hkMatrix4, hkContainerHeapAllocator>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 1364889027,
+    "id": "hclSimpleMeshBoneDeformOperator",
+    "optionals": 41,
+    "parent_class_id": "hclOperator",
+    "size": 112,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -2560,73 +2606,6 @@
     "version": 0
   },
   {
-    "alignment": 8,
-    "class_name": "hclBufferDefinition",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "meshName",
-        "offset": 24,
-        "type_id": "hkStringPtr",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "bufferName",
-        "offset": 32,
-        "type_id": "hkStringPtr",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "type",
-        "offset": 40,
-        "type_id": "hkInt32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "subType",
-        "offset": 44,
-        "type_id": "hkInt32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "numVertices",
-        "offset": 48,
-        "type_id": "hkUint32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "numTriangles",
-        "offset": 52,
-        "type_id": "hkUint32",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "bufferLayout",
-        "offset": 56,
-        "type_id": "hclBufferLayout",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 1534215538,
-    "id": "hclBufferDefinition",
-    "optionals": 45,
-    "parent_class_id": "hkReferencedObject",
-    "size": 88,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 2
-  },
-  {
     "alignment": 16,
     "class_name": "hclCollidable",
     "declared": 1,
@@ -2722,6 +2701,73 @@
     "version": 4
   },
   {
+    "alignment": 8,
+    "class_name": "hclBufferDefinition",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "meshName",
+        "offset": 24,
+        "type_id": "hkStringPtr",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "bufferName",
+        "offset": 32,
+        "type_id": "hkStringPtr",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "type",
+        "offset": 40,
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "subType",
+        "offset": 44,
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "numVertices",
+        "offset": 48,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "numTriangles",
+        "offset": 52,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "bufferLayout",
+        "offset": 56,
+        "type_id": "hclBufferLayout",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 1534215538,
+    "id": "hclBufferDefinition",
+    "optionals": 45,
+    "parent_class_id": "hkReferencedObject",
+    "size": 88,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 2
+  },
+  {
     "alignment": 0,
     "class_name": "hkMatrix4",
     "declared": 1,
@@ -2732,6 +2778,23 @@
     "id": "hkMatrix4",
     "optionals": 0,
     "parent_class_id": "hkMatrix4f",
+    "size": 0,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 0,
+    "class_name": "hkMatrix4f",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 0,
+    "hash": 0,
+    "id": "hkMatrix4f",
+    "optionals": 0,
+    "parent_class_id": "hkMatrix4Impl<float>",
     "size": 0,
     "sub_type_id": "",
     "template_args": [],
@@ -2789,19 +2852,25 @@
     "version": 0
   },
   {
-    "alignment": 0,
-    "class_name": "hkMatrix4f",
+    "alignment": 8,
+    "class_name": "T*",
     "declared": 1,
     "defined": 1,
     "fields": [],
-    "format": 0,
-    "hash": 0,
-    "id": "hkMatrix4f",
-    "optionals": 0,
-    "parent_class_id": "hkMatrix4Impl<float>",
-    "size": 0,
-    "sub_type_id": "",
-    "template_args": [],
+    "format": 6,
+    "hash": 2305643412,
+    "id": "T*<hclCollidable>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hclCollidable",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclCollidable",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -2856,29 +2925,6 @@
     "version": 0
   },
   {
-    "alignment": 8,
-    "class_name": "T*",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 6,
-    "hash": 2305643412,
-    "id": "T*<hclCollidable>",
-    "optionals": 11,
-    "parent_class_id": "",
-    "size": 8,
-    "sub_type_id": "hclCollidable",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclCollidable",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
     "alignment": 16,
     "class_name": "hkMatrix3Impl",
     "declared": 1,
@@ -2920,6 +2966,23 @@
         "value": 0
       }
     ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 0,
+    "class_name": "hkTransform",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 0,
+    "hash": 0,
+    "id": "hkTransform",
+    "optionals": 0,
+    "parent_class_id": "hkTransformf",
+    "size": 0,
+    "sub_type_id": "",
+    "template_args": [],
     "type_flags": 0,
     "version": 0
   },
@@ -2974,18 +3037,58 @@
     "version": 0
   },
   {
-    "alignment": 0,
-    "class_name": "hkTransform",
+    "alignment": 16,
+    "class_name": "hknpPhysicsSystemData::bodyCinfoWithAttachment",
     "declared": 1,
     "defined": 1,
-    "fields": [],
-    "format": 0,
-    "hash": 0,
-    "id": "hkTransform",
-    "optionals": 0,
-    "parent_class_id": "hkTransformf",
-    "size": 0,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "attachedBody",
+        "offset": 176,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 2149479961,
+    "id": "hknpPhysicsSystemData::bodyCinfoWithAttachment",
+    "optionals": 41,
+    "parent_class_id": "hknpBodyCinfo",
+    "size": 192,
     "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hkTransformf",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "rotation",
+        "offset": 0,
+        "type_id": "hkRotationf",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "translation",
+        "offset": 48,
+        "type_id": "hkVector4f",
+        "unk_value": 0
+      }
+    ],
+    "format": 4136,
+    "hash": 0,
+    "id": "hkTransformf",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 64,
+    "sub_type_id": "float",
     "template_args": [],
     "type_flags": 0,
     "version": 0
@@ -3051,33 +3154,18 @@
     "version": 0
   },
   {
-    "alignment": 16,
-    "class_name": "hkTransformf",
+    "alignment": 0,
+    "class_name": "hkRotationf",
     "declared": 1,
     "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "rotation",
-        "offset": 0,
-        "type_id": "hkRotationf",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "translation",
-        "offset": 48,
-        "type_id": "hkVector4f",
-        "unk_value": 0
-      }
-    ],
-    "format": 4136,
+    "fields": [],
+    "format": 0,
     "hash": 0,
-    "id": "hkTransformf",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 64,
-    "sub_type_id": "float",
+    "id": "hkRotationf",
+    "optionals": 0,
+    "parent_class_id": "hkRotationImpl<float>",
+    "size": 0,
+    "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
     "version": 0
@@ -3109,23 +3197,6 @@
     "optionals": 41,
     "parent_class_id": "",
     "size": 4,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 0,
-    "class_name": "hkRotationf",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 0,
-    "hash": 0,
-    "id": "hkRotationf",
-    "optionals": 0,
-    "parent_class_id": "hkRotationImpl<float>",
-    "size": 0,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -3333,16 +3404,16 @@
       }
     ],
     "format": 8,
-    "hash": 0,
-    "id": "hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator>",
+    "hash": 3270913392,
+    "id": "hkArray<hknpMotionProperties, hkContainerHeapAllocator>",
     "optionals": 43,
     "parent_class_id": "",
     "size": 16,
-    "sub_type_id": "hclObjectSpaceDeformer::FiveBlendEntryBlock",
+    "sub_type_id": "hknpMotionProperties",
     "template_args": [
       {
         "name": "tT",
-        "type_id": "hclObjectSpaceDeformer::FiveBlendEntryBlock",
+        "type_id": "hknpMotionProperties",
         "value": 0
       },
       {
@@ -3355,12 +3426,36 @@
     "version": 0
   },
   {
-    "class_name": "hclObjectSpaceDeformer::EightBlendEntryBlock",
+    "alignment": 8,
+    "class_name": "hclBonePlanesConstraintSet",
     "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclObjectSpaceDeformer::EightBlendEntryBlock",
-    "template_args": []
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "bonePlanes",
+        "offset": 40,
+        "type_id": "hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "transformSetIndex",
+        "offset": 56,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 2481738222,
+    "id": "hclBonePlanesConstraintSet",
+    "optionals": 41,
+    "parent_class_id": "hclConstraintSet",
+    "size": 64,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
   },
   {
     "alignment": 4,
@@ -3430,34 +3525,60 @@
     "version": 1
   },
   {
+    "class_name": "hclObjectSpaceDeformer::EightBlendEntryBlock",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclObjectSpaceDeformer::EightBlendEntryBlock",
+    "template_args": []
+  },
+  {
     "alignment": 8,
-    "class_name": "hclBonePlanesConstraintSet",
+    "class_name": "hkArray",
     "declared": 1,
     "defined": 1,
     "fields": [
       {
-        "flags": 32,
-        "name": "bonePlanes",
-        "offset": 40,
-        "type_id": "hkArray<hclBonePlanesConstraintSet::BonePlane, hkContainerHeapAllocator>",
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
         "unk_value": 0
       },
       {
-        "flags": 32,
-        "name": "transformSetIndex",
-        "offset": 56,
-        "type_id": "hkUint32",
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
         "unk_value": 0
       }
     ],
-    "format": 7,
-    "hash": 2481738222,
-    "id": "hclBonePlanesConstraintSet",
-    "optionals": 41,
-    "parent_class_id": "hclConstraintSet",
-    "size": 64,
-    "sub_type_id": "",
-    "template_args": [],
+    "format": 8,
+    "hash": 0,
+    "id": "hkArray<hclObjectSpaceDeformer::FiveBlendEntryBlock, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hclObjectSpaceDeformer::FiveBlendEntryBlock",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclObjectSpaceDeformer::FiveBlendEntryBlock",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -3479,17 +3600,17 @@
     "version": 0
   },
   {
-    "alignment": 0,
-    "class_name": "hkInt16",
+    "alignment": 1,
+    "class_name": "unsigned char",
     "declared": 1,
     "defined": 1,
     "fields": [],
-    "format": 0,
-    "hash": 1556469994,
-    "id": "hkInt16",
-    "optionals": 0,
-    "parent_class_id": "short",
-    "size": 0,
+    "format": 8196,
+    "hash": 0,
+    "id": "unsigned char",
+    "optionals": 9,
+    "parent_class_id": "",
+    "size": 1,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -3546,17 +3667,17 @@
     "version": 0
   },
   {
-    "alignment": 1,
-    "class_name": "unsigned char",
+    "alignment": 0,
+    "class_name": "hkInt16",
     "declared": 1,
     "defined": 1,
     "fields": [],
-    "format": 8196,
-    "hash": 0,
-    "id": "unsigned char",
-    "optionals": 9,
-    "parent_class_id": "",
-    "size": 1,
+    "format": 0,
+    "hash": 1556469994,
+    "id": "hkInt16",
+    "optionals": 0,
+    "parent_class_id": "short",
+    "size": 0,
     "sub_type_id": "",
     "template_args": [],
     "type_flags": 0,
@@ -3613,12 +3734,40 @@
     "version": 0
   },
   {
-    "class_name": "hclClothData::Platform",
+    "alignment": 1,
+    "class_name": "hkEnum",
     "declared": 1,
-    "defined": 0,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 8196,
     "hash": 0,
-    "id": "hclClothData::Platform",
-    "template_args": []
+    "id": "hkEnum<hknpShapeType::Enum, hkUint8>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tENUM",
+        "type_id": "hknpShapeType::Enum",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint8",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
   },
   {
     "alignment": 8,
@@ -3669,6 +3818,14 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "class_name": "hclClothData::Platform",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclClothData::Platform",
+    "template_args": []
   },
   {
     "alignment": 4,
@@ -3897,15 +4054,15 @@
     ],
     "format": 8,
     "hash": 0,
-    "id": "hkArray<hclBoneSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>",
+    "id": "hkArray<hclVirtualCollisionPointsData::Block, hkContainerHeapAllocator>",
     "optionals": 43,
     "parent_class_id": "",
     "size": 16,
-    "sub_type_id": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
+    "sub_type_id": "hclVirtualCollisionPointsData::Block",
     "template_args": [
       {
         "name": "tT",
-        "type_id": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
+        "type_id": "hclVirtualCollisionPointsData::Block",
         "value": 0
       },
       {
@@ -3947,15 +4104,15 @@
     ],
     "format": 8,
     "hash": 0,
-    "id": "hkArray<hclVirtualCollisionPointsData::Block, hkContainerHeapAllocator>",
+    "id": "hkArray<hclBoneSpaceDeformer::LocalBlockUnpackedPN, hkContainerHeapAllocator>",
     "optionals": 43,
     "parent_class_id": "",
     "size": 16,
-    "sub_type_id": "hclVirtualCollisionPointsData::Block",
+    "sub_type_id": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
     "template_args": [
       {
         "name": "tT",
-        "type_id": "hclVirtualCollisionPointsData::Block",
+        "type_id": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
         "value": 0
       },
       {
@@ -3964,6 +4121,94 @@
         "value": 0
       }
     ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 4,
+    "class_name": "hknpMotionProperties::DeactivationSettings",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "maxDistSqrd",
+        "offset": 0,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "maxRotSqrd",
+        "offset": 4,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "invBlockSize",
+        "offset": 8,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "pathingUpperThreshold",
+        "offset": 12,
+        "type_id": "hkInt16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "pathingLowerThreshold",
+        "offset": 14,
+        "type_id": "hkInt16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "numDeactivationFrequencyPasses",
+        "offset": 16,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "deactivationVelocityScaleSquare",
+        "offset": 17,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "minimumPathingVelocityScaleSquare",
+        "offset": 18,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "spikingVelocityScaleThresholdSquared",
+        "offset": 19,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "minimumSpikingVelocityScaleSquared",
+        "offset": 20,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpMotionProperties::DeactivationSettings",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 24,
+    "sub_type_id": "",
+    "template_args": [],
     "type_flags": 0,
     "version": 0
   },
@@ -4092,6 +4337,42 @@
     "template_args": []
   },
   {
+    "alignment": 1,
+    "class_name": "hkEnum",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 8196,
+    "hash": 0,
+    "id": "hkEnum<hknpCollisionDispatchType::Enum, hkUint8>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tENUM",
+        "type_id": "hknpCollisionDispatchType::Enum",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint8",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
@@ -4178,16 +4459,16 @@
       }
     ],
     "format": 8,
-    "hash": 2657341099,
-    "id": "hkArray<hclBoneSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>",
+    "hash": 0,
+    "id": "hkArray<hclVirtualCollisionPointsData::EdgeFan, hkContainerHeapAllocator>",
     "optionals": 43,
     "parent_class_id": "",
     "size": 16,
-    "sub_type_id": "hclBoneSpaceDeformer::OneBlendEntryBlock",
+    "sub_type_id": "hclVirtualCollisionPointsData::EdgeFan",
     "template_args": [
       {
         "name": "tT",
-        "type_id": "hclBoneSpaceDeformer::OneBlendEntryBlock",
+        "type_id": "hclVirtualCollisionPointsData::EdgeFan",
         "value": 0
       },
       {
@@ -4228,16 +4509,16 @@
       }
     ],
     "format": 8,
-    "hash": 0,
-    "id": "hkArray<hclVirtualCollisionPointsData::EdgeFan, hkContainerHeapAllocator>",
+    "hash": 2657341099,
+    "id": "hkArray<hclBoneSpaceDeformer::OneBlendEntryBlock, hkContainerHeapAllocator>",
     "optionals": 43,
     "parent_class_id": "",
     "size": 16,
-    "sub_type_id": "hclVirtualCollisionPointsData::EdgeFan",
+    "sub_type_id": "hclBoneSpaceDeformer::OneBlendEntryBlock",
     "template_args": [
       {
         "name": "tT",
-        "type_id": "hclVirtualCollisionPointsData::EdgeFan",
+        "type_id": "hclBoneSpaceDeformer::OneBlendEntryBlock",
         "value": 0
       },
       {
@@ -4248,6 +4529,14 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "class_name": "hclVirtualCollisionPointsData::EdgeFan",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclVirtualCollisionPointsData::EdgeFan",
+    "template_args": []
   },
   {
     "alignment": 4,
@@ -4276,14 +4565,6 @@
     ],
     "type_flags": 0,
     "version": 0
-  },
-  {
-    "class_name": "hclVirtualCollisionPointsData::EdgeFan",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclVirtualCollisionPointsData::EdgeFan",
-    "template_args": []
   },
   {
     "alignment": 8,
@@ -4452,6 +4733,14 @@
     "version": 0
   },
   {
+    "class_name": "hclVirtualCollisionPointsData::TriangleFanLandscape",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclVirtualCollisionPointsData::TriangleFanLandscape",
+    "template_args": []
+  },
+  {
     "alignment": 8,
     "class_name": "hclBendStiffnessConstraintSetMx",
     "declared": 1,
@@ -4503,14 +4792,6 @@
     "template_args": [],
     "type_flags": 0,
     "version": 1
-  },
-  {
-    "class_name": "hclVirtualCollisionPointsData::TriangleFanLandscape",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclVirtualCollisionPointsData::TriangleFanLandscape",
-    "template_args": []
   },
   {
     "alignment": 8,
@@ -4614,14 +4895,6 @@
     "version": 0
   },
   {
-    "class_name": "hclStateTransition",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclStateTransition",
-    "template_args": []
-  },
-  {
     "alignment": 1,
     "class_name": "hclBufferLayout::BufferElement",
     "declared": 1,
@@ -4668,6 +4941,14 @@
     "version": 0
   },
   {
+    "class_name": "hclStateTransition",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclStateTransition",
+    "template_args": []
+  },
+  {
     "alignment": 1,
     "class_name": "hkEnum",
     "declared": 1,
@@ -4697,6 +4978,42 @@
       {
         "name": "tSTORAGE",
         "type_id": "hkUint8",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 2,
+    "class_name": "hkFlags",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "unsigned short",
+        "unk_value": 0
+      }
+    ],
+    "format": 16388,
+    "hash": 0,
+    "id": "hkFlags<hknpCollisionControl::Enum, unsigned short>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 2,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tBITS",
+        "type_id": "hknpCollisionControl::Enum",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "unsigned short",
         "value": 0
       }
     ],
@@ -4740,42 +5057,6 @@
     "version": 0
   },
   {
-    "class_name": "hclBoneSpaceDeformer::FourBlendEntryBlock",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclBoneSpaceDeformer::FourBlendEntryBlock",
-    "template_args": []
-  },
-  {
-    "alignment": 2,
-    "class_name": "T[N]",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 4136,
-    "hash": 0,
-    "id": "T[N]<hkUint16, 16>",
-    "optionals": 11,
-    "parent_class_id": "",
-    "size": 32,
-    "sub_type_id": "hkUint16",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hkUint16",
-        "value": 0
-      },
-      {
-        "name": "vN",
-        "type_id": "",
-        "value": 16
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
     "alignment": 1,
     "class_name": "hclBufferLayout::Slot",
     "declared": 1,
@@ -4806,6 +5087,42 @@
     "template_args": [],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "alignment": 2,
+    "class_name": "T[N]",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 4136,
+    "hash": 0,
+    "id": "T[N]<hkUint16, 16>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 32,
+    "sub_type_id": "hkUint16",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkUint16",
+        "value": 0
+      },
+      {
+        "name": "vN",
+        "type_id": "",
+        "value": 16
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "class_name": "hclBoneSpaceDeformer::FourBlendEntryBlock",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclBoneSpaceDeformer::FourBlendEntryBlock",
+    "template_args": []
   },
   {
     "alignment": 1,
@@ -4844,6 +5161,14 @@
     "version": 0
   },
   {
+    "class_name": "hclBufferLayout::SlotFlags",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclBufferLayout::SlotFlags",
+    "template_args": []
+  },
+  {
     "alignment": 2,
     "class_name": "T[N]",
     "declared": 1,
@@ -4870,14 +5195,6 @@
     ],
     "type_flags": 0,
     "version": 0
-  },
-  {
-    "class_name": "hclBufferLayout::SlotFlags",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclBufferLayout::SlotFlags",
-    "template_args": []
   },
   {
     "alignment": 1,
@@ -4964,6 +5281,29 @@
   },
   {
     "alignment": 8,
+    "class_name": "T*",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 6,
+    "hash": 2719825062,
+    "id": "T*<hclOperator>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hclOperator",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclOperator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
     "defined": 1,
@@ -5011,37 +5351,6 @@
     ],
     "type_flags": 0,
     "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "T*",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 6,
-    "hash": 2719825062,
-    "id": "T*<hclOperator>",
-    "optionals": 11,
-    "parent_class_id": "",
-    "size": 8,
-    "sub_type_id": "hclOperator",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclOperator",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "class_name": "hclObjectSpaceDeformer::LocalBlockUnpackedPN",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclObjectSpaceDeformer::LocalBlockUnpackedPN",
-    "template_args": []
   },
   {
     "alignment": 8,
@@ -5097,6 +5406,14 @@
     "version": 2
   },
   {
+    "class_name": "hclObjectSpaceDeformer::LocalBlockUnpackedPN",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclObjectSpaceDeformer::LocalBlockUnpackedPN",
+    "template_args": []
+  },
+  {
     "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
@@ -5145,6 +5462,116 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "class_name": "hknpCollisionDispatchType::Enum",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpCollisionDispatchType::Enum",
+    "template_args": []
+  },
+  {
+    "alignment": 16,
+    "class_name": "hknpMotionProperties",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 160,
+        "name": "isExclusive",
+        "offset": 0,
+        "type_id": "hkUint32",
+        "unk_value": 15
+      },
+      {
+        "flags": 32,
+        "name": "flags",
+        "offset": 4,
+        "type_id": "hknpCollisionFlags",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "gravityFactor",
+        "offset": 8,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "timeFactor",
+        "offset": 12,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "maxLinearSpeed",
+        "offset": 16,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "maxAngularSpeed",
+        "offset": 20,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "linearDamping",
+        "offset": 24,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "angularDamping",
+        "offset": 28,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "solverStabilizationSpeedThreshold",
+        "offset": 32,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "solverStabilizationSpeedReduction",
+        "offset": 36,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "deactivationSettings",
+        "offset": 40,
+        "type_id": "hknpMotionProperties::DeactivationSettings",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "fullCastSettings",
+        "offset": 64,
+        "type_id": "hknpMotionProperties::FullCastSettings",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 4188560537,
+    "id": "hknpMotionProperties",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 112,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 5
   },
   {
     "alignment": 4,
@@ -5219,38 +5646,6 @@
   },
   {
     "alignment": 8,
-    "class_name": "hclStretchLinkConstraintSetMx",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "batches",
-        "offset": 40,
-        "type_id": "hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "singles",
-        "offset": 56,
-        "type_id": "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 3791460596,
-    "id": "hclStretchLinkConstraintSetMx",
-    "optionals": 41,
-    "parent_class_id": "hclConstraintSet",
-    "size": 72,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
     "class_name": "hclTransformSetUsage",
     "declared": 1,
     "defined": 1,
@@ -5280,6 +5675,38 @@
     "template_args": [],
     "type_flags": 0,
     "version": 1
+  },
+  {
+    "alignment": 8,
+    "class_name": "hclStretchLinkConstraintSetMx",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "batches",
+        "offset": 40,
+        "type_id": "hkArray<hclStretchLinkConstraintSetMx::Batch, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "singles",
+        "offset": 56,
+        "type_id": "hkArray<hclStretchLinkConstraintSetMx::Single, hkContainerHeapAllocator>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 3791460596,
+    "id": "hclStretchLinkConstraintSetMx",
+    "optionals": 41,
+    "parent_class_id": "hclConstraintSet",
+    "size": 72,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
   },
   {
     "alignment": 1,
@@ -5569,6 +5996,114 @@
   },
   {
     "alignment": 8,
+    "class_name": "hknpShapeMassProperties",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 160,
+        "name": "compressedMassProperties",
+        "offset": 24,
+        "type_id": "hkCompressedMassProperties",
+        "unk_value": 3
+      }
+    ],
+    "format": 7,
+    "hash": 4217350405,
+    "id": "hknpShapeMassProperties",
+    "optionals": 41,
+    "parent_class_id": "hkReferencedObject",
+    "size": 56,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hknpPhysicsSystemData",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "materials",
+        "offset": 24,
+        "type_id": "hkArray<hknpMaterial, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "motionProperties",
+        "offset": 40,
+        "type_id": "hkArray<hknpMotionProperties, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "bodyCinfos",
+        "offset": 56,
+        "type_id": "hkArray<hknpPhysicsSystemData::bodyCinfoWithAttachment, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "constraintCinfos",
+        "offset": 72,
+        "type_id": "hkArray<hknpConstraintCinfo, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "name",
+        "offset": 88,
+        "type_id": "hkStringPtr",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "microStepMultiplier",
+        "offset": 96,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 2741073764,
+    "id": "hknpPhysicsSystemData",
+    "optionals": 45,
+    "parent_class_id": "hkReferencedObject",
+    "size": 104,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 3
+  },
+  {
+    "alignment": 8,
+    "class_name": "T*",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 6,
+    "hash": 4222590812,
+    "id": "T*<hclStateDependencyGraph>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hclStateDependencyGraph",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclStateDependencyGraph",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
     "class_name": "hclObjectSpaceSkinOperator",
     "declared": 1,
     "defined": 1,
@@ -5622,29 +6157,6 @@
   },
   {
     "alignment": 8,
-    "class_name": "T*",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 6,
-    "hash": 4222590812,
-    "id": "T*<hclStateDependencyGraph>",
-    "optionals": 11,
-    "parent_class_id": "",
-    "size": 8,
-    "sub_type_id": "hclStateDependencyGraph",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclStateDependencyGraph",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
     "class_name": "hclStateDependencyGraph",
     "declared": 1,
     "defined": 1,
@@ -5693,6 +6205,56 @@
     "size": 96,
     "sub_type_id": "",
     "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 1457274167,
+    "id": "hkArray<hkRefCountedProperties::Entry, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hkRefCountedProperties::Entry",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkRefCountedProperties::Entry",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -5793,14 +6355,6 @@
     "version": 0
   },
   {
-    "class_name": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
-    "declared": 1,
-    "defined": 0,
-    "hash": 0,
-    "id": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
-    "template_args": []
-  },
-  {
     "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
@@ -5849,6 +6403,14 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "class_name": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hclBoneSpaceDeformer::LocalBlockUnpackedPN",
+    "template_args": []
   },
   {
     "alignment": 8,
@@ -5951,6 +6513,45 @@
     "version": 0
   },
   {
+    "class_name": "hkLocalFrame",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hkLocalFrame",
+    "template_args": []
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefPtr",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "ptr",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      }
+    ],
+    "format": 6,
+    "hash": 2363435676,
+    "id": "hkRefPtr<hkReferencedObject>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hkReferencedObject",
+    "template_args": [
+      {
+        "name": "tTYPE",
+        "type_id": "hkReferencedObject",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "class_name": "T*",
     "declared": 1,
     "defined": 0,
@@ -5994,6 +6595,218 @@
       {
         "name": "tSTORAGE",
         "type_id": "hkUint32",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 4,
+    "class_name": "hkRelArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "offset",
+        "offset": 0,
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "size",
+        "offset": 4,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 2364447659,
+    "id": "hkRelArray<hknpConvexHull::Face>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hknpConvexHull::Face",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hknpConvexHull::Face",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkaSkeleton",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "name",
+        "offset": 24,
+        "type_id": "hkStringPtr",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "parentIndices",
+        "offset": 32,
+        "type_id": "hkArray<hkInt16, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "bones",
+        "offset": 48,
+        "type_id": "hkArray<hkaBone, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "referencePose",
+        "offset": 64,
+        "type_id": "hkArray<hkQsTransform, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "referenceFloats",
+        "offset": 80,
+        "type_id": "hkArray<hkReal, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "floatSlots",
+        "offset": 96,
+        "type_id": "hkArray<hkStringPtr, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "localFrames",
+        "offset": 112,
+        "type_id": "hkArray<hkaSkeleton::LocalFrameOnBone, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "partitions",
+        "offset": 128,
+        "type_id": "hkArray<hkaSkeleton::Partition, hkContainerHeapAllocator>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 2607764882,
+    "id": "hkaSkeleton",
+    "optionals": 45,
+    "parent_class_id": "hkReferencedObject",
+    "size": 144,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 6
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 2388791410,
+    "id": "hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hclObjectSpaceDeformer::ThreeBlendEntryBlock",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclObjectSpaceDeformer::ThreeBlendEntryBlock",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 1689810635,
+    "id": "hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hclObjectSpaceDeformer::LocalBlockPN",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclObjectSpaceDeformer::LocalBlockPN",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
         "value": 0
       }
     ],
@@ -6117,180 +6930,6 @@
     "version": 0
   },
   {
-    "alignment": 8,
-    "class_name": "hkArray",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 1689810635,
-    "id": "hkArray<hclObjectSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "hclObjectSpaceDeformer::LocalBlockPN",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclObjectSpaceDeformer::LocalBlockPN",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "hkArray",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 2388791410,
-    "id": "hkArray<hclObjectSpaceDeformer::ThreeBlendEntryBlock, hkContainerHeapAllocator>",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "hclObjectSpaceDeformer::ThreeBlendEntryBlock",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclObjectSpaceDeformer::ThreeBlendEntryBlock",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
-    "class_name": "hkaSkeleton",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "name",
-        "offset": 24,
-        "type_id": "hkStringPtr",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "parentIndices",
-        "offset": 32,
-        "type_id": "hkArray<hkInt16, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "bones",
-        "offset": 48,
-        "type_id": "hkArray<hkaBone, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "referencePose",
-        "offset": 64,
-        "type_id": "hkArray<hkQsTransform, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "referenceFloats",
-        "offset": 80,
-        "type_id": "hkArray<hkReal, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "floatSlots",
-        "offset": 96,
-        "type_id": "hkArray<hkStringPtr, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "localFrames",
-        "offset": 112,
-        "type_id": "hkArray<hkaSkeleton::LocalFrameOnBone, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "partitions",
-        "offset": 128,
-        "type_id": "hkArray<hkaSkeleton::Partition, hkContainerHeapAllocator>",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 2607764882,
-    "id": "hkaSkeleton",
-    "optionals": 45,
-    "parent_class_id": "hkReferencedObject",
-    "size": 144,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 6
-  },
-  {
     "alignment": 2,
     "class_name": "short",
     "declared": 1,
@@ -6352,6 +6991,34 @@
         "name": "tAllocator",
         "type_id": "hkContainerHeapAllocator",
         "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 1,
+    "class_name": "T[N]",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 296,
+    "hash": 0,
+    "id": "T[N]<hkUint8, 1>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "hkUint8",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkUint8",
+        "value": 0
+      },
+      {
+        "name": "vN",
+        "type_id": "",
+        "value": 1
       }
     ],
     "type_flags": 0,
@@ -6670,6 +7337,37 @@
   },
   {
     "alignment": 8,
+    "class_name": "hkRefPtr",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "ptr",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      }
+    ],
+    "format": 6,
+    "hash": 3635148273,
+    "id": "hkRefPtr<hknpShape>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hknpShape",
+    "template_args": [
+      {
+        "name": "tTYPE",
+        "type_id": "hknpShape",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
     "class_name": "hclObjectSpaceDeformer",
     "declared": 1,
     "defined": 1,
@@ -6869,6 +7567,31 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefCountedProperties",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "entries",
+        "offset": 24,
+        "type_id": "hkArray<hkRefCountedProperties::Entry, hkContainerHeapAllocator>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 4226104209,
+    "id": "hkRefCountedProperties",
+    "optionals": 45,
+    "parent_class_id": "hkReferencedObject",
+    "size": 40,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 2
   },
   {
     "class_name": "hclObjectSpaceDeformer::SevenBlendEntryBlock",
@@ -7099,6 +7822,31 @@
     "version": 0
   },
   {
+    "alignment": 2,
+    "class_name": "hkHalf16",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "value",
+        "offset": 0,
+        "type_id": "hkInt16",
+        "unk_value": 0
+      }
+    ],
+    "format": 476677,
+    "hash": 0,
+    "id": "hkHalf16",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 2,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
@@ -7205,38 +7953,6 @@
     "version": 0
   },
   {
-    "alignment": 16,
-    "class_name": "hclBoneSpaceDeformer::LocalBlockPN",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "localPosition",
-        "offset": 0,
-        "type_id": "T[N]<hkVector4, 16>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "localNormal",
-        "offset": 256,
-        "type_id": "T[N]<hkPackedVector3, 16>",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 1262607835,
-    "id": "hclBoneSpaceDeformer::LocalBlockPN",
-    "optionals": 45,
-    "parent_class_id": "",
-    "size": 384,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 1
-  },
-  {
     "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
@@ -7280,6 +7996,76 @@
       {
         "name": "tAllocator",
         "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hclBoneSpaceDeformer::LocalBlockPN",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "localPosition",
+        "offset": 0,
+        "type_id": "T[N]<hkVector4, 16>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "localNormal",
+        "offset": 256,
+        "type_id": "T[N]<hkPackedVector3, 16>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 1262607835,
+    "id": "hclBoneSpaceDeformer::LocalBlockPN",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 384,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 1
+  },
+  {
+    "alignment": 4,
+    "class_name": "hkRelArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "offset",
+        "offset": 0,
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "size",
+        "offset": 4,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 3140512678,
+    "id": "hkRelArray<hkUint8>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hkUint8",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkUint8",
         "value": 0
       }
     ],
@@ -7404,11 +8190,11 @@
     "version": 0
   },
   {
-    "class_name": "hclLocalRangeConstraintSet::ShapeType",
+    "class_name": "hknpConstraintCinfo",
     "declared": 1,
     "defined": 0,
     "hash": 0,
-    "id": "hclLocalRangeConstraintSet::ShapeType",
+    "id": "hknpConstraintCinfo",
     "template_args": []
   },
   {
@@ -7440,36 +8226,12 @@
     "version": 0
   },
   {
-    "alignment": 8,
-    "class_name": "hclVolumeConstraint",
+    "class_name": "hclLocalRangeConstraintSet::ShapeType",
     "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 32,
-        "name": "frameDatas",
-        "offset": 40,
-        "type_id": "hkArray<hclVolumeConstraint::FrameData, hkContainerHeapAllocator>",
-        "unk_value": 0
-      },
-      {
-        "flags": 32,
-        "name": "applyDatas",
-        "offset": 56,
-        "type_id": "hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>",
-        "unk_value": 0
-      }
-    ],
-    "format": 7,
-    "hash": 600065596,
-    "id": "hclVolumeConstraint",
-    "optionals": 45,
-    "parent_class_id": "hclConstraintSet",
-    "size": 72,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 2
+    "defined": 0,
+    "hash": 0,
+    "id": "hclLocalRangeConstraintSet::ShapeType",
+    "template_args": []
   },
   {
     "alignment": 8,
@@ -7520,6 +8282,38 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hclVolumeConstraint",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "frameDatas",
+        "offset": 40,
+        "type_id": "hkArray<hclVolumeConstraint::FrameData, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "applyDatas",
+        "offset": 56,
+        "type_id": "hkArray<hclVolumeConstraint::ApplyData, hkContainerHeapAllocator>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 600065596,
+    "id": "hclVolumeConstraint",
+    "optionals": 45,
+    "parent_class_id": "hclConstraintSet",
+    "size": 72,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 2
   },
   {
     "alignment": 8,
@@ -8108,6 +8902,42 @@
     "version": 0
   },
   {
+    "alignment": 2,
+    "class_name": "hkFlags",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint16",
+        "unk_value": 0
+      }
+    ],
+    "format": 16388,
+    "hash": 0,
+    "id": "hkFlags<hknpShape::FlagsEnum, hkUint16>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 2,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tBITS",
+        "type_id": "hknpShape::FlagsEnum",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint16",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 8,
     "class_name": "hclLocalRangeConstraintSet",
     "declared": 1,
@@ -8218,6 +9048,34 @@
     "version": 0
   },
   {
+    "alignment": 2,
+    "class_name": "T[N]",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 2088,
+    "hash": 0,
+    "id": "T[N]<hkUint16, 8>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hkUint16",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkUint16",
+        "value": 0
+      },
+      {
+        "name": "vN",
+        "type_id": "",
+        "value": 8
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 4,
     "class_name": "hclLocalRangeConstraintSet::LocalConstraint",
     "declared": 1,
@@ -8267,34 +9125,6 @@
     "size": 16,
     "sub_type_id": "",
     "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 2,
-    "class_name": "T[N]",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 2088,
-    "hash": 0,
-    "id": "T[N]<hkUint16, 8>",
-    "optionals": 11,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "hkUint16",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hkUint16",
-        "value": 0
-      },
-      {
-        "name": "vN",
-        "type_id": "",
-        "value": 8
-      }
-    ],
     "type_flags": 0,
     "version": 0
   },
@@ -8870,6 +9700,45 @@
     "version": 0
   },
   {
+    "alignment": 2,
+    "class_name": "hknpConvexHull::Face",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "firstIndex",
+        "offset": 0,
+        "type_id": "hkUint16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "numIndices",
+        "offset": 2,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "minHalfAngle",
+        "offset": 3,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 864046963,
+    "id": "hknpConvexHull::Face",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 4,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 8,
     "class_name": "hclStandardLinkConstraintSetMx",
     "declared": 1,
@@ -9001,6 +9870,29 @@
     "size": 64,
     "sub_type_id": "",
     "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "T*",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 6,
+    "hash": 0,
+    "id": "T*<hknpSurfaceVelocity>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hknpSurfaceVelocity",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hknpSurfaceVelocity",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -9323,6 +10215,56 @@
     "size": 32,
     "sub_type_id": "",
     "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 901024981,
+    "id": "hkArray<hknpPhysicsSystemData::bodyCinfoWithAttachment, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hknpPhysicsSystemData::bodyCinfoWithAttachment",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hknpPhysicsSystemData::bodyCinfoWithAttachment",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
     "type_flags": 0,
     "version": 0
   },
@@ -9655,6 +10597,56 @@
     "version": 0
   },
   {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 1350568881,
+    "id": "hkArray<hclBoneSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hclBoneSpaceDeformer::LocalBlockPN",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclBoneSpaceDeformer::LocalBlockPN",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
     "alignment": 4,
     "class_name": "hclBendStiffnessConstraintSet::Link",
     "declared": 1,
@@ -9743,56 +10735,6 @@
     "version": 1
   },
   {
-    "alignment": 8,
-    "class_name": "hkArray",
-    "declared": 1,
-    "defined": 1,
-    "fields": [
-      {
-        "flags": 34,
-        "name": "m_data",
-        "offset": 0,
-        "type_id": "T*<void>",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_size",
-        "offset": 8,
-        "type_id": "int",
-        "unk_value": 0
-      },
-      {
-        "flags": 34,
-        "name": "m_capacityAndFlags",
-        "offset": 12,
-        "type_id": "int",
-        "unk_value": 0
-      }
-    ],
-    "format": 8,
-    "hash": 1350568881,
-    "id": "hkArray<hclBoneSpaceDeformer::LocalBlockPN, hkContainerHeapAllocator>",
-    "optionals": 43,
-    "parent_class_id": "",
-    "size": 16,
-    "sub_type_id": "hclBoneSpaceDeformer::LocalBlockPN",
-    "template_args": [
-      {
-        "name": "tT",
-        "type_id": "hclBoneSpaceDeformer::LocalBlockPN",
-        "value": 0
-      },
-      {
-        "name": "tAllocator",
-        "type_id": "hkContainerHeapAllocator",
-        "value": 0
-      }
-    ],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
     "alignment": 16,
     "class_name": "T[N]",
     "declared": 1,
@@ -9864,6 +10806,42 @@
       {
         "name": "tAllocator",
         "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 1,
+    "class_name": "hkEnum",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 8196,
+    "hash": 0,
+    "id": "hkEnum<hknpMaterial::MassChangerCategory, hkUint8>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tENUM",
+        "type_id": "hknpMaterial::MassChangerCategory",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint8",
         "value": 0
       }
     ],
@@ -10039,6 +11017,1425 @@
         "name": "tAllocator",
         "type_id": "hkContainerHeapAllocator",
         "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 826489242,
+    "id": "hkArray<hknpMaterial, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hknpMaterial",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hknpMaterial",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hknpMaterial",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 160,
+        "name": "name",
+        "offset": 0,
+        "type_id": "hkStringPtr",
+        "unk_value": 4
+      },
+      {
+        "flags": 32,
+        "name": "isExclusive",
+        "offset": 8,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "flags",
+        "offset": 12,
+        "type_id": "hknpCollisionFlags",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "triggerType",
+        "offset": 16,
+        "type_id": "hkEnum<hknpMaterial::TriggerType, hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "triggerManifoldTolerance",
+        "offset": 17,
+        "type_id": "hkUFloat8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "dynamicFriction",
+        "offset": 18,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "staticFriction",
+        "offset": 20,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "restitution",
+        "offset": 22,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "frictionCombinePolicy",
+        "offset": 24,
+        "type_id": "hkEnum<hknpMaterial::CombinePolicy, hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "restitutionCombinePolicy",
+        "offset": 25,
+        "type_id": "hkEnum<hknpMaterial::CombinePolicy, hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "weldingTolerance",
+        "offset": 28,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "maxContactImpulse",
+        "offset": 32,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "fractionOfClippedImpulseToApply",
+        "offset": 36,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "massChangerCategory",
+        "offset": 40,
+        "type_id": "hkEnum<hknpMaterial::MassChangerCategory, hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "massChangerHeavyObjectFactor",
+        "offset": 42,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "softContactForceFactor",
+        "offset": 44,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "softContactDampFactor",
+        "offset": 46,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "softContactSeparationVelocity",
+        "offset": 48,
+        "type_id": "hkUFloat8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "surfaceVelocity",
+        "offset": 56,
+        "type_id": "T*<hknpSurfaceVelocity>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "disablingCollisionsBetweenCvxCvxDynamicObjectsDistance",
+        "offset": 64,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 160,
+        "name": "userData",
+        "offset": 72,
+        "type_id": "hkUint64",
+        "unk_value": 3
+      }
+    ],
+    "format": 7,
+    "hash": 1672333247,
+    "id": "hknpMaterial",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 80,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 6
+  },
+  {
+    "alignment": 0,
+    "class_name": "hknpCollisionFlags",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 0,
+    "hash": 0,
+    "id": "hknpCollisionFlags",
+    "optionals": 0,
+    "parent_class_id": "hkFlags<hknpCollisionFlags::Enum, int>",
+    "size": 0,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 4,
+    "class_name": "hkFlags",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 33284,
+    "hash": 0,
+    "id": "hkFlags<hknpCollisionFlags::Enum, int>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 4,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tBITS",
+        "type_id": "hknpCollisionFlags::Enum",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "int",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefPtr",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "ptr",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      }
+    ],
+    "format": 6,
+    "hash": 2830703274,
+    "id": "hkRefPtr<hkRefCountedProperties>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hkRefCountedProperties",
+    "template_args": [
+      {
+        "name": "tTYPE",
+        "type_id": "hkRefCountedProperties",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "class_name": "hknpCollisionFlags::Enum",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpCollisionFlags::Enum",
+    "template_args": []
+  },
+  {
+    "alignment": 1,
+    "class_name": "hkEnum",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 8196,
+    "hash": 0,
+    "id": "hkEnum<hknpMaterial::TriggerType, hkUint8>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tENUM",
+        "type_id": "hknpMaterial::TriggerType",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint8",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "class_name": "hknpMaterial::TriggerType",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpMaterial::TriggerType",
+    "template_args": []
+  },
+  {
+    "alignment": 1,
+    "class_name": "hkUFloat8",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "value",
+        "offset": 0,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hkUFloat8",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 1,
+    "class_name": "hkEnum",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "storage",
+        "offset": 0,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      }
+    ],
+    "format": 8196,
+    "hash": 0,
+    "id": "hkEnum<hknpMaterial::CombinePolicy, hkUint8>",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 1,
+    "sub_type_id": "",
+    "template_args": [
+      {
+        "name": "tENUM",
+        "type_id": "hknpMaterial::CombinePolicy",
+        "value": 0
+      },
+      {
+        "name": "tSTORAGE",
+        "type_id": "hkUint8",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "class_name": "hknpMaterial::CombinePolicy",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpMaterial::CombinePolicy",
+    "template_args": []
+  },
+  {
+    "class_name": "hknpMaterial::MassChangerCategory",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpMaterial::MassChangerCategory",
+    "template_args": []
+  },
+  {
+    "class_name": "hknpSurfaceVelocity",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpSurfaceVelocity",
+    "template_args": []
+  },
+  {
+    "alignment": 4,
+    "class_name": "hknpMotionProperties::FullCastSettings",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "minSeparation",
+        "offset": 0,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "minExtraSeparation",
+        "offset": 4,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "toiSeparation",
+        "offset": 8,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "toiExtraSeparation",
+        "offset": 12,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "toiAccuracy",
+        "offset": 16,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "relativeSafeDeltaTime",
+        "offset": 20,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "absoluteSafeDeltaTime",
+        "offset": 24,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "keepTime",
+        "offset": 28,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "keepDistance",
+        "offset": 32,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "maxIterations",
+        "offset": 36,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpMotionProperties::FullCastSettings",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 40,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hknpBodyCinfo",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "shape",
+        "offset": 0,
+        "type_id": "hkRefPtr<hknpShape>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "flags",
+        "offset": 8,
+        "type_id": "hknpCollisionFlags",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "collisionCntrl",
+        "offset": 12,
+        "type_id": "hknpCollisionControl",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "collisionFilterInfo",
+        "offset": 16,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "materialId",
+        "offset": 20,
+        "type_id": "unsigned short",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "qualityId",
+        "offset": 22,
+        "type_id": "unsigned char",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "name",
+        "offset": 24,
+        "type_id": "hkStringPtr",
+        "unk_value": 0
+      },
+      {
+        "flags": 160,
+        "name": "userData",
+        "offset": 32,
+        "type_id": "hkUint64",
+        "unk_value": 3
+      },
+      {
+        "flags": 32,
+        "name": "motionType",
+        "offset": 40,
+        "type_id": "unsigned char",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "position",
+        "offset": 48,
+        "type_id": "hkVector4",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "orientation",
+        "offset": 64,
+        "type_id": "hkQuaternion",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "linearVelocity",
+        "offset": 80,
+        "type_id": "hkVector4",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "angularVelocity",
+        "offset": 96,
+        "type_id": "hkVector4",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "mass",
+        "offset": 112,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "massDistribution",
+        "offset": 120,
+        "type_id": "hkRefPtr<hknpRefMassDistribution>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "dragProperties",
+        "offset": 128,
+        "type_id": "hkRefPtr<hknpRefDragProperties>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "motionPropertiesId",
+        "offset": 136,
+        "type_id": "unsigned short",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "desiredBodyId",
+        "offset": 140,
+        "type_id": "hknpBodyId",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "motionId",
+        "offset": 144,
+        "type_id": "unsigned int",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "collisionLookAheadDistance",
+        "offset": 148,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "localFrame",
+        "offset": 152,
+        "type_id": "hkRefPtr<hkLocalFrame>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "activationPriority",
+        "offset": 160,
+        "type_id": "hkInt8",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpBodyCinfo",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 176,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 8
+  },
+  {
+    "alignment": 8,
+    "class_name": "hknpShape",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "flags",
+        "offset": 24,
+        "type_id": "hkFlags<hknpShape::FlagsEnum, hkUint16>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "type",
+        "offset": 26,
+        "type_id": "hkEnum<hknpShapeType::Enum, hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "numShapeKeyBits",
+        "offset": 27,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "dispatchType",
+        "offset": 28,
+        "type_id": "hkEnum<hknpCollisionDispatchType::Enum, hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "convexRadius",
+        "offset": 32,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "userData",
+        "offset": 40,
+        "type_id": "hkUint64",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "properties",
+        "offset": 48,
+        "type_id": "hkRefPtr<hkRefCountedProperties>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpShape",
+    "optionals": 45,
+    "parent_class_id": "hkReferencedObject",
+    "size": 56,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 5
+  },
+  {
+    "class_name": "hknpShapeType::Enum",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpShapeType::Enum",
+    "template_args": []
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefCountedProperties::Entry",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "object",
+        "offset": 0,
+        "type_id": "hkRefPtr<hkReferencedObject>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "key",
+        "offset": 8,
+        "type_id": "hkUint16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "flags",
+        "offset": 10,
+        "type_id": "hkUint16",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 3846323405,
+    "id": "hkRefCountedProperties::Entry",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 0,
+    "class_name": "hknpCollisionControl",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 0,
+    "hash": 0,
+    "id": "hknpCollisionControl",
+    "optionals": 0,
+    "parent_class_id": "hkFlags<hknpCollisionControl::Enum, unsigned short>",
+    "size": 0,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "class_name": "hknpCollisionControl::Enum",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpCollisionControl::Enum",
+    "template_args": []
+  },
+  {
+    "alignment": 4,
+    "class_name": "hkRelArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "offset",
+        "offset": 0,
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "size",
+        "offset": 4,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 2111480292,
+    "id": "hkRelArray<hknpConvexHull::Edge>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hknpConvexHull::Edge",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hknpConvexHull::Edge",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 0,
+    "class_name": "hkQuaternion",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 0,
+    "hash": 0,
+    "id": "hkQuaternion",
+    "optionals": 0,
+    "parent_class_id": "hkQuaternionf",
+    "size": 0,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefPtr",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "ptr",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      }
+    ],
+    "format": 6,
+    "hash": 2269040508,
+    "id": "hkRefPtr<hknpRefMassDistribution>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hknpRefMassDistribution",
+    "template_args": [
+      {
+        "name": "tTYPE",
+        "type_id": "hknpRefMassDistribution",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hknpRefMassDistribution",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "massDistribution",
+        "offset": 32,
+        "type_id": "hknpMassDistribution",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 46991855,
+    "id": "hknpRefMassDistribution",
+    "optionals": 41,
+    "parent_class_id": "hkReferencedObject",
+    "size": 80,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hknpMassDistribution",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "centerOfMassAndVolume",
+        "offset": 0,
+        "type_id": "hkVector4",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "majorAxisSpace",
+        "offset": 16,
+        "type_id": "hkQuaternion",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "inertiaTensor",
+        "offset": 32,
+        "type_id": "hkVector4",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpMassDistribution",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 48,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefPtr",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "ptr",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      }
+    ],
+    "format": 6,
+    "hash": 0,
+    "id": "hkRefPtr<hknpRefDragProperties>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hknpRefDragProperties",
+    "template_args": [
+      {
+        "name": "tTYPE",
+        "type_id": "hknpRefDragProperties",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "class_name": "hknpRefDragProperties",
+    "declared": 1,
+    "defined": 0,
+    "hash": 0,
+    "id": "hknpRefDragProperties",
+    "template_args": []
+  },
+  {
+    "alignment": 4,
+    "class_name": "hknpBodyId",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "serialAndIndex",
+        "offset": 0,
+        "type_id": "hkUint32",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpBodyId",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 4,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkRefPtr",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 36,
+        "name": "ptr",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      }
+    ],
+    "format": 6,
+    "hash": 0,
+    "id": "hkRefPtr<hkLocalFrame>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hkLocalFrame",
+    "template_args": [
+      {
+        "name": "tTYPE",
+        "type_id": "hkLocalFrame",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 0,
+    "id": "hkArray<hknpConstraintCinfo, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hknpConstraintCinfo",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hknpConstraintCinfo",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hknpConvexShape",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "maxAllowedPenetration",
+        "offset": 56,
+        "type_id": "hkHalf16",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "hull",
+        "offset": 60,
+        "type_id": "hknpConvexHull",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 3798386044,
+    "id": "hknpConvexShape",
+    "optionals": 45,
+    "parent_class_id": "hknpShape",
+    "size": 112,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 6
+  },
+  {
+    "alignment": 4,
+    "class_name": "hknpConvexHull",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "vertices",
+        "offset": 0,
+        "type_id": "hkRelArray<hkFloat3>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "planes",
+        "offset": 8,
+        "type_id": "hkRelArray<hkVector4>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "faces",
+        "offset": 16,
+        "type_id": "hkRelArray<hknpConvexHull::Face>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "indices",
+        "offset": 24,
+        "type_id": "hkRelArray<hkUint8>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "faceLinks",
+        "offset": 32,
+        "type_id": "hkRelArray<hknpConvexHull::Edge>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "vertexEdges",
+        "offset": 40,
+        "type_id": "hkRelArray<hknpConvexHull::Edge>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hknpConvexHull",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 48,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 4,
+    "class_name": "hkRelArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "offset",
+        "offset": 0,
+        "type_id": "hkInt32",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "size",
+        "offset": 4,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 2425848652,
+    "id": "hkRelArray<hkFloat3>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hkFloat3",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkFloat3",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 4,
+    "class_name": "hkFloat3",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "x",
+        "offset": 0,
+        "type_id": "float",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "y",
+        "offset": 4,
+        "type_id": "float",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "z",
+        "offset": 8,
+        "type_id": "float",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 1488974649,
+    "id": "hkFloat3",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 12,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 2,
+    "class_name": "hknpConvexHull::Edge",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "faceIndex",
+        "offset": 0,
+        "type_id": "hkUint16",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "edgeIndex",
+        "offset": 2,
+        "type_id": "hkUint8",
+        "unk_value": 0
+      },
+      {
+        "flags": 33,
+        "name": "padding",
+        "offset": 3,
+        "type_id": "T[N]<hkUint8, 1>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 646510277,
+    "id": "hknpConvexHull::Edge",
+    "optionals": 41,
+    "parent_class_id": "",
+    "size": 4,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 12296,
+    "class_name": "hkCompressedMassProperties",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 160,
+        "name": "centerOfMass",
+        "offset": 0,
+        "type_id": "hkPackedVector3",
+        "unk_value": 3
+      },
+      {
+        "flags": 160,
+        "name": "inertia",
+        "offset": 8,
+        "type_id": "hkPackedVector3",
+        "unk_value": 3
+      },
+      {
+        "flags": 160,
+        "name": "majorAxisSpace",
+        "offset": 16,
+        "type_id": "T[N]<short, 4>",
+        "unk_value": 3
+      },
+      {
+        "flags": 32,
+        "name": "mass",
+        "offset": 24,
+        "type_id": "hkReal",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "volume",
+        "offset": 28,
+        "type_id": "hkReal",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 0,
+    "id": "hkCompressedMassProperties",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 32,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 1
+  },
+  {
+    "alignment": 2,
+    "class_name": "T[N]",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 1064,
+    "hash": 0,
+    "id": "T[N]<short, 4>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "short",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "short",
+        "value": 0
+      },
+      {
+        "name": "vN",
+        "type_id": "",
+        "value": 4
       }
     ],
     "type_flags": 0,

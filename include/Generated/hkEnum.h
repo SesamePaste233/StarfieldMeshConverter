@@ -3,9 +3,9 @@
 
 
 namespace hktypes{
-	class hknpMaterial::MassChangerCategory;
 	class hknpMaterial::CombinePolicy;
 	class hknpMaterial::TriggerType;
+	class hknpMaterial::MassChangerCategory;
 	class hknpShapeType::Enum;
 	class hknpCollisionDispatchType::Enum;
 

@@ -153,6 +153,21 @@ namespace nif {
 
 	class BSXFlags : public NiNodeBase {
 	public:
+		enum class BSXFLAG : uint32_t {
+			None = 0,
+			Animated = 1,
+			Havok = 2,
+			Ragdoll = 4,
+			Complex = 8,
+			Addon = 16,
+			EditorMarker = 32,
+			Dynamic = 64,
+			Articulated = 128,
+			NeedsTransUpdates = 256,
+			RigMesh = 65536,
+		};
+
+
 		BSXFlags() = default;
 		~BSXFlags() = default;
 

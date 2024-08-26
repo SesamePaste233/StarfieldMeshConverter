@@ -2,6 +2,83 @@
 #include "hclSimClothData.h"
 #include "hclOperator.h"
 
+
+bool hktypes::hkUFloat8::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+	
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkUFloat8::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkUFloat8") {
+		std::cout << "hkUFloat8::FromInstance: Expecting hkUFloat8 but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("value")->GetValue(value);
+	return true;
+}
+
+bool hktypes::hkUFloat8::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkUFloat8::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkUFloat8") {
+		std::cout << "hkUFloat8::ToInstance: Expecting hkUFloat8 but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("value")->SetValue(value);
+	return true;
+}
+
+bool hktypes::hkFloat3::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkFloat3::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkFloat3") {
+		std::cout << "hkFloat3::FromInstance: Expecting hkFloat3 but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("x")->GetValue(x);
+	class_instance->GetInstanceByFieldName("y")->GetValue(y);
+	class_instance->GetInstanceByFieldName("z")->GetValue(z);
+	return true;
+}
+
+bool hktypes::hkFloat3::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkFloat3::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkFloat3") {
+		std::cout << "hkFloat3::ToInstance: Expecting hkFloat3 but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("x")->SetValue(x);
+	class_instance->GetInstanceByFieldName("y")->SetValue(y);
+	class_instance->GetInstanceByFieldName("z")->SetValue(z);
+	return true;
+}
+
 bool hktypes::hkPackedVector3::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
@@ -202,6 +279,67 @@ hktypes::hkVector4Holder hktypes::hkVector4Holder::FromVector3f(const Eigen::Vec
 	return result;
 }
 
+bool hktypes::hkQuaternionHolder::FromInstance(const hkreflex::hkClassInstance* instance)
+{
+	auto array_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkQuaternionImpl" && array_instance->type->type_name != "hkQuaternion" && array_instance->type->type_name != "hkQuaternionf" && array_instance->type->type_name != "hkQuaterniond") {
+		std::cout << "hkQuaternionHolder::FromInstance: type_name is not hkQuaternion" << std::endl;
+		return false;
+	}
+
+	std::vector<float> _values;
+	array_instance->GetValue(_values);
+	for (int i = 0; i < 4; i++) {
+		this->values[i] = _values[i];
+	}
+
+	return true;
+}
+
+bool hktypes::hkQuaternionHolder::ToInstance(hkreflex::hkClassInstance* instance)
+{
+	auto array_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
+	if (array_instance->type->type_name != "hkQuaternionImpl" && array_instance->type->type_name != "hkQuaternion" && array_instance->type->type_name != "hkQuaternionf" && array_instance->type->type_name != "hkQuaterniond") {
+		std::cout << "hkQuaternionHolder::FromInstance: type_name is not hkQuaternion" << std::endl;
+		return false;
+	}
+
+	std::vector<float> _values = { this->values[0], this->values[1], this->values[2], this->values[3] };
+	array_instance->SetValue(_values);
+
+	return true;
+}
+
+Eigen::Vector4f hktypes::hkQuaternionHolder::ToVector4f()
+{
+	return Eigen::Vector4f(values[0], values[1], values[2], values[3]);
+}
+
+hktypes::hkQuaternionHolder hktypes::hkQuaternionHolder::FromVector4f(const Eigen::Vector4f vec)
+{
+	hkQuaternionHolder result;
+	result.values[0] = vec.x();
+	result.values[1] = vec.y();
+	result.values[2] = vec.z();
+	result.values[3] = vec.w();
+	return result;
+}
+
+Eigen::Vector3f hktypes::hkQuaternionHolder::ToVector3f()
+{
+	return Eigen::Vector3f(values[0], values[1], values[2]);
+}
+
+hktypes::hkQuaternionHolder hktypes::hkQuaternionHolder::FromVector3f(const Eigen::Vector3f vec, const float w)
+{
+	hkQuaternionHolder result;
+	result.values[0] = vec.x();
+	result.values[1] = vec.y();
+	result.values[2] = vec.z();
+	result.values[3] = w;
+	return result;
+}
+
 bool hktypes::hkBitField::FromInstance(const hkreflex::hkClassInstance* instance)
 {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
@@ -323,6 +461,85 @@ hktypes::hkBitField hktypes::hkBitField::operator|=(const hkBitField& other)
 	}
 	return *this;
 }
+
+bool hktypes::hkRefCountedProperties::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties") {
+		std::cout << "hkRefCountedProperties::FromInstance: Expecting hkRefCountedProperties but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hkReferencedObject::FromInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("entries")->GetValue(entries);
+	return true;
+}
+
+bool hktypes::hkRefCountedProperties::Entry::FromInstance(const hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::Entry::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties::Entry") {
+		std::cout << "hkRefCountedProperties::Entry::FromInstance: Expecting hkRefCountedProperties::Entry but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("object")->GetValue(object);
+	class_instance->GetInstanceByFieldName("key")->GetValue(key);
+	class_instance->GetInstanceByFieldName("flags")->GetValue(flags);
+	return true;
+}
+
+bool hktypes::hkRefCountedProperties::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties") {
+		std::cout << "hkRefCountedProperties::ToInstance: Expecting hkRefCountedProperties but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	hkReferencedObject::ToInstance(class_instance->GetInstanceByFieldName("class_parent"));
+	class_instance->GetInstanceByFieldName("entries")->SetValue(entries);
+	return true;
+}
+
+bool hktypes::hkRefCountedProperties::Entry::ToInstance(hkreflex::hkClassInstance* instance) {
+	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+
+#ifndef NO_HK_TYPENAME_CHECK
+	if (!class_instance) {
+		std::cout << "hkRefCountedProperties::Entry::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
+		throw;
+	}
+	if (class_instance->type->type_name != "hkRefCountedProperties::Entry") {
+		std::cout << "hkRefCountedProperties::Entry::ToInstance: Expecting hkRefCountedProperties::Entry but got " << class_instance->type->type_name << std::endl;
+		return false;
+	}
+#endif // NO_HK_TYPENAME_CHECK
+
+	class_instance->GetInstanceByFieldName("object")->SetValue(object);
+	class_instance->GetInstanceByFieldName("key")->SetValue(key);
+	class_instance->GetInstanceByFieldName("flags")->SetValue(flags);
+	return true;
+}
+
 
 bool hktypes::hkRootLevelContainer::NamedVariant::FromInstance(const hkreflex::hkClassInstance* instance)
 {

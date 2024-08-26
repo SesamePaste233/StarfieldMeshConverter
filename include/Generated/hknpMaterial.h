@@ -7,11 +7,11 @@ namespace hktypes{
 	class hknpCollisionFlags;
 	template <typename tENUM, typename tSTORAGE>
 	class ;
-	class hknpSurfaceVelocity;
 	template <typename tENUM, typename tSTORAGE>
 	class ;
-	class hkHalf16;
 	class hkUFloat8;
+	class hkHalf16;
+	class hknpSurfaceVelocity;
 	template <typename tENUM, typename tSTORAGE>
 	class ;
 

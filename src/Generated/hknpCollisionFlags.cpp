@@ -6,9 +6,13 @@ bool hktypes::hknpCollisionFlags::FromInstance(const hkreflex::hkClassInstance* 
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpCollisionFlags") {
-		std::cout << "hknpCollisionFlags::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpCollisionFlags::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpCollisionFlags") {
+		std::cout << "hknpCollisionFlags::FromInstance: Expecting hknpCollisionFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -20,9 +24,13 @@ bool hktypes::hknpCollisionFlags::Enum::FromInstance(const hkreflex::hkClassInst
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpCollisionFlags::Enum") {
-		std::cout << "hknpCollisionFlags::Enum::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpCollisionFlags::Enum::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpCollisionFlags::Enum") {
+		std::cout << "hknpCollisionFlags::Enum::FromInstance: Expecting hknpCollisionFlags::Enum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -33,9 +41,13 @@ bool hktypes::hknpCollisionFlags::ToInstance(hkreflex::hkClassInstance* instance
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpCollisionFlags") {
-		std::cout << "hknpCollisionFlags::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpCollisionFlags::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpCollisionFlags") {
+		std::cout << "hknpCollisionFlags::ToInstance: Expecting hknpCollisionFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -47,9 +59,13 @@ bool hktypes::hknpCollisionFlags::Enum::ToInstance(hkreflex::hkClassInstance* in
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hknpCollisionFlags::Enum") {
-		std::cout << "hknpCollisionFlags::Enum::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hknpCollisionFlags::Enum::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hknpCollisionFlags::Enum") {
+		std::cout << "hknpCollisionFlags::Enum::ToInstance: Expecting hknpCollisionFlags::Enum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

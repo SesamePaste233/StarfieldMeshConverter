@@ -6,9 +6,9 @@ namespace hktypes{
 	template <typename tT, typename tAllocator>
 	class ;
 	class hkBitField;
+	class hknpCompositeShape;
 	template <typename tTYPE>
 	class ;
-	class hknpCompositeShape;
 
 	class hknpCompressedMeshShape : public hknpCompositeShape {
 	public:

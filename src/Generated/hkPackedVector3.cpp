@@ -5,9 +5,13 @@ bool hktypes::hkPackedVector3::FromInstance(const hkreflex::hkClassInstance* ins
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkPackedVector3") {
-		std::cout << "hkPackedVector3::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkPackedVector3::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkPackedVector3") {
+		std::cout << "hkPackedVector3::FromInstance: Expecting hkPackedVector3 but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -19,9 +23,13 @@ bool hktypes::hkPackedVector3::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkPackedVector3") {
-		std::cout << "hkPackedVector3::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkPackedVector3::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkPackedVector3") {
+		std::cout << "hkPackedVector3::ToInstance: Expecting hkPackedVector3 but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

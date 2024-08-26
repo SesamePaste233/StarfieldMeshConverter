@@ -4,13 +4,13 @@
 
 namespace hktypes{
 	class hkReferencedObject;
-	template <typename tENUM, typename tSTORAGE>
+	template <typename tBITS, typename tSTORAGE>
 	class ;
 	template <typename tENUM, typename tSTORAGE>
 	class ;
 	template <typename tTYPE>
 	class ;
-	template <typename tBITS, typename tSTORAGE>
+	template <typename tENUM, typename tSTORAGE>
 	class ;
 
 	class hknpShape : public hkReferencedObject {

@@ -14,7 +14,7 @@ namespace hktypes{
 		bool ToInstance(hkreflex::hkClassInstance* instance) override;
 		inline std::string GethkClassName() override { return "hkVector4"; };
 		inline std::string GetTranscriptId() override { return "hkVector4"; };
-		inline uint32_t GethkClassHash() override { return 0; };
+		inline uint32_t GethkClassHash() override { return 1544414121; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
 			};

@@ -207,6 +207,21 @@
     <ClInclude Include="include\hkReflDataSerializeContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hknpPhysicsSystemData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hknpShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hknpBodyCinfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hknpMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hknpMotionProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
@@ -285,6 +300,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\hkTypesHeader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hknpMotionProperties.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hknpMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hknpBodyCinfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hknpShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hknpPhysicsSystemData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

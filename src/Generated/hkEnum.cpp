@@ -11,9 +11,13 @@ bool hktypes::hkEnum<hknpMaterial::TriggerType, hkUint8>::FromInstance(const hkr
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -26,9 +30,13 @@ bool hktypes::hkEnum<hknpMaterial::TriggerType, hkUint8>::ToInstance(hkreflex::h
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -47,9 +55,13 @@ bool hktypes::hkEnum<hknpMaterial::CombinePolicy, hkUint8>::FromInstance(const h
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -62,9 +74,13 @@ bool hktypes::hkEnum<hknpMaterial::CombinePolicy, hkUint8>::ToInstance(hkreflex:
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -83,9 +99,13 @@ bool hktypes::hkEnum<hknpMaterial::MassChangerCategory, hkUint8>::FromInstance(c
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -98,9 +118,13 @@ bool hktypes::hkEnum<hknpMaterial::MassChangerCategory, hkUint8>::ToInstance(hkr
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -119,9 +143,13 @@ bool hktypes::hkEnum<hknpShapeType::Enum, hkUint8>::FromInstance(const hkreflex:
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -134,9 +162,13 @@ bool hktypes::hkEnum<hknpShapeType::Enum, hkUint8>::ToInstance(hkreflex::hkClass
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -155,9 +187,13 @@ bool hktypes::hkEnum<hknpCollisionDispatchType::Enum, hkUint8>::FromInstance(con
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::FromInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -170,9 +206,13 @@ bool hktypes::hkEnum<hknpCollisionDispatchType::Enum, hkUint8>::ToInstance(hkref
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkEnum") {
-		std::cout << "hkEnum::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkEnum::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkEnum") {
+		std::cout << "hkEnum::ToInstance: Expecting hkEnum but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

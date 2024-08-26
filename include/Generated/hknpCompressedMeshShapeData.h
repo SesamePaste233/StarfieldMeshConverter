@@ -4,9 +4,9 @@
 
 namespace hktypes{
 	class hkReferencedObject;
+	class hknpCompressedMeshShapeTree;
 	class hkcdSimdTree;
 	class hkcdStaticMeshTree::Connectivity;
-	class hknpCompressedMeshShapeTree;
 
 	class hknpCompressedMeshShapeData : public hkReferencedObject {
 	public:
