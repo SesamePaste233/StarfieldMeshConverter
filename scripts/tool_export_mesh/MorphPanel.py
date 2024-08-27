@@ -1,6 +1,7 @@
 import bpy
 
 import utils_blender
+import utils_common as utils
 
 from numpy.linalg import LinAlgError
 
@@ -70,6 +71,11 @@ class TransferShapeKeys(bpy.types.Operator):
 		)
 
 	def execute(self, context):
+		_try_import_success, _rtn_str = utils._try_import("import scipy", "Scipy not installed. Install it in Plugin Preferences Panel.", raise_exception=False)
+		if not _try_import_success:
+			self.report({'ERROR'}, _rtn_str)
+			return {'CANCELLED'}
+		
 		import utils_transfer as transfer
 		reference = context.object
 		target_list = [o for o in utils_blender.GetSelectedObjs(True) if o.type == "MESH"]
@@ -177,8 +183,17 @@ def menu_func_morphs(self, context):
 	col.label(text="Attributes")
 
 	row = layout.row(align=True)
-	row.label(text=f"NRM: {'Found' if obj.data.attributes.get(f'NRM_{sk.name}') != None else 'Not found'}")
-	row.label(text=f"COL: {'Found' if obj.data.attributes.get(f'COL_{sk.name}') != None else 'Not found'}")
+
+	nrm_found = False
+	if nrm_attr := obj.data.attributes.get(f'NRM_{sk.name}') and nrm_attr.domain != 'CORNER' or nrm_attr.data_type != 'FLOAT_VECTOR':
+		nrm_found = True
+
+	col_found = False
+	if col_attr := obj.data.attributes.get(f'COL_{sk.name}') and col_attr.domain != 'CORNER' or col_attr.data_type != 'FLOAT_COLOR':
+		col_found = True
+
+	row.label(text=f"NRM: {'Found' if nrm_found else 'Not found'}")
+	row.label(text=f"COL: {'Found' if col_found else 'Not found'}")
 	
 	row = layout.row(align=True)
 	#row.operator("object.morph_list_recalculate_normals")

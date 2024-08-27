@@ -266,7 +266,7 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 		sk.slider_min = 0
 		sk.slider_max = 1
 
-		sk.data.foreach_set('co', (basis_positions + delta_pos[n]).flatten())
+		sk.data.foreach_set('co', (basis_positions + delta_pos[n]).ravel())
 
 		if debug_delta_normal:
 			utils_blender.VisualizeVectors(target_obj.data, delta_pos[n], basis_normals + delta_normals[n], key_name)
@@ -277,8 +277,8 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 			nrm_attr = target_obj.data.attributes[f"NRM_{key_name}"]
 			col_attr = target_obj.data.attributes[f"COL_{key_name}"]
 
-			nrm_attr.data.foreach_set('vector', delta_normals[n][loop_indices].flatten())
-			col_attr.data.foreach_set('color', np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].flatten())
+			nrm_attr.data.foreach_set('vector', delta_normals[n][loop_indices].ravel())
+			col_attr.data.foreach_set('color', np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].ravel())
 
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}

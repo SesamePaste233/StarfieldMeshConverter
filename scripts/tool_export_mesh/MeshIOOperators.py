@@ -108,6 +108,11 @@ class ExportCustomMesh(bpy.types.Operator):
 		layout.prop(self, "export_sf_mesh_open_folder")
 
 	def execute(self,context):
+		_try_import_success, _rtn_str = utils._try_import("import scipy", "Scipy not installed. Install it in Plugin Preferences Panel.", raise_exception=False)
+		if not _try_import_success:
+			self.report({'ERROR'}, _rtn_str)
+			return {'CANCELLED'}
+		
 		original_active = utils_blender.GetActiveObject()
 		original_selected = utils_blender.GetSelectedObjs(True)
 

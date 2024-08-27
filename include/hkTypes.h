@@ -16,6 +16,8 @@ namespace hktypes {
 	using hkUint32 = uint32_t;
 	using hkUint64 = uint64_t;
 
+	using hkUlong = uint64_t;
+
 	using hkInt8 = int8_t;
 	using hkInt16 = int16_t;
 	using hkInt32 = int32_t;
@@ -43,7 +45,7 @@ namespace hktypes {
 		inline uint32_t GethkClassHash() override { return 0; };
 		inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 			return {
-				{ "serialAndIndex", "hkUint32" },
+				{ "value", "hkUint8" },
 			};
 		};
 	};

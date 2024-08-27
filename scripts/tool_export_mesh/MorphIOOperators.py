@@ -4,6 +4,8 @@ import MorphIO
 
 import os
 
+import utils_common as utils
+
 class ImportCustomMorph(bpy.types.Operator):
 	bl_idname = "import_scene.custom_morph"
 	bl_label = "Import Custom Morph"
@@ -101,6 +103,11 @@ class ExportCustomMorph(bpy.types.Operator):
 				box_row.enabled = True
 
 	def execute(self, context):
+		_try_import_success, _rtn_str = utils._try_import("import scipy", "Scipy not installed. Install it in Plugin Preferences Panel.", raise_exception=False)
+		if not _try_import_success:
+			self.report({'ERROR'}, _rtn_str)
+			return {'CANCELLED'}
+		
 		if self.snapping_enabled:
 			rtn, _ = MorphIO.ExportMorph_alt(self, context, self.filepath, self, self.snapping_range, self.snap_delta_positions, self.snap_lerp_coeff, self.snap_lerp_coeff_delta_positions)
 		else:

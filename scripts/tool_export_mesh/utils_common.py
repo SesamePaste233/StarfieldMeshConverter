@@ -7,20 +7,42 @@ import re
 from functools import wraps
 from time import time
 
+def _try_import(import_str, exception_str = None, silent = False, raise_exception = True):
+	try:
+		exec(import_str)
+		return True, ""
+	except Exception as e:
+		if raise_exception:
+			if exception_str:
+				raise Exception(exception_str)
+			else:
+				raise e
+		if exception_str:
+			if not silent:
+				print(f"Error executing '{import_str}': {exception_str}")
+			return False, exception_str
+		else:
+			if not silent:
+				print(f"Error executing '{import_str}': {e}")
+			return False, f"{e}"
+	finally:
+		pass
+
 def __prop_wrapper(prop_func, *args, **kwargs):
 	def _wrapper_inner(**kwargs_inner):
 		return prop_func(*args, **kwargs, **kwargs_inner)
 	return _wrapper_inner
 
 def timer(f):
-    @wraps(f)
-    def wrap(*args, **kw):
-        ts = time()
-        result = f(*args, **kw)
-        te = time()
-        print(f'func:{f.__name__} took: {te-ts:.4f} secs')
-        return result
-    return wrap
+	@wraps(f)
+	def wrap(*args, _suppress_timer_print_ = False, **kw):
+		ts = time()
+		result = f(*args, **kw)
+		te = time()
+		if not _suppress_timer_print_:
+			print(f'func:{f.__name__} took: {te-ts:.4f} secs')
+		return result
+	return wrap
 
 default_assets_folder = 'YOUR_LOOSE_DATA_FOLDER'
 export_mesh_folder_path = None

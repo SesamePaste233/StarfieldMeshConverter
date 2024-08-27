@@ -9,8 +9,6 @@ from enum import Enum, unique
 import utils_math
 from utils_common import timer
 
-from scipy.spatial import cKDTree
-
 class AtomicException(Exception):
     pass
 
@@ -181,6 +179,7 @@ class Primitive():
 
     @functools.cached_property
     def KDTree(self):
+        from scipy.spatial import cKDTree
         return cKDTree(self.positions)
 
     def gather(self):
@@ -529,14 +528,30 @@ class Primitive():
             for key_block in key_blocks:
                 
                 # If attribute is found, use it.
+                attr:bpy.types.Attribute = None
                 if f"NRM_{key_block.name}" in self.blender_mesh.attributes:
-                    use_attributes = True
-                    raw_morph_normal_deltas = np.array([list(v.vector) for v in self.blender_mesh.attributes[f"NRM_{key_block.name}"].data], dtype=np.float32).flatten()
+                    attr = self.blender_mesh.attributes[f"NRM_{key_block.name}"]
+
+                    # Validate attribute domain and data_type
+                    if attr.domain != 'CORNER' or attr.data_type != 'FLOAT_VECTOR':
+                        print(f"Attribute NRM_{key_block.name} is not a FLOAT_VECTOR type on CORNER domain")
+                        use_attributes = False
+                    else:
+                        use_attributes = True
+
+                else:
+                    use_attributes = False
+                    attr = None
+
+                if use_attributes and attr is not None:
+                    raw_morph_normal_deltas = np.empty(len(self.blender_mesh.loops) * 3, dtype=np.float32)
+
+                    # Significantly faster than list comprehension
+                    attr.data.foreach_get('vector', raw_morph_normal_deltas.ravel())
 
                     # Sum normals deltas + raw corner normals of the basis
                     raw_morph_normals = np.array(raw_corner_normals + raw_morph_normal_deltas, dtype=np.float32)
                 else:
-                    use_attributes = False
                     raw_morph_normals = np.array(key_block.normals_split_get(), dtype=np.float32)
 
                 raw_morph_normals = raw_morph_normals.reshape(len(self.blender_mesh.loops), 3)
@@ -785,6 +800,8 @@ def SnapPositions(src_primitive:Primitive, tar_primitive:Primitive, copy_range =
     if Primitive.GatheredData.POSITION not in src_primitive.gathered or Primitive.GatheredData.POSITION not in tar_primitive.gathered:
         raise UngatheredException("SnapPositions() called with ungathered positions")
 
+    from scipy.spatial import cKDTree
+    
     tar_kdtree: cKDTree = tar_primitive.KDTree
 
     dists, indices = tar_kdtree.query(src_primitive.positions, k=1)
@@ -802,6 +819,8 @@ def CopyNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, copy_ran
     if Primitive.GatheredData.NORMALS not in src_primitive.gathered or Primitive.GatheredData.NORMALS not in tar_primitive.gathered:
         raise UngatheredException("CopyNormalsAtSeam() called with ungathered normals")
 
+    from scipy.spatial import cKDTree
+
     tar_kdtree: cKDTree = tar_primitive.KDTree
 
     dists, indices = tar_kdtree.query(src_primitive.positions, k=1)
@@ -818,6 +837,8 @@ def CopyMorphNormalsAtSeam(src_primitive:Primitive, tar_primitive:Primitive, cop
         raise UngatheredException("CopyMorphNormalsAtSeam() called with ungathered positions")
     if Primitive.GatheredData.MORPHNORMALS not in src_primitive.gathered or Primitive.GatheredData.MORPHNORMALS not in tar_primitive.gathered:
         raise UngatheredException("CopyMorphNormalsAtSeam() called with ungathered morph data")
+    
+    from scipy.spatial import cKDTree
 
     tar_kdtree: cKDTree = tar_primitive.KDTree
 
