@@ -10,6 +10,7 @@ from mathutils import Vector
 import utils_blender
 import utils_math
 import utils_primitive
+import utils_morph_attrs
 import MeshConverter
 
 def IsMorphExportNode(obj):
@@ -26,176 +27,6 @@ def IsMorphObject(obj):
 	i = name.find('[')
 	j = name.find(']')
 	return j > i
-
-def DEPRECATED_ImportMorph(options, context, operator, result_objs = []):
-	import_path = options.filepath
-	
-	rtn = MeshConverter.ImportMorphAsJson(import_path)
-
-	if rtn == "":
-		returncode = -1 
-	else:
-		returncode = 0
-
-	if returncode != 0:
-		operator.report({'INFO'}, f"Execution failed with return code {returncode}. Contact the author for assistance.")
-		return {"CANCELLED"}
-	
-	jsondata = json.loads(rtn)
-
-	vert_count = jsondata["numVertices"]
-	shape_keys = list(jsondata["shapeKeys"])
-	morph_data = jsondata["morphData"]
-
-	target_obj = bpy.context.active_object
-
-	if target_obj == None or len(target_obj.data.vertices) != vert_count:
-		target_obj = None
-		for _obj in bpy.data.objects:
-			if _obj.type == 'MESH' and utils_blender.read_only_marker not in _obj.name and len(_obj.data.vertices) == vert_count:
-				target_obj = _obj
-				break
-	
-	if target_obj == None:
-		operator.report({'WARNING'}, f"No matching mesh found for the morph.")
-		return {"CANCELLED"}
-	else:
-		if utils_blender.read_only_marker in target_obj.name and target_obj.data.shape_keys != None and len(target_obj.data.shape_keys.key_blocks) != 0:
-			operator.report({'WARNING'}, f"Target mesh is Read Only! Remove {utils_blender.read_only_marker} in the name before continue.")
-			return {"CANCELLED"}
-	
-
-	verts = target_obj.data.vertices
-
-	target_obj.shape_key_clear()
-	sk_basis = target_obj.shape_key_add(name = 'Basis', from_mix=False)
-	sk_basis.interpolation = 'KEY_LINEAR'
-	target_obj.data.shape_keys.use_relative = True
-
-	debug_mode = options.debug_delta_normal or options.debug_padding or options.debug_delta_tangent
-
-	if debug_mode or options.as_multiple:
-		normals, tangents, signs = utils_blender.GetNormalTangents(target_obj.data, True)
-		
-	if options.as_multiple:
-		prev_coll = bpy.data.collections.new('morphs_' + target_obj.name)
-		bpy.context.scene.collection.children.link(prev_coll)
-		
-		morph_node = bpy.data.objects.new('[MorphExport]' + target_obj.name, None, )
-		morph_node.empty_display_size = 0.015
-
-		utils_blender.move_object_to_collection([morph_node], prev_coll)
-		utils_blender.move_object_to_parent([morph_node], target_obj)
-
-		result_objs.clear()
-
-	if options.as_multiple:
-		key_blocks = target_obj.data.shape_keys.key_blocks
-		for sk in key_blocks:
-			shape_key_index = key_blocks.keys().index(sk.name)
-
-			utils_blender.SetActiveObject(target_obj)
-			bpy.ops.object.mode_set(mode='EDIT')
-			target_obj.active_shape_key_index = shape_key_index
-			for key in key_blocks:
-				key.value = 0
-			sk.value = 1
-
-			bm = bmesh.from_edit_mesh(target_obj.data)
-			me = bpy.data.meshes.new("mesh")
-			me_obj = bpy.data.objects.new(f"[{sk.name}]"+target_obj.name, me)  # add a new object using the mesh
-			bpy.context.collection.objects.link(me_obj)
-			bm.to_mesh(me)
-			bm.free()
-
-			bpy.ops.object.mode_set(mode='OBJECT')
-			me.use_auto_smooth = True
-			me.normals_split_custom_set_from_vertices(normals)
-			utils_blender.move_object_to_collection([me_obj], prev_coll)
-			utils_blender.move_object_to_parent([me_obj], morph_node)
-
-			result_objs.append(me_obj)
-
-	for n, key_name in enumerate(shape_keys):
-		
-		if debug_mode or options.as_multiple or options.use_attributes:
-			delta_normals = [[] for i in range(len(verts))]
-			delta_tangents = [[] for i in range(len(verts))]
-			offsets = [[] for i in range(len(verts))]
-			target_vert_colors = [() for i in range(len(verts))]
-
-		# Create new shape key
-		sk = target_obj.shape_key_add(name = key_name, from_mix=False)
-		sk.interpolation = 'KEY_LINEAR'
-		sk.relative_key = sk_basis
-		sk.slider_min = 0
-		sk.slider_max = 1
-
-		if options.use_attributes:
-			utils_blender.addShapeKeyAttributes(target_obj, sk.name)
-
-			target_obj.data.vertex_colors.active = target_obj.data.vertex_colors[f"COL_{sk.name}"]
-			
-		# position each vert
-		for i in range(len(verts)):
-			sk.data[i].co.x += morph_data[n][i][0]
-			sk.data[i].co.y += morph_data[n][i][1]
-			sk.data[i].co.z += morph_data[n][i][2]
-			
-			if debug_mode or options.as_multiple:
-				offsets[i] = [morph_data[n][i][0],morph_data[n][i][1],morph_data[n][i][2]]
-				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
-				delta_normals[i] = [morph_data[n][i][4][0],morph_data[n][i][4][1],morph_data[n][i][4][2]]
-				delta_tangents[i] = [morph_data[n][i][5][0],morph_data[n][i][5][1],morph_data[n][i][5][2]]
-			
-			if options.use_attributes:
-				target_vert_colors[i] = utils_blender.RGB888ToColor(morph_data[n][i][3])
-
-				target_obj.data.attributes.get(f"NRM_{sk.name}").data[i].vector = [morph_data[n][i][4][0],morph_data[n][i][4][1],morph_data[n][i][4][2]]
-				target_obj.data.attributes.get(f"TAN_{sk.name}").data[i].vector = [morph_data[n][i][5][0],morph_data[n][i][5][1],morph_data[n][i][5][2]]
-
-		if options.use_attributes:
-			utils_blender.SetVertColorPerVert(target_obj, target_vert_colors)
-			
-		if options.as_multiple:
-			key_blocks = target_obj.data.shape_keys.key_blocks
-			shape_key_index = key_blocks.keys().index(sk.name)
-
-			utils_blender.SetActiveObject(target_obj)
-			bpy.ops.object.mode_set(mode='EDIT')
-			target_obj.active_shape_key_index = shape_key_index
-			for key in key_blocks:
-				key.value = 0
-			sk.value = 1
-
-			bm = bmesh.from_edit_mesh(target_obj.data)
-			me = bpy.data.meshes.new("mesh")
-			me_obj = bpy.data.objects.new(f"[{sk.name}]"+target_obj.name, me)  # add a new object using the mesh
-			bpy.context.collection.objects.link(me_obj)
-			bm.to_mesh(me)
-			bm.free()
-
-			bpy.ops.object.mode_set(mode='OBJECT')
-			me.use_auto_smooth = True
-			me.vertex_colors.new(name='col')
-			me.normals_split_custom_set_from_vertices([utils_math.NormalizeVec([n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]]) for n, dn in zip(normals, delta_normals)])
-			utils_blender.SetVertColorPerVert(me_obj, target_vert_colors)
-			utils_blender.move_object_to_collection([me_obj], prev_coll)
-			utils_blender.move_object_to_parent([me_obj], morph_node)
-
-			result_objs.append(me_obj)
-
-		if options.debug_delta_normal:
-			utils_blender.VisualizeVectors(target_obj.data, offsets, [[n[0] + dn[0], n[1] + dn[1], n[2] + dn[2]] for n, dn in zip(normals, delta_normals)], key_name)
-		if options.debug_padding:
-			utils_blender.VisualizeVectors(target_obj.data, offsets, [[p * (n[0] + dn[0]), p * (n[1] + dn[1]), p * (n[2] + dn[2])] for n, dn, p in zip(normals, delta_normals, target_vert_colors)], key_name)
-		if options.debug_delta_tangent:
-			utils_blender.VisualizeVectors(target_obj.data, offsets, [[n[0] + s * dn[0], n[1] + s * dn[1], n[2] + s * dn[2]] for n, dn, s in zip(tangents, delta_tangents, signs)], key_name)
-	
-	
-	
-	operator.report({'INFO'}, f"Import Morph Successful.")
-	return {'FINISHED'}
 
 def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False, use_attributes = False):
 	import_path = filepath
@@ -272,13 +103,8 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 			utils_blender.VisualizeVectors(target_obj.data, delta_pos[n], basis_normals + delta_normals[n], key_name)
 		
 		if use_attributes:
-			utils_blender.addShapeKeyAttributes(target_obj, key_name, replace=True)
-
-			nrm_attr = target_obj.data.attributes[f"NRM_{key_name}"]
-			col_attr = target_obj.data.attributes[f"COL_{key_name}"]
-
-			nrm_attr.data.foreach_set('vector', delta_normals[n][loop_indices].ravel())
-			col_attr.data.foreach_set('color', np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].ravel())
+			utils_morph_attrs.MorphNormals().set_data(target_obj.data, key_name, delta_normals[n][loop_indices].ravel(), create_if_not_exist=True)
+			utils_morph_attrs.MorphTargetColors().set_data(target_obj.data, key_name, np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].ravel(), create_if_not_exist=True)
 
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}

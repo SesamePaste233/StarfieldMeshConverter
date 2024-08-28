@@ -7,6 +7,8 @@ import ctypes
 from enum import Enum, unique
 
 import utils_math
+import utils_morph_attrs
+
 from utils_common import timer
 
 class AtomicException(Exception):
@@ -166,8 +168,8 @@ class Primitive():
         return np.array([raw_morph_position_deltas[self.atomic_vertices['vertex_index']] for raw_morph_position_deltas in self.raw_morph_position_deltas], dtype=np.float32)
 
     @functools.cached_property
-    def morph_target_colors(self): # TODO
-        return np.ones((len(self.key_blocks), len(self.atomic_vertices), 3), dtype=np.float32) * 255
+    def morph_target_colors(self):
+        return np.array([raw_morph_target_colors[self.atomic_to_loop_id] for raw_morph_target_colors in self.raw_morph_target_colors], dtype=np.float32) * 255
 
     @functools.cached_property
     def morph_normal_deltas(self):
@@ -482,7 +484,22 @@ class Primitive():
     def gather_morphs(self):
         self.shapeKeys = [key_block.name for key_block in self.key_blocks]
 
-        # TODO: Gather morph target colors
+        self.raw_morph_target_colors = []
+
+        morph_target_colors = utils_morph_attrs.MorphTargetColors()
+
+        key_blocks = self.key_blocks if self.options.gather_morph_data else []
+
+        for key_block in key_blocks:
+            col_attr = morph_target_colors.validate(self.blender_mesh, key_block.name, remove_invalid=False, create_if_invalid=False)
+
+            if col_attr is None:
+                raw_morph_target_colors = np.ones((len(self.blender_mesh.loops), 3), dtype=np.float32)
+            else:
+                print(f"Primitive.gather_morphs() found valid color attribute for shape key: {key_block.name}")
+                raw_morph_target_colors = morph_target_colors.gather(self.blender_mesh, key_block.name).reshape(-1, 4)[:, :3]
+                
+            self.raw_morph_target_colors.append(raw_morph_target_colors)
 
     @timer
     def gather_triangles(self):
@@ -529,6 +546,8 @@ class Primitive():
                 
                 # If attribute is found, use it.
                 attr:bpy.types.Attribute = None
+                use_attributes = False
+
                 if f"NRM_{key_block.name}" in self.blender_mesh.attributes:
                     attr = self.blender_mesh.attributes[f"NRM_{key_block.name}"]
 

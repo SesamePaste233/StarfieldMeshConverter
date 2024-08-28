@@ -3,6 +3,8 @@ import bpy
 import utils_blender
 import utils_common as utils
 
+import utils_morph_attrs
+
 from numpy.linalg import LinAlgError
 
 class SGB_UL_ShapeKeyListItems(bpy.types.UIList):
@@ -152,7 +154,7 @@ class MorphListRecalculateNormals(bpy.types.Operator):
 
         bpy.ops.ed.undo_push()
 
-        rtn = utils_blender.morphPanelRecalculateActiveNormals(obj)
+        rtn = utils_morph_attrs.morphPanelRecalculateActiveNormals(obj)
 
         if rtn == False:
             self.report({'ERROR'}, "Shape-key for recalculating normals not found.")
@@ -183,17 +185,8 @@ def menu_func_morphs(self, context):
 	col.label(text="Attributes")
 
 	row = layout.row(align=True)
-
-	nrm_found = False
-	if nrm_attr := obj.data.attributes.get(f'NRM_{sk.name}') and nrm_attr.domain != 'CORNER' or nrm_attr.data_type != 'FLOAT_VECTOR':
-		nrm_found = True
-
-	col_found = False
-	if col_attr := obj.data.attributes.get(f'COL_{sk.name}') and col_attr.domain != 'CORNER' or col_attr.data_type != 'FLOAT_COLOR':
-		col_found = True
-
-	row.label(text=f"NRM: {'Found' if nrm_found else 'Not found'}")
-	row.label(text=f"COL: {'Found' if col_found else 'Not found'}")
+	row.label(text=f"NRM: {'Found' if utils_morph_attrs.MorphNormals().validate(obj.data, sk.name, ) else 'Not found'}")
+	row.label(text=f"COL: {'Found' if utils_morph_attrs.MorphTargetColors().validate(obj.data, sk.name, ) else 'Not found'}")
 	
 	row = layout.row(align=True)
 	#row.operator("object.morph_list_recalculate_normals")
