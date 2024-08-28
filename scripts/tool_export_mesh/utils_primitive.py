@@ -172,7 +172,7 @@ class Primitive():
 
     @functools.cached_property
     def morph_target_colors(self):
-        return np.array([raw_morph_target_colors[self.atomic_to_loop_id] for raw_morph_target_colors in self.raw_morph_target_colors], dtype=np.float32) * 255
+        return np.array([raw_morph_target_colors[self.atomic_to_loop_id] for raw_morph_target_colors in self.raw_morph_target_colors], dtype=np.float32) * 192
 
     @functools.cached_property
     def morph_normal_deltas(self):
@@ -580,9 +580,9 @@ class Primitive():
                 # Raw morph normal deltas are already got using normal attributes,
                 # no need to get it twice.
                 if attr is not None:
-                    raw_morph_normal_deltas = utils_math.bounded_vector_substraction(self.raw_normals, raw_morph_normals)
-                else:
                     raw_morph_normal_deltas = np.reshape(raw_morph_normal_deltas, (-1, 3))
+                else:
+                    raw_morph_normal_deltas = utils_math.bounded_vector_substraction(self.raw_normals, raw_morph_normals)
 
                 self.raw_morph_normal_deltas.append(raw_morph_normal_deltas)
 

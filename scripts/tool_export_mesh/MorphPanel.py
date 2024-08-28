@@ -185,7 +185,7 @@ class MorphListCreateResetColors(bpy.types.Operator):
 		name="Color",
 		subtype='COLOR',
 		size=3,
-		default=(1.0, 1.0, 1.0),
+		default=(0.7529, 0.7529, 0.7529), # 192/255
 		min=0.0,
 		max=1.0,
 	)
