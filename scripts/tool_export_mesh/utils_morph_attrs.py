@@ -101,13 +101,18 @@ class MorphAttrFactory:
 	def from_mesh_data(self, mesh:bpy.types.Mesh, shapekey_name:str) -> None:
 		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=True)
 		if not attr:
-			print(f"Attribute {self.name_fn(shapekey_name)} not found or invalid.")
+			print(f"Shapekey name {shapekey_name} invalid.")
 			return
 		
 		self.from_mesh_data_fn(attr, shapekey_name, mesh)
 
-	def to_mesh_data(attr, mesh:bpy.types.Mesh, shapekey_name:str) -> None:
-		pass
+	def to_mesh_data(self, attr, mesh:bpy.types.Mesh, shapekey_name:str) -> None:
+		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=True)
+		if not attr:
+			print(f"Shapekey name {shapekey_name} invalid.")
+			return
+		
+		self.to_mesh_data_fn(attr, shapekey_name, mesh)
 
 	def gather(self, mesh:bpy.types.Mesh, shapekey_name:str) -> np.ndarray:
 		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=True)
@@ -136,6 +141,14 @@ class MorphAttrFactory:
 		return data
 
 	def set_data(self, mesh:bpy.types.Mesh, shapekey_name:str, data:np.ndarray, create_if_not_exist = True) -> bool:
+		'''
+		Set the data of the attribute. If the attribute does not exist, create it if create_if_not_exist is True
+
+		:param mesh: bpy.types.Mesh
+		:param shapekey_name: str
+		:param data: np.ndarray. Data must be a num_elem * data_size matrix
+		:param create_if_not_exist: bool. If True, create the attribute if it does not exist
+		'''
 		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=create_if_not_exist)
 		if not attr:
 			print(f"Attribute {self.name_fn(shapekey_name)} not found or invalid.")
@@ -151,13 +164,51 @@ class MorphAttrFactory:
 			raise ValueError(f"MorphAttrFactory.gather(): Unimplemented data type {self.type}")
 
 		if self.domain == "CORNER":
-			attr.data.foreach_set(data_entry, data)
+			attr.data.foreach_set(data_entry, data.ravel())
 		elif self.domain == "POINT":
-			attr.data.foreach_set(data_entry, data)
+			attr.data.foreach_set(data_entry, data.ravel())
 		else:
 			raise ValueError(f"MorphAttrFactory.gather(): Unimplemented domain {self.domain}")
 		
 		return True
+
+	def set_data_foreach(self, mesh:bpy.types.Mesh, shapekey_name:str, data:np.ndarray, create_if_not_exist = True) -> bool:
+		'''
+		Set all elements with the same data. If the attribute does not exist, create it if create_if_not_exist is True
+
+		:param mesh: bpy.types.Mesh
+		:param shapekey_name: str
+		:param data: np.ndarray. Data must be a (data_size, 1) vector or equivalent size
+		:param create_if_not_exist: bool. If True, create the attribute if it does not exist		
+		'''
+		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=create_if_not_exist)
+		if not attr:
+			print(f"Attribute {self.name_fn(shapekey_name)} not found or invalid.")
+			return False
+		
+		num_elements = None
+		data_size = None
+		np_type = None
+		data_entry = None
+		
+		if _prop := _data_type_element_prop_[self.type]:
+			data_size, np_type, data_entry = _prop
+		else:
+			raise ValueError(f"MorphAttrFactory.gather(): Unimplemented data type {self.type}")
+		
+		assert len(data.ravel()) == data_size, f"Data size mismatch. Expected {data_size}, got {len(data.ravel())}"
+
+		if self.domain == "CORNER":
+			num_elements = len(mesh.loops)
+		elif self.domain == "POINT":
+			num_elements = len(mesh.vertices)
+		else:
+			raise ValueError(f"MorphAttrFactory.gather(): Unimplemented domain {self.domain}")
+
+		populated_data = np.tile(data, (num_elements, 1))
+
+		return self.set_data(mesh, shapekey_name, populated_data, create_if_not_exist)
+
 
 _morph_attr_factory_list_ = {
 	"morph_normals": MorphAttrFactory("NRM", "CORNER", "FLOAT_VECTOR"),
@@ -177,41 +228,3 @@ def addShapeKeyAttributes(obj:bpy.types.Object, shapekey_name:str, replace=False
 	mesh = obj.data
 	for factory in _morph_attr_factory_list_.values():
 		factory.create(mesh, shapekey_name, replace)
-
-def morphPanelRecalculateActiveNormals(obj):
-
-	active = obj.data.shape_keys.key_blocks[obj.active_shape_key_index]
-	morph_name = active.name
-	mesh = obj.data
-
-	if f"NRM_{morph_name}" not in mesh.attributes:
-		mesh.attributes.new(name=f"NRM_{morph_name}", type="FLOAT_VECTOR", domain="POINT")
-
-	if f"TAN_{morph_name}" not in mesh.attributes:
-		mesh.attributes.new(name=f"TAN_{morph_name}", type="FLOAT_VECTOR", domain="POINT")
-
-	nrm_attr = mesh.attributes.get(f"NRM_{morph_name}")
-	tan_attr = mesh.attributes.get(f"TAN_{morph_name}")
-
-	obj.data.calc_normals_split()
-	obj.data.calc_tangents()
-
-	vid_lid_list = [0 for _ in range(len(obj.data.vertices))]
-	temp_sk_normals = active.normals_vertex_get()
-	sk_normals_lists = [temp_sk_normals[i:i+3] for i in range(0, len(temp_sk_normals), 3)]
-
-	basis_normals, basis_tangents, basis_tangentsigns = GetNormalTangents(obj.data, True, True, vid_lid_list)
-
-	for face in obj.data.polygons:
-		for l_id in face.loop_indices:
-			vid_lid_list[obj.data.loops[l_id].vertex_index] = l_id
-
-	sk_tangents = [utils_math.GramSchmidtOrthogonalize(np.array(mesh.loops[loop_idx].tangent), mathutils.Vector(n)) for loop_idx, n in zip(vid_lid_list, sk_normals_lists)]
-
-	for i in range(len(mesh.vertices)):
-		sk_nrm = mathutils.Vector(sk_normals_lists[i]).normalized()
-		obj_nrm = mathutils.Vector((n for n in basis_normals[i])).normalized()
-		dot_product = obj_nrm.dot(sk_nrm)
-
-		nrm_attr.data[i].vector = sk_nrm - (obj_nrm * dot_product)
-		tan_attr.data[i].vector = basis_tangentsigns[i] * (sk_tangents[i] - basis_tangents[i])

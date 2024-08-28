@@ -103,7 +103,7 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 			utils_blender.VisualizeVectors(target_obj.data, delta_pos[n], basis_normals + delta_normals[n], key_name)
 		
 		if use_attributes:
-			utils_morph_attrs.MorphNormals().set_data(target_obj.data, key_name, delta_normals[n][loop_indices].ravel(), create_if_not_exist=True)
+			#utils_morph_attrs.MorphNormals().set_data(target_obj.data, key_name, delta_normals[n][loop_indices].ravel(), create_if_not_exist=True)
 			utils_morph_attrs.MorphTargetColors().set_data(target_obj.data, key_name, np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].ravel(), create_if_not_exist=True)
 
 	operator.report({'INFO'}, f"Import Morph Successful.")

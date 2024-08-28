@@ -55,6 +55,9 @@ class Primitive():
 
             self.gather_tangents = True
 
+            self.use_morph_normal_attrs = False # Use morph normal attributes if available
+            self.use_morph_color_attrs = True # Use morph target color attributes if available
+
             # Less frequently changed options
             self.normal_tangent_round_precision = 3
             self.atomic_max_number = 65535
@@ -491,7 +494,10 @@ class Primitive():
         key_blocks = self.key_blocks if self.options.gather_morph_data else []
 
         for key_block in key_blocks:
-            col_attr = morph_target_colors.validate(self.blender_mesh, key_block.name, remove_invalid=False, create_if_invalid=False)
+            col_attr = None
+
+            if self.options.use_morph_color_attrs:
+                col_attr = morph_target_colors.validate(self.blender_mesh, key_block.name, remove_invalid=False, create_if_invalid=False)
 
             if col_attr is None:
                 raw_morph_target_colors = np.ones((len(self.blender_mesh.loops), 3), dtype=np.float32)
@@ -545,28 +551,13 @@ class Primitive():
             for key_block in key_blocks:
                 
                 # If attribute is found, use it.
-                attr:bpy.types.Attribute = None
-                use_attributes = False
+                attr:bpy.types.Attribute|None = None
 
-                if f"NRM_{key_block.name}" in self.blender_mesh.attributes:
-                    attr = self.blender_mesh.attributes[f"NRM_{key_block.name}"]
+                if self.options.use_morph_normal_attrs:
+                    attr = utils_morph_attrs.MorphNormals().validate(self.blender_mesh, key_block.name, remove_invalid=False, create_if_invalid=False)
 
-                    # Validate attribute domain and data_type
-                    if attr.domain != 'CORNER' or attr.data_type != 'FLOAT_VECTOR':
-                        print(f"Attribute NRM_{key_block.name} is not a FLOAT_VECTOR type on CORNER domain")
-                        use_attributes = False
-                    else:
-                        use_attributes = True
-
-                else:
-                    use_attributes = False
-                    attr = None
-
-                if use_attributes and attr is not None:
-                    raw_morph_normal_deltas = np.empty(len(self.blender_mesh.loops) * 3, dtype=np.float32)
-
-                    # Significantly faster than list comprehension
-                    attr.data.foreach_get('vector', raw_morph_normal_deltas.ravel())
+                if attr is not None:
+                    raw_morph_normal_deltas = utils_morph_attrs.MorphNormals().gather(self.blender_mesh, key_block.name)
 
                     # Sum normals deltas + raw corner normals of the basis
                     raw_morph_normals = np.array(raw_corner_normals + raw_morph_normal_deltas, dtype=np.float32)
@@ -588,7 +579,7 @@ class Primitive():
                 
                 # Raw morph normal deltas are already got using normal attributes,
                 # no need to get it twice.
-                if not use_attributes:
+                if attr is not None:
                     raw_morph_normal_deltas = utils_math.bounded_vector_substraction(self.raw_normals, raw_morph_normals)
                 else:
                     raw_morph_normal_deltas = np.reshape(raw_morph_normal_deltas, (-1, 3))

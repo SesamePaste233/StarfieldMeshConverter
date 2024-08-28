@@ -1174,3 +1174,11 @@ def get_texconv_path() -> str|None:
 	if not os.path.exists(texconv_path) or not os.path.isfile(texconv_path):
 		return None
 	return texconv_path
+
+def set_viewport_shading(screen:bpy.types.Screen, **kwargs):
+	area:bpy.types.Area = next(area for area in screen.areas if area.type == 'VIEW_3D')
+	space:bpy.types.Space = next(space for space in area.spaces if space.type == 'VIEW_3D')
+
+	# setattr
+	for key, value in kwargs.items():
+		setattr(space.shading, key, value)
