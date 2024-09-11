@@ -44,6 +44,7 @@ class Primitive():
         MORPHNORMALS = 8
         MORPHTANGENTS = 9
         TRIANGLES = 10
+        MORPHCOLORS = 11
 
     class Options():
         def __init__(self):
@@ -205,8 +206,6 @@ class Primitive():
             self.gather_morphs()
 
         self.gather_triangles()
-
-        self.gathered.add(Primitive.GatheredData.TRIANGLES)
     
     @timer
     def scan_object_for_data(self):
@@ -506,6 +505,8 @@ class Primitive():
                 raw_morph_target_colors = morph_target_colors.gather(self.blender_mesh, key_block.name).reshape(-1, 4)[:, :3]
                 
             self.raw_morph_target_colors.append(raw_morph_target_colors)
+
+        self.gathered.add(Primitive.GatheredData.MORPHCOLORS)
 
     @timer
     def gather_triangles(self):

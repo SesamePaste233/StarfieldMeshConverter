@@ -123,7 +123,11 @@ class ExportMaterialPanel(bpy.types.Panel):
         sub_layout.label(text="Texture Maps")
         for texture_item in MaterialConverter.TextureIndex.__members__.values():
             sub_layout.prop(context.scene, f"sf_export_material_{texture_item.name}")
+            
             sub_layout.prop(context.scene, f"sf_export_material_{texture_item.name}_size")
+            if texture_item == MaterialConverter.TextureIndex.NORMAL:
+                row = sub_layout.row(align=True)
+                row.prop(context.scene, "sf_export_material_normal_map_flip_y", text="Flip Y", toggle=True)
 
         sub_layout.label(text="Alpha Settings")
         box = sub_layout.box()
@@ -217,6 +221,11 @@ def register():
             ],
             default="None",
         ))
+    bpy.types.Scene.sf_export_material_normal_map_flip_y = bpy.props.BoolProperty(
+        name="Flip Y",
+        default=False
+    )
+    
     bpy.types.Scene.sf_export_material_alpha_thresh = bpy.props.FloatProperty(
         name="Alpha Threshold",
         default=0.0,
@@ -257,6 +266,7 @@ def unregister():
     for texture_item in MaterialConverter.TextureIndex.__members__.values():
         delattr(bpy.types.Scene, f"sf_export_material_{texture_item.name}")
         delattr(bpy.types.Scene, f"sf_export_material_{texture_item.name}_size")
+    del bpy.types.Scene.sf_export_material_normal_map_flip_y
     del bpy.types.Scene.sf_export_material_alpha_thresh
     del bpy.types.Scene.sf_export_material_alpha_blend_channel
     del bpy.types.Scene.sf_export_material_folder

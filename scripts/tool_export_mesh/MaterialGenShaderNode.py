@@ -89,26 +89,31 @@ def sf_shadernode_node_group():
     sf_shadernode.inputs[5].max_value = 1.0
     sf_shadernode.inputs[5].attribute_domain = 'POINT'
 
+    #input EMISSIVE
+    sf_shadernode.inputs.new('NodeSocketColor', "EMISSIVE")
+    sf_shadernode.inputs[6].default_value = (0.0, 0.0, 0.0, 1.0)
+    sf_shadernode.inputs[6].attribute_domain = 'POINT'
+
     #input HEIGHT
     sf_shadernode.inputs.new('NodeSocketVector', "HEIGHT")
-    sf_shadernode.inputs[6].default_value = (0.0, 0.0, 0.0)
-    sf_shadernode.inputs[6].min_value = -3.4028234663852886e+38
-    sf_shadernode.inputs[6].max_value = 3.4028234663852886e+38
-    sf_shadernode.inputs[6].attribute_domain = 'POINT'
+    sf_shadernode.inputs[7].default_value = (0.0, 0.0, 0.0)
+    sf_shadernode.inputs[7].min_value = -3.4028234663852886e+38
+    sf_shadernode.inputs[7].max_value = 3.4028234663852886e+38
+    sf_shadernode.inputs[7].attribute_domain = 'POINT'
 
     #input A_TEST_THRESH
     sf_shadernode.inputs.new('NodeSocketFloat', "A_TEST_THRESH")
-    sf_shadernode.inputs[7].default_value = 0.0
-    sf_shadernode.inputs[7].min_value = 0.0
-    sf_shadernode.inputs[7].max_value = 1.0
-    sf_shadernode.inputs[7].attribute_domain = 'POINT'
+    sf_shadernode.inputs[8].default_value = 0.0
+    sf_shadernode.inputs[8].min_value = 0.0
+    sf_shadernode.inputs[8].max_value = 1.0
+    sf_shadernode.inputs[8].attribute_domain = 'POINT'
 
     #input A_BLEND_CHANNEL
     sf_shadernode.inputs.new('NodeSocketFloat', "A_BLEND_CHANNEL")
-    sf_shadernode.inputs[8].default_value = 0.0
-    sf_shadernode.inputs[8].min_value = 0.0
-    sf_shadernode.inputs[8].max_value = 4.0
-    sf_shadernode.inputs[8].attribute_domain = 'POINT'
+    sf_shadernode.inputs[9].default_value = 0.0
+    sf_shadernode.inputs[9].min_value = 0.0
+    sf_shadernode.inputs[9].max_value = 4.0
+    sf_shadernode.inputs[9].attribute_domain = 'POINT'
 
 
 
@@ -148,8 +153,6 @@ def sf_shadernode_node_group():
     principled_bsdf.inputs[17].default_value = 0.0
     #Transmission Roughness
     principled_bsdf.inputs[18].default_value = 0.0
-    #Emission
-    principled_bsdf.inputs[19].default_value = (0.0, 0.0, 0.0, 1.0)
     #Emission Strength
     principled_bsdf.inputs[20].default_value = 1.0
     #Clearcoat Normal
@@ -221,7 +224,7 @@ def sf_shadernode_node_group():
     #group_input_001.NORMAL -> principled_bsdf.Normal
     sf_shadernode.links.new(group_input_001.outputs[1], principled_bsdf.inputs[22])
     #group_input_001.HEIGHT -> group_output.Displacement
-    sf_shadernode.links.new(group_input_001.outputs[6], group_output.inputs[1])
+    sf_shadernode.links.new(group_input_001.outputs[7], group_output.inputs[1])
     #group_input.COLOR -> mix.A
     sf_shadernode.links.new(group_input.outputs[0], mix.inputs[6])
     #group_input.AO -> invert.Color
@@ -233,7 +236,7 @@ def sf_shadernode_node_group():
     #group_input_002.OPACITY -> math.Value
     sf_shadernode.links.new(group_input_002.outputs[2], math.inputs[0])
     #group_input_002.A_TEST_THRESH -> math.Value
-    sf_shadernode.links.new(group_input_002.outputs[7], math.inputs[1])
+    sf_shadernode.links.new(group_input_002.outputs[8], math.inputs[1])
     #math.Value -> math_001.Value
     sf_shadernode.links.new(math.outputs[0], math_001.inputs[1])
     #math_001.Value -> math_002.Value
@@ -242,6 +245,8 @@ def sf_shadernode_node_group():
     sf_shadernode.links.new(group_input_002.outputs[2], math_002.inputs[1])
     #math_002.Value -> principled_bsdf.Alpha
     sf_shadernode.links.new(math_002.outputs[0], principled_bsdf.inputs[21])
+    #group_input_001.EMISSIVE -> principled_bsdf.Emission
+    sf_shadernode.links.new(group_input_001.outputs[6], principled_bsdf.inputs[19])
 
 def GetMatNode():
 	if "SF_ShaderNode" in bpy.data.node_groups:
@@ -266,25 +271,85 @@ def new_mat(mat_name:str):
 
     GetMatNode()
 
-    #node Group
-    group = material.nodes.new("ShaderNodeGroup")
-    group.node_tree = bpy.data.node_groups["SF_ShaderNode"]
-    #Input_8
-    group.inputs[6].default_value = (0.0, 0.0, 0.0)
-    #Input_9
-    group.inputs[7].default_value = 0.0
-    #Input_10
-    group.inputs[8].default_value = 0.0
+    #node OPACITY
+    opacity = material.nodes.new("ShaderNodeTexImage")
+    opacity.mute = True
+    opacity.name = "OPACITY"
+    opacity.interpolation = 'Linear'
+    opacity.projection = 'FLAT'
+    opacity.extension = 'REPEAT'
+    #Vector
+    opacity.inputs[0].default_value = (0.0, 0.0, 0.0)
+
+    #node METAL
+    metal = material.nodes.new("ShaderNodeTexImage")
+    metal.mute = True
+    metal.name = "METAL"
+    metal.interpolation = 'Linear'
+    metal.projection = 'FLAT'
+    metal.extension = 'REPEAT'
+    #Vector
+    metal.inputs[0].default_value = (0.0, 0.0, 0.0)
+
+    #node EMISSIVE
+    emissive = material.nodes.new("ShaderNodeTexImage")
+    emissive.mute = True
+    emissive.name = "EMISSIVE"
+    emissive.interpolation = 'Linear'
+    emissive.projection = 'FLAT'
+    emissive.extension = 'REPEAT'
+    #Vector
+    emissive.inputs[0].default_value = (0.0, 0.0, 0.0)
+
+    #node AO
+    ao = material.nodes.new("ShaderNodeTexImage")
+    ao.mute = True
+    ao.name = "AO"
+    ao.interpolation = 'Linear'
+    ao.projection = 'FLAT'
+    ao.extension = 'REPEAT'
+    #Vector
+    ao.inputs[0].default_value = (0.0, 0.0, 0.0)
+
+    #node ROUGH
+    rough = material.nodes.new("ShaderNodeTexImage")
+    rough.mute = True
+    rough.name = "ROUGH"
+    rough.interpolation = 'Linear'
+    rough.projection = 'FLAT'
+    rough.extension = 'REPEAT'
+    #Vector
+    rough.inputs[0].default_value = (0.0, 0.0, 0.0)
 
     #node COLOR
     color = material.nodes.new("ShaderNodeTexImage")
+    color.mute = True
     color.name = "COLOR"
     color.interpolation = 'Linear'
     color.projection = 'FLAT'
     color.extension = 'REPEAT'
-    color.mute = True
     #Vector
     color.inputs[0].default_value = (0.0, 0.0, 0.0)
+
+    #node HEIGHT
+    height = material.nodes.new("ShaderNodeTexImage")
+    height.mute = True
+    height.name = "HEIGHT"
+    height.interpolation = 'Linear'
+    height.projection = 'FLAT'
+    height.extension = 'REPEAT'
+    #Vector
+    height.inputs[0].default_value = (0.0, 0.0, 0.0)
+
+    #node NORMAL
+    normal = material.nodes.new("ShaderNodeTexImage")
+    normal.mute = True
+    normal.name = "NORMAL"
+    normal.interpolation = 'Linear'
+    normal.projection = 'FLAT'
+    normal.extension = 'REPEAT'
+    #Vector
+    normal.inputs[0].default_value = (0.0, 0.0, 0.0)
 
     #node Normal Map
     normal_map = material.nodes.new("ShaderNodeNormalMap")
@@ -292,90 +357,42 @@ def new_mat(mat_name:str):
     #Strength
     normal_map.inputs[0].default_value = 1.0
 
-    #node OPACITY
-    opacity = material.nodes.new("ShaderNodeTexImage")
-    opacity.name = "OPACITY"
-    opacity.interpolation = 'Linear'
-    opacity.projection = 'FLAT'
-    opacity.extension = 'REPEAT'
-    opacity.mute = True
-    #Vector
-    opacity.inputs[0].default_value = (0.0, 0.0, 0.0)
-
-    #node NORMAL
-    normal = material.nodes.new("ShaderNodeTexImage")
-    normal.name = "NORMAL"
-    normal.interpolation = 'Linear'
-    normal.projection = 'FLAT'
-    normal.extension = 'REPEAT'
-    normal.mute = True
-    #Vector
-    normal.inputs[0].default_value = (0.0, 0.0, 0.0)
-
-    #node ROUGHNESS
-    roughness = material.nodes.new("ShaderNodeTexImage")
-    roughness.name = "ROUGH"
-    roughness.interpolation = 'Linear'
-    roughness.projection = 'FLAT'
-    roughness.extension = 'REPEAT'
-    roughness.mute = True
-    #Vector
-    roughness.inputs[0].default_value = (0.0, 0.0, 0.0)
-
-    #node HEIGHT
-    height = material.nodes.new("ShaderNodeTexImage")
-    height.name = "HEIGHT"
-    height.interpolation = 'Linear'
-    height.projection = 'FLAT'
-    height.extension = 'REPEAT'
-    height.mute = True
-    #Vector
-    height.inputs[0].default_value = (0.0, 0.0, 0.0)
-
-    #node AO
-    ao = material.nodes.new("ShaderNodeTexImage")
-    ao.name = "AO"
-    ao.interpolation = 'Linear'
-    ao.projection = 'FLAT'
-    ao.extension = 'REPEAT'
-    ao.mute = True
-    #Vector
-    ao.inputs[0].default_value = (0.0, 0.0, 0.0)
-
-    #node METALNESS
-    metalness = material.nodes.new("ShaderNodeTexImage")
-    metalness.name = "METAL"
-    metalness.interpolation = 'Linear'
-    metalness.projection = 'FLAT'
-    metalness.extension = 'REPEAT'
-    metalness.mute = True
-    #Vector
-    metalness.inputs[0].default_value = (0.0, 0.0, 0.0)
+    #node Group
+    group = material.nodes.new("ShaderNodeGroup")
+    group.node_tree = bpy.data.node_groups["SF_ShaderNode"]
+    #Input_8
+    group.inputs[7].default_value = (0.0, 0.0, 0.0)
+    #Input_9
+    group.inputs[8].default_value = 0.0
+    #Input_10
+    group.inputs[9].default_value = 0.0
 
 
     #Set locations
     material_output.location = (300.0, 300.0)
-    group.location = (-20.0, 300.0)
-    color.location = (-820.0, 300.0)
-    normal_map.location = (-340.0, 160.0)
     opacity.location = (-820.0, -100.0)
-    normal.location = (-820.0, 100.0)
-    roughness.location = (-820.0, -500.0)
-    height.location = (-820.0, -900.0)
+    metal.location = (-820.0, -300.0)
+    emissive.location = (-820.0, -900.0)
     ao.location = (-820.0, -700.0)
-    metalness.location = (-820.0, -300.0)
+    rough.location = (-820.0, -500.0)
+    color.location = (-820.0, 300.0)
+    height.location = (-820.0, -1100.0)
+    normal.location = (-820.0, 100.0)
+    normal_map.location = (-340.0, 160.0)
+    group.location = (-20.0, 300.0)
 
     #Set dimensions
     material_output.width, material_output.height = 140.0, 100.0
-    group.width, group.height = 237.6750030517578, 100.0
-    color.width, color.height = 240.0, 100.0
-    normal_map.width, normal_map.height = 150.0, 100.0
     opacity.width, opacity.height = 240.0, 100.0
-    normal.width, normal.height = 240.0, 100.0
-    roughness.width, roughness.height = 240.0, 100.0
-    height.width, height.height = 240.0, 100.0
+    metal.width, metal.height = 240.0, 100.0
+    emissive.width, emissive.height = 240.0, 100.0
     ao.width, ao.height = 240.0, 100.0
-    metalness.width, metalness.height = 240.0, 100.0
+    rough.width, rough.height = 240.0, 100.0
+    color.width, color.height = 240.0, 100.0
+    height.width, height.height = 240.0, 100.0
+    normal.width, normal.height = 240.0, 100.0
+    normal_map.width, normal_map.height = 150.0, 100.0
+    group.width, group.height = 237.6750030517578, 100.0
 
     #initialize material links
     #group.BSDF -> material_output.Surface
@@ -392,13 +409,16 @@ def new_mat(mat_name:str):
     material.links.new(opacity.outputs[0], group.inputs[2])
     #ao.Color -> group.AO
     material.links.new(ao.outputs[0], group.inputs[5])
-    #roughness.Color -> group.ROUGHNESS
-    material.links.new(roughness.outputs[0], group.inputs[4])
-    #metalness.Color -> group.METALNESS
-    material.links.new(metalness.outputs[0], group.inputs[3])
+    #rough.Color -> group.ROUGH
+    material.links.new(rough.outputs[0], group.inputs[4])
+    #metal.Color -> group.METAL
+    material.links.new(metal.outputs[0], group.inputs[3])
+    #emissive.Color -> group.EMISSIVE
+    material.links.new(emissive.outputs[0], group.inputs[6])
 
     mat.blend_method = 'HASHED'
     mat.use_backface_culling = True
     mat.shadow_method = 'HASHED'
 
     return mat
+

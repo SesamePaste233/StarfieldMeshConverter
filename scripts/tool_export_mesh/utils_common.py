@@ -7,6 +7,8 @@ import re
 from functools import wraps
 from time import time
 
+import random
+
 def _try_import(import_str, exception_str = None, silent = False, raise_exception = True):
 	try:
 		exec(import_str)
@@ -32,6 +34,33 @@ def __prop_wrapper(prop_func, *args, **kwargs):
 	def _wrapper_inner(**kwargs_inner):
 		return prop_func(*args, **kwargs, **kwargs_inner)
 	return _wrapper_inner
+
+__timer_indent__ = 0
+
+def indented_timer(f, indent = 2):
+    @wraps(f)
+    def wrap(*args, _suppress_timer_print_ = False, **kw):
+        global __timer_indent__
+        
+        ts = time()
+        if not _suppress_timer_print_:
+            print(' ' * indent * __timer_indent__ + f'func:{f.__name__} timer start.')
+            
+        __timer_indent__ += 1
+        
+        try:
+            result = f(*args, **kw)
+        except Exception as e:
+            raise e
+        finally:
+            __timer_indent__ -= 1
+            
+            te = time()
+            if not _suppress_timer_print_:
+                print(' ' * indent * __timer_indent__ + f'func:{f.__name__} took: {te-ts:.4f} secs')
+            
+        return result
+    return wrap
 
 def timer(f):
 	@wraps(f)
@@ -283,5 +312,18 @@ def TransformWeightData(weight_data: list[list[list]], do_normalize = False) -> 
 		
 	return output
 
-
-			
+def RandomHexHashStr(seed:int = 0, hex_len:int = 8, upper_case = True) -> tuple[str, int]:
+	# Get a random number base-10 from the seed
+	random.seed(seed)
+	random_num = random.randint(0, 16**hex_len)
+	# Convert the random number to a hexadecimal string
+	random_hex = format(random_num, f'0{hex_len}x')
+	if upper_case:
+		return random_hex.upper(), random_num
+	else:
+		return random_hex, random_num
+	
+def RandomHexHashStrGenerator(seed:int = 0, hex_len:int = 8):
+	while True:
+		result, seed = RandomHexHashStr(seed, hex_len)
+		yield result

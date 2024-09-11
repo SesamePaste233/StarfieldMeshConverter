@@ -207,7 +207,7 @@ def _is_srgb(texture_index:MaterialConverter.TextureIndex) -> bool:
 def _is_normal_map(texture_index:MaterialConverter.TextureIndex) -> bool:
     return texture_index.name == "NORMAL"
 
-def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.TextureIndex, png_path:str, size:int = None):
+def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.TextureIndex, png_path:str, size:int = None, normal_map_inverty = False):
     if not png_path.endswith('.png'):
         raise ValueError("Input image is not a PNG file")
 
@@ -216,8 +216,8 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
     if _is_srgb(texture_index):
         cmd += ["-srgbi"]
 
-    if _is_normal_map(texture_index):
-        #cmd += ["-inverty"]
+    if _is_normal_map(texture_index) and normal_map_inverty:
+        cmd += ["-inverty"]
         pass
 
     cmd += [
@@ -238,7 +238,7 @@ def convert_image_to_dds(texconv_path:str, texture_index:MaterialConverter.Textu
         print(f"Export dds error: {e.stderr}")
         return False
     
-def export_texture_map_to_dds(image:bpy.types.Image, texture_index:MaterialConverter.TextureIndex, path:str, texconv_path:str, remove_png:bool = True, size:int = None):
+def export_texture_map_to_dds(image:bpy.types.Image, texture_index:MaterialConverter.TextureIndex, path:str, texconv_path:str, remove_png:bool = True, size:int = None, normal_map_inverty = False):
     if image is None:
         return False
     if not path.endswith('.dds'):
@@ -255,7 +255,7 @@ def export_texture_map_to_dds(image:bpy.types.Image, texture_index:MaterialConve
         print(f"Export texture map {image.name} to png success: {time_end - time_start:.2f}s")
     
     time_start = time.time()
-    success = convert_image_to_dds(texconv_path, texture_index, png_path, size)
+    success = convert_image_to_dds(texconv_path, texture_index, png_path, size, normal_map_inverty = normal_map_inverty)
     time_end = time.time()
 
     if not success:

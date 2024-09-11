@@ -1,5 +1,8 @@
 import json
 import enum
+from utils_common import RandomHexHashStr
+
+import time
 
 class ShaderModel(enum.Enum):
     ONE_LAYER_STANDARD = "1LayerStandard"
@@ -267,22 +270,32 @@ class MatFile:
     def compose(self) -> str:
         name = self.name
         has_opacity = self.texture_slots[TextureIndex.OPACITY.value] is not None
+
+        seed = int(time.time())
+
+        self.base_id = "0005DD03:A7CE75E1"
+
+        layer_id, seed = RandomHexHashStr(seed, 8)
+        uv_stream_id, seed = RandomHexHashStr(seed, 8)
+        material_id, seed = RandomHexHashStr(seed, 8)
+        texture_set_id, seed = RandomHexHashStr(seed, 8)
+
         self.json_data = {
             "Objects": [
                 {
                 "Components": [
                     self.CTName(name),
-                    self.LayerID(self.ID("0574E109")),
+                    self.LayerID(self.ID(layer_id)),
                     AlphaSettingsComponent(has_opacity, self.alpha_test_threshold, self.alpha_blend_vertex_color_channel).to_dict(),
                     self.ShaderModelComponent(self.shader_model),
                     self.LayeredEmissivityComponent(),
                 ],
                 "Parent": "materials\\layered\\root\\layeredmaterials.mat"
                 },
-                self.Layers(self.ID("0574E109"), "0574E12A", "0574E181"),
-                self.UVStreams(self.ID("0574E181")),
-                self.Materials(self.ID("0574E12A"), "0574E154"),
-                self.TextureSets(self.ID("0574E154"), self.texture_slots, self.texture_replacements, self.disable_mip_bias_hint)
+                self.Layers(self.ID(layer_id), material_id, uv_stream_id),
+                self.UVStreams(self.ID(uv_stream_id)),
+                self.Materials(self.ID(material_id), texture_set_id),
+                self.TextureSets(self.ID(texture_set_id), self.texture_slots, self.texture_replacements, self.disable_mip_bias_hint)
             ],
             "Version": 1
         }
@@ -355,7 +368,7 @@ def ExportMat(mat_name, options, context, operator, mat_folder, texture_rootfold
             texture_size = int(texture_size_str)
         if texture_map is not None and isinstance(texture_map, bpy.types.Image):
             texture_path = os.path.join(texture_rootfolder, texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.png")
-            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path, not utils_blender.is_plugin_debug_mode(), texture_size)
+            utils_material.export_texture_map_to_dds(texture_map, texture_item, texture_path, texconv_path, not utils_blender.is_plugin_debug_mode(), texture_size, options.sf_export_material_normal_map_flip_y)
             
             mat.setTexturePath(texture_item, os.path.join("Data", texture_relfolder, f"{mat_name}_{texture_item.name.lower()}.dds"))
 
