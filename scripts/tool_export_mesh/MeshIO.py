@@ -30,6 +30,23 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	bmesh.ops.triangulate(bm, faces=bm.faces[:])
 	bm.to_mesh(new_obj.data)
 	bm.free()
+	
+	# Normals handling
+	if obj.data.has_custom_normals:
+		
+		obj.data.calc_normals_split()
+
+		loop_vertices = np.zeros(len(obj.data.loops), dtype=np.int32)
+		obj.data.loops.foreach_get('vertex_index', loop_vertices)
+
+		corner_normals = np.zeros(len(obj.data.loops) * 3, dtype=np.float32)
+		obj.data.corner_normals.foreach_get('vector', corner_normals)
+		corner_normals = corner_normals.reshape(-1, 3)
+
+		vertex_normals = np.zeros((len(obj.data.vertices), 3))
+		np.add.at(vertex_normals, loop_vertices, corner_normals.reshape(-1, 3))
+
+		new_obj.data.normals_split_custom_set_from_vertices(vertex_normals.tolist())
 
 	p_options = utils_primitive.Primitive.Options()
 	p_options.gather_morph_data = False
