@@ -165,10 +165,6 @@ def sqrt_prec_round(data:np.ndarray, precision:float) -> np.ndarray:
 	_data = np.around(np.sqrt(data)/precision, 0)*precision
 	return _data**2
 
-from scipy.spatial.distance import pdist
-from sklearn.cluster import KMeans
-
-
 def min_max_dist(points):
 	'''
 		Subtract max value and min value for each dimension
