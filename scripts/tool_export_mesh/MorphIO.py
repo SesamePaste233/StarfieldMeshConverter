@@ -298,7 +298,7 @@ def ExportMorph_alt(options, context, export_file_path, operator, snapping_range
 			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
 			return {"CANCELLED"}, None
 
-		operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f}  + Dll: {time_end2 - time_end1:.2} seconds.")
+		operator.report({'INFO'}, f"Export morph successful. Vertex count: {jsondata['numVertices']}. Time taken: Gather: {time_end - time_start:.2f}  + Dll: {time_end2 - time_end1:.2} seconds.")
 		return {"FINISHED"}, jsondata['numVertices']
 
 def ExportMorph(options, context, export_file_path, operator):
