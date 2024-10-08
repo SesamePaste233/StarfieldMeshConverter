@@ -85,6 +85,15 @@ class ExportCustomMesh(bpy.types.Operator):
 		layout.prop(self, "use_world_origin")
 		layout.prop(self, "WEIGHTS")
 		layout.prop(self, "use_secondary_uv")
+
+		report = utils_blender.export_report(report_uv_layers=True)
+		box = layout.box()
+		if self.use_secondary_uv:
+			box.label(text=f"First UV Map: {report['first_uv'].name}")
+			box.label(text=f"Second UV Map: {report['second_uv'].name}")
+		else:
+			box.label(text=f"UV Map: {report['first_uv'].name}")
+
 		layout.prop(self, "export_sf_mesh_hash_result")
 
 		layout.separator()
@@ -178,7 +187,7 @@ class ImportCustomMesh(bpy.types.Operator):
 	)
 
 	def execute(self, context):
-		return MeshIO.ImportMesh(self.filepath, self, context, self)
+		return MeshIO.ImportMesh_Alt(self.filepath, self, context, self)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)

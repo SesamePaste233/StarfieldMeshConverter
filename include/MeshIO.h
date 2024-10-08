@@ -13,7 +13,7 @@ namespace mesh {
 	typedef bone_binding* vertex_weight;
 
 	typedef struct {
-		uint8_t r, g, b, a;
+		uint8_t b, g, r, a;
 	}vertex_color;
 
 	class MeshIO
@@ -82,13 +82,15 @@ namespace mesh {
 
 		bool LoadToNumpy(
 			float* ptr_positions,
-			int64_t* ptr_indices,
+			int32_t* ptr_indices,
 			float* ptr_normals,
 			float* ptr_uv1,
 			float* ptr_uv2,
 			float* ptr_color,
 			float* ptr_tangents,
-			int32_t* ptr_bitangent_signs
+			int32_t* ptr_bitangent_signs,
+			float* ptr_weights,
+			int32_t* ptr_bone_indices
 		);
 
 		bool SerializeToJsonStr(std::string& json_data) const;

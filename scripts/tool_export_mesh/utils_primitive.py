@@ -60,7 +60,7 @@ class Primitive():
             self.use_morph_color_attrs = True # Use morph target color attributes if available
 
             # Less frequently changed options
-            self.normal_tangent_round_precision = 3
+            self.normal_tangent_round_precision = 0.01
             self.atomic_max_number = 65535
             self.weight_cutoff_threshold = 0.0001
             self.max_weights_per_vertex = 8
@@ -194,6 +194,8 @@ class Primitive():
 
         self.gather_atomics()
 
+        self._test_deduplication()
+
         self.deduplicate_atomics()
 
         self.gather_positions()
@@ -297,7 +299,7 @@ class Primitive():
         # Gather UV data
         _temp_arr = np.empty(len(self.blender_mesh.loops) * 2, dtype = np.float32)
         self.uv_layer.data.foreach_get('uv', _temp_arr)
-        uvs = _temp_arr.reshape(-1, 2).T
+        uvs = np.round(_temp_arr, 3).reshape(-1, 2).T
         # u, v -> u, 1-v
         uvs[1] = 1 - uvs[1]
         self.atomic_vertices['uv_x'] = uvs[0]
@@ -308,7 +310,7 @@ class Primitive():
         if self.options.secondary_uv_layer_index != -1 and self.second_uv_layer:
             _temp_arr = np.empty(len(self.blender_mesh.loops) * 2, dtype = np.float32)
             self.second_uv_layer.data.foreach_get('uv', _temp_arr)
-            uvs = _temp_arr.reshape(-1, 2).T
+            uvs = np.round(_temp_arr, 3).reshape(-1, 2).T
             # u, v -> u, 1-v
             uvs[1] = 1 - uvs[1]
             self.atomic_vertices['uv_x_2'] = uvs[0]
@@ -358,7 +360,15 @@ class Primitive():
 
     @timer
     def deduplicate_atomics(self, raise_exception = True):
-        self.atomic_vertices, self.atomic_to_loop_id, self.loop_id_to_atomic = np.unique(self.atomic_vertices, return_index=True, return_inverse=True)
+        temp_atomic_vertices, temp_atomic_to_loop_id, loop_id_to_temp_atomic = np.unique(self.atomic_vertices, return_index=True, return_inverse=True)
+
+        # Refine normal deduplication
+        self.refine_normal_deduplication(temp_atomic_vertices)
+
+        self.atomic_vertices, atomic_to_temp_atomic, temp_atomic_to_atomic = np.unique(temp_atomic_vertices, return_index=True, return_inverse=True)
+
+        self.atomic_to_loop_id = temp_atomic_to_loop_id[atomic_to_temp_atomic]
+        self.loop_id_to_atomic = temp_atomic_to_atomic[loop_id_to_temp_atomic]
 
         print("Final vertices count: " + str(len(self.atomic_vertices)))
 
@@ -372,16 +382,48 @@ class Primitive():
 
     @timer
     def _test_deduplication(self, raise_exception = True):
-        _test_uv = np.unique(np.hstack([self.atomic_vertices['uv_x'], self.atomic_vertices['uv_y'], self.atomic_vertices['uv_x_2'], self.atomic_vertices['uv_y_2']]))
+        print("Initial loop vertices count: " + str(len(self.atomic_vertices)))
+
+        _test_uv = np.unique(self.atomic_vertices[['vertex_index', 'uv_x', 'uv_y', 'uv_x_2', 'uv_y_2']])
         print("Final vertices count by UV: " + str(len(_test_uv)))
 
-        _test_normals = np.unique(np.hstack([self.atomic_vertices['normal_x'], self.atomic_vertices['normal_y'], self.atomic_vertices['normal_z']]))
+        _test_normals = np.unique(self.atomic_vertices[['vertex_index', 'normal_x', 'normal_y', 'normal_z']])
         print("Final vertices count by normals: " + str(len(_test_normals)))
 
-        _test_colors = np.unique(np.hstack([self.atomic_vertices['color_r'], self.atomic_vertices['color_g'], self.atomic_vertices['color_b'], self.atomic_vertices['color_a']]))
+        _test_colors = np.unique(self.atomic_vertices[['vertex_index', 'color_r', 'color_g', 'color_b', 'color_a']])
         print("Final vertices count by colors: " + str(len(_test_colors)))
+
+        #first_elements = _test_normals['vertex_index']
+        #unique_elements, counts = np.unique(first_elements, return_counts=True)
+
+        #repeated_vertices = _test_normals[np.isin(first_elements, unique_elements[counts > 1])]
+        #for vertex_index in repeated_vertices['vertex_index']:
+        #    print(self.atomic_vertices[self.atomic_vertices['vertex_index']==vertex_index])
+
         return True
     
+    @timer
+    def refine_normal_deduplication(self, atomic_verts, threshold = 0.02):
+        first_elements = atomic_verts['vertex_index']
+        unique_elements, counts = np.unique(first_elements, return_counts=True)
+
+        repeated_vertices = atomic_verts[np.isin(first_elements, unique_elements[counts > 1])]
+
+        normals = np.vstack((atomic_verts['normal_x'], atomic_verts['normal_y'], atomic_verts['normal_z'])).T
+
+        for vertex_index in repeated_vertices['vertex_index']:
+            vert_normal_group = normals[atomic_verts['vertex_index'] == vertex_index]
+            # Get max, min value for each field
+            max = np.max(vert_normal_group, axis=0)
+            min = np.min(vert_normal_group, axis=0)
+
+            if np.max(utils_math.min_max_dist(vert_normal_group)) < threshold:
+                center = np.mean(vert_normal_group, axis=0)
+                
+                # Replace all normals with the center
+                atomic_verts['normal_x'][atomic_verts['vertex_index'] == vertex_index] = center[0]
+                atomic_verts['normal_y'][atomic_verts['vertex_index'] == vertex_index] = center[1]
+                atomic_verts['normal_z'][atomic_verts['vertex_index'] == vertex_index] = center[2]
     @timer
     def gather_positions(self):
         self.raw_positions = np.empty(len(self.blender_mesh.vertices) * 3, dtype=np.float32)
@@ -536,7 +578,7 @@ class Primitive():
         
         self.raw_normals = self.raw_normals.reshape(-1, 3)
 
-        self.raw_normals = np.round(self.raw_normals, self.options.normal_tangent_round_precision)
+        self.raw_normals = utils_math.prec_round(self.raw_normals, self.options.normal_tangent_round_precision)
 
         # Handle degenrated normals
         is_zero = ~self.raw_normals.any(axis=1)
@@ -566,7 +608,7 @@ class Primitive():
                     raw_morph_normals = np.array(key_block.normals_split_get(), dtype=np.float32)
 
                 raw_morph_normals = raw_morph_normals.reshape(len(self.blender_mesh.loops), 3)
-                raw_morph_normals = np.round(raw_morph_normals, self.options.normal_tangent_round_precision)
+                raw_morph_normals = utils_math.prec_round(raw_morph_normals, self.options.normal_tangent_round_precision)
 
                 # Handle degenrated normals
                 is_zero = ~raw_morph_normals.any(axis=1)
@@ -595,7 +637,7 @@ class Primitive():
         self.blender_mesh.loops.foreach_get('tangent', self.raw_tangents)
         self.raw_tangents = self.raw_tangents.reshape(len(self.blender_mesh.loops), 3)
 
-        self.raw_tangents = np.round(self.raw_tangents, self.options.normal_tangent_round_precision)
+        self.raw_tangents = utils_math.prec_round(self.raw_tangents, self.options.normal_tangent_round_precision)
 
         self._post_tangent_transform(self.raw_tangents)
 
@@ -785,7 +827,7 @@ class Primitive():
         }
         return data
 
-def CheckForPrimitive(blender_object:bpy.types.Object, gather_tangents = True):
+def CheckForPrimitive(blender_object:bpy.types.Object, gather_tangents = True, gather_morphs = False):
     # Mesh type
     if blender_object.type != 'MESH':
         return False, "Object is not a mesh"
@@ -798,6 +840,18 @@ def CheckForPrimitive(blender_object:bpy.types.Object, gather_tangents = True):
     if not blender_object.data.uv_layers.active:
         return False, "Object has no active UV data"
     
+    if gather_morphs:
+        if blender_object.data.shape_keys:
+            has_exportable_shape_keys = False
+            for key_block in blender_object.data.shape_keys.key_blocks:
+                if key_block != key_block.relative_key and not key_block.mute:
+                    has_exportable_shape_keys = True
+                    break
+            if not has_exportable_shape_keys:
+                return False, "No exportable shape keys found on mesh"
+        else:
+            return False, "No shape keys found on mesh"
+
     return True, ""
 
 @timer

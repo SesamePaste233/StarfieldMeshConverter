@@ -154,3 +154,56 @@ def apply_mat_to_all(matrix:mathutils.Matrix, vectors:np.ndarray) -> np.ndarray:
 	if len(matrix) == 4:
 		res += np.array(matrix.translation)
 	return res
+
+def prec_round(data:np.ndarray, precision:float) -> np.ndarray:
+	"""Rounds the data to the nearest multiple of precision"""
+	_data = np.around(data/precision, 0)*precision
+	return _data
+
+def sqrt_prec_round(data:np.ndarray, precision:float) -> np.ndarray:
+	"""Rounds the data to the nearest multiple of precision"""
+	_data = np.around(np.sqrt(data)/precision, 0)*precision
+	return _data**2
+
+from scipy.spatial.distance import pdist
+from sklearn.cluster import KMeans
+
+
+def min_max_dist(points):
+	'''
+		Subtract max value and min value for each dimension
+	'''
+	return np.max(points, axis=0) - np.min(points, axis=0)
+
+def divide_into_two_parts(points, dim):
+	"""
+	Divide points into two parts by thresholding on the specified dimension.
+	"""
+	# Sort the points along the specified dimension
+	sorted_points = points[points[:, dim].argsort()]
+	mid = len(sorted_points) // 2
+
+	return sorted_points[:mid], sorted_points[mid:]
+
+from utils_common import timer, timer_cell
+
+def iterative_divide(points, threshold):
+	"""
+	Recursively divide points into subsets such that each subset's maximum distance is below the threshold.
+	"""
+	if len(points) == 1:
+		return [points] 
+
+	mmd = min_max_dist(points)
+	max_dim = np.argmax(mmd)
+
+	if np.max(mmd) <= threshold:
+		return [np.mean(points, axis=0, keepdims=True)]
+
+	part1, part2 = divide_into_two_parts(points, max_dim)
+
+	#result_part1 = iterative_divide(part1, threshold)
+	#result_part2 = iterative_divide(part2, threshold)
+
+	#return result_part1 + result_part2
+	return [np.mean(part1, axis=0, keepdims=True), np.mean(part2, axis=0, keepdims=True)]

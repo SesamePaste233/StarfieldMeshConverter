@@ -73,6 +73,26 @@ def timer(f):
 		return result
 	return wrap
 
+class TimerCell:
+	def __init__(self, name = 'Code_block'):
+		self.name = name
+		self.ts = None
+		self.te = None
+
+	def __enter__(self):
+		self.ts = time()
+		if self.name:
+			print(f'{self.name} timer start.')
+		return self
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		self.te = time()
+		if self.name:
+			print(f'{self.name} took: {self.te - self.ts:.4f} secs')
+
+def timer_cell(name = 'Code_block'):
+	return TimerCell(name)
+
 default_assets_folder = 'YOUR_LOOSE_DATA_FOLDER'
 export_mesh_folder_path = None
 assets_folder = None

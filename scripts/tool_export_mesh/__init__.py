@@ -13,6 +13,7 @@ import PhysicsPanel
 import MaterialPanel
 import ImportSkeleOp
 import Preferences
+import BoneRegionsOperator
 import BoneRegionsPanel
 import MorphPanel
 import NifIOOperators
@@ -70,6 +71,7 @@ __modules__ = [
 	MaterialPanel,
 	ImportSkeleOp,
 	Preferences,
+	BoneRegionsOperator,
 	BoneRegionsPanel,
 	MorphPanel,
 	MeshIOOperators,

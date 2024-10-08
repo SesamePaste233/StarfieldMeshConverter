@@ -5,6 +5,20 @@ import bpy
 import numpy as np
 
 
+__all_sculpt_regions__ = [
+    'Mouth',
+    'Ears',
+    'Eyes',
+    'Nose',
+    'Jaw',
+    'Head Shapes',
+    'Neck',
+    'Forehead',
+    'Eyebrows',
+    'Cheeks',
+    'Chin',
+]
+
 class IDRecorder:
     def __init__(self) -> None:
         self.id = 0
@@ -14,7 +28,7 @@ class IDRecorder:
         return self.id
     
     def set_id(self, id):
-        self.id = id
+        self.id = max(self.id, id)
 
     def reset_id(self):
         self.id = 0
@@ -98,6 +112,15 @@ class ControlBone:
             self.position_minima + self.rotation_minima + self.scale_minima
         ], dtype=np.float32)
 
+    def is_zeros(self, is_maxima:bool):
+        if is_maxima:
+            return np.all(self.position_maxima == 0) and np.all(self.rotation_maxima == 0) and np.all(self.scale_maxima == 0)
+        else:
+            return np.all(self.position_minima == 0) and np.all(self.rotation_minima == 0) and np.all(self.scale_minima == 0)
+        
+    def is_zeros_all(self):
+        return self.is_zeros(True) and self.is_zeros(False)
+
 class Slider:
     def __init__(self, ID, name: str = "", is_zero_to_one = False) -> None:
         self.id = ID
@@ -122,16 +145,25 @@ class Slider:
                 ...
             }
         '''
-        if not additive:
-            self.bones.clear()
-            
-        for bone_name, data in bone_data.items():
+        for bone_name in set(self.bones.keys()).union(bone_data.keys()):
             if bone_name in self.bones:
-                self.bones[bone_name].set_bone_data(data, is_maxima)
+                if bone_name in bone_data: # Update bone data
+                    data = bone_data[bone_name]
+                    self.bones[bone_name].set_bone_data(data, is_maxima)
+                elif not additive: # Set bone data to zero
+                    data = np.zeros(9, dtype=np.float32)
+                    self.bones[bone_name].set_bone_data(data, is_maxima)
+                else: # Skip
+                    continue
             else:
                 bone = ControlBone(bone_name)
+                data = bone_data[bone_name]
                 bone.set_bone_data(data, is_maxima)
                 self.bones[bone_name] = bone
+
+        for bone_name, bone in list(self.bones.items()):
+            if bone.is_zeros_all():
+                del self.bones[bone_name]
 
 
     @staticmethod
@@ -248,7 +280,7 @@ class BoneRegions:
         self.regions:dict[str, Region] = {}
         self.id_recorder = IDRecorder()
         self.bone_names:list[str] = []
-        self.face_region_names:list[str] = []
+        self.pheno_face_region_names:list[str] = []
         self.phenotypes:list[str] = []
         self.sculpt_regions:list[str] = []
         self._BR_tensor:np.ndarray = None
@@ -298,7 +330,7 @@ class BoneRegions:
             raw_data = csv.reader(file)
 
             csvdata = [row for row in raw_data]
-            self.face_region_names = csvdata[0][1:]
+            self.pheno_face_region_names = csvdata[0][1:]
             self.bone_names = [row[0] for row in csvdata[1:]]
             _BR_matrix = np.array([row[1:] for row in csvdata[1:]], dtype=np.float32) * 0.01
             self._BR_tensor = _BR_matrix[:, :, np.newaxis]
@@ -498,7 +530,7 @@ class BoneRegions:
         self.regions.clear()
         self.id_recorder = IDRecorder()
         self.bone_names.clear()
-        self.face_region_names.clear()
+        self.pheno_face_region_names.clear()
         self.phenotypes.clear()
         self.sculpt_regions.clear()
         self._BR_tensor = None
@@ -508,7 +540,7 @@ class BoneRegions:
             del self._Sculpt_tensor
 
     def get_input_shape(self):
-        return len(self.phenotypes), len(self.face_region_names)
+        return len(self.phenotypes), len(self.pheno_face_region_names)
 
 __bone_regions_data__ = BoneRegions()
 
@@ -521,7 +553,7 @@ if __name__ == "__main__":
     bone_regions = BoneRegions()
     bone_regions.import_from_file(regions_file, mapping_file)
     
-    control_matrix = np.zeros((len(bone_regions.phenotypes), len(bone_regions.face_region_names)))
+    control_matrix = np.zeros((len(bone_regions.phenotypes), len(bone_regions.pheno_face_region_names)))
 
     # Set the first row to 1
     control_matrix[0] = 1

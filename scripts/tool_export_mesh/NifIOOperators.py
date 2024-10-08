@@ -505,6 +505,14 @@ class ExportCustomNif(bpy.types.Operator):
 		layout.prop(self, "WEIGHTS")
 		layout.prop(self, "use_secondary_uv")
 		
+		report = utils_blender.export_report(report_uv_layers=True)
+		box = layout.box()
+		if self.use_secondary_uv:
+			box.label(text=f"First UV Map: {report['first_uv'].name}")
+			box.label(text=f"Second UV Map: {report['second_uv'].name}")
+		else:
+			box.label(text=f"UV Map: {report['first_uv'].name}")
+			
 		# Draw a horizontal line
 		layout.separator()
 		layout.label(text="Additional Data:") 

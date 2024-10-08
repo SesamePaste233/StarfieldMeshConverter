@@ -225,82 +225,79 @@ def ExportMorph_alt(options, context, export_file_path, operator, snapping_range
 	p_options.gather_morph_data = True
 	p_options.use_global_positions = options.use_world_origin
 	
-	new_obj = target_obj.copy()
-	new_obj.data = target_obj.data.copy()
-	bm = bmesh.new()
-	bm.from_mesh(new_obj.data)
-	bmesh.ops.triangulate(bm, faces=bm.faces[:])
-	bm.to_mesh(new_obj.data)
-	bm.free()
+	with utils_blender.get_obj_proxy(target_obj, bmesh_triangulation=True) as new_obj:
+		rtn, reason = utils_primitive.CheckForPrimitive(new_obj, gather_tangents=False, gather_morphs=True)
+		if not rtn:
+			operator.report({'WARNING'}, f"Object {target_obj.name} is not a valid object. Reason: {reason}")
+			return {'CANCELLED'},  None
 
-	time_start = time.time()
+		if options.use_secondary_uv:
+			uv_layer = target_obj.data.uv_layers.active
+			for _uv_layer in target_obj.data.uv_layers:
+				if _uv_layer != uv_layer:
+					p_options.secondary_uv_layer_index = target_obj.data.uv_layers.find(_uv_layer.name)
+					break
 
-	primitive = utils_primitive.Primitive(new_obj, p_options)
+		time_start = time.time()
 
-	sel_primitives = []
-	if snapping_range > 0:
-		for select_obj in selected_objs:
-			rtn, reason = utils_primitive.CheckForPrimitive(select_obj, gather_tangents=False)
-			if not rtn:
-				operator.report({'WARNING'}, f"Object {select_obj.name} is not a valid primitive for snapping. Reason: {reason}")
-				continue
+		primitive = utils_primitive.Primitive(new_obj, p_options)
 
-			sel_p_options = utils_primitive.Primitive.Options()
-			sel_p_options.gather_morph_data = True
-			sel_p_options.gather_tangents = False
-			sel_p_options.use_global_positions = options.use_world_origin
+		sel_primitives = []
+		if snapping_range > 0:
+			for select_obj in selected_objs:
+				rtn, reason = utils_primitive.CheckForPrimitive(select_obj, gather_tangents=False)
+				if not rtn:
+					operator.report({'WARNING'}, f"Object {select_obj.name} is not a valid primitive for snapping. Reason: {reason}")
+					continue
 
-			sel_primitive = utils_primitive.Primitive(select_obj, sel_p_options)
-			sel_primitive.gather()
-			sel_primitives.append(sel_primitive)
+				sel_p_options = utils_primitive.Primitive.Options()
+				sel_p_options.gather_morph_data = True
+				sel_p_options.gather_tangents = False
+				sel_p_options.use_global_positions = options.use_world_origin
 
-	try:
-		primitive.gather()
+				sel_primitive = utils_primitive.Primitive(select_obj, sel_p_options)
+				sel_primitive.gather()
+				sel_primitives.append(sel_primitive)
 
-		for sel_prim in sel_primitives:
-			utils_primitive.CopyMorphNormalsAtSeam(primitive, sel_prim, snapping_range, snap_delta_positions=snap_delta_positions, lerp_coeff=snap_lerp_coeff, lerp_coeff_delta_pos=snap_lerp_coeff_delta_pos)
+		try:
+			primitive.gather()
 
-		jsondata = primitive.to_morph_numpy_dict()
-	except utils_primitive.UVNotFoundException as e:
-		operator.report({'WARNING'}, f"UVNotFoundException caught: {e}.")
-		return {'CANCELLED'},  None
-	except utils_primitive.AtomicException as e:
-		operator.report({'WARNING'}, f"AtomicException caught: {e}.")
-		return {'CANCELLED'},  None
-	except Exception as e:
-		print(e)
-		operator.report({'WARNING'}, f"An error occurred during gathering morph data. Message: {e}")
-		return {'CANCELLED'},  None
+			for sel_prim in sel_primitives:
+				utils_primitive.CopyMorphNormalsAtSeam(primitive, sel_prim, snapping_range, snap_delta_positions=snap_delta_positions, lerp_coeff=snap_lerp_coeff, lerp_coeff_delta_pos=snap_lerp_coeff_delta_pos)
 
-	time_end = time.time()
+			jsondata = primitive.to_morph_numpy_dict()
+		except utils_primitive.UVNotFoundException as e:
+			operator.report({'WARNING'}, f"UVNotFoundException caught: {e}.")
+			return {'CANCELLED'},  None
+		except utils_primitive.AtomicException as e:
+			operator.report({'WARNING'}, f"AtomicException caught: {e}.")
+			return {'CANCELLED'},  None
+		except Exception as e:
+			print(e)
+			operator.report({'WARNING'}, f"An error occurred during gathering morph data. Message: {e}")
+			return {'CANCELLED'},  None
 
-	#json_data = json.dumps(jsondata)
+		time_end = time.time()
 
-	time_end1 = time.time()
+		#json_data = json.dumps(jsondata)
 
-	#if utils_blender.is_plugin_debug_mode():
-	#	debug_json_data = json.dumps(jsondata, indent=2)
-	#	with open(export_path + ".json", 'w') as f:
-	#		f.write(debug_json_data)
+		time_end1 = time.time()
 
-	returncode = MeshConverter.ExportMorphFromNumpy(jsondata, export_path)
+		#if utils_blender.is_plugin_debug_mode():
+		#	debug_json_data = json.dumps(jsondata, indent=2)
+		#	with open(export_path + ".json", 'w') as f:
+		#		f.write(debug_json_data)
 
-	time_end2 = time.time()
+		returncode = MeshConverter.ExportMorphFromNumpy(jsondata, export_path)
 
-	if not returncode:
-		bpy.data.meshes.remove(new_obj.data)
-		
-		utils_blender.SetActiveObject(target_obj)
+		time_end2 = time.time()
 
-		operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
-		return {"CANCELLED"}, None
+		if not returncode:
+			operator.report({'INFO'}, f"Execution failed with error message: \"{returncode.what()}\". Contact the author for assistance.")
+			return {"CANCELLED"}, None
 
-	bpy.data.meshes.remove(new_obj.data)
-
-	utils_blender.SetActiveObject(target_obj)
-
-	operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f}  + Dll: {time_end2 - time_end1:.2} seconds.")
-	return {"FINISHED"}, jsondata['numVertices']
+		operator.report({'INFO'}, f"Export morph successful. Time taken: Gather: {time_end - time_start:.2f}  + Dll: {time_end2 - time_end1:.2} seconds.")
+		return {"FINISHED"}, jsondata['numVertices']
 
 def ExportMorph(options, context, export_file_path, operator):
 	export_path = export_file_path

@@ -335,9 +335,9 @@ bool mesh::MeshIO::Serialize(std::ostream& file)
 		utils::writeAsHex(file, this->num_vert_colors);
 
 		for (auto color : this->vert_colors) {
-			utils::writeAsHex(file, color.r);
-			utils::writeAsHex(file, color.g);
 			utils::writeAsHex(file, color.b);
+			utils::writeAsHex(file, color.g);
+			utils::writeAsHex(file, color.r);
 			utils::writeAsHex(file, color.a);
 		}
 	}
@@ -1107,13 +1107,15 @@ bool mesh::MeshIO::LoadFromJson(const nlohmann::json& jsonData, const float scal
 
 bool mesh::MeshIO::LoadToNumpy(
 	float* ptr_positions, 
-	int64_t* ptr_indices, 
+	int32_t* ptr_indices,
 	float* ptr_normals, 
 	float* ptr_uv1, 
 	float* ptr_uv2, 
 	float* ptr_color, 
 	float* ptr_tangents, 
-	int32_t* ptr_bitangent_signs
+	int32_t* ptr_bitangent_signs,
+	float* ptr_weights,
+	int32_t* ptr_bone_indices
 ) {
 	if (ptr_positions != nullptr) {
 		for (size_t i = 0; i < this->num_vertices; ++i) {
@@ -1168,6 +1170,15 @@ bool mesh::MeshIO::LoadToNumpy(
 	if (ptr_bitangent_signs != nullptr) {
 		for (size_t i = 0; i < this->num_tangents; ++i) {
 			ptr_bitangent_signs[i] = this->tangent_signs[i];
+		}
+	}
+
+	if (ptr_weights != nullptr && ptr_bone_indices != nullptr) {
+		for (size_t i = 0; i < this->num_vertices; ++i) {
+			for (size_t j = 0; j < this->num_weightsPerVertex; ++j) {
+				ptr_weights[i * this->num_weightsPerVertex + j] = this->weights[i][j].weight/65535.f;
+				ptr_bone_indices[i * this->num_weightsPerVertex + j] = this->weights[i][j].bone;
+			}
 		}
 	}
 

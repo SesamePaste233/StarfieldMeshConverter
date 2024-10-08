@@ -51,13 +51,15 @@ extern "C" {
 
 	DLL uint32_t ImportMeshNumpy(const char* input_file,
 		float* positions,
-		int64_t* indices,
+		int32_t* indices,
 		float* normals,
 		float* uv1,
 		float* uv2,
 		float* colors,
 		float* tangents,
-		int32_t* bitangent_signs
+		int32_t* bitangent_signs,
+		float* ptr_weights,
+		int32_t* ptr_bone_indices
 	);
 
 	DLL const char* ImportMorph(const char* input_file);

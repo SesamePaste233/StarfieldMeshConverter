@@ -178,13 +178,15 @@ const char* ImportMeshHeader(const char* input_file) {
 
 uint32_t ImportMeshNumpy(const char* input_file,
 	float* positions,
-	int64_t* indices,
+	int32_t* indices,
 	float* normals,
 	float* uv1,
 	float* uv2,
 	float* colors,
 	float* tangents,
-	int32_t* bitangent_signs
+	int32_t* bitangent_signs,
+	float* ptr_weights,
+	int32_t* ptr_bone_indices
 ) {
 	std::string inputMesh(input_file);
 
@@ -197,7 +199,7 @@ uint32_t ImportMeshNumpy(const char* input_file,
 
 	// Save the morph to the output file
 	std::string JsonData;
-	if (!meshReader.LoadToNumpy(positions, indices, normals, uv1, uv2, colors, tangents, bitangent_signs)) {
+	if (!meshReader.LoadToNumpy(positions, indices, normals, uv1, uv2, colors, tangents, bitangent_signs, ptr_weights, ptr_bone_indices)) {
 		std::cerr << "Failed to serialize morph to json" << std::endl;
 		return 99;
 	}

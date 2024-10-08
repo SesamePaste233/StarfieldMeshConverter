@@ -22,15 +22,6 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	if not (obj and obj.type == 'MESH'):
 		return {'CANCELLED'}, "Selected object is not a mesh.", None, None
 	
-	# Duplicate the object and triangulate the mesh
-	new_obj = obj.copy()
-	new_obj.data = obj.data.copy()
-	bm = bmesh.new()
-	bm.from_mesh(new_obj.data)
-	bmesh.ops.triangulate(bm, faces=bm.faces[:])
-	bm.to_mesh(new_obj.data)
-	bm.free()
-
 	p_options = utils_primitive.Primitive.Options()
 	p_options.gather_morph_data = False
 	p_options.gather_weights_data = options.WEIGHTS
@@ -39,73 +30,76 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	
 	p_options.prune_empty_vertex_groups = prune_empty_vertex_groups
 
-	if options.use_secondary_uv:
-		uv_layer = obj.data.uv_layers.active
-		for _uv_layer in obj.data.uv_layers:
-			if _uv_layer != uv_layer:
-				p_options.secondary_uv_layer_index = obj.data.uv_layers.find(_uv_layer.name)
-				break
+	# Duplicate the object and triangulate the mesh
+	with utils_blender.get_obj_proxy(obj, bmesh_triangulation=True) as new_obj:
+		rtn, reason = utils_primitive.CheckForPrimitive(new_obj, gather_tangents=False)
+		if not rtn:
+			return {'CANCELLED'},  f"Object {obj.name} is not a valid object. Reason: {reason}"
+		
+		if options.use_secondary_uv:
+			uv_layer = obj.data.uv_layers.active
+			for _uv_layer in obj.data.uv_layers:
+				if _uv_layer != uv_layer:
+					p_options.secondary_uv_layer_index = obj.data.uv_layers.find(_uv_layer.name)
+					break
 
-	if head_object_mode == 'Base':
-		facebone_vg_names = [vg.name for vg in obj.vertex_groups if vg.name.startswith("faceBone_")]
-		p_options.vertex_group_merge_source = facebone_vg_names
-		p_options.vertex_group_merge_target = "C_Head"
+		if head_object_mode == 'Base':
+			facebone_vg_names = [vg.name for vg in obj.vertex_groups if vg.name.startswith("faceBone_")]
+			p_options.vertex_group_merge_source = facebone_vg_names
+			p_options.vertex_group_merge_target = "C_Head"
 
-	if bone_list_filter is not None:
-		for vg in obj.vertex_groups:
-			if vg.name not in bone_list_filter:
-				p_options.vertex_group_ignore.append(vg.name)
+		if bone_list_filter is not None:
+			for vg in obj.vertex_groups:
+				if vg.name not in bone_list_filter:
+					p_options.vertex_group_ignore.append(vg.name)
 
-	primitive = utils_primitive.Primitive(new_obj, p_options)
+		primitive = utils_primitive.Primitive(new_obj, p_options)
 
-	if len(ref_objects) >= 1:
-		print("Snapping on export mesh was enabled. Snapping the data...")
-		ref_primitives = []
+		if len(ref_objects) >= 1:
+			print("Snapping on export mesh was enabled. Snapping the data...")
+			ref_primitives = []
 
-		for ref_obj in ref_objects:
-			rtn, reason = utils_primitive.CheckForPrimitive(ref_obj, gather_tangents=False)
-			
-			if not rtn:
-				continue
+			for ref_obj in ref_objects:
+				rtn, reason = utils_primitive.CheckForPrimitive(ref_obj, gather_tangents=False)
+				
+				if not rtn:
+					continue
 
-			sel_p_options = utils_primitive.Primitive.Options()
-			sel_p_options.gather_morph_data = False
-			sel_p_options.gather_tangents = False
-			sel_p_options.use_global_positions = options.use_world_origin
+				sel_p_options = utils_primitive.Primitive.Options()
+				sel_p_options.gather_morph_data = False
+				sel_p_options.gather_tangents = False
+				sel_p_options.use_global_positions = options.use_world_origin
 
-			sel_primitive = utils_primitive.Primitive(ref_obj, sel_p_options)
-			sel_primitive.gather()
-			ref_primitives.append(sel_primitive)
+				sel_primitive = utils_primitive.Primitive(ref_obj, sel_p_options)
+				sel_primitive.gather()
+				ref_primitives.append(sel_primitive)
 
-	try:
-		primitive.gather()
-	except utils_primitive.UVNotFoundException as e:
-		return {'CANCELLED'}, "Your mesh has no active UV map.", None, None
-	except utils_primitive.AtomicException as e:
-		return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None, None
-	except Exception as e:
-		return {'CANCELLED'}, f"An error occurred: {e}", None, None
+		try:
+			primitive.gather()
+		except utils_primitive.UVNotFoundException as e:
+			return {'CANCELLED'}, "Your mesh has no active UV map.", None, None
+		except utils_primitive.AtomicException as e:
+			return {'CANCELLED'}, "Your mesh has too many vertices or sharp edges or uv islands. Try to reduce them.", None, None
+		except Exception as e:
+			return {'CANCELLED'}, f"An error occurred: {e}", None, None
 
-	if len(ref_objects) >= 1:
-		for ref_primitive in ref_primitives:
+		if len(ref_objects) >= 1:
+			for ref_primitive in ref_primitives:
 
-			utils_primitive.CopyNormalsAtSeam(
-				primitive,
-				ref_primitive,
-				copy_range=options.snapping_range,
-				lerp_coeff=options.snap_lerp_coeff
-			)
-	
-	try:
-		matrices, data = primitive.to_mesh_numpy_dict()
-	except Exception as e:
-		return {'CANCELLED'}, f"An error occurred on at converting to numpy dict: {e}", None, None
-	
-	# Cleanup
-	bpy.data.meshes.remove(new_obj.data)	
+				utils_primitive.CopyNormalsAtSeam(
+					primitive,
+					ref_primitive,
+					copy_range=options.snapping_range,
+					lerp_coeff=options.snap_lerp_coeff
+				)
+		
+		try:
+			matrices, data = primitive.to_mesh_numpy_dict()
+		except Exception as e:
+			return {'CANCELLED'}, f"An error occurred on at converting to numpy dict: {e}", None, None
 
-	print(f"MeshToJson took {time.time() - start_time} seconds")
-	return {'FINISHED'}, "", data, matrices
+		print(f"MeshToJson took {time.time() - start_time} seconds")
+		return {'FINISHED'}, "", data, matrices
 
 def ExportMesh(options, context, filepath: str, operator, bone_list_filter = None, prune_empty_vertex_groups = False, head_object_mode = 'None', ref_objects = []):
 	export_mesh_file_path = filepath
@@ -167,6 +161,65 @@ def ImportMesh(file_path, options, context, operator, mesh_name_override = None)
 
 	return MeshFromJson(data, options, context, operator, mesh_name_override)
 
+@utils.timer
+def ImportMesh_Alt(file_path, options, context, operator, mesh_name_override = None):
+	import_path = file_path
+
+	dict = MeshConverter.ImportMeshAsNumpy(import_path)
+
+	name = "ImportedMesh" if mesh_name_override == None else mesh_name_override
+
+	obj = bpy.data.objects.new(name, bpy.data.meshes.new(name))
+	mesh:bpy.types.Mesh = obj.data
+	bpy.context.collection.objects.link(obj)
+
+	# Add the vertices
+	mesh.from_pydata(dict['positions_raw'], [], dict['vertex_indices_raw'])
+
+	vertex_indices = np.empty(len(mesh.loops), dtype=np.int32)
+	mesh.loops.foreach_get('vertex_index', vertex_indices)
+
+	# Set the normals
+	vert_normals = dict['normals']
+	# Normalize the normals
+	vert_normals = vert_normals / np.linalg.norm(vert_normals, axis=1)[:, np.newaxis]
+	mesh.normals_split_custom_set_from_vertices(vert_normals)
+
+	# Set the UVs
+	uv_layer = mesh.uv_layers.new(name="UVMap")
+	uv_layer.data.foreach_set("uv", dict['uv_coords'][vertex_indices].ravel())
+
+	if not np.isclose(dict['uv_coords_2'], 0).any():
+		uv_layer2 = mesh.uv_layers.new(name="UVMap2")
+		uv_layer2.data.foreach_set("uv", dict['uv_coords_2'][vertex_indices].ravel())
+
+	# Set the vertex colors
+	if not np.isclose(dict['vertex_color'], 0).any():
+		vertex_colors = mesh.color_attributes.new(name="Col", type='BYTE_COLOR', domain='CORNER')
+		vertex_colors.data.foreach_set("color", dict['vertex_color'].ravel())
+
+	if not dict['num_weightsPerVertex'] == 0:
+		weights = dict['weights']
+		bone_indices = dict['bone_indices']
+
+		num_vertices = dict['num_verts']
+		num_bones = np.max(bone_indices) + 1
+
+
+		result = np.zeros((num_vertices, num_bones))
+
+		np.add.at(result, (np.arange(num_vertices)[:, None], bone_indices), weights)
+
+		for i in range(num_bones):
+			vg = obj.vertex_groups.new(name=f"bone{i}")
+			v_ids = result[:, i].nonzero()[0]
+			ws = result[:, i][v_ids]
+			[vg.add([int(v_id)], float(w), 'ADD') for v_id, w in zip(v_ids, ws)]
+
+	utils_blender.SetActiveObject(obj)
+
+	return {'FINISHED'}
+
 def MeshFromJson(json_data, options, context, operator, mesh_name_override = None):
 	data = json_data
 
@@ -183,6 +236,9 @@ def MeshFromJson(json_data, options, context, operator, mesh_name_override = Non
 	)
 
 	obj = bpy.context.selected_objects[0]
+
+	utils_blender.AverageCustomNormals(obj)
+
 	if not obj:
 		operator.report({'WARNING'}, f"Unknown error. Contact the author for assistance.")
 		return {'CANCELLED'}

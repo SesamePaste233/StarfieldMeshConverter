@@ -1182,3 +1182,88 @@ def set_viewport_shading(screen:bpy.types.Screen, **kwargs):
 	# setattr
 	for key, value in kwargs.items():
 		setattr(space.shading, key, value)
+
+def export_report(report_uv_layers: bool):
+	target_obj = GetActiveObject()
+	selected_objs = GetSelectedObjs(True)
+
+	report = {
+		"target_obj": target_obj,
+		"selected_objs": selected_objs,
+	}
+	
+	if not report_uv_layers:
+		return report
+	
+	first_uv = target_obj.data.uv_layers.active
+	second_uv = None
+	for _uv_layer in target_obj.data.uv_layers:
+		if _uv_layer != first_uv:
+			second_uv = _uv_layer
+
+	report["first_uv"] = first_uv
+	report["second_uv"] = second_uv
+
+	return report
+
+class ObjectBMeshProxy:
+	def __init__(self, obj:bpy.types.Object, bmesh_triangulation = False, proxy_name = "BMeshProxy"):
+		self.target_obj = obj
+		self.new_obj = None
+		self.proxy_name = proxy_name
+		self.bmesh_triangulation = bmesh_triangulation
+		self.use_bmesh = self.bmesh_triangulation
+
+	def __enter__(self):
+		print("Allocating new object.")
+		if self.target_obj == None:
+			# Create a new object
+			self.new_obj = bpy.data.objects.new(self.proxy_name, bpy.data.meshes.new(self.proxy_name))
+			return self.new_obj
+
+		self.new_obj = self.target_obj.copy()
+		self.new_obj.data = self.target_obj.data.copy()
+		if self.use_bmesh:
+			bm = bmesh.new()
+			bm.from_mesh(self.new_obj.data)
+			if self.bmesh_triangulation:
+				bmesh.ops.triangulate(bm, faces=bm.faces[:])
+			bm.to_mesh(self.new_obj.data)
+			bm.free()
+
+		return self.new_obj
+	
+	def __exit__(self, exc_type, exc_value, traceback):
+		print("Deallocating new object.")
+		try:
+			bpy.data.meshes.remove(self.new_obj.data)
+		except Exception as e:
+			print(f"Error: {e}")
+			pass
+		self.new_obj = None
+
+def get_obj_proxy(obj:bpy.types.Object, bmesh_triangulation = False):
+	return ObjectBMeshProxy(obj, bmesh_triangulation)
+
+def get_active_obj_proxy(bmesh_triangulation = False):
+	return ObjectBMeshProxy(GetActiveObject(), bmesh_triangulation)
+
+
+def AverageCustomNormals(obj:bpy.types.Object):
+	original_active = SetActiveObject(obj)
+
+	old_mode = obj.mode
+
+	if obj.mode != 'EDIT':
+		bpy.ops.object.mode_set(mode='EDIT')
+
+	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+	bpy.ops.mesh.select_all(action='SELECT')
+	bpy.ops.mesh.average_normals(average_type='CUSTOM_NORMAL')
+	bpy.ops.mesh.select_all(action='DESELECT')
+
+	if old_mode != 'EDIT':
+		bpy.ops.object.mode_set(mode=old_mode)
+
+	if original_active != obj:
+		SetActiveObject(original_active)

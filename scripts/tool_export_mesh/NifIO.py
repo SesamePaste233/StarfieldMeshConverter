@@ -59,7 +59,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 			if use_internal_geom_data:
 				rtn = MeshIO.MeshFromJson(mesh_info['mesh_data'], options, context, operator)
 			else:
-				rtn = MeshIO.ImportMesh(mesh_filepath, options, context, operator, factory_path)
+				rtn = MeshIO.ImportMesh_Alt(mesh_filepath, options, context, operator, factory_path)
 			
 			if 'FINISHED' not in rtn:
 				operator.report({'WARNING'}, f'Failed to load mesh for {geo_name}.')

@@ -6,6 +6,8 @@ import os
 
 import utils_common as utils
 
+import utils_blender	
+
 class ImportCustomMorph(bpy.types.Operator):
 	bl_idname = "import_scene.custom_morph"
 	bl_label = "Import Custom Morph"
@@ -45,6 +47,12 @@ class ExportCustomMorph(bpy.types.Operator):
 	filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
 
 	use_world_origin = True
+
+	use_secondary_uv: bpy.props.BoolProperty(
+		name="Use Secondary UV",
+		description="Use the topmost non-active UV map (if possible) as secondary UV",
+		default=False
+	)
 
 	snapping_enabled: bpy.props.BoolProperty(
 		name="Snap Morph Data To Selected",
@@ -86,6 +94,16 @@ class ExportCustomMorph(bpy.types.Operator):
 
 	def draw(self, context):
 		layout = self.layout
+		layout.prop(self, "use_secondary_uv")
+
+		report = utils_blender.export_report(report_uv_layers=True)
+		box = layout.box()
+		if self.use_secondary_uv:
+			box.label(text=f"First UV Map: {report['first_uv'].name}")
+			box.label(text=f"Second UV Map: {report['second_uv'].name}")
+		else:
+			box.label(text=f"UV Map: {report['first_uv'].name}")
+
 		layout.label(text="Morph Snapping Options:")
 		layout.prop(self, "snapping_enabled")
 		box = layout.box()

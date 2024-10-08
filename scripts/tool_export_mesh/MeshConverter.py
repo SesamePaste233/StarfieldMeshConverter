@@ -81,13 +81,15 @@ _dll_import_mesh_numpy = _dll.ImportMeshNumpy
 _dll_import_mesh_numpy.argtypes = [
     ctypes.c_char_p, # morph file path
     ctypes.POINTER(ctypes.c_float), # ptr_positions
-    ctypes.POINTER(ctypes.c_int64), # ptr_indices
+    ctypes.POINTER(ctypes.c_int32), # ptr_indices
     ctypes.POINTER(ctypes.c_float), # ptr_normals
     ctypes.POINTER(ctypes.c_float), # ptr_uv1
     ctypes.POINTER(ctypes.c_float), # ptr_uv2
     ctypes.POINTER(ctypes.c_float), # ptr_color
     ctypes.POINTER(ctypes.c_float), # ptr_tangents
     ctypes.POINTER(ctypes.c_int32), # ptr_bitangent_signs
+    ctypes.POINTER(ctypes.c_float), # ptr_weights
+    ctypes.POINTER(ctypes.c_int32), # ptr_bone_indices
     ]
 
 _dll_compose_physics_data = _dll.ComposePhysicsData
@@ -266,24 +268,28 @@ def ImportMeshAsNumpy(input_file: str) -> dict:
     assert(num_triangles * 3 == num_indices)
 
     positions = np.zeros((num_vertices, 3), dtype=np.float32)
-    indices = np.zeros((num_triangles, 3), dtype=np.int64)
+    indices = np.zeros((num_triangles, 3), dtype=np.int32)
     normals = np.zeros((num_vertices, 3), dtype=np.float32)
     uv1 = np.zeros((num_vertices, 2), dtype=np.float32)
     uv2 = np.zeros((num_vertices, 2), dtype=np.float32)
     color = np.zeros((num_vertices, 4), dtype=np.float32)
     tangents = np.zeros((num_vertices, 3), dtype=np.float32)
     bitangent_signs = np.zeros((num_vertices,), dtype=np.int32)
+    weights = np.zeros((num_vertices, num_weightsPerVertex), dtype=np.float32)
+    bone_indices = np.zeros((num_vertices, num_weightsPerVertex), dtype=np.int32)
 
     ptr_positions = _check_numpy_type_and_size(positions, np_type=np.float32, size=(num_vertices, 3))
-    ptr_indices = _check_numpy_type_and_size(indices, np_type=np.int64, size=(num_triangles, 3))
+    ptr_indices = _check_numpy_type_and_size(indices, np_type=np.int32, size=(num_triangles, 3))
     ptr_normals = _check_numpy_type_and_size(normals, np_type=np.float32, size=(num_vertices, 3))
     ptr_uv1 = _check_numpy_type_and_size(uv1, np_type=np.float32, size=(num_vertices, 2))
     ptr_uv2 = _check_numpy_type_and_size(uv2, np_type=np.float32, size=(num_vertices, 2))
     ptr_color = _check_numpy_type_and_size(color, np_type=np.float32, size=(num_vertices, 4))
     ptr_tangents = _check_numpy_type_and_size(tangents, np_type=np.float32, size=(num_vertices, 3))
     ptr_bitangent_signs = _check_numpy_type_and_size(bitangent_signs, np_type=np.int32, size=(num_vertices,))
+    ptr_weights = _check_numpy_type_and_size(weights, np_type=np.float32, size=(num_vertices, num_weightsPerVertex))
+    ptr_bone_indices = _check_numpy_type_and_size(bone_indices, np_type=np.int32, size=(num_vertices, num_weightsPerVertex))
 
-    rtn = _dll_import_mesh_numpy(input_file.encode('utf-8'), ptr_positions, ptr_indices, ptr_normals, ptr_uv1, ptr_uv2, ptr_color, ptr_tangents, ptr_bitangent_signs)
+    rtn = _dll_import_mesh_numpy(input_file.encode('utf-8'), ptr_positions, ptr_indices, ptr_normals, ptr_uv1, ptr_uv2, ptr_color, ptr_tangents, ptr_bitangent_signs, ptr_weights, ptr_bone_indices)
 
     if rtn != 0:
         raise Exception(f"Failed to load mesh file: {input_file}")
@@ -301,7 +307,9 @@ def ImportMeshAsNumpy(input_file: str) -> dict:
         "uv_coords_2": uv2,
         "vertex_color": color,
         "tangents": tangents,
-        "bitangent_signs": bitangent_signs
+        "bitangent_signs": bitangent_signs,
+        "weights": weights,
+        "bone_indices": bone_indices
     }
 
 def ImportMorphAsJson(input_file: str) -> str:
