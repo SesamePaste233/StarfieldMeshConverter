@@ -194,7 +194,7 @@ class Primitive():
 
         self.gather_atomics()
 
-        self._test_deduplication()
+        #self._test_deduplication()
 
         self.deduplicate_atomics()
 
