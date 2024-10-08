@@ -227,7 +227,7 @@ def ExportMorph_alt(options, context, export_file_path, operator, snapping_range
 	p_options.gather_morph_data = True
 	p_options.use_global_positions = options.use_world_origin
 	
-	with utils_blender.get_obj_proxy(target_obj, bmesh_triangulation=True) as new_obj:
+	with utils_blender.get_obj_proxy(target_obj, triangulation_method='Ops') as new_obj:
 		rtn, reason = utils_primitive.CheckForPrimitive(new_obj, gather_tangents=False, gather_morphs=True)
 		if not rtn:
 			operator.report({'WARNING'}, f"Object {target_obj.name} is not a valid object. Reason: {reason}")

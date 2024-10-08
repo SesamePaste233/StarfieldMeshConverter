@@ -1206,13 +1206,42 @@ def export_report(report_uv_layers: bool):
 
 	return report
 
+
+class ObjectScope:
+	def __init__(self, obj:bpy.types.Object, edit_mode = False, edit_mode_select_all_verts = False):
+		self.obj = obj
+		self.original_active = None
+		self.original_mode = None
+		self.edit_mode = edit_mode
+		self.edit_mode_select_all_verts = edit_mode_select_all_verts
+
+	def __enter__(self):
+		self.original_active = SetActiveObject(self.obj)
+		self.original_mode = self.obj.mode
+		if self.edit_mode:
+			if self.obj.mode != 'EDIT':
+				bpy.ops.object.mode_set(mode='EDIT')
+			bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+			if self.edit_mode_select_all_verts:
+				bpy.ops.mesh.select_all(action='SELECT')
+		return self.obj
+	
+	def __exit__(self, exc_type, exc_value, traceback):
+		if self.original_mode != self.obj.mode:
+			bpy.ops.object.mode_set(mode=self.original_mode)
+		if self.original_active != self.obj and self.original_active != None:
+			SetActiveObject(self.original_active)
+
+def get_obj_scope(obj:bpy.types.Object, edit_mode = False, edit_mode_select_all_verts = False):
+	return ObjectScope(obj, edit_mode, edit_mode_select_all_verts)
+
 class ObjectBMeshProxy:
-	def __init__(self, obj:bpy.types.Object, bmesh_triangulation = False, proxy_name = "BMeshProxy"):
+	def __init__(self, obj:bpy.types.Object, triangulation_method: str = 'None', proxy_name = "BMeshProxy"):
 		self.target_obj = obj
 		self.new_obj = None
 		self.proxy_name = proxy_name
-		self.bmesh_triangulation = bmesh_triangulation
-		self.use_bmesh = self.bmesh_triangulation
+		self.bmesh_triangulation = triangulation_method == 'BMesh'
+		self.ops_triangulation = triangulation_method == 'Ops'
 
 	def __enter__(self):
 		print("Allocating new object.")
@@ -1223,13 +1252,15 @@ class ObjectBMeshProxy:
 
 		self.new_obj = self.target_obj.copy()
 		self.new_obj.data = self.target_obj.data.copy()
-		if self.use_bmesh:
+		if self.bmesh_triangulation:
 			bm = bmesh.new()
 			bm.from_mesh(self.new_obj.data)
-			if self.bmesh_triangulation:
-				bmesh.ops.triangulate(bm, faces=bm.faces[:])
+			bmesh.ops.triangulate(bm, faces=bm.faces[:])
 			bm.to_mesh(self.new_obj.data)
 			bm.free()
+		elif self.ops_triangulation:
+			with get_obj_scope(self.new_obj, True, True):
+				bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
 
 		return self.new_obj
 	
@@ -1242,12 +1273,11 @@ class ObjectBMeshProxy:
 			pass
 		self.new_obj = None
 
-def get_obj_proxy(obj:bpy.types.Object, bmesh_triangulation = False):
-	return ObjectBMeshProxy(obj, bmesh_triangulation)
+def get_obj_proxy(obj:bpy.types.Object, triangulation_method = 'None'):
+	return ObjectBMeshProxy(obj, triangulation_method)
 
-def get_active_obj_proxy(bmesh_triangulation = False):
-	return ObjectBMeshProxy(GetActiveObject(), bmesh_triangulation)
-
+def get_active_obj_proxy(triangulation_method = 'None'):
+	return ObjectBMeshProxy(GetActiveObject(), triangulation_method)
 
 def AverageCustomNormals(obj:bpy.types.Object):
 	original_active = SetActiveObject(obj)

@@ -31,7 +31,7 @@ def MeshToJson(obj, options, bone_list_filter = None, prune_empty_vertex_groups 
 	p_options.prune_empty_vertex_groups = prune_empty_vertex_groups
 
 	# Duplicate the object and triangulate the mesh
-	with utils_blender.get_obj_proxy(obj, bmesh_triangulation=True) as new_obj:
+	with utils_blender.get_obj_proxy(obj, triangulation_method='Ops') as new_obj:
 
 		#if obj.data.has_custom_normals:
 		#	obj.data.calc_normals_split()
