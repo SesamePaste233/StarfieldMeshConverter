@@ -28,7 +28,7 @@ def IsMorphObject(obj):
 	j = name.find(']')
 	return j > i
 
-def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False, use_attributes = False):
+def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False, use_colors = False, use_normals = False):
 	import_path = filepath
 	
 	data = MeshConverter.ImportMorphAsNumpy(import_path)
@@ -85,7 +85,7 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 	sk_basis.interpolation = 'KEY_LINEAR'
 	target_obj.data.shape_keys.use_relative = True
 
-	if use_attributes:
+	if (use_normals or use_colors):
 		ones_column = np.zeros((data["targetColors"][0].shape[0], 1), dtype=np.float32)
 
 		loop_indices = np.array([loop.vertex_index for loop in target_obj.data.loops], dtype=np.int32)
@@ -102,9 +102,11 @@ def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_i
 		if debug_delta_normal:
 			utils_blender.VisualizeVectors(target_obj.data, delta_pos[n], basis_normals + delta_normals[n], key_name)
 		
-		if use_attributes:
-			#utils_morph_attrs.MorphNormals().set_data(target_obj.data, key_name, delta_normals[n][loop_indices].ravel(), create_if_not_exist=True)
+		if use_colors:
 			utils_morph_attrs.MorphTargetColors().set_data(target_obj.data, key_name, np.hstack((target_colors[n] / 255.0, ones_column))[loop_indices].ravel(), create_if_not_exist=True)
+
+		if use_normals:
+			utils_morph_attrs.MorphNormals().set_data(target_obj.data, key_name, delta_normals[n][loop_indices].ravel(), create_if_not_exist=True)
 
 	operator.report({'INFO'}, f"Import Morph Successful.")
 	return {'FINISHED'}
