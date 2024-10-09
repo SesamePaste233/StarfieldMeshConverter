@@ -1210,12 +1210,17 @@ def export_report(report_uv_layers: bool):
 class ObjectScope:
 	def __init__(self, obj:bpy.types.Object, edit_mode = False, edit_mode_select_all_verts = False):
 		self.obj = obj
+		self.obj_in_view_layer = bpy.context.view_layer.objects.find(obj.name) != -1
 		self.original_active = None
 		self.original_mode = None
 		self.edit_mode = edit_mode
 		self.edit_mode_select_all_verts = edit_mode_select_all_verts
 
 	def __enter__(self):
+		# Add object to view layer if not already in it
+		if not self.obj_in_view_layer:
+			bpy.context.collection.objects.link(self.obj)
+
 		self.original_active = SetActiveObject(self.obj)
 		self.original_mode = self.obj.mode
 		if self.edit_mode:
@@ -1231,6 +1236,9 @@ class ObjectScope:
 			bpy.ops.object.mode_set(mode=self.original_mode)
 		if self.original_active != self.obj and self.original_active != None:
 			SetActiveObject(self.original_active)
+
+		if not self.obj_in_view_layer:
+			bpy.context.collection.objects.unlink(self.obj)
 
 def get_obj_scope(obj:bpy.types.Object, edit_mode = False, edit_mode_select_all_verts = False):
 	return ObjectScope(obj, edit_mode, edit_mode_select_all_verts)
