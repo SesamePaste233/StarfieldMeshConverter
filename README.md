@@ -1,5 +1,5 @@
 # MeshConverter
-A blender plugin that exports models, morph, geometry and physics data for Starfield in a single click.
+A blender plugin that exports models, morph, geometry and physics data for Starfield in a single click. This plugin is designed to work with blender version 3.5 or 3.6, imcompatible with blender 4.0+.
 
 ## Discord Community
 https://discord.gg/dUuUcJ6G8t (with temporary access)
@@ -14,7 +14,7 @@ https://www.nexusmods.com/starfield/mods/4360
 * Miniball library for bounding sphere computation: https://github.com/hbf/miniball
 
 ## Installation
-Install it like any other blender plugin. You should find a new panel inside "Tool" sidebar.
+You should get the latest release from this github page and follow this video: https://www.youtube.com/watch?v=YuuFkJNWDCU
 
 ## Term Of Use
 * Starfield Geometry Bridge is an open-source program meant for ***everyone***. You have the freedom to use SGB for whatever you want however you like, within this agreement, the license on github page and the law.
