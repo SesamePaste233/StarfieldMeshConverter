@@ -66,7 +66,7 @@ namespace nif {
 			uint8_t endian = 1;
 			uint32_t user_version = 12;
 			uint32_t num_blocks;
-			uint32_t BS_version = 172;
+			uint32_t BS_version = 173; // 172 for older versions of starfield
 			std::string author = "";
 			uint32_t unk1 = 3;
 			std::string process_script = "Blender Mesh Plugin";

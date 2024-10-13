@@ -1697,12 +1697,12 @@ nif::ni_template::RTTI nif::ni_template::NiArmatureTemplate::FromNif(const NifIO
 		for (int i = 0; i < current->children.size(); ++i) {
 			auto _child = manager.GetBlock(current->children[i]);
 
-			auto name = nif.string_manager.GetString(_child->name_index);
-
-			if (skeleton_mode && skeleton_bones.find(name) == skeleton_bones.end())
-				continue;
-
 			if (_child != nullptr) {
+				auto name = nif.string_manager.GetString(_child->name_index);
+
+				if (skeleton_mode && skeleton_bones.find(name) == skeleton_bones.end())
+					continue;
+
 				auto child = dynamic_cast<NiObject*>(_child);
 				NodeInfo child_bone;
 				if (!child_bone.FromNiObject(child, nif)) {

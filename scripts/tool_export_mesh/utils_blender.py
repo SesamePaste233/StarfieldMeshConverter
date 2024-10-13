@@ -1212,6 +1212,7 @@ class ObjectScope:
 		self.obj = obj
 		self.obj_in_view_layer = bpy.context.view_layer.objects.find(obj.name) != -1
 		self.original_active = None
+		self.original_selected = None
 		self.original_mode = None
 		self.edit_mode = edit_mode
 		self.edit_mode_select_all_verts = edit_mode_select_all_verts
@@ -1222,6 +1223,7 @@ class ObjectScope:
 			bpy.context.collection.objects.link(self.obj)
 
 		self.original_active = SetActiveObject(self.obj)
+		self.original_selected = SetSelectObjects([])
 		self.original_mode = self.obj.mode
 		if self.edit_mode:
 			if self.obj.mode != 'EDIT':
@@ -1236,6 +1238,9 @@ class ObjectScope:
 			bpy.ops.object.mode_set(mode=self.original_mode)
 		if self.original_active != self.obj and self.original_active != None:
 			SetActiveObject(self.original_active)
+
+		if self.original_selected != None:
+			SetSelectObjects(self.original_selected)
 
 		if not self.obj_in_view_layer:
 			bpy.context.collection.objects.unlink(self.obj)
