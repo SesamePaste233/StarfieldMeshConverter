@@ -1192,7 +1192,7 @@ def export_report(report_uv_layers: bool):
 		"selected_objs": selected_objs,
 	}
 	
-	if not report_uv_layers:
+	if not report_uv_layers or target_obj == None or target_obj.type != 'MESH':
 		return report
 	
 	first_uv = target_obj.data.uv_layers.active

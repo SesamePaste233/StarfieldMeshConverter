@@ -38,7 +38,7 @@ namespace nif {
 		static constexpr uint32_t NO_REF = 0xffffffff;
 
 		NiNodeBase() = default;
-		~NiNodeBase() = default;
+		virtual ~NiNodeBase() = default;
 
 		uint32_t type_index = NO_REF;
 		uint32_t name_index = NO_REF;

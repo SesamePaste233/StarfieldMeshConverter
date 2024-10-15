@@ -85,6 +85,8 @@ namespace utils {
 
 	class SerializableBase {
 	public:
+		virtual ~SerializableBase() = default;
+
 		uint64_t serialized_index = -1;
 
 		virtual uint64_t Serialize(utils::DataAccessor data, SerializePool& serializer) = 0;

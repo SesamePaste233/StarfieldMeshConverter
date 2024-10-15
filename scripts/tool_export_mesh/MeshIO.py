@@ -195,17 +195,25 @@ def ImportMesh_Alt(file_path, options, context, operator, mesh_name_override = N
 	mesh.loops.foreach_get('vertex_index', vertex_indices)
 
 	# Set the normals
-	vert_normals = dict['normals']
-	# Normalize the normals
+	vert_normals: np.ndarray = dict['normals']
+	vert_normals = vert_normals.astype(np.float64)
 	vert_normals = vert_normals / np.linalg.norm(vert_normals, axis=1)[:, np.newaxis]
-	mesh.normals_split_custom_set_from_vertices(vert_normals)
+	mesh.normals_split_custom_set_from_vertices(vert_normals) # This doesn't work as expected if vert_normals is at low bitwidth, each vertex will still have several different normals ever so slightly different from each other
 
 	# Set the UVs
 	uv_layer = mesh.uv_layers.new(name="UVMap")
+	# Flip y axis
+	uv_data = dict['uv_coords']
+	uv_data[:, 1] = 1 - uv_data[:, 1]
+	
 	uv_layer.data.foreach_set("uv", dict['uv_coords'][vertex_indices].ravel())
 
 	if not np.isclose(dict['uv_coords_2'], 0).any():
 		uv_layer2 = mesh.uv_layers.new(name="UVMap2")
+		# Flip y axis
+		uv_data2 = dict['uv_coords_2']
+		uv_data2[:, 1] = 1 - uv_data2[:, 1]
+
 		uv_layer2.data.foreach_set("uv", dict['uv_coords_2'][vertex_indices].ravel())
 
 	# Set the vertex colors
@@ -232,6 +240,9 @@ def ImportMesh_Alt(file_path, options, context, operator, mesh_name_override = N
 			[vg.add([int(v_id)], float(w), 'ADD') for v_id, w in zip(v_ids, ws)]
 
 	utils_blender.SetActiveObject(obj)
+	obj.data.use_auto_smooth = True
+
+	#utils_blender.AverageCustomNormals(obj)
 
 	return {'FINISHED'}
 

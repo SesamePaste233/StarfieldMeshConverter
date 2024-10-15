@@ -284,6 +284,7 @@ namespace nif {
 
 		class NiTemplateBase {
 		public:
+			virtual ~NiTemplateBase() = default;
 			virtual RTTI GetRTTI() const { return RTTI::None; };
 			virtual bool ToNif(NifIO& source) { return false; };
 			virtual RTTI FromNif(const NifIO& source) {

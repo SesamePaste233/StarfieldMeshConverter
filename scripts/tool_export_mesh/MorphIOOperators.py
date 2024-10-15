@@ -105,11 +105,14 @@ class ExportCustomMorph(bpy.types.Operator):
 
 		report = utils_blender.export_report(report_uv_layers=True)
 		box = layout.box()
-		if self.use_secondary_uv:
-			box.label(text=f"First UV Map: {report['first_uv'].name}")
-			box.label(text=f"Second UV Map: {report['second_uv'].name}")
+		if 'first_uv' in report and 'second_uv' in report:
+			if self.use_secondary_uv:
+				box.label(text=f"First UV Map: {report['first_uv'].name}")
+				box.label(text=f"Second UV Map: {report['second_uv'].name}")
+			else:
+				box.label(text=f"UV Map: {report['first_uv'].name}")
 		else:
-			box.label(text=f"UV Map: {report['first_uv'].name}")
+			box.label(text="UV Map: N/A")
 
 		layout.label(text="Morph Snapping Options:")
 		layout.prop(self, "snapping_enabled")
