@@ -203,23 +203,6 @@
   },
   {
     "alignment": 8,
-    "class_name": "char*",
-    "declared": 1,
-    "defined": 1,
-    "fields": [],
-    "format": 3,
-    "hash": 0,
-    "id": "char*",
-    "optionals": 9,
-    "parent_class_id": "",
-    "size": 8,
-    "sub_type_id": "",
-    "template_args": [],
-    "type_flags": 0,
-    "version": 0
-  },
-  {
-    "alignment": 8,
     "class_name": "hkArray",
     "declared": 1,
     "defined": 1,
@@ -265,6 +248,23 @@
         "value": 0
       }
     ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "char*",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 3,
+    "hash": 0,
+    "id": "char*",
+    "optionals": 9,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "",
+    "template_args": [],
     "type_flags": 0,
     "version": 0
   },
@@ -4531,6 +4531,45 @@
     "version": 0
   },
   {
+    "alignment": 16,
+    "class_name": "hclVolumeConstraintMx::ApplyBatchData",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "frameVector",
+        "offset": 0,
+        "type_id": "T[N]<hkVector4, 4>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "stiffness",
+        "offset": 64,
+        "type_id": "T[N]<hkReal, 4>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "particleIndex",
+        "offset": 80,
+        "type_id": "T[N]<hkUint16, 4>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 3462998564,
+    "id": "hclVolumeConstraintMx::ApplyBatchData",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 96,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 1
+  },
+  {
     "class_name": "hclVirtualCollisionPointsData::EdgeFan",
     "declared": 1,
     "defined": 0,
@@ -5117,12 +5156,43 @@
     "version": 0
   },
   {
+    "alignment": 2,
     "class_name": "hclBoneSpaceDeformer::FourBlendEntryBlock",
     "declared": 1,
-    "defined": 0,
-    "hash": 0,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "vertexIndices",
+        "offset": 0,
+        "type_id": "T[N]<hkUint16, 4>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "boneIndices",
+        "offset": 8,
+        "type_id": "T[N]<hkUint16, 16>",
+        "unk_value": 0
+      },
+      {
+        "flags": 33,
+        "name": "padding",
+        "offset": 40,
+        "type_id": "T[N]<hkUint8, 8>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 1623421278,
     "id": "hclBoneSpaceDeformer::FourBlendEntryBlock",
-    "template_args": []
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 48,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 1
   },
   {
     "alignment": 1,
@@ -5936,6 +6006,56 @@
   },
   {
     "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 1088147199,
+    "id": "hkArray<hclVolumeConstraintMx::ApplyBatchData, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hclVolumeConstraintMx::ApplyBatchData",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclVolumeConstraintMx::ApplyBatchData",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
     "class_name": "hclClothState",
     "declared": 1,
     "defined": 1,
@@ -6513,6 +6633,38 @@
     "version": 0
   },
   {
+    "alignment": 8,
+    "class_name": "hclVolumeConstraintMx",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "frameBatchDatas",
+        "offset": 40,
+        "type_id": "hkArray<hclVolumeConstraintMx::FrameBatchData, hkContainerHeapAllocator>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "applyBatchDatas",
+        "offset": 56,
+        "type_id": "hkArray<hclVolumeConstraintMx::ApplyBatchData, hkContainerHeapAllocator>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 4022169133,
+    "id": "hclVolumeConstraintMx",
+    "optionals": 45,
+    "parent_class_id": "hclConstraintSet",
+    "size": 72,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 2
+  },
+  {
     "class_name": "hkLocalFrame",
     "declared": 1,
     "defined": 0,
@@ -6564,6 +6716,34 @@
         "value": 0
       }
     ]
+  },
+  {
+    "alignment": 16,
+    "class_name": "T[N]",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 1064,
+    "hash": 0,
+    "id": "T[N]<hkVector4, 4>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 64,
+    "sub_type_id": "hkVector4",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkVector4",
+        "value": 0
+      },
+      {
+        "name": "vN",
+        "type_id": "",
+        "value": 4
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
   },
   {
     "alignment": 4,
@@ -10403,7 +10583,7 @@
       }
     ],
     "format": 8,
-    "hash": 0,
+    "hash": 3569347824,
     "id": "hkArray<hclBoneSpaceDeformer::FourBlendEntryBlock, hkContainerHeapAllocator>",
     "optionals": 43,
     "parent_class_id": "",
@@ -12440,5 +12620,122 @@
     ],
     "type_flags": 0,
     "version": 0
+  },
+  {
+    "alignment": 1,
+    "class_name": "T[N]",
+    "declared": 1,
+    "defined": 1,
+    "fields": [],
+    "format": 2088,
+    "hash": 0,
+    "id": "T[N]<hkUint8, 8>",
+    "optionals": 11,
+    "parent_class_id": "",
+    "size": 8,
+    "sub_type_id": "hkUint8",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hkUint8",
+        "value": 0
+      },
+      {
+        "name": "vN",
+        "type_id": "",
+        "value": 8
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 8,
+    "class_name": "hkArray",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 34,
+        "name": "m_data",
+        "offset": 0,
+        "type_id": "T*<void>",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_size",
+        "offset": 8,
+        "type_id": "int",
+        "unk_value": 0
+      },
+      {
+        "flags": 34,
+        "name": "m_capacityAndFlags",
+        "offset": 12,
+        "type_id": "int",
+        "unk_value": 0
+      }
+    ],
+    "format": 8,
+    "hash": 638634001,
+    "id": "hkArray<hclVolumeConstraintMx::FrameBatchData, hkContainerHeapAllocator>",
+    "optionals": 43,
+    "parent_class_id": "",
+    "size": 16,
+    "sub_type_id": "hclVolumeConstraintMx::FrameBatchData",
+    "template_args": [
+      {
+        "name": "tT",
+        "type_id": "hclVolumeConstraintMx::FrameBatchData",
+        "value": 0
+      },
+      {
+        "name": "tAllocator",
+        "type_id": "hkContainerHeapAllocator",
+        "value": 0
+      }
+    ],
+    "type_flags": 0,
+    "version": 0
+  },
+  {
+    "alignment": 16,
+    "class_name": "hclVolumeConstraintMx::FrameBatchData",
+    "declared": 1,
+    "defined": 1,
+    "fields": [
+      {
+        "flags": 32,
+        "name": "frameVector",
+        "offset": 0,
+        "type_id": "T[N]<hkVector4, 4>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "weight",
+        "offset": 64,
+        "type_id": "T[N]<hkReal, 4>",
+        "unk_value": 0
+      },
+      {
+        "flags": 32,
+        "name": "particleIndex",
+        "offset": 80,
+        "type_id": "T[N]<hkUint16, 4>",
+        "unk_value": 0
+      }
+    ],
+    "format": 7,
+    "hash": 3774165338,
+    "id": "hclVolumeConstraintMx::FrameBatchData",
+    "optionals": 45,
+    "parent_class_id": "",
+    "size": 96,
+    "sub_type_id": "",
+    "template_args": [],
+    "type_flags": 0,
+    "version": 1
   }
 ]

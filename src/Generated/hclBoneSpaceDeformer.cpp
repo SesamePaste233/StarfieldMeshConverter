@@ -13,9 +13,13 @@ bool hktypes::hclBoneSpaceDeformer::FromInstance(const hkreflex::hkClassInstance
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer") {
-		std::cout << "hclBoneSpaceDeformer::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer") {
+		std::cout << "hclBoneSpaceDeformer::FromInstance: Expecting hclBoneSpaceDeformer but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -34,9 +38,13 @@ bool hktypes::hclBoneSpaceDeformer::LocalBlockPN::FromInstance(const hkreflex::h
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockPN") {
-		std::cout << "hclBoneSpaceDeformer::LocalBlockPN::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockPN::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockPN") {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockPN::FromInstance: Expecting hclBoneSpaceDeformer::LocalBlockPN but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -49,9 +57,13 @@ bool hktypes::hclBoneSpaceDeformer::LocalBlockUnpackedPN::FromInstance(const hkr
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockUnpackedPN") {
-		std::cout << "hclBoneSpaceDeformer::LocalBlockUnpackedPN::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockUnpackedPN::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockUnpackedPN") {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockUnpackedPN::FromInstance: Expecting hclBoneSpaceDeformer::LocalBlockUnpackedPN but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -62,12 +74,19 @@ bool hktypes::hclBoneSpaceDeformer::FourBlendEntryBlock::FromInstance(const hkre
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::FourBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::FourBlendEntryBlock::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::FourBlendEntryBlock::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::FourBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::FourBlendEntryBlock::FromInstance: Expecting hclBoneSpaceDeformer::FourBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("vertexIndices")->GetValue(vertexIndices);
+	class_instance->GetInstanceByFieldName("boneIndices")->GetValue(boneIndices);
+	class_instance->GetInstanceByFieldName("padding")->GetValue(padding);
 	return true;
 }
 
@@ -75,9 +94,13 @@ bool hktypes::hclBoneSpaceDeformer::ThreeBlendEntryBlock::FromInstance(const hkr
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::ThreeBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::ThreeBlendEntryBlock::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::ThreeBlendEntryBlock::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::ThreeBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::ThreeBlendEntryBlock::FromInstance: Expecting hclBoneSpaceDeformer::ThreeBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -88,9 +111,13 @@ bool hktypes::hclBoneSpaceDeformer::TwoBlendEntryBlock::FromInstance(const hkref
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::TwoBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::TwoBlendEntryBlock::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::TwoBlendEntryBlock::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::TwoBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::TwoBlendEntryBlock::FromInstance: Expecting hclBoneSpaceDeformer::TwoBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -101,9 +128,13 @@ bool hktypes::hclBoneSpaceDeformer::OneBlendEntryBlock::FromInstance(const hkref
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::OneBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::OneBlendEntryBlock::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::OneBlendEntryBlock::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::OneBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::OneBlendEntryBlock::FromInstance: Expecting hclBoneSpaceDeformer::OneBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -116,9 +147,13 @@ bool hktypes::hclBoneSpaceDeformer::ToInstance(hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer") {
-		std::cout << "hclBoneSpaceDeformer::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer") {
+		std::cout << "hclBoneSpaceDeformer::ToInstance: Expecting hclBoneSpaceDeformer but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -137,9 +172,13 @@ bool hktypes::hclBoneSpaceDeformer::LocalBlockPN::ToInstance(hkreflex::hkClassIn
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockPN") {
-		std::cout << "hclBoneSpaceDeformer::LocalBlockPN::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockPN::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockPN") {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockPN::ToInstance: Expecting hclBoneSpaceDeformer::LocalBlockPN but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -152,9 +191,13 @@ bool hktypes::hclBoneSpaceDeformer::LocalBlockUnpackedPN::ToInstance(hkreflex::h
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockUnpackedPN") {
-		std::cout << "hclBoneSpaceDeformer::LocalBlockUnpackedPN::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockUnpackedPN::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::LocalBlockUnpackedPN") {
+		std::cout << "hclBoneSpaceDeformer::LocalBlockUnpackedPN::ToInstance: Expecting hclBoneSpaceDeformer::LocalBlockUnpackedPN but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -165,12 +208,19 @@ bool hktypes::hclBoneSpaceDeformer::FourBlendEntryBlock::ToInstance(hkreflex::hk
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::FourBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::FourBlendEntryBlock::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::FourBlendEntryBlock::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::FourBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::FourBlendEntryBlock::ToInstance: Expecting hclBoneSpaceDeformer::FourBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("vertexIndices")->SetValue(vertexIndices);
+	class_instance->GetInstanceByFieldName("boneIndices")->SetValue(boneIndices);
+	class_instance->GetInstanceByFieldName("padding")->SetValue(padding);
 	return true;
 }
 
@@ -178,9 +228,13 @@ bool hktypes::hclBoneSpaceDeformer::ThreeBlendEntryBlock::ToInstance(hkreflex::h
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::ThreeBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::ThreeBlendEntryBlock::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::ThreeBlendEntryBlock::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::ThreeBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::ThreeBlendEntryBlock::ToInstance: Expecting hclBoneSpaceDeformer::ThreeBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -191,9 +245,13 @@ bool hktypes::hclBoneSpaceDeformer::TwoBlendEntryBlock::ToInstance(hkreflex::hkC
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::TwoBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::TwoBlendEntryBlock::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::TwoBlendEntryBlock::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::TwoBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::TwoBlendEntryBlock::ToInstance: Expecting hclBoneSpaceDeformer::TwoBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -204,9 +262,13 @@ bool hktypes::hclBoneSpaceDeformer::OneBlendEntryBlock::ToInstance(hkreflex::hkC
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceDeformer::OneBlendEntryBlock") {
-		std::cout << "hclBoneSpaceDeformer::OneBlendEntryBlock::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceDeformer::OneBlendEntryBlock::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceDeformer::OneBlendEntryBlock") {
+		std::cout << "hclBoneSpaceDeformer::OneBlendEntryBlock::ToInstance: Expecting hclBoneSpaceDeformer::OneBlendEntryBlock but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

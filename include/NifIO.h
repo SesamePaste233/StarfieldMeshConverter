@@ -208,6 +208,8 @@ namespace nif {
 
 		NiBlockManager block_manager = NiBlockManager(&header, this);
 
+		bool _decode_physics_data = true;
+
 		std::vector<NiNodeBase*> GetRTTIBlocks(const NiRTTI& RTTI, const bool use_name = false, const std::string& name = "") const;
 
 		NiNode* GetRootNode() const;

@@ -13,9 +13,13 @@ bool hktypes::hclClothState::FromInstance(const hkreflex::hkClassInstance* insta
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothState") {
-		std::cout << "hclClothState::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothState::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothState") {
+		std::cout << "hclClothState::FromInstance: Expecting hclClothState but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -33,9 +37,13 @@ bool hktypes::hclClothState::BufferAccess::FromInstance(const hkreflex::hkClassI
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothState::BufferAccess") {
-		std::cout << "hclClothState::BufferAccess::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothState::BufferAccess::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothState::BufferAccess") {
+		std::cout << "hclClothState::BufferAccess::FromInstance: Expecting hclClothState::BufferAccess but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -49,9 +57,13 @@ bool hktypes::hclClothState::TransformSetAccess::FromInstance(const hkreflex::hk
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothState::TransformSetAccess") {
-		std::cout << "hclClothState::TransformSetAccess::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothState::TransformSetAccess::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothState::TransformSetAccess") {
+		std::cout << "hclClothState::TransformSetAccess::FromInstance: Expecting hclClothState::TransformSetAccess but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -64,9 +76,13 @@ bool hktypes::hclClothState::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothState") {
-		std::cout << "hclClothState::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothState::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothState") {
+		std::cout << "hclClothState::ToInstance: Expecting hclClothState but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -84,9 +100,13 @@ bool hktypes::hclClothState::BufferAccess::ToInstance(hkreflex::hkClassInstance*
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothState::BufferAccess") {
-		std::cout << "hclClothState::BufferAccess::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothState::BufferAccess::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothState::BufferAccess") {
+		std::cout << "hclClothState::BufferAccess::ToInstance: Expecting hclClothState::BufferAccess but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -100,9 +120,13 @@ bool hktypes::hclClothState::TransformSetAccess::ToInstance(hkreflex::hkClassIns
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothState::TransformSetAccess") {
-		std::cout << "hclClothState::TransformSetAccess::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothState::TransformSetAccess::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothState::TransformSetAccess") {
+		std::cout << "hclClothState::TransformSetAccess::ToInstance: Expecting hclClothState::TransformSetAccess but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

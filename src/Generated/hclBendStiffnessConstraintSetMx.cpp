@@ -9,9 +9,13 @@ bool hktypes::hclBendStiffnessConstraintSetMx::FromInstance(const hkreflex::hkCl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx") {
-		std::cout << "hclBendStiffnessConstraintSetMx::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBendStiffnessConstraintSetMx::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx") {
+		std::cout << "hclBendStiffnessConstraintSetMx::FromInstance: Expecting hclBendStiffnessConstraintSetMx but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -28,9 +32,13 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Batch::FromInstance(const hkrefle
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Batch") {
-		std::cout << "hclBendStiffnessConstraintSetMx::Batch::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBendStiffnessConstraintSetMx::Batch::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Batch") {
+		std::cout << "hclBendStiffnessConstraintSetMx::Batch::FromInstance: Expecting hclBendStiffnessConstraintSetMx::Batch but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -55,12 +63,30 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Single::FromInstance(const hkrefl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Single") {
-		std::cout << "hclBendStiffnessConstraintSetMx::Single::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBendStiffnessConstraintSetMx::Single::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Single") {
+		std::cout << "hclBendStiffnessConstraintSetMx::Single::FromInstance: Expecting hclBendStiffnessConstraintSetMx::Single but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("weightA")->GetValue(weightA);
+	class_instance->GetInstanceByFieldName("weightB")->GetValue(weightB);
+	class_instance->GetInstanceByFieldName("weightC")->GetValue(weightC);
+	class_instance->GetInstanceByFieldName("weightD")->GetValue(weightD);
+	class_instance->GetInstanceByFieldName("bendStiffness")->GetValue(bendStiffness);
+	class_instance->GetInstanceByFieldName("restCurvature")->GetValue(restCurvature);
+	class_instance->GetInstanceByFieldName("invMassA")->GetValue(invMassA);
+	class_instance->GetInstanceByFieldName("invMassB")->GetValue(invMassB);
+	class_instance->GetInstanceByFieldName("invMassC")->GetValue(invMassC);
+	class_instance->GetInstanceByFieldName("invMassD")->GetValue(invMassD);
+	class_instance->GetInstanceByFieldName("particleA")->GetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->GetValue(particleB);
+	class_instance->GetInstanceByFieldName("particleC")->GetValue(particleC);
+	class_instance->GetInstanceByFieldName("particleD")->GetValue(particleD);
 	return true;
 }
 
@@ -68,9 +94,13 @@ bool hktypes::hclBendStiffnessConstraintSetMx::ToInstance(hkreflex::hkClassInsta
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx") {
-		std::cout << "hclBendStiffnessConstraintSetMx::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBendStiffnessConstraintSetMx::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx") {
+		std::cout << "hclBendStiffnessConstraintSetMx::ToInstance: Expecting hclBendStiffnessConstraintSetMx but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -87,9 +117,13 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Batch::ToInstance(hkreflex::hkCla
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Batch") {
-		std::cout << "hclBendStiffnessConstraintSetMx::Batch::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBendStiffnessConstraintSetMx::Batch::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Batch") {
+		std::cout << "hclBendStiffnessConstraintSetMx::Batch::ToInstance: Expecting hclBendStiffnessConstraintSetMx::Batch but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -114,12 +148,30 @@ bool hktypes::hclBendStiffnessConstraintSetMx::Single::ToInstance(hkreflex::hkCl
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Single") {
-		std::cout << "hclBendStiffnessConstraintSetMx::Single::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBendStiffnessConstraintSetMx::Single::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBendStiffnessConstraintSetMx::Single") {
+		std::cout << "hclBendStiffnessConstraintSetMx::Single::ToInstance: Expecting hclBendStiffnessConstraintSetMx::Single but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
+	class_instance->GetInstanceByFieldName("weightA")->SetValue(weightA);
+	class_instance->GetInstanceByFieldName("weightB")->SetValue(weightB);
+	class_instance->GetInstanceByFieldName("weightC")->SetValue(weightC);
+	class_instance->GetInstanceByFieldName("weightD")->SetValue(weightD);
+	class_instance->GetInstanceByFieldName("bendStiffness")->SetValue(bendStiffness);
+	class_instance->GetInstanceByFieldName("restCurvature")->SetValue(restCurvature);
+	class_instance->GetInstanceByFieldName("invMassA")->SetValue(invMassA);
+	class_instance->GetInstanceByFieldName("invMassB")->SetValue(invMassB);
+	class_instance->GetInstanceByFieldName("invMassC")->SetValue(invMassC);
+	class_instance->GetInstanceByFieldName("invMassD")->SetValue(invMassD);
+	class_instance->GetInstanceByFieldName("particleA")->SetValue(particleA);
+	class_instance->GetInstanceByFieldName("particleB")->SetValue(particleB);
+	class_instance->GetInstanceByFieldName("particleC")->SetValue(particleC);
+	class_instance->GetInstanceByFieldName("particleD")->SetValue(particleD);
 	return true;
 }
 

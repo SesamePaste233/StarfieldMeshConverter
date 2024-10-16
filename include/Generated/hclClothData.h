@@ -15,9 +15,9 @@ namespace hktypes{
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;
-	template <typename tENUM, typename tSTORAGE>
-	class ;
 	template <typename tT, typename tAllocator>
+	class ;
+	template <typename tENUM, typename tSTORAGE>
 	class ;
 	template <typename tT, typename tAllocator>
 	class ;

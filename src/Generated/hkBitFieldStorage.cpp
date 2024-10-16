@@ -7,9 +7,13 @@ bool hktypes::hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>>::Fr
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkBitFieldStorage") {
-		std::cout << "hkBitFieldStorage::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkBitFieldStorage::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkBitFieldStorage") {
+		std::cout << "hkBitFieldStorage::FromInstance: Expecting hkBitFieldStorage but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -23,9 +27,13 @@ bool hktypes::hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>>::To
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkBitFieldStorage") {
-		std::cout << "hkBitFieldStorage::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkBitFieldStorage::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkBitFieldStorage") {
+		std::cout << "hkBitFieldStorage::ToInstance: Expecting hkBitFieldStorage but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

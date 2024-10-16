@@ -10,9 +10,13 @@ bool hktypes::hclLocalRangeConstraintSet::FromInstance(const hkreflex::hkClassIn
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet") {
-		std::cout << "hclLocalRangeConstraintSet::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet") {
+		std::cout << "hclLocalRangeConstraintSet::FromInstance: Expecting hclLocalRangeConstraintSet but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -30,9 +34,13 @@ bool hktypes::hclLocalRangeConstraintSet::LocalConstraint::FromInstance(const hk
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalConstraint") {
-		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalConstraint") {
+		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::FromInstance: Expecting hclLocalRangeConstraintSet::LocalConstraint but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -48,9 +56,13 @@ bool hktypes::hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
-		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
+		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::FromInstance: Expecting hclLocalRangeConstraintSet::LocalStiffnessConstraint but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -61,9 +73,13 @@ bool hktypes::hclLocalRangeConstraintSet::ShapeType::FromInstance(const hkreflex
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::ShapeType") {
-		std::cout << "hclLocalRangeConstraintSet::ShapeType::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::ShapeType::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::ShapeType") {
+		std::cout << "hclLocalRangeConstraintSet::ShapeType::FromInstance: Expecting hclLocalRangeConstraintSet::ShapeType but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -74,9 +90,13 @@ bool hktypes::hclLocalRangeConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet") {
-		std::cout << "hclLocalRangeConstraintSet::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet") {
+		std::cout << "hclLocalRangeConstraintSet::ToInstance: Expecting hclLocalRangeConstraintSet but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -94,9 +114,13 @@ bool hktypes::hclLocalRangeConstraintSet::LocalConstraint::ToInstance(hkreflex::
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalConstraint") {
-		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalConstraint") {
+		std::cout << "hclLocalRangeConstraintSet::LocalConstraint::ToInstance: Expecting hclLocalRangeConstraintSet::LocalConstraint but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -112,9 +136,13 @@ bool hktypes::hclLocalRangeConstraintSet::LocalStiffnessConstraint::ToInstance(h
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
-		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::LocalStiffnessConstraint") {
+		std::cout << "hclLocalRangeConstraintSet::LocalStiffnessConstraint::ToInstance: Expecting hclLocalRangeConstraintSet::LocalStiffnessConstraint but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -125,9 +153,13 @@ bool hktypes::hclLocalRangeConstraintSet::ShapeType::ToInstance(hkreflex::hkClas
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclLocalRangeConstraintSet::ShapeType") {
-		std::cout << "hclLocalRangeConstraintSet::ShapeType::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclLocalRangeConstraintSet::ShapeType::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclLocalRangeConstraintSet::ShapeType") {
+		std::cout << "hclLocalRangeConstraintSet::ShapeType::ToInstance: Expecting hclLocalRangeConstraintSet::ShapeType but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

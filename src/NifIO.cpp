@@ -36,6 +36,11 @@ bool nif::NifIO::Deserialize(const std::string filename)
 		auto bytes = this->header.block_sizes[i];
 		auto block = CreateBlock(type, type_id, bytes);
 
+		if (!this->_decode_physics_data && (type == "BSClothExtraData" || type == "bhkPhysicsSystem")) {
+			auto binary_block = dynamic_cast<BinaryBlock*>(block);
+			binary_block->_decode_binary = false;
+		}
+
 		file.seekg(cur_pos, std::ios::beg);
 		block->Deserialize(file);
 

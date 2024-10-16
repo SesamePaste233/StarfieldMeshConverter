@@ -1214,6 +1214,7 @@ class ObjectScope:
 		self.original_active = None
 		self.original_selected = None
 		self.original_mode = None
+		self.original_visibility = not self.obj.hide_get(view_layer=bpy.context.view_layer)
 		self.edit_mode = edit_mode
 		self.edit_mode_select_all_verts = edit_mode_select_all_verts
 
@@ -1221,6 +1222,8 @@ class ObjectScope:
 		# Add object to view layer if not already in it
 		if not self.obj_in_view_layer:
 			bpy.context.collection.objects.link(self.obj)
+		if not self.original_visibility:
+			self.obj.hide_set(False, view_layer=bpy.context.view_layer)
 
 		self.original_active = SetActiveObject(self.obj)
 		self.original_selected = SetSelectObjects([])
@@ -1244,6 +1247,9 @@ class ObjectScope:
 
 		if not self.obj_in_view_layer:
 			bpy.context.collection.objects.unlink(self.obj)
+
+		if not self.original_visibility:
+			self.obj.hide_set(True, view_layer=bpy.context.view_layer)
 
 def get_obj_scope(obj:bpy.types.Object, edit_mode = False, edit_mode_select_all_verts = False):
 	return ObjectScope(obj, edit_mode, edit_mode_select_all_verts)
@@ -1310,3 +1316,29 @@ def AverageCustomNormals(obj:bpy.types.Object):
 
 	if original_active != obj:
 		SetActiveObject(original_active)
+
+def ApplyShapekey(obj: bpy.types.Object, target_sk_n: str, use_relative = True):
+    
+    mesh = obj.data
+    
+    basis_sk = mesh.shape_keys.key_blocks['Basis']
+
+    target_sk = mesh.shape_keys.key_blocks[target_sk_n]
+
+    other_sk = [sk for sk in mesh.shape_keys.key_blocks if sk != sk.relative_key and not sk.mute and sk != target_sk]
+
+    vs = np.empty(len(mesh.vertices) * 3, dtype=np.float32)
+    ovs = np.empty(len(mesh.vertices) * 3, dtype=np.float32)
+    
+    target_sk.data.foreach_get('co', vs)
+    basis_sk.data.foreach_set('co', ovs)
+
+    basis_sk.data.foreach_set('co', vs)
+
+    if use_relative:
+        for sk in other_sk:
+            rvs = np.empty(len(mesh.vertices) * 3, dtype=np.float32)
+            sk.data.foreach_get('co', rvs)
+            sk.data.foreach_set('co', rvs-ovs+vs)
+            
+    target_sk.value = 0

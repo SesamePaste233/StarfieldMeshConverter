@@ -144,6 +144,82 @@ namespace hktypes {
 			}
 		};
 
+		class FourBlendEntryBlock : public hkHolderBase {
+		public:
+			using BaseType = void;
+			uint16_t vertexIndices[4];	// Offset: 0 Unk: 0
+			uint16_t boneIndices[16];	// Offset: 32 Unk: 0
+			uint8_t padding[8];	// Offset: 32 Unk: 0
+
+			// Extra
+			bool FromInstance(const hkreflex::hkClassInstance* instance) override {
+				auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
+				if (!class_instance) return false;
+
+				std::vector<uint16_t> _vertexIndices;
+				class_instance->GetInstanceByFieldName("vertexIndices")->GetValue(_vertexIndices);
+				if (_vertexIndices.size() != 4) {
+					throw std::runtime_error("vertexIndices for FourBlendEntryBlock: size is not 4");
+					return false;
+				}
+				std::memcpy(vertexIndices, _vertexIndices.data(), 4 * sizeof(uint16_t));
+
+				std::vector<uint16_t> _boneIndices;
+				class_instance->GetInstanceByFieldName("boneIndices")->GetValue(_boneIndices);
+				if (_boneIndices.size() != 16) {
+					throw std::runtime_error("boneIndices for FourBlendEntryBlock: size is not 16");
+					return false;
+				}
+				std::memcpy(boneIndices, _boneIndices.data(), 16 * sizeof(uint16_t));
+
+				std::vector<uint8_t> _padding;
+				class_instance->GetInstanceByFieldName("padding")->GetValue(_padding);
+				if (_padding.size() != 8) {
+					throw std::runtime_error("padding for FourBlendEntryBlock: size is not 8");
+					return false;
+				}
+				std::memcpy(padding, _padding.data(), 8 * sizeof(uint8_t));
+
+				return true;
+			}
+			bool ToInstance(hkreflex::hkClassInstance* instance) override {
+				auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
+				if (!class_instance) return false;
+
+				std::vector<uint16_t> _vertexIndices(vertexIndices, vertexIndices + 4);
+				class_instance->GetInstanceByFieldName("vertexIndices")->SetValue(_vertexIndices);
+
+				std::vector<uint16_t> _boneIndices(boneIndices, boneIndices + 16);
+				class_instance->GetInstanceByFieldName("boneIndices")->SetValue(_boneIndices);
+
+				std::vector<uint8_t> _padding(padding, padding + 8);
+				class_instance->GetInstanceByFieldName("padding")->SetValue(_padding);
+
+				return true;
+			}
+			inline std::string GethkClassName() override { return ""; };
+			inline std::string GetTranscriptId() override { return ""; };
+			inline uint32_t GethkClassHash() override { return 0; };
+			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
+				return {
+				};
+			};
+
+			std::vector<std::vector<std::pair<uint16_t, uint8_t>>> GetBoneIndicesAndWeights(std::vector<uint16_t>& transformSubset) {
+				std::vector<std::vector<std::pair<uint16_t, uint8_t>>> result;
+				for (int i = 0; i < 4; i++) {
+					std::vector<std::pair<uint16_t, uint8_t>> boneIndicesAndWeights;
+					boneIndicesAndWeights.push_back(std::make_pair(transformSubset[boneIndices[4 * i]], 64));
+					boneIndicesAndWeights.push_back(std::make_pair(transformSubset[boneIndices[4 * i + 1]], 64));
+					boneIndicesAndWeights.push_back(std::make_pair(transformSubset[boneIndices[4 * i + 2]], 64));
+					boneIndicesAndWeights.push_back(std::make_pair(transformSubset[boneIndices[4 * i + 3]], 63));
+
+					result.push_back(boneIndicesAndWeights);
+				}
+				return result;
+			}
+		};
+
 		class TwoBlendEntryBlock : public hkHolderBase {
 		public:
 			using BaseType = void;
@@ -166,7 +242,7 @@ namespace hktypes {
 				std::vector<uint16_t> _boneIndices;
 				class_instance->GetInstanceByFieldName("boneIndices")->GetValue(_boneIndices);
 				if (_boneIndices.size() != 16) {
-					throw std::runtime_error("boneIndices for BlendEntryBlock: size is not " + std::to_string(16));
+					throw std::runtime_error("boneIndices for TwoBlendEntryBlock: size is not 16");
 					return false;
 				}
 				std::memcpy(boneIndices, _boneIndices.data(), 16 * sizeof(uint16_t));
@@ -228,7 +304,7 @@ namespace hktypes {
 				std::vector<uint16_t> _boneIndices;
 				class_instance->GetInstanceByFieldName("boneIndices")->GetValue(_boneIndices);
 				if (_boneIndices.size() != 16) {
-					throw std::runtime_error("boneIndices for OneBlendEntryBlock: size is not " + std::to_string(16));
+					throw std::runtime_error("boneIndices for OneBlendEntryBlock: size is not 16");
 					return false;
 				}
 				std::memcpy(boneIndices, _boneIndices.data(), 16 * sizeof(uint16_t));
@@ -267,8 +343,8 @@ namespace hktypes {
 			}
 		};
 
-		using FourBlendEntryBlock = BlendEntryBlock<4>;
-		using ThreeBlendEntryBlock = BlendEntryBlock<3>;
+		//using FourBlendEntryBlock = BlendEntryBlock<4>;
+		using ThreeBlendEntryBlock = BlendEntryBlock<3>; // TODO
 
 		std::vector<hclBoneSpaceDeformer::FourBlendEntryBlock> fourBlendEntries;	// Offset: 0 Unk: 0
 		std::vector<hclBoneSpaceDeformer::ThreeBlendEntryBlock> threeBlendEntries;	// Offset: 16 Unk: 0

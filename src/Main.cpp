@@ -201,7 +201,7 @@ void main() {
 	hkphysics::hkReflDataDeserializer data;
 
 	//data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\bed_double01-bhkPhysicsSystem_3.bin", true);
-	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\warthog01-bhkPhysicsSystem_393.bin", true);
+	data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\messy_bob_m_facebones-BSClothExtraData_2.bin", true);
 
 	auto updated_transcript = data.RegisterClassesToTranscriptor();
 

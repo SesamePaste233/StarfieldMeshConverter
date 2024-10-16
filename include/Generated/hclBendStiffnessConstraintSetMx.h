@@ -61,15 +61,43 @@ namespace hktypes{
 		class Single : public hkHolderBase {
 		public:
 			using BaseType = void;
+			hkReal weightA; // Offset: 0
+			hkReal weightB; // Offset: 4
+			hkReal weightC; // Offset: 8
+			hkReal weightD; // Offset: 12
+			hkReal bendStiffness; // Offset: 16
+			hkReal restCurvature; // Offset: 20
+			hkReal invMassA; // Offset: 24
+			hkReal invMassB; // Offset: 28
+			hkReal invMassC; // Offset: 32
+			hkReal invMassD; // Offset: 36
+			hkUint16 particleA; // Offset: 40
+			hkUint16 particleB; // Offset: 42
+			hkUint16 particleC; // Offset: 44
+			hkUint16 particleD; // Offset: 46
 
 			// Extra
 			bool FromInstance(const hkreflex::hkClassInstance* instance) override;
 			bool ToInstance(hkreflex::hkClassInstance* instance) override;
 			inline std::string GethkClassName() override { return "hclBendStiffnessConstraintSetMx::Single"; };
 			inline std::string GetTranscriptId() override { return "hclBendStiffnessConstraintSetMx::Single"; };
-			inline uint32_t GethkClassHash() override { return 0; };
+			inline uint32_t GethkClassHash() override { return 535526491; };
 			inline std::vector<std::pair<std::string, std::string>> GethkClassMembers() override {
 				return {
+					{ "weightA", "hkReal" },
+					{ "weightB", "hkReal" },
+					{ "weightC", "hkReal" },
+					{ "weightD", "hkReal" },
+					{ "bendStiffness", "hkReal" },
+					{ "restCurvature", "hkReal" },
+					{ "invMassA", "hkReal" },
+					{ "invMassB", "hkReal" },
+					{ "invMassC", "hkReal" },
+					{ "invMassD", "hkReal" },
+					{ "particleA", "hkUint16" },
+					{ "particleB", "hkUint16" },
+					{ "particleC", "hkUint16" },
+					{ "particleD", "hkUint16" },
 				};
 			};
 			inline std::vector<std::pair<std::string, std::string>> GetTemplateArgs();

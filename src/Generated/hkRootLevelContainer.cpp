@@ -8,9 +8,13 @@ bool hktypes::hkRootLevelContainer::FromInstance(const hkreflex::hkClassInstance
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRootLevelContainer") {
-		std::cout << "hkRootLevelContainer::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRootLevelContainer::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRootLevelContainer") {
+		std::cout << "hkRootLevelContainer::FromInstance: Expecting hkRootLevelContainer but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -22,9 +26,13 @@ bool hktypes::hkRootLevelContainer::NamedVariant::FromInstance(const hkreflex::h
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRootLevelContainer::NamedVariant") {
-		std::cout << "hkRootLevelContainer::NamedVariant::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRootLevelContainer::NamedVariant::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRootLevelContainer::NamedVariant") {
+		std::cout << "hkRootLevelContainer::NamedVariant::FromInstance: Expecting hkRootLevelContainer::NamedVariant but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -38,9 +46,13 @@ bool hktypes::hkRootLevelContainer::ToInstance(hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRootLevelContainer") {
-		std::cout << "hkRootLevelContainer::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRootLevelContainer::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRootLevelContainer") {
+		std::cout << "hkRootLevelContainer::ToInstance: Expecting hkRootLevelContainer but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -52,9 +64,13 @@ bool hktypes::hkRootLevelContainer::NamedVariant::ToInstance(hkreflex::hkClassIn
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkRootLevelContainer::NamedVariant") {
-		std::cout << "hkRootLevelContainer::NamedVariant::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkRootLevelContainer::NamedVariant::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkRootLevelContainer::NamedVariant") {
+		std::cout << "hkRootLevelContainer::NamedVariant::ToInstance: Expecting hkRootLevelContainer::NamedVariant but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

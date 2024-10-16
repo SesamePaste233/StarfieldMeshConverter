@@ -8,9 +8,13 @@ bool hktypes::hclBonePlanesConstraintSet::FromInstance(const hkreflex::hkClassIn
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet") {
-		std::cout << "hclBonePlanesConstraintSet::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBonePlanesConstraintSet::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet") {
+		std::cout << "hclBonePlanesConstraintSet::FromInstance: Expecting hclBonePlanesConstraintSet but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -24,9 +28,13 @@ bool hktypes::hclBonePlanesConstraintSet::BonePlane::FromInstance(const hkreflex
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
-		std::cout << "hclBonePlanesConstraintSet::BonePlane::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBonePlanesConstraintSet::BonePlane::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
+		std::cout << "hclBonePlanesConstraintSet::BonePlane::FromInstance: Expecting hclBonePlanesConstraintSet::BonePlane but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -41,9 +49,13 @@ bool hktypes::hclBonePlanesConstraintSet::ToInstance(hkreflex::hkClassInstance* 
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet") {
-		std::cout << "hclBonePlanesConstraintSet::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBonePlanesConstraintSet::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet") {
+		std::cout << "hclBonePlanesConstraintSet::ToInstance: Expecting hclBonePlanesConstraintSet but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -57,9 +69,13 @@ bool hktypes::hclBonePlanesConstraintSet::BonePlane::ToInstance(hkreflex::hkClas
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
-		std::cout << "hclBonePlanesConstraintSet::BonePlane::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBonePlanesConstraintSet::BonePlane::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBonePlanesConstraintSet::BonePlane") {
+		std::cout << "hclBonePlanesConstraintSet::BonePlane::ToInstance: Expecting hclBonePlanesConstraintSet::BonePlane but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

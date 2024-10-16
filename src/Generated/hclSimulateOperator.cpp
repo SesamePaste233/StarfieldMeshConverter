@@ -11,9 +11,13 @@ bool hktypes::hclSimulateOperator::FromInstance(const hkreflex::hkClassInstance*
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimulateOperator") {
-		std::cout << "hclSimulateOperator::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimulateOperator::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimulateOperator") {
+		std::cout << "hclSimulateOperator::FromInstance: Expecting hclSimulateOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -27,9 +31,13 @@ bool hktypes::hclSimulateOperator::Config::FromInstance(const hkreflex::hkClassI
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimulateOperator::Config") {
-		std::cout << "hclSimulateOperator::Config::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimulateOperator::Config::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimulateOperator::Config") {
+		std::cout << "hclSimulateOperator::Config::FromInstance: Expecting hclSimulateOperator::Config but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -47,9 +55,13 @@ bool hktypes::hclSimulateOperator::ToInstance(hkreflex::hkClassInstance* instanc
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimulateOperator") {
-		std::cout << "hclSimulateOperator::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimulateOperator::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimulateOperator") {
+		std::cout << "hclSimulateOperator::ToInstance: Expecting hclSimulateOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -63,9 +75,13 @@ bool hktypes::hclSimulateOperator::Config::ToInstance(hkreflex::hkClassInstance*
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimulateOperator::Config") {
-		std::cout << "hclSimulateOperator::Config::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimulateOperator::Config::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimulateOperator::Config") {
+		std::cout << "hclSimulateOperator::Config::ToInstance: Expecting hclSimulateOperator::Config but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

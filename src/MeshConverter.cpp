@@ -307,6 +307,8 @@ uint32_t EditNifBSGeometries(const char* base_nif_path, const char* json_data, c
 	
 	nif::NifIO base_nif;
 	base_nif.SetAssetsPath(assets_folder);
+
+	base_nif._decode_physics_data = false;
 		
 	base_nif.Deserialize(base_nif_path);
 

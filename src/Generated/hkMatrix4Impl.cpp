@@ -7,9 +7,13 @@ bool hktypes::hkMatrix4Impl<float>::FromInstance(const hkreflex::hkClassInstance
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkMatrix4Impl") {
-		std::cout << "hkMatrix4Impl::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkMatrix4Impl::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkMatrix4Impl") {
+		std::cout << "hkMatrix4Impl::FromInstance: Expecting hkMatrix4Impl but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -25,9 +29,13 @@ bool hktypes::hkMatrix4Impl<float>::ToInstance(hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<hkreflex::hkClassArrayInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkMatrix4Impl") {
-		std::cout << "hkMatrix4Impl::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkMatrix4Impl::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkMatrix4Impl") {
+		std::cout << "hkMatrix4Impl::ToInstance: Expecting hkMatrix4Impl but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

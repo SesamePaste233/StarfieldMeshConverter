@@ -22,9 +22,13 @@ bool hktypes::hclSimClothData::FromInstance(const hkreflex::hkClassInstance* ins
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData") {
-		std::cout << "hclSimClothData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData") {
+		std::cout << "hclSimClothData::FromInstance: Expecting hclSimClothData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -65,9 +69,13 @@ bool hktypes::hclSimClothData::OverridableSimulationInfo::FromInstance(const hkr
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
-		std::cout << "hclSimClothData::OverridableSimulationInfo::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::OverridableSimulationInfo::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
+		std::cout << "hclSimClothData::OverridableSimulationInfo::FromInstance: Expecting hclSimClothData::OverridableSimulationInfo but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -80,9 +88,13 @@ bool hktypes::hclSimClothData::ParticleData::FromInstance(const hkreflex::hkClas
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::ParticleData") {
-		std::cout << "hclSimClothData::ParticleData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::ParticleData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::ParticleData") {
+		std::cout << "hclSimClothData::ParticleData::FromInstance: Expecting hclSimClothData::ParticleData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -97,9 +109,13 @@ bool hktypes::hclSimClothData::CollidableTransformMap::FromInstance(const hkrefl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
-		std::cout << "hclSimClothData::CollidableTransformMap::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::CollidableTransformMap::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
+		std::cout << "hclSimClothData::CollidableTransformMap::FromInstance: Expecting hclSimClothData::CollidableTransformMap but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -113,9 +129,13 @@ bool hktypes::hclSimClothData::TransferMotionData::FromInstance(const hkreflex::
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
-		std::cout << "hclSimClothData::TransferMotionData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::TransferMotionData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
+		std::cout << "hclSimClothData::TransferMotionData::FromInstance: Expecting hclSimClothData::TransferMotionData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -138,9 +158,13 @@ bool hktypes::hclSimClothData::LandscapeCollisionData::FromInstance(const hkrefl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
-		std::cout << "hclSimClothData::LandscapeCollisionData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::LandscapeCollisionData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
+		std::cout << "hclSimClothData::LandscapeCollisionData::FromInstance: Expecting hclSimClothData::LandscapeCollisionData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -158,9 +182,13 @@ bool hktypes::hclSimClothData::CollidablePinchingData::FromInstance(const hkrefl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
-		std::cout << "hclSimClothData::CollidablePinchingData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::CollidablePinchingData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
+		std::cout << "hclSimClothData::CollidablePinchingData::FromInstance: Expecting hclSimClothData::CollidablePinchingData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -171,9 +199,13 @@ bool hktypes::hclSimClothData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData") {
-		std::cout << "hclSimClothData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData") {
+		std::cout << "hclSimClothData::ToInstance: Expecting hclSimClothData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -214,9 +246,13 @@ bool hktypes::hclSimClothData::OverridableSimulationInfo::ToInstance(hkreflex::h
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
-		std::cout << "hclSimClothData::OverridableSimulationInfo::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::OverridableSimulationInfo::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::OverridableSimulationInfo") {
+		std::cout << "hclSimClothData::OverridableSimulationInfo::ToInstance: Expecting hclSimClothData::OverridableSimulationInfo but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -229,9 +265,13 @@ bool hktypes::hclSimClothData::ParticleData::ToInstance(hkreflex::hkClassInstanc
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::ParticleData") {
-		std::cout << "hclSimClothData::ParticleData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::ParticleData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::ParticleData") {
+		std::cout << "hclSimClothData::ParticleData::ToInstance: Expecting hclSimClothData::ParticleData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -246,9 +286,13 @@ bool hktypes::hclSimClothData::CollidableTransformMap::ToInstance(hkreflex::hkCl
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
-		std::cout << "hclSimClothData::CollidableTransformMap::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::CollidableTransformMap::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::CollidableTransformMap") {
+		std::cout << "hclSimClothData::CollidableTransformMap::ToInstance: Expecting hclSimClothData::CollidableTransformMap but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -262,9 +306,13 @@ bool hktypes::hclSimClothData::TransferMotionData::ToInstance(hkreflex::hkClassI
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
-		std::cout << "hclSimClothData::TransferMotionData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::TransferMotionData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::TransferMotionData") {
+		std::cout << "hclSimClothData::TransferMotionData::ToInstance: Expecting hclSimClothData::TransferMotionData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -287,9 +335,13 @@ bool hktypes::hclSimClothData::LandscapeCollisionData::ToInstance(hkreflex::hkCl
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
-		std::cout << "hclSimClothData::LandscapeCollisionData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::LandscapeCollisionData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::LandscapeCollisionData") {
+		std::cout << "hclSimClothData::LandscapeCollisionData::ToInstance: Expecting hclSimClothData::LandscapeCollisionData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -307,9 +359,13 @@ bool hktypes::hclSimClothData::CollidablePinchingData::ToInstance(hkreflex::hkCl
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
-		std::cout << "hclSimClothData::CollidablePinchingData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimClothData::CollidablePinchingData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimClothData::CollidablePinchingData") {
+		std::cout << "hclSimClothData::CollidablePinchingData::ToInstance: Expecting hclSimClothData::CollidablePinchingData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

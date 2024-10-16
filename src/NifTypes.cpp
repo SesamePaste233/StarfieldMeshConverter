@@ -454,8 +454,7 @@ size_t nif::BoneTranslations::GetSize()
 void nif::BinaryBlock::Deserialize(std::istream& file)
 {
 	if (this->binary_bytes > 0) {
-		this->binary_data = new uint8_t[this->binary_bytes];
-		std::memcpy(this->binary_data, utils::readString(file, this->binary_bytes).data(), this->binary_bytes);
+		this->binary_data = utils::readBytes(file, this->binary_bytes);
 	}
 }
 
@@ -602,6 +601,13 @@ nif::NiRTTI nif::StringToRTTI(const std::string& rtti)
 
 void nif::BSClothExtraData::Deserialize(std::istream& file)
 {
+	auto pos = file.tellg();
+	BinaryBlock::Deserialize(file);
+	if (!this->_decode_binary){
+		return;
+	}
+	file.seekg(pos);
+
 	this->data.Clear();
 #ifndef _DEBUG
 	try {
@@ -624,7 +630,7 @@ void nif::BSClothExtraData::Deserialize(std::istream& file)
 
 void nif::BSClothExtraData::Serialize(std::ostream& file)
 {
-	if (this->root_level_container) {
+	if (this->_decode_binary && this->root_level_container) {
 		std::stringstream ss;
 		this->data_serializer.Clear();
 		this->data_serializer.root_level_container = this->root_level_container;
@@ -640,12 +646,19 @@ void nif::BSClothExtraData::Serialize(std::ostream& file)
 
 void nif::bhkPhysicsSystem::Deserialize(std::istream& file)
 {
-	this->data = new hkphysics::hkReflDataDeserializer();
+	auto pos = file.tellg();
+	BinaryBlock::Deserialize(file);
+	if (!this->_decode_binary) {
+		return;
+	}
+	file.seekg(pos);
+
+	this->data.Clear();
 	try {
 		this->data_length = utils::read<uint32_t>(file)[0];
 		assert(this->binary_bytes == this->data_length + 4);
-		this->data->Deserialize(file, this->data_length);
-		root_level_container = this->data->root_level_container;
+		this->data.Deserialize(file, this->data_length);
+		root_level_container = this->data.root_level_container;
 	}
 	catch (std::exception& e) {
 		std::cout << "Failed to deserialize bhkPhysicsSystem." << std::endl;
@@ -655,6 +668,17 @@ void nif::bhkPhysicsSystem::Deserialize(std::istream& file)
 
 void nif::bhkPhysicsSystem::Serialize(std::ostream& file)
 {
+	if (this->_decode_binary && this->root_level_container) {
+		std::stringstream ss;
+		this->data_serializer.Clear();
+		this->data_serializer.root_level_container = this->root_level_container;
+		this->data_length = this->data_serializer.Serialize(ss);
+		this->binary_bytes = this->data_length + 4;
+		utils::writeAsHex<uint32_t>(file, this->data_length);
+		utils::writeString(file, ss.str());
+		return;
+	}
+
 	BinaryBlock::Serialize(file);
 }
 

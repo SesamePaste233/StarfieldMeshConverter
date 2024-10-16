@@ -8,9 +8,13 @@ bool hktypes::hclBoneSpaceSkinOperator::FromInstance(const hkreflex::hkClassInst
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceSkinOperator") {
-		std::cout << "hclBoneSpaceSkinOperator::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceSkinOperator::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceSkinOperator") {
+		std::cout << "hclBoneSpaceSkinOperator::FromInstance: Expecting hclBoneSpaceSkinOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -26,9 +30,13 @@ bool hktypes::hclBoneSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* in
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBoneSpaceSkinOperator") {
-		std::cout << "hclBoneSpaceSkinOperator::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBoneSpaceSkinOperator::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBoneSpaceSkinOperator") {
+		std::cout << "hclBoneSpaceSkinOperator::ToInstance: Expecting hclBoneSpaceSkinOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

@@ -16,9 +16,13 @@ bool hktypes::hclVirtualCollisionPointsData::FromInstance(const hkreflex::hkClas
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData") {
-		std::cout << "hclVirtualCollisionPointsData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData") {
+		std::cout << "hclVirtualCollisionPointsData::FromInstance: Expecting hclVirtualCollisionPointsData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -49,9 +53,13 @@ bool hktypes::hclVirtualCollisionPointsData::Block::FromInstance(const hkreflex:
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::Block") {
-		std::cout << "hclVirtualCollisionPointsData::Block::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::Block::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::Block") {
+		std::cout << "hclVirtualCollisionPointsData::Block::FromInstance: Expecting hclVirtualCollisionPointsData::Block but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -62,9 +70,13 @@ bool hktypes::hclVirtualCollisionPointsData::BarycentricDictionaryEntry::FromIns
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricDictionaryEntry") {
-		std::cout << "hclVirtualCollisionPointsData::BarycentricDictionaryEntry::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricDictionaryEntry::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricDictionaryEntry") {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricDictionaryEntry::FromInstance: Expecting hclVirtualCollisionPointsData::BarycentricDictionaryEntry but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -75,9 +87,13 @@ bool hktypes::hclVirtualCollisionPointsData::BarycentricPair::FromInstance(const
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricPair") {
-		std::cout << "hclVirtualCollisionPointsData::BarycentricPair::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricPair::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricPair") {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricPair::FromInstance: Expecting hclVirtualCollisionPointsData::BarycentricPair but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -88,9 +104,13 @@ bool hktypes::hclVirtualCollisionPointsData::EdgeFanSection::FromInstance(const 
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanSection") {
-		std::cout << "hclVirtualCollisionPointsData::EdgeFanSection::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanSection::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanSection") {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanSection::FromInstance: Expecting hclVirtualCollisionPointsData::EdgeFanSection but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -101,9 +121,13 @@ bool hktypes::hclVirtualCollisionPointsData::EdgeFan::FromInstance(const hkrefle
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFan") {
-		std::cout << "hclVirtualCollisionPointsData::EdgeFan::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFan::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFan") {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFan::FromInstance: Expecting hclVirtualCollisionPointsData::EdgeFan but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -114,9 +138,13 @@ bool hktypes::hclVirtualCollisionPointsData::TriangleFanSection::FromInstance(co
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanSection") {
-		std::cout << "hclVirtualCollisionPointsData::TriangleFanSection::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanSection::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanSection") {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanSection::FromInstance: Expecting hclVirtualCollisionPointsData::TriangleFanSection but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -127,9 +155,13 @@ bool hktypes::hclVirtualCollisionPointsData::TriangleFan::FromInstance(const hkr
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFan") {
-		std::cout << "hclVirtualCollisionPointsData::TriangleFan::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFan::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFan") {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFan::FromInstance: Expecting hclVirtualCollisionPointsData::TriangleFan but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -140,9 +172,13 @@ bool hktypes::hclVirtualCollisionPointsData::EdgeFanLandscape::FromInstance(cons
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanLandscape") {
-		std::cout << "hclVirtualCollisionPointsData::EdgeFanLandscape::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanLandscape::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanLandscape") {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanLandscape::FromInstance: Expecting hclVirtualCollisionPointsData::EdgeFanLandscape but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -153,9 +189,13 @@ bool hktypes::hclVirtualCollisionPointsData::TriangleFanLandscape::FromInstance(
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanLandscape") {
-		std::cout << "hclVirtualCollisionPointsData::TriangleFanLandscape::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanLandscape::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanLandscape") {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanLandscape::FromInstance: Expecting hclVirtualCollisionPointsData::TriangleFanLandscape but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -166,9 +206,13 @@ bool hktypes::hclVirtualCollisionPointsData::ToInstance(hkreflex::hkClassInstanc
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData") {
-		std::cout << "hclVirtualCollisionPointsData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData") {
+		std::cout << "hclVirtualCollisionPointsData::ToInstance: Expecting hclVirtualCollisionPointsData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -199,9 +243,13 @@ bool hktypes::hclVirtualCollisionPointsData::Block::ToInstance(hkreflex::hkClass
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::Block") {
-		std::cout << "hclVirtualCollisionPointsData::Block::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::Block::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::Block") {
+		std::cout << "hclVirtualCollisionPointsData::Block::ToInstance: Expecting hclVirtualCollisionPointsData::Block but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -212,9 +260,13 @@ bool hktypes::hclVirtualCollisionPointsData::BarycentricDictionaryEntry::ToInsta
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricDictionaryEntry") {
-		std::cout << "hclVirtualCollisionPointsData::BarycentricDictionaryEntry::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricDictionaryEntry::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricDictionaryEntry") {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricDictionaryEntry::ToInstance: Expecting hclVirtualCollisionPointsData::BarycentricDictionaryEntry but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -225,9 +277,13 @@ bool hktypes::hclVirtualCollisionPointsData::BarycentricPair::ToInstance(hkrefle
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricPair") {
-		std::cout << "hclVirtualCollisionPointsData::BarycentricPair::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricPair::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::BarycentricPair") {
+		std::cout << "hclVirtualCollisionPointsData::BarycentricPair::ToInstance: Expecting hclVirtualCollisionPointsData::BarycentricPair but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -238,9 +294,13 @@ bool hktypes::hclVirtualCollisionPointsData::EdgeFanSection::ToInstance(hkreflex
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanSection") {
-		std::cout << "hclVirtualCollisionPointsData::EdgeFanSection::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanSection::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanSection") {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanSection::ToInstance: Expecting hclVirtualCollisionPointsData::EdgeFanSection but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -251,9 +311,13 @@ bool hktypes::hclVirtualCollisionPointsData::EdgeFan::ToInstance(hkreflex::hkCla
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFan") {
-		std::cout << "hclVirtualCollisionPointsData::EdgeFan::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFan::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFan") {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFan::ToInstance: Expecting hclVirtualCollisionPointsData::EdgeFan but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -264,9 +328,13 @@ bool hktypes::hclVirtualCollisionPointsData::TriangleFanSection::ToInstance(hkre
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanSection") {
-		std::cout << "hclVirtualCollisionPointsData::TriangleFanSection::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanSection::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanSection") {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanSection::ToInstance: Expecting hclVirtualCollisionPointsData::TriangleFanSection but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -277,9 +345,13 @@ bool hktypes::hclVirtualCollisionPointsData::TriangleFan::ToInstance(hkreflex::h
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFan") {
-		std::cout << "hclVirtualCollisionPointsData::TriangleFan::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFan::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFan") {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFan::ToInstance: Expecting hclVirtualCollisionPointsData::TriangleFan but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -290,9 +362,13 @@ bool hktypes::hclVirtualCollisionPointsData::EdgeFanLandscape::ToInstance(hkrefl
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanLandscape") {
-		std::cout << "hclVirtualCollisionPointsData::EdgeFanLandscape::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanLandscape::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::EdgeFanLandscape") {
+		std::cout << "hclVirtualCollisionPointsData::EdgeFanLandscape::ToInstance: Expecting hclVirtualCollisionPointsData::EdgeFanLandscape but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -303,9 +379,13 @@ bool hktypes::hclVirtualCollisionPointsData::TriangleFanLandscape::ToInstance(hk
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanLandscape") {
-		std::cout << "hclVirtualCollisionPointsData::TriangleFanLandscape::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanLandscape::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclVirtualCollisionPointsData::TriangleFanLandscape") {
+		std::cout << "hclVirtualCollisionPointsData::TriangleFanLandscape::ToInstance: Expecting hclVirtualCollisionPointsData::TriangleFanLandscape but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

@@ -218,7 +218,7 @@ std::string utils::readString(std::istream& file, int counts)
 	return result;
 }
 
-const uint8_t* utils::readBytes(std::istream& file, size_t bytes)
+uint8_t* utils::readBytes(std::istream& file, size_t bytes)
 {
 	auto pos = file.tellg();
 	if (pos + std::streampos(bytes) > file.seekg(0, std::ios::end).tellg()) {

@@ -8,9 +8,13 @@ bool hktypes::hclConstraintSet::FromInstance(const hkreflex::hkClassInstance* in
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclConstraintSet") {
-		std::cout << "hclConstraintSet::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclConstraintSet::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclConstraintSet") {
+		std::cout << "hclConstraintSet::FromInstance: Expecting hclConstraintSet but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -25,9 +29,13 @@ bool hktypes::hclConstraintSet::ToInstance(hkreflex::hkClassInstance* instance) 
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclConstraintSet") {
-		std::cout << "hclConstraintSet::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclConstraintSet::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclConstraintSet") {
+		std::cout << "hclConstraintSet::ToInstance: Expecting hclConstraintSet but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

@@ -16,9 +16,13 @@ bool hktypes::hclClothData::FromInstance(const hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothData") {
-		std::cout << "hclClothData::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothData::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothData") {
+		std::cout << "hclClothData::FromInstance: Expecting hclClothData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -40,9 +44,13 @@ bool hktypes::hclClothData::Platform::FromInstance(const hkreflex::hkClassInstan
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothData::Platform") {
-		std::cout << "hclClothData::Platform::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothData::Platform::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothData::Platform") {
+		std::cout << "hclClothData::Platform::FromInstance: Expecting hclClothData::Platform but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -53,9 +61,13 @@ bool hktypes::hclClothData::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothData") {
-		std::cout << "hclClothData::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothData::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothData") {
+		std::cout << "hclClothData::ToInstance: Expecting hclClothData but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -77,9 +89,13 @@ bool hktypes::hclClothData::Platform::ToInstance(hkreflex::hkClassInstance* inst
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclClothData::Platform") {
-		std::cout << "hclClothData::Platform::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclClothData::Platform::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclClothData::Platform") {
+		std::cout << "hclClothData::Platform::ToInstance: Expecting hclClothData::Platform but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

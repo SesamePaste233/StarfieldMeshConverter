@@ -8,9 +8,13 @@ bool hktypes::hclBufferLayout::FromInstance(const hkreflex::hkClassInstance* ins
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout") {
-		std::cout << "hclBufferLayout::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout") {
+		std::cout << "hclBufferLayout::FromInstance: Expecting hclBufferLayout but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -25,9 +29,13 @@ bool hktypes::hclBufferLayout::BufferElement::FromInstance(const hkreflex::hkCla
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::BufferElement") {
-		std::cout << "hclBufferLayout::BufferElement::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::BufferElement::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::BufferElement") {
+		std::cout << "hclBufferLayout::BufferElement::FromInstance: Expecting hclBufferLayout::BufferElement but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -42,9 +50,13 @@ bool hktypes::hclBufferLayout::Slot::FromInstance(const hkreflex::hkClassInstanc
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::Slot") {
-		std::cout << "hclBufferLayout::Slot::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::Slot::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::Slot") {
+		std::cout << "hclBufferLayout::Slot::FromInstance: Expecting hclBufferLayout::Slot but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -57,9 +69,13 @@ bool hktypes::hclBufferLayout::TriangleFormat::FromInstance(const hkreflex::hkCl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
-		std::cout << "hclBufferLayout::TriangleFormat::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::TriangleFormat::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
+		std::cout << "hclBufferLayout::TriangleFormat::FromInstance: Expecting hclBufferLayout::TriangleFormat but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -70,9 +86,13 @@ bool hktypes::hclBufferLayout::SlotFlags::FromInstance(const hkreflex::hkClassIn
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
-		std::cout << "hclBufferLayout::SlotFlags::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::SlotFlags::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
+		std::cout << "hclBufferLayout::SlotFlags::FromInstance: Expecting hclBufferLayout::SlotFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -83,9 +103,13 @@ bool hktypes::hclBufferLayout::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout") {
-		std::cout << "hclBufferLayout::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout") {
+		std::cout << "hclBufferLayout::ToInstance: Expecting hclBufferLayout but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -100,9 +124,13 @@ bool hktypes::hclBufferLayout::BufferElement::ToInstance(hkreflex::hkClassInstan
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::BufferElement") {
-		std::cout << "hclBufferLayout::BufferElement::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::BufferElement::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::BufferElement") {
+		std::cout << "hclBufferLayout::BufferElement::ToInstance: Expecting hclBufferLayout::BufferElement but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -117,9 +145,13 @@ bool hktypes::hclBufferLayout::Slot::ToInstance(hkreflex::hkClassInstance* insta
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::Slot") {
-		std::cout << "hclBufferLayout::Slot::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::Slot::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::Slot") {
+		std::cout << "hclBufferLayout::Slot::ToInstance: Expecting hclBufferLayout::Slot but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -132,9 +164,13 @@ bool hktypes::hclBufferLayout::TriangleFormat::ToInstance(hkreflex::hkClassInsta
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
-		std::cout << "hclBufferLayout::TriangleFormat::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::TriangleFormat::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::TriangleFormat") {
+		std::cout << "hclBufferLayout::TriangleFormat::ToInstance: Expecting hclBufferLayout::TriangleFormat but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -145,9 +181,13 @@ bool hktypes::hclBufferLayout::SlotFlags::ToInstance(hkreflex::hkClassInstance* 
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
-		std::cout << "hclBufferLayout::SlotFlags::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferLayout::SlotFlags::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferLayout::SlotFlags") {
+		std::cout << "hclBufferLayout::SlotFlags::ToInstance: Expecting hclBufferLayout::SlotFlags but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

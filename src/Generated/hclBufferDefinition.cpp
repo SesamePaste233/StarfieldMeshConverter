@@ -8,9 +8,13 @@ bool hktypes::hclBufferDefinition::FromInstance(const hkreflex::hkClassInstance*
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferDefinition") {
-		std::cout << "hclBufferDefinition::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferDefinition::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferDefinition") {
+		std::cout << "hclBufferDefinition::FromInstance: Expecting hclBufferDefinition but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -29,9 +33,13 @@ bool hktypes::hclBufferDefinition::ToInstance(hkreflex::hkClassInstance* instanc
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclBufferDefinition") {
-		std::cout << "hclBufferDefinition::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclBufferDefinition::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclBufferDefinition") {
+		std::cout << "hclBufferDefinition::ToInstance: Expecting hclBufferDefinition but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

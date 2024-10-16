@@ -7,9 +7,13 @@ bool hktypes::hclTransformSetUsage::FromInstance(const hkreflex::hkClassInstance
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclTransformSetUsage") {
-		std::cout << "hclTransformSetUsage::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclTransformSetUsage::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclTransformSetUsage") {
+		std::cout << "hclTransformSetUsage::FromInstance: Expecting hclTransformSetUsage but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -22,9 +26,13 @@ bool hktypes::hclTransformSetUsage::TransformTracker::FromInstance(const hkrefle
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclTransformSetUsage::TransformTracker") {
-		std::cout << "hclTransformSetUsage::TransformTracker::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclTransformSetUsage::TransformTracker::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclTransformSetUsage::TransformTracker") {
+		std::cout << "hclTransformSetUsage::TransformTracker::FromInstance: Expecting hclTransformSetUsage::TransformTracker but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -38,9 +46,13 @@ bool hktypes::hclTransformSetUsage::ToInstance(hkreflex::hkClassInstance* instan
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclTransformSetUsage") {
-		std::cout << "hclTransformSetUsage::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclTransformSetUsage::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclTransformSetUsage") {
+		std::cout << "hclTransformSetUsage::ToInstance: Expecting hclTransformSetUsage but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -53,9 +65,13 @@ bool hktypes::hclTransformSetUsage::TransformTracker::ToInstance(hkreflex::hkCla
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclTransformSetUsage::TransformTracker") {
-		std::cout << "hclTransformSetUsage::TransformTracker::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclTransformSetUsage::TransformTracker::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclTransformSetUsage::TransformTracker") {
+		std::cout << "hclTransformSetUsage::TransformTracker::ToInstance: Expecting hclTransformSetUsage::TransformTracker but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

@@ -87,6 +87,9 @@ hktypes::hkHolderBase* hktypes::AllocateHolder(const hkreflex::hkClassInstance* 
 	else if (class_instance->type->type_name == "hclVolumeConstraint") {
 		return new hclVolumeConstraint();
 	}
+	else if (class_instance->type->type_name == "hclVolumeConstraintMx") {
+		return new hclVolumeConstraintMx();
+	}
 	else if (class_instance->type->type_name == "hclCompressibleLinkConstraintSetMx") {
 		return new hclCompressibleLinkConstraintSetMx();
 	}

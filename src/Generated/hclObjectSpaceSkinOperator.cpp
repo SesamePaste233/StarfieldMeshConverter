@@ -9,9 +9,13 @@ bool hktypes::hclObjectSpaceSkinOperator::FromInstance(const hkreflex::hkClassIn
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclObjectSpaceSkinOperator") {
-		std::cout << "hclObjectSpaceSkinOperator::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclObjectSpaceSkinOperator::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclObjectSpaceSkinOperator") {
+		std::cout << "hclObjectSpaceSkinOperator::FromInstance: Expecting hclObjectSpaceSkinOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -28,9 +32,13 @@ bool hktypes::hclObjectSpaceSkinOperator::ToInstance(hkreflex::hkClassInstance* 
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclObjectSpaceSkinOperator") {
-		std::cout << "hclObjectSpaceSkinOperator::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclObjectSpaceSkinOperator::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclObjectSpaceSkinOperator") {
+		std::cout << "hclObjectSpaceSkinOperator::ToInstance: Expecting hclObjectSpaceSkinOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

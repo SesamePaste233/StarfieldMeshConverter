@@ -8,9 +8,13 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(const hkreflex::hkCl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
-		std::cout << "hclSimpleMeshBoneDeformOperator::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimpleMeshBoneDeformOperator::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
+		std::cout << "hclSimpleMeshBoneDeformOperator::FromInstance: Expecting hclSimpleMeshBoneDeformOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -26,9 +30,13 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance(co
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
-		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
+		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::FromInstance: Expecting hclSimpleMeshBoneDeformOperator::TriangleBonePair but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -41,9 +49,13 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::ToInstance(hkreflex::hkClassInsta
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
-		std::cout << "hclSimpleMeshBoneDeformOperator::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimpleMeshBoneDeformOperator::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator") {
+		std::cout << "hclSimpleMeshBoneDeformOperator::ToInstance: Expecting hclSimpleMeshBoneDeformOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -59,9 +71,13 @@ bool hktypes::hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance(hkre
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
-		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclSimpleMeshBoneDeformOperator::TriangleBonePair") {
+		std::cout << "hclSimpleMeshBoneDeformOperator::TriangleBonePair::ToInstance: Expecting hclSimpleMeshBoneDeformOperator::TriangleBonePair but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

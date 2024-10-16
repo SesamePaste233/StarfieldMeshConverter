@@ -1,650 +1,1707 @@
 #pragma once
 
 #include "hkBaseCTypes.h"
-// Class No.93
+// Class No.224
+// Mapped to c type: hkArray
+template<class tT=hkArray<int, hkContainerHeapAllocator>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.223
+// Mapped to c type: hkArray
+template<class tT=int, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.222
+// Mapped to c type: hclStateDependencyGraph::Branch
+class hclStateDependencyGraph::Branch {
+	int branchId;	// Offset: 0 Unk: 0
+	hkArray stateOperatorIndices;	// Offset: 8 Unk: 0
+	hkArray parentBranches;	// Offset: 24 Unk: 0
+	hkArray childBranches;	// Offset: 40 Unk: 0
+};
+
+// Class No.221
+// Mapped to c type: hkArray
+template<class tT=hclStateDependencyGraph::Branch, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.220
+// Mapped to c type: std::array<hkVector4, 4>
+template<class tT=hkVector4, class vN=4>
+class T[N] {
+};
+
+// Class No.219
+// Mapped to c type: hclVolumeConstraintMx::ApplyBatchData
+class hclVolumeConstraintMx::ApplyBatchData {
+	std::array<hkVector4, 4> frameVector;	// Offset: 0 Unk: 0
+	std::array<hkReal, 4> stiffness;	// Offset: 64 Unk: 0
+	std::array<hkUint16, 4> particleIndex;	// Offset: 80 Unk: 0
+};
+
+// Class No.218
+// Mapped to c type: hkArray
+template<class tT=hclVolumeConstraintMx::ApplyBatchData, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.217
+// Mapped to c type: hclVolumeConstraintMx::FrameBatchData
+class hclVolumeConstraintMx::FrameBatchData {
+	std::array<hkVector4, 4> frameVector;	// Offset: 0 Unk: 0
+	std::array<hkReal, 4> weight;	// Offset: 64 Unk: 0
+	std::array<hkUint16, 4> particleIndex;	// Offset: 80 Unk: 0
+};
+
+// Class No.216
+// Mapped to c type: hkArray
+template<class tT=hclVolumeConstraintMx::FrameBatchData, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.215
+// Mapped to c type: hclVolumeConstraintMx
+class hclVolumeConstraintMx : public hclConstraintSet {
+	hkArray frameBatchDatas;	// Offset: 40 Unk: 0
+	hkArray applyBatchDatas;	// Offset: 56 Unk: 0
+};
+
+// Class No.214
+// Mapped to c type: hclLocalRangeConstraintSet::ShapeType
+class hclLocalRangeConstraintSet::ShapeType;	// [Undefined]
+
+// Class No.213
+// Mapped to c type: hkEnum
+template<class tENUM=hclLocalRangeConstraintSet::ShapeType, class tSTORAGE=hkUint32>
+class hkEnum {
+	hkUint32 storage;	// Offset: 0 Unk: 0
+};
+
+// Class No.212
+// Mapped to c type: hclLocalRangeConstraintSet::LocalStiffnessConstraint
+class hclLocalRangeConstraintSet::LocalStiffnessConstraint;	// [Undefined]
+
+// Class No.211
+// Mapped to c type: hkArray
+template<class tT=hclLocalRangeConstraintSet::LocalStiffnessConstraint, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.210
+// Mapped to c type: hclLocalRangeConstraintSet::LocalConstraint
+class hclLocalRangeConstraintSet::LocalConstraint {
+	hkUint16 particleIndex;	// Offset: 0 Unk: 0
+	hkUint16 referenceVertex;	// Offset: 2 Unk: 0
+	hkReal maximumDistance;	// Offset: 4 Unk: 0
+	hkReal maxNormalDistance;	// Offset: 8 Unk: 0
+	hkReal minNormalDistance;	// Offset: 12 Unk: 0
+};
+
+// Class No.209
+// Mapped to c type: hkArray
+template<class tT=hclLocalRangeConstraintSet::LocalConstraint, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.208
+// Mapped to c type: hclLocalRangeConstraintSet
+class hclLocalRangeConstraintSet : public hclConstraintSet {
+	hkArray localConstraints;	// Offset: 40 Unk: 0
+	hkArray localStiffnessConstraints;	// Offset: 56 Unk: 0
+	hkUint32 referenceMeshBufferIdx;	// Offset: 72 Unk: 0
+	hkReal stiffness;	// Offset: 76 Unk: 0
+	hkEnum shapeType;	// Offset: 80 Unk: 0
+	hkBool applyNormalComponent;	// Offset: 84 Unk: 0
+};
+
+// Class No.207
+// Mapped to c type: hclBendStiffnessConstraintSetMx::Single
+class hclBendStiffnessConstraintSetMx::Single {
+	hkReal weightA;	// Offset: 0 Unk: 0
+	hkReal weightB;	// Offset: 4 Unk: 0
+	hkReal weightC;	// Offset: 8 Unk: 0
+	hkReal weightD;	// Offset: 12 Unk: 0
+	hkReal bendStiffness;	// Offset: 16 Unk: 0
+	hkReal restCurvature;	// Offset: 20 Unk: 0
+	hkReal invMassA;	// Offset: 24 Unk: 0
+	hkReal invMassB;	// Offset: 28 Unk: 0
+	hkReal invMassC;	// Offset: 32 Unk: 0
+	hkReal invMassD;	// Offset: 36 Unk: 0
+	hkUint16 particleA;	// Offset: 40 Unk: 0
+	hkUint16 particleB;	// Offset: 42 Unk: 0
+	hkUint16 particleC;	// Offset: 44 Unk: 0
+	hkUint16 particleD;	// Offset: 46 Unk: 0
+};
+
+// Class No.206
+// Mapped to c type: hkArray
+template<class tT=hclBendStiffnessConstraintSetMx::Single, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.205
+// Mapped to c type: hclBendStiffnessConstraintSetMx::Batch
+class hclBendStiffnessConstraintSetMx::Batch {
+	std::array<hkReal, 4> weightsA;	// Offset: 0 Unk: 0
+	std::array<hkReal, 4> weightsB;	// Offset: 16 Unk: 0
+	std::array<hkReal, 4> weightsC;	// Offset: 32 Unk: 0
+	std::array<hkReal, 4> weightsD;	// Offset: 48 Unk: 0
+	std::array<hkReal, 4> bendStiffnesses;	// Offset: 64 Unk: 0
+	std::array<hkReal, 4> restCurvatures;	// Offset: 80 Unk: 0
+	std::array<hkReal, 4> invMassesA;	// Offset: 96 Unk: 0
+	std::array<hkReal, 4> invMassesB;	// Offset: 112 Unk: 0
+	std::array<hkReal, 4> invMassesC;	// Offset: 128 Unk: 0
+	std::array<hkReal, 4> invMassesD;	// Offset: 144 Unk: 0
+	std::array<hkUint16, 4> particlesA;	// Offset: 160 Unk: 0
+	std::array<hkUint16, 4> particlesB;	// Offset: 168 Unk: 0
+	std::array<hkUint16, 4> particlesC;	// Offset: 176 Unk: 0
+	std::array<hkUint16, 4> particlesD;	// Offset: 184 Unk: 0
+};
+
+// Class No.204
+// Mapped to c type: hkArray
+template<class tT=hclBendStiffnessConstraintSetMx::Batch, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.203
+// Mapped to c type: hclBendStiffnessConstraintSetMx
+class hclBendStiffnessConstraintSetMx : public hclConstraintSet {
+	hkArray batches;	// Offset: 40 Unk: 0
+	hkArray singles;	// Offset: 56 Unk: 0
+	hkReal maxRestPoseHeightSq;	// Offset: 72 Unk: 0
+	hkBool clampBendStiffness;	// Offset: 76 Unk: 0
+	hkBool useRestPoseConfig;	// Offset: 77 Unk: 0
+};
+
+// Class No.202
+// Mapped to c type: hclBonePlanesConstraintSet::BonePlane
+class hclBonePlanesConstraintSet::BonePlane {
+	hkVector4 planeEquationBone;	// Offset: 0 Unk: 0
+	hkUint16 particleIndex;	// Offset: 16 Unk: 0
+	hkUint16 transformIndex;	// Offset: 18 Unk: 0
+	hkReal stiffness;	// Offset: 20 Unk: 0
+};
+
+// Class No.201
+// Mapped to c type: hkArray
+template<class tT=hclBonePlanesConstraintSet::BonePlane, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.200
+// Mapped to c type: hclBonePlanesConstraintSet
+class hclBonePlanesConstraintSet : public hclConstraintSet {
+	hkArray bonePlanes;	// Offset: 40 Unk: 0
+	hkUint32 transformSetIndex;	// Offset: 56 Unk: 0
+};
+
+// Class No.199
+// Mapped to c type: hclStretchLinkConstraintSetMx::Single
+class hclStretchLinkConstraintSetMx::Single;	// [Undefined]
+
+// Class No.198
+// Mapped to c type: hkArray
+template<class tT=hclStretchLinkConstraintSetMx::Single, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.197
+// Mapped to c type: hclStretchLinkConstraintSetMx::Batch
+class hclStretchLinkConstraintSetMx::Batch {
+	std::array<hkReal, 4> restLengths;	// Offset: 0 Unk: 0
+	std::array<hkReal, 4> stiffnesses;	// Offset: 16 Unk: 0
+	std::array<hkUint16, 4> particlesA;	// Offset: 32 Unk: 0
+	std::array<hkUint16, 4> particlesB;	// Offset: 40 Unk: 0
+};
+
+// Class No.196
+// Mapped to c type: hkArray
+template<class tT=hclStretchLinkConstraintSetMx::Batch, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.195
+// Mapped to c type: hclStretchLinkConstraintSetMx
+class hclStretchLinkConstraintSetMx : public hclConstraintSet {
+	hkArray batches;	// Offset: 40 Unk: 0
+	hkArray singles;	// Offset: 56 Unk: 0
+};
+
+// Class No.194
+// Mapped to c type: std::array<hkUint16, 4>
+template<class tT=hkUint16, class vN=4>
+class T[N] {
+};
+
+// Class No.193
+// Mapped to c type: std::array<hkReal, 4>
+template<class tT=hkReal, class vN=4>
+class T[N] {
+};
+
+// Class No.192
+// Mapped to c type: hkHandle
+template<class tTYPE=hkUint32, class vINVALID_VALUE=2147483647>
+class hkHandle {
+	hkUint32 value;	// Offset: 0 Unk: 0
+};
+
+// Class No.191
+// Mapped to c type: hclStandardLinkConstraintSetMx::Single
+class hclStandardLinkConstraintSetMx::Single;	// [Undefined]
+
+// Class No.190
+// Mapped to c type: hkArray
+template<class tT=hclStandardLinkConstraintSetMx::Single, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.189
+// Mapped to c type: hclStandardLinkConstraintSetMx::Batch
+class hclStandardLinkConstraintSetMx::Batch {
+	std::array<hkReal, 4> restLengths;	// Offset: 0 Unk: 0
+	std::array<hkReal, 4> stiffnessesA;	// Offset: 16 Unk: 0
+	std::array<hkReal, 4> stiffnessesB;	// Offset: 32 Unk: 0
+	std::array<hkUint16, 4> particlesA;	// Offset: 48 Unk: 0
+	std::array<hkUint16, 4> particlesB;	// Offset: 56 Unk: 0
+};
+
+// Class No.188
+// Mapped to c type: hkArray
+template<class tT=hclStandardLinkConstraintSetMx::Batch, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.187
+// Mapped to c type: hclStandardLinkConstraintSetMx
+class hclStandardLinkConstraintSetMx : public hclConstraintSet {
+	hkArray batches;	// Offset: 40 Unk: 0
+	hkArray singles;	// Offset: 56 Unk: 0
+};
+
+// Class No.186
+// Mapped to c type: hkArray
+template<class tT=hkVector4, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.185
+// Mapped to c type: hclStateDependencyGraph
+class hclStateDependencyGraph : public hkReferencedObject {
+	hkArray branches;	// Offset: 24 Unk: 0
+	hkArray rootBranchIds;	// Offset: 40 Unk: 0
+	hkArray children;	// Offset: 56 Unk: 0
+	hkArray parents;	// Offset: 72 Unk: 0
+	hkBool multiThreadable;	// Offset: 88 Unk: 0
+};
+
+// Class No.184
+// Mapped to c type: hclStateDependencyGraph*
+template<class tT=hclStateDependencyGraph>
+class T* {
+};
+
+// Class No.183
+// Mapped to c type: hclGatherAllVerticesOperator
+class hclGatherAllVerticesOperator : public hclOperator {
+	hkArray vertexInputFromVertexOutput;	// Offset: 72 Unk: 0
+	hkUint32 inputBufferIdx;	// Offset: 88 Unk: 0
+	hkUint32 outputBufferIdx;	// Offset: 92 Unk: 0
+	hkBool gatherNormals;	// Offset: 96 Unk: 0
+	hkBool partialGather;	// Offset: 97 Unk: 0
+};
+
+// Class No.182
+// Mapped to c type: hclSimpleMeshBoneDeformOperator::TriangleBonePair
+class hclSimpleMeshBoneDeformOperator::TriangleBonePair {
+	hkUint16 boneOffset;	// Offset: 0 Unk: 0
+	hkUint16 triangleOffset;	// Offset: 2 Unk: 0
+};
+
+// Class No.181
+// Mapped to c type: hkArray
+template<class tT=hclSimpleMeshBoneDeformOperator::TriangleBonePair, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.180
+// Mapped to c type: hclSimpleMeshBoneDeformOperator
+class hclSimpleMeshBoneDeformOperator : public hclOperator {
+	hkUint32 inputBufferIdx;	// Offset: 72 Unk: 0
+	hkUint32 outputTransformSetIdx;	// Offset: 76 Unk: 0
+	hkArray triangleBonePairs;	// Offset: 80 Unk: 0
+	hkArray localBoneTransforms;	// Offset: 96 Unk: 0
+};
+
+// Class No.179
+// Mapped to c type: hkArray
+template<class tT=hkInt32, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.178
+// Mapped to c type: hclSimulateOperator::Config
+class hclSimulateOperator::Config {
+	hkStringPtr name;	// Offset: 0 Unk: 0
+	hkArray constraintExecution;	// Offset: 8 Unk: 0
+	hkArray instanceCollidablesUsed;	// Offset: 24 Unk: 0
+	hkUint8 subSteps;	// Offset: 40 Unk: 0
+	hkUint8 numberOfSolveIterations;	// Offset: 41 Unk: 0
+	hkBool useAllInstanceCollidables;	// Offset: 42 Unk: 0
+	hkBool adaptConstraintStiffness;	// Offset: 43 Unk: 0
+};
+
+// Class No.177
+// Mapped to c type: hkArray
+template<class tT=hclSimulateOperator::Config, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.176
+// Mapped to c type: hclSimulateOperator
+class hclSimulateOperator : public hclOperator {
+	hkUint32 simClothIndex;	// Offset: 72 Unk: 0
+	hkArray simulateOpConfigs;	// Offset: 80 Unk: 0
+};
+
+// Class No.175
+// Mapped to c type: hclMoveParticlesOperator::VertexParticlePair
+class hclMoveParticlesOperator::VertexParticlePair {
+	hkUint16 vertexIndex;	// Offset: 0 Unk: 0
+	hkUint16 particleIndex;	// Offset: 2 Unk: 0
+};
+
+// Class No.174
+// Mapped to c type: hkArray
+template<class tT=hclMoveParticlesOperator::VertexParticlePair, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.173
+// Mapped to c type: hclMoveParticlesOperator
+class hclMoveParticlesOperator : public hclOperator {
+	hkArray vertexParticlePairs;	// Offset: 72 Unk: 0
+	hkUint32 simClothIndex;	// Offset: 88 Unk: 0
+	hkUint32 refBufferIdx;	// Offset: 92 Unk: 0
+};
+
+// Class No.172
+// Mapped to c type: hkBitFieldStorage
+template<class tStorage=hkArray<hkUint32, hkContainerHeapAllocator>>
+class hkBitFieldStorage {
+	hkArray words;	// Offset: 0 Unk: 0
+	int numBits;	// Offset: 16 Unk: 0
+};
+
+// Class No.171
+// Mapped to c type: hkBitFieldBase
+template<class tStorage=hkBitFieldStorage<hkArray>>
+class hkBitFieldBase {
+	hkBitFieldStorage storage;	// Offset: 0 Unk: 0
+};
+
+// Class No.170
+// Mapped to c type: hkBitField
+class hkBitField : public hkBitFieldBase<hkBitFieldStorage> {
+};
+
+// Class No.169
 // Mapped to c type: std::array<hkInt16, 4>
 template<class tT=hkInt16, class vN=4>
 class T[N] {
 };
 
-// Class No.92
-// Mapped to c type: std::array<short, 4>
-template<class tT=short, class vN=4>
-class T[N] {
-};
-
-// Class No.91
+// Class No.168
 // Mapped to c type: hkPackedVector3
 class hkPackedVector3 {
 	std::array<hkInt16, 4> values;	// Offset: 0 Unk: 3
 };
 
-// Class No.90
-// Mapped to c type: hkCompressedMassProperties
-class hkCompressedMassProperties {
-	hkPackedVector3 centerOfMass;	// Offset: 0 Unk: 3
-	hkPackedVector3 inertia;	// Offset: 8 Unk: 3
-	std::array<short, 4> majorAxisSpace;	// Offset: 16 Unk: 3
-	hkReal mass;	// Offset: 24 Unk: 0
-	hkReal volume;	// Offset: 28 Unk: 0
+// Class No.167
+// Mapped to c type: std::array<hkPackedVector3, 16>
+template<class tT=hkPackedVector3, class vN=16>
+class T[N] {
 };
 
-// Class No.89
-// Mapped to c type: hknpShapeMassProperties
-class hknpShapeMassProperties : public hkReferencedObject {
-	hkCompressedMassProperties compressedMassProperties;	// Offset: 24 Unk: 3
+// Class No.166
+// Mapped to c type: std::array<hkUint8, 32>
+template<class tT=hkUint8, class vN=32>
+class T[N] {
 };
 
-// Class No.88
-// Mapped to c type: hkRefPtr
-template<class tTYPE=hkReferencedObject>
-class hkRefPtr {
-	void* ptr;	// Offset: 0 Unk: 0
+// Class No.165
+// Mapped to c type: std::array<hkUint16, 32>
+template<class tT=hkUint16, class vN=32>
+class T[N] {
 };
 
-// Class No.87
-// Mapped to c type: hkRefCountedProperties::Entry
-class hkRefCountedProperties::Entry {
-	hkRefPtr object;	// Offset: 0 Unk: 0
-	hkUint16 key;	// Offset: 8 Unk: 0
-	hkUint16 flags;	// Offset: 10 Unk: 0
+// Class No.164
+// Mapped to c type: std::array<hkUint8, 48>
+template<class tT=hkUint8, class vN=48>
+class T[N] {
 };
 
-// Class No.86
+// Class No.163
+// Mapped to c type: std::array<hkUint16, 48>
+template<class tT=hkUint16, class vN=48>
+class T[N] {
+};
+
+// Class No.162
+// Mapped to c type: std::array<hkUint8, 64>
+template<class tT=hkUint8, class vN=64>
+class T[N] {
+};
+
+// Class No.161
+// Mapped to c type: std::array<hkUint16, 64>
+template<class tT=hkUint16, class vN=64>
+class T[N] {
+};
+
+// Class No.160
+// Mapped to c type: std::array<hkUint16, 16>
+template<class tT=hkUint16, class vN=16>
+class T[N] {
+};
+
+// Class No.159
+// Mapped to c type: hkMatrix4Impl
+template<class tFT=float>
+class hkMatrix4Impl {
+	hkVector4f col0;	// Offset: 0 Unk: 0
+	hkVector4f col1;	// Offset: 16 Unk: 0
+	hkVector4f col2;	// Offset: 32 Unk: 0
+	hkVector4f col3;	// Offset: 48 Unk: 0
+};
+
+// Class No.158
+// Mapped to c type: hkMatrix4f
+class hkMatrix4f : public hkMatrix4Impl<float> {
+};
+
+// Class No.157
+// Mapped to c type: hclTransformSetUsage::TransformTracker
+class hclTransformSetUsage::TransformTracker {
+	hkBitField read;	// Offset: 0 Unk: 0
+	hkBitField readBeforeWrite;	// Offset: 24 Unk: 0
+	hkBitField written;	// Offset: 48 Unk: 0
+};
+
+// Class No.156
 // Mapped to c type: hkArray
-template<class tT=hkRefCountedProperties::Entry, class tAllocator=hkContainerHeapAllocator>
+template<class tT=hclTransformSetUsage::TransformTracker, class tAllocator=hkContainerHeapAllocator>
 class hkArray {
 	void* m_data;	// Offset: 0 Unk: 0
 	int m_size;	// Offset: 8 Unk: 0
 	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.85
-// Mapped to c type: hknpMassDistribution
-class hknpMassDistribution {
-	hkVector4 centerOfMassAndVolume;	// Offset: 0 Unk: 0
-	hkQuaternion majorAxisSpace;	// Offset: 16 Unk: 0
-	hkVector4 inertiaTensor;	// Offset: 32 Unk: 0
-};
-
-// Class No.84
-// Mapped to c type: std::array<hkUint8, 1>
-template<class tT=hkUint8, class vN=1>
+// Class No.155
+// Mapped to c type: std::array<hkUint8, 2>
+template<class tT=hkUint8, class vN=2>
 class T[N] {
 };
 
-// Class No.83
-// Mapped to c type: hkInt32
-class hkInt32 : public int {
+// Class No.154
+// Mapped to c type: hclTransformSetUsage
+class hclTransformSetUsage {
+	std::array<hkUint8, 2> perComponentFlags;	// Offset: 0 Unk: 0
+	hkArray perComponentTransformTrackers;	// Offset: 8 Unk: 0
 };
 
-// Class No.82
-// Mapped to c type: hknpConvexHull::Edge
-class hknpConvexHull::Edge {
-	hkUint16 faceIndex;	// Offset: 0 Unk: 0
-	hkUint8 edgeIndex;	// Offset: 2 Unk: 0
-	std::array<hkUint8, 1> padding;	// Offset: 3 Unk: 0
+// Class No.153
+// Mapped to c type: std::array<hkUint8, 4>
+template<class tT=hkUint8, class vN=4>
+class T[N] {
 };
 
-// Class No.81
-// Mapped to c type: hkRelArray
-template<class tT=hknpConvexHull::Edge>
-class hkRelArray {
-	hkInt32 offset;	// Offset: 0 Unk: 0
-	int size;	// Offset: 4 Unk: 0
+// Class No.152
+// Mapped to c type: hclBufferUsage
+class hclBufferUsage {
+	std::array<hkUint8, 4> perComponentFlags;	// Offset: 0 Unk: 0
+	hkBool trianglesRead;	// Offset: 4 Unk: 0
 };
 
-// Class No.80
-// Mapped to c type: hkRelArray
-template<class tT=hkUint8>
-class hkRelArray {
-	hkInt32 offset;	// Offset: 0 Unk: 0
-	int size;	// Offset: 4 Unk: 0
+// Class No.151
+// Mapped to c type: hclObjectSpaceDeformer::OneBlendEntryBlock
+class hclObjectSpaceDeformer::OneBlendEntryBlock {
+	std::array<hkUint16, 16> vertexIndices;	// Offset: 0 Unk: 0
+	std::array<hkUint16, 16> boneIndices;	// Offset: 32 Unk: 0
 };
 
-// Class No.79
-// Mapped to c type: hknpConvexHull::Face
-class hknpConvexHull::Face {
-	hkUint16 firstIndex;	// Offset: 0 Unk: 0
-	hkUint8 numIndices;	// Offset: 2 Unk: 0
-	hkUint8 minHalfAngle;	// Offset: 3 Unk: 0
+// Class No.150
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::OneBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.78
-// Mapped to c type: hkRelArray
-template<class tT=hknpConvexHull::Face>
-class hkRelArray {
-	hkInt32 offset;	// Offset: 0 Unk: 0
-	int size;	// Offset: 4 Unk: 0
+// Class No.149
+// Mapped to c type: hclObjectSpaceDeformer::TwoBlendEntryBlock
+class hclObjectSpaceDeformer::TwoBlendEntryBlock {
+	std::array<hkUint16, 16> vertexIndices;	// Offset: 0 Unk: 0
+	std::array<hkUint16, 32> boneIndices;	// Offset: 32 Unk: 0
+	std::array<hkUint8, 32> boneWeights;	// Offset: 96 Unk: 0
 };
 
-// Class No.77
-// Mapped to c type: hkRelArray
-template<class tT=hkVector4>
-class hkRelArray {
-	hkInt32 offset;	// Offset: 0 Unk: 0
-	int size;	// Offset: 4 Unk: 0
+// Class No.148
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::TwoBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.76
-// Mapped to c type: hkFloat3
-class hkFloat3 {
-	float x;	// Offset: 0 Unk: 0
-	float y;	// Offset: 4 Unk: 0
-	float z;	// Offset: 8 Unk: 0
+// Class No.147
+// Mapped to c type: hclObjectSpaceDeformer::ThreeBlendEntryBlock
+class hclObjectSpaceDeformer::ThreeBlendEntryBlock {
+	std::array<hkUint16, 16> vertexIndices;	// Offset: 0 Unk: 0
+	std::array<hkUint16, 48> boneIndices;	// Offset: 32 Unk: 0
+	std::array<hkUint8, 48> boneWeights;	// Offset: 128 Unk: 0
 };
 
-// Class No.75
-// Mapped to c type: hkRelArray
-template<class tT=hkFloat3>
-class hkRelArray {
-	hkInt32 offset;	// Offset: 0 Unk: 0
-	int size;	// Offset: 4 Unk: 0
+// Class No.146
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::ThreeBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.74
-// Mapped to c type: hkRefCountedProperties
-class hkRefCountedProperties : public hkReferencedObject {
-	hkArray entries;	// Offset: 24 Unk: 0
+// Class No.145
+// Mapped to c type: hclObjectSpaceDeformer::FourBlendEntryBlock
+class hclObjectSpaceDeformer::FourBlendEntryBlock {
+	std::array<hkUint16, 16> vertexIndices;	// Offset: 0 Unk: 0
+	std::array<hkUint16, 64> boneIndices;	// Offset: 32 Unk: 0
+	std::array<hkUint8, 64> boneWeights;	// Offset: 160 Unk: 0
 };
 
-// Class No.73
-// Mapped to c type: hkRefPtr
-template<class tTYPE=hkRefCountedProperties>
-class hkRefPtr {
-	void* ptr;	// Offset: 0 Unk: 0
+// Class No.144
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::FourBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.72
-// Mapped to c type: hknpCollisionDispatchType::Enum
-class hknpCollisionDispatchType::Enum;	// [Undefined]
+// Class No.143
+// Mapped to c type: hclObjectSpaceDeformer::FiveBlendEntryBlock
+class hclObjectSpaceDeformer::FiveBlendEntryBlock;	// [Undefined]
 
-// Class No.71
+// Class No.142
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::FiveBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.141
+// Mapped to c type: hclObjectSpaceDeformer::SixBlendEntryBlock
+class hclObjectSpaceDeformer::SixBlendEntryBlock;	// [Undefined]
+
+// Class No.140
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::SixBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.139
+// Mapped to c type: hclObjectSpaceDeformer::SevenBlendEntryBlock
+class hclObjectSpaceDeformer::SevenBlendEntryBlock;	// [Undefined]
+
+// Class No.138
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::SevenBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.137
+// Mapped to c type: hclObjectSpaceDeformer::EightBlendEntryBlock
+class hclObjectSpaceDeformer::EightBlendEntryBlock;	// [Undefined]
+
+// Class No.136
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::EightBlendEntryBlock, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.135
+// Mapped to c type: hclClothState::TransformSetAccess
+class hclClothState::TransformSetAccess {
+	hkUint32 transformSetIndex;	// Offset: 0 Unk: 0
+	hclTransformSetUsage transformSetUsage;	// Offset: 8 Unk: 0
+};
+
+// Class No.134
+// Mapped to c type: hkArray
+template<class tT=hclClothState::TransformSetAccess, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.133
+// Mapped to c type: hclClothState::BufferAccess
+class hclClothState::BufferAccess {
+	hkUint32 bufferIndex;	// Offset: 0 Unk: 0
+	hclBufferUsage bufferUsage;	// Offset: 4 Unk: 0
+	hkUint32 shadowBufferIndex;	// Offset: 12 Unk: 0
+};
+
+// Class No.132
+// Mapped to c type: hkArray
+template<class tT=hclClothState::BufferAccess, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.131
+// Mapped to c type: hclObjectSpaceDeformer
+class hclObjectSpaceDeformer {
+	hkArray eightBlendEntries;	// Offset: 0 Unk: 0
+	hkArray sevenBlendEntries;	// Offset: 16 Unk: 0
+	hkArray sixBlendEntries;	// Offset: 32 Unk: 0
+	hkArray fiveBlendEntries;	// Offset: 48 Unk: 0
+	hkArray fourBlendEntries;	// Offset: 64 Unk: 0
+	hkArray threeBlendEntries;	// Offset: 80 Unk: 0
+	hkArray twoBlendEntries;	// Offset: 96 Unk: 0
+	hkArray oneBlendEntries;	// Offset: 112 Unk: 0
+	hkArray controlBytes;	// Offset: 128 Unk: 0
+	hkUint16 startVertexIndex;	// Offset: 144 Unk: 0
+	hkUint16 endVertexIndex;	// Offset: 146 Unk: 0
+	hkBool partialWrite;	// Offset: 148 Unk: 0
+};
+
+// Class No.130
+// Mapped to c type: hclObjectSpaceDeformer::LocalBlockUnpackedPN
+class hclObjectSpaceDeformer::LocalBlockUnpackedPN;	// [Undefined]
+
+// Class No.129
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::LocalBlockUnpackedPN, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.128
+// Mapped to c type: hclObjectSpaceDeformer::LocalBlockPN
+class hclObjectSpaceDeformer::LocalBlockPN {
+	std::array<hkPackedVector3, 16> localPosition;	// Offset: 0 Unk: 0
+	std::array<hkPackedVector3, 16> localNormal;	// Offset: 128 Unk: 0
+};
+
+// Class No.127
+// Mapped to c type: hkArray
+template<class tT=hclObjectSpaceDeformer::LocalBlockPN, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.126
+// Mapped to c type: hclObjectSpaceSkinOperator
+class hclObjectSpaceSkinOperator : public hclOperator {
+	hkArray boneFromSkinMeshTransforms;	// Offset: 72 Unk: 0
+	hkArray transformSubset;	// Offset: 88 Unk: 0
+	hkUint32 outputBufferIndex;	// Offset: 104 Unk: 0
+	hkUint32 transformSetIndex;	// Offset: 108 Unk: 0
+	hclObjectSpaceDeformer objectSpaceDeformer;	// Offset: 112 Unk: 0
+};
+
+// Class No.125
+// Mapped to c type: hclObjectSpaceSkinPNOperator
+class hclObjectSpaceSkinPNOperator : public hclObjectSpaceSkinOperator {
+	hkArray localPNs;	// Offset: 264 Unk: 0
+	hkArray localUnpackedPNs;	// Offset: 280 Unk: 0
+};
+
+// Class No.124
+// Mapped to c type: hclBufferLayout::SlotFlags
+class hclBufferLayout::SlotFlags;	// [Undefined]
+
+// Class No.123
 // Mapped to c type: hkEnum
-template<class tENUM=hknpCollisionDispatchType::Enum, class tSTORAGE=hkUint8>
+template<class tENUM=hclBufferLayout::SlotFlags, class tSTORAGE=hkUint8>
 class hkEnum {
 	hkUint8 storage;	// Offset: 0 Unk: 0
 };
 
-// Class No.70
-// Mapped to c type: hknpShapeType::Enum
-class hknpShapeType::Enum;	// [Undefined]
+// Class No.122
+// Mapped to c type: hclRuntimeConversionInfo::VectorConversion
+class hclRuntimeConversionInfo::VectorConversion;	// [Undefined]
 
-// Class No.69
+// Class No.121
 // Mapped to c type: hkEnum
-template<class tENUM=hknpShapeType::Enum, class tSTORAGE=hkUint8>
+template<class tENUM=hclRuntimeConversionInfo::VectorConversion, class tSTORAGE=hkUint8>
 class hkEnum {
 	hkUint8 storage;	// Offset: 0 Unk: 0
 };
 
-// Class No.68
-// Mapped to c type: hkUint16
-class hkUint16 : public unsigned short {
+// Class No.120
+// Mapped to c type: hclBufferLayout::TriangleFormat
+class hclBufferLayout::TriangleFormat;	// [Undefined]
+
+// Class No.119
+// Mapped to c type: hkEnum
+template<class tENUM=hclBufferLayout::TriangleFormat, class tSTORAGE=hkUint8>
+class hkEnum {
+	hkUint8 storage;	// Offset: 0 Unk: 0
 };
 
-// Class No.67
-// Mapped to c type: hknpShape::FlagsEnum
-class hknpShape::FlagsEnum;	// [Undefined]
-
-// Class No.66
-// Mapped to c type: hkFlags
-template<class tBITS=hknpShape::FlagsEnum, class tSTORAGE=hkUint16>
-class hkFlags {
-	hkUint16 storage;	// Offset: 0 Unk: 0
+// Class No.118
+// Mapped to c type: hclBufferLayout::Slot
+class hclBufferLayout::Slot {
+	hkEnum flags;	// Offset: 0 Unk: 0
+	hkUint8 stride;	// Offset: 1 Unk: 0
 };
 
-// Class No.65
-// Mapped to c type: hknpConvexHull
-class hknpConvexHull {
-	hkRelArray vertices;	// Offset: 0 Unk: 0
-	hkRelArray planes;	// Offset: 8 Unk: 0
-	hkRelArray faces;	// Offset: 16 Unk: 0
-	hkRelArray indices;	// Offset: 24 Unk: 0
-	hkRelArray faceLinks;	// Offset: 32 Unk: 0
-	hkRelArray vertexEdges;	// Offset: 40 Unk: 0
+// Class No.117
+// Mapped to c type: std::array<hclBufferLayout::Slot, 4>
+template<class tT=hclBufferLayout::Slot, class vN=4>
+class T[N] {
 };
 
-// Class No.64
-// Mapped to c type: hknpConvexShape
-class hknpConvexShape : public hknpShape {
-	hkHalf16 maxAllowedPenetration;	// Offset: 56 Unk: 0
-	hknpConvexHull hull;	// Offset: 60 Unk: 0
+// Class No.116
+// Mapped to c type: hclBufferLayout::BufferElement
+class hclBufferLayout::BufferElement {
+	hkEnum vectorConversion;	// Offset: 0 Unk: 0
+	hkUint8 vectorSize;	// Offset: 1 Unk: 0
+	hkUint8 slotId;	// Offset: 2 Unk: 0
+	hkUint8 slotStart;	// Offset: 3 Unk: 0
 };
 
-// Class No.63
+// Class No.115
+// Mapped to c type: std::array<hclBufferLayout::BufferElement, 4>
+template<class tT=hclBufferLayout::BufferElement, class vN=4>
+class T[N] {
+};
+
+// Class No.114
+// Mapped to c type: hclBufferLayout
+class hclBufferLayout {
+	std::array<hclBufferLayout::BufferElement, 4> elementsLayout;	// Offset: 0 Unk: 0
+	std::array<hclBufferLayout::Slot, 4> slots;	// Offset: 16 Unk: 0
+	hkUint8 numSlots;	// Offset: 24 Unk: 0
+	hkEnum triangleFormat;	// Offset: 25 Unk: 0
+};
+
+// Class No.113
+// Mapped to c type: hclScratchBufferDefinition
+class hclScratchBufferDefinition : public hclBufferDefinition {
+	hkArray triangleIndices;	// Offset: 88 Unk: 0
+	hkBool storeNormals;	// Offset: 104 Unk: 0
+	hkBool storeTangentsAndBiTangents;	// Offset: 105 Unk: 0
+};
+
+// Class No.112
+// Mapped to c type: unsigned char
+class unsigned char {
+};
+
+// Class No.111
 // Mapped to c type: signed char
 class signed char {
 };
 
+// Class No.110
+// Mapped to c type: hclVirtualCollisionPointsData::TriangleFanLandscape
+class hclVirtualCollisionPointsData::TriangleFanLandscape;	// [Undefined]
+
+// Class No.109
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::TriangleFanLandscape, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.108
+// Mapped to c type: hclVirtualCollisionPointsData::EdgeFanLandscape
+class hclVirtualCollisionPointsData::EdgeFanLandscape;	// [Undefined]
+
+// Class No.107
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::EdgeFanLandscape, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.106
+// Mapped to c type: hclVirtualCollisionPointsData::TriangleFan
+class hclVirtualCollisionPointsData::TriangleFan;	// [Undefined]
+
+// Class No.105
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::TriangleFan, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.104
+// Mapped to c type: hclVirtualCollisionPointsData::TriangleFanSection
+class hclVirtualCollisionPointsData::TriangleFanSection;	// [Undefined]
+
+// Class No.103
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::TriangleFanSection, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.102
+// Mapped to c type: hclVirtualCollisionPointsData::EdgeFan
+class hclVirtualCollisionPointsData::EdgeFan;	// [Undefined]
+
+// Class No.101
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::EdgeFan, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.100
+// Mapped to c type: hclVirtualCollisionPointsData::EdgeFanSection
+class hclVirtualCollisionPointsData::EdgeFanSection;	// [Undefined]
+
+// Class No.99
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::EdgeFanSection, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.98
+// Mapped to c type: hclVirtualCollisionPointsData::BarycentricPair
+class hclVirtualCollisionPointsData::BarycentricPair;	// [Undefined]
+
+// Class No.97
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::BarycentricPair, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.96
+// Mapped to c type: hclVirtualCollisionPointsData::BarycentricDictionaryEntry
+class hclVirtualCollisionPointsData::BarycentricDictionaryEntry;	// [Undefined]
+
+// Class No.95
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::BarycentricDictionaryEntry, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.94
+// Mapped to c type: hclVirtualCollisionPointsData::Block
+class hclVirtualCollisionPointsData::Block;	// [Undefined]
+
+// Class No.93
+// Mapped to c type: hkArray
+template<class tT=hclVirtualCollisionPointsData::Block, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.92
+// Mapped to c type: unsigned short
+class unsigned short {
+};
+
+// Class No.91
+// Mapped to c type: hkInt8
+class hkInt8 : public signed char {
+};
+
+// Class No.90
+// Mapped to c type: hkMatrix4
+class hkMatrix4 : public hkMatrix4f {
+};
+
+// Class No.89
+// Mapped to c type: hkArray
+template<class tT=hkMatrix4, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.88
+// Mapped to c type: hkInt32
+class hkInt32 : public int {
+};
+
+// Class No.87
+// Mapped to c type: hkVector4
+class hkVector4 : public hkVector4f {
+};
+
+// Class No.86
+// Mapped to c type: hclVirtualCollisionPointsData
+class hclVirtualCollisionPointsData {
+	hkArray blocks;	// Offset: 0 Unk: 0
+	hkUint16 numVCPoints;	// Offset: 16 Unk: 0
+	hkArray landscapeParticlesBlockIndex;	// Offset: 24 Unk: 0
+	hkUint16 numLandscapeVCPoints;	// Offset: 40 Unk: 0
+	hkArray edgeBarycentricsDictionary;	// Offset: 48 Unk: 0
+	hkArray edgeDictionaryEntries;	// Offset: 64 Unk: 0
+	hkArray triangleBarycentricsDictionary;	// Offset: 80 Unk: 0
+	hkArray triangleDictionaryEntries;	// Offset: 96 Unk: 0
+	hkArray edges;	// Offset: 112 Unk: 0
+	hkArray edgeFans;	// Offset: 128 Unk: 0
+	hkArray triangles;	// Offset: 144 Unk: 0
+	hkArray triangleFans;	// Offset: 160 Unk: 0
+	hkArray edgesLandscape;	// Offset: 176 Unk: 0
+	hkArray edgeFansLandscape;	// Offset: 192 Unk: 0
+	hkArray trianglesLandscape;	// Offset: 208 Unk: 0
+	hkArray triangleFansLandscape;	// Offset: 224 Unk: 0
+	hkArray edgeFanIndices;	// Offset: 240 Unk: 0
+	hkArray triangleFanIndices;	// Offset: 256 Unk: 0
+	hkArray edgeFanIndicesLandscape;	// Offset: 272 Unk: 0
+	hkArray triangleFanIndicesLandscape;	// Offset: 288 Unk: 0
+};
+
+// Class No.85
+// Mapped to c type: hclSimClothData::CollidablePinchingData
+class hclSimClothData::CollidablePinchingData;	// [Undefined]
+
+// Class No.84
+// Mapped to c type: hkArray
+template<class tT=hclSimClothData::CollidablePinchingData, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.83
+// Mapped to c type: hkArray
+template<class tT=hkBool, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.82
+// Mapped to c type: hkUint8
+class hkUint8 : public unsigned char {
+};
+
+// Class No.81
+// Mapped to c type: hkArray
+template<class tT=hkUint8, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.80
+// Mapped to c type: hclSimClothData::LandscapeCollisionData
+class hclSimClothData::LandscapeCollisionData {
+	hkReal landscapeRadius;	// Offset: 0 Unk: 0
+	hkBool enableStuckParticleDetection;	// Offset: 4 Unk: 0
+	hkReal stuckParticlesStretchFactorSq;	// Offset: 8 Unk: 0
+	hkBool pinchDetectionEnabled;	// Offset: 12 Unk: 0
+	hkInt8 pinchDetectionPriority;	// Offset: 13 Unk: 0
+	hkReal pinchDetectionRadius;	// Offset: 16 Unk: 0
+	hkReal collisionTolerance;	// Offset: 20 Unk: 0
+};
+
+// Class No.79
+// Mapped to c type: hclSimClothData::TransferMotionData
+class hclSimClothData::TransferMotionData {
+	hkUint32 transformSetIndex;	// Offset: 0 Unk: 0
+	hkUint32 transformIndex;	// Offset: 4 Unk: 0
+	hkBool transferTranslationMotion;	// Offset: 8 Unk: 0
+	hkReal minTranslationSpeed;	// Offset: 12 Unk: 0
+	hkReal maxTranslationSpeed;	// Offset: 16 Unk: 0
+	hkReal minTranslationBlend;	// Offset: 20 Unk: 0
+	hkReal maxTranslationBlend;	// Offset: 24 Unk: 0
+	hkBool transferRotationMotion;	// Offset: 28 Unk: 0
+	hkReal minRotationSpeed;	// Offset: 32 Unk: 0
+	hkReal maxRotationSpeed;	// Offset: 36 Unk: 0
+	hkReal minRotationBlend;	// Offset: 40 Unk: 0
+	hkReal maxRotationBlend;	// Offset: 44 Unk: 0
+};
+
+// Class No.78
+// Mapped to c type: hkArray
+template<class tT=hkUint32, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.77
+// Mapped to c type: hclCollidable
+class hclCollidable;	// [Undefined]
+
+// Class No.76
+// Mapped to c type: hclCollidable*
+template<class tT=hclCollidable>
+class T*;	// [Undefined]
+
+// Class No.75
+// Mapped to c type: hkArray
+template<class tT=T*<hclCollidable>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.74
+// Mapped to c type: hclSimClothData::CollidableTransformMap
+class hclSimClothData::CollidableTransformMap {
+	hkInt32 transformSetIndex;	// Offset: 0 Unk: 0
+	hkArray transformIndices;	// Offset: 8 Unk: 0
+	hkArray offsets;	// Offset: 24 Unk: 0
+};
+
+// Class No.73
+// Mapped to c type: hclConstraintSet
+class hclConstraintSet : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hkHandle constraintId;	// Offset: 32 Unk: 0
+	unsigned int type;	// Offset: 36 Unk: 0
+};
+
+// Class No.72
+// Mapped to c type: hclConstraintSet*
+template<class tT=hclConstraintSet>
+class T* {
+};
+
+// Class No.71
+// Mapped to c type: hkArray
+template<class tT=T*<hclConstraintSet>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.70
+// Mapped to c type: hclSimClothPose
+class hclSimClothPose : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hkArray positions;	// Offset: 32 Unk: 0
+};
+
+// Class No.69
+// Mapped to c type: hclSimClothPose*
+template<class tT=hclSimClothPose>
+class T* {
+};
+
+// Class No.68
+// Mapped to c type: hkArray
+template<class tT=T*<hclSimClothPose>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.67
+// Mapped to c type: hkArray
+template<class tT=unsigned int, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.66
+// Mapped to c type: hkUint16
+class hkUint16 : public unsigned short {
+};
+
+// Class No.65
+// Mapped to c type: hkArray
+template<class tT=hkUint16, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.64
+// Mapped to c type: hclSimClothData::ParticleData
+class hclSimClothData::ParticleData {
+	hkReal mass;	// Offset: 0 Unk: 0
+	hkReal invMass;	// Offset: 4 Unk: 0
+	hkReal radius;	// Offset: 8 Unk: 0
+	hkReal friction;	// Offset: 12 Unk: 0
+};
+
+// Class No.63
+// Mapped to c type: hkArray
+template<class tT=hclSimClothData::ParticleData, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
 // Class No.62
+// Mapped to c type: hclSimClothData::OverridableSimulationInfo
+class hclSimClothData::OverridableSimulationInfo {
+	hkVector4 gravity;	// Offset: 0 Unk: 0
+	hkReal globalDampingPerSecond;	// Offset: 16 Unk: 0
+};
+
+// Class No.61
+// Mapped to c type: float
+class float {
+};
+
+// Class No.60
 // Mapped to c type: hkQuaternionf
 class hkQuaternionf {
 	hkVector4f vec;	// Offset: 0 Unk: 0
 };
 
-// Class No.61
+// Class No.59
 // Mapped to c type: hkVector4f
 class hkVector4f {
 };
 
-// Class No.60
-// Mapped to c type: hknpCollisionControl::Enum
-class hknpCollisionControl::Enum;	// [Undefined]
-
-// Class No.59
-// Mapped to c type: hkFlags
-template<class tBITS=hknpCollisionControl::Enum, class tSTORAGE=unsigned short>
-class hkFlags {
-	unsigned short storage;	// Offset: 0 Unk: 0
-};
-
 // Class No.58
-// Mapped to c type: hkInt8
-class hkInt8 : public signed char {
+// Mapped to c type: hkQsTransformf
+class hkQsTransformf {
+	hkVector4f translation;	// Offset: 0 Unk: 0
+	hkQuaternionf rotation;	// Offset: 16 Unk: 0
+	hkVector4f scale;	// Offset: 32 Unk: 0
 };
 
 // Class No.57
-// Mapped to c type: hkLocalFrame
-class hkLocalFrame;	// [Undefined]
-
-// Class No.56
-// Mapped to c type: hkRefPtr
-template<class tTYPE=hkLocalFrame>
-class hkRefPtr {
-	void* ptr;	// Offset: 0 Unk: 0
-};
-
-// Class No.55
-// Mapped to c type: hknpBodyId
-class hknpBodyId {
-	hkUint32 serialAndIndex;	// Offset: 0 Unk: 0
-};
-
-// Class No.54
-// Mapped to c type: hknpRefDragProperties
-class hknpRefDragProperties;	// [Undefined]
-
-// Class No.53
-// Mapped to c type: hkRefPtr
-template<class tTYPE=hknpRefDragProperties>
-class hkRefPtr {
-	void* ptr;	// Offset: 0 Unk: 0
-};
-
-// Class No.52
-// Mapped to c type: hknpRefMassDistribution
-class hknpRefMassDistribution : public hkReferencedObject {
-	hknpMassDistribution massDistribution;	// Offset: 32 Unk: 0
-};
-
-// Class No.51
-// Mapped to c type: hkRefPtr
-template<class tTYPE=hknpRefMassDistribution>
-class hkRefPtr {
-	void* ptr;	// Offset: 0 Unk: 0
-};
-
-// Class No.50
-// Mapped to c type: hkQuaternion
-class hkQuaternion : public hkQuaternionf {
-};
-
-// Class No.49
-// Mapped to c type: hkVector4
-class hkVector4 : public hkVector4f {
-};
-
-// Class No.48
-// Mapped to c type: unsigned short
-class unsigned short {
-};
-
-// Class No.47
-// Mapped to c type: hknpCollisionControl
-class hknpCollisionControl : public hkFlags<hknpCollisionControl::Enum, unsigned short> {
-};
-
-// Class No.46
-// Mapped to c type: hknpShape
-class hknpShape : public hkReferencedObject {
-	hkFlags flags;	// Offset: 24 Unk: 0
-	hkEnum type;	// Offset: 26 Unk: 0
-	hkUint8 numShapeKeyBits;	// Offset: 27 Unk: 0
-	hkEnum dispatchType;	// Offset: 28 Unk: 0
-	hkReal convexRadius;	// Offset: 32 Unk: 0
-	hkUint64 userData;	// Offset: 40 Unk: 0
-	hkRefPtr properties;	// Offset: 48 Unk: 0
-};
-
-// Class No.45
-// Mapped to c type: hkRefPtr
-template<class tTYPE=hknpShape>
-class hkRefPtr {
-	void* ptr;	// Offset: 0 Unk: 0
-};
-
-// Class No.44
-// Mapped to c type: hknpBodyCinfo
-class hknpBodyCinfo {
-	hkRefPtr shape;	// Offset: 0 Unk: 0
-	hknpCollisionFlags flags;	// Offset: 8 Unk: 0
-	hknpCollisionControl collisionCntrl;	// Offset: 12 Unk: 0
-	hkUint32 collisionFilterInfo;	// Offset: 16 Unk: 0
-	unsigned short materialId;	// Offset: 20 Unk: 0
-	unsigned char qualityId;	// Offset: 22 Unk: 0
-	hkStringPtr name;	// Offset: 24 Unk: 0
-	hkUint64 userData;	// Offset: 32 Unk: 3
-	unsigned char motionType;	// Offset: 40 Unk: 0
-	hkVector4 position;	// Offset: 48 Unk: 0
-	hkQuaternion orientation;	// Offset: 64 Unk: 0
-	hkVector4 linearVelocity;	// Offset: 80 Unk: 0
-	hkVector4 angularVelocity;	// Offset: 96 Unk: 0
-	hkReal mass;	// Offset: 112 Unk: 0
-	hkRefPtr massDistribution;	// Offset: 120 Unk: 0
-	hkRefPtr dragProperties;	// Offset: 128 Unk: 0
-	unsigned short motionPropertiesId;	// Offset: 136 Unk: 0
-	hknpBodyId desiredBodyId;	// Offset: 140 Unk: 0
-	unsigned int motionId;	// Offset: 144 Unk: 0
-	hkReal collisionLookAheadDistance;	// Offset: 148 Unk: 0
-	hkRefPtr localFrame;	// Offset: 152 Unk: 0
-	hkInt8 activationPriority;	// Offset: 160 Unk: 0
-};
-
-// Class No.43
-// Mapped to c type: hknpMotionProperties::FullCastSettings
-class hknpMotionProperties::FullCastSettings {
-	hkReal minSeparation;	// Offset: 0 Unk: 0
-	hkReal minExtraSeparation;	// Offset: 4 Unk: 0
-	hkReal toiSeparation;	// Offset: 8 Unk: 0
-	hkReal toiExtraSeparation;	// Offset: 12 Unk: 0
-	hkReal toiAccuracy;	// Offset: 16 Unk: 0
-	hkReal relativeSafeDeltaTime;	// Offset: 20 Unk: 0
-	hkReal absoluteSafeDeltaTime;	// Offset: 24 Unk: 0
-	hkReal keepTime;	// Offset: 28 Unk: 0
-	hkReal keepDistance;	// Offset: 32 Unk: 0
-	int maxIterations;	// Offset: 36 Unk: 0
-};
-
-// Class No.42
-// Mapped to c type: hknpMotionProperties::DeactivationSettings
-class hknpMotionProperties::DeactivationSettings {
-	hkReal maxDistSqrd;	// Offset: 0 Unk: 0
-	hkReal maxRotSqrd;	// Offset: 4 Unk: 0
-	hkReal invBlockSize;	// Offset: 8 Unk: 0
-	hkInt16 pathingUpperThreshold;	// Offset: 12 Unk: 0
-	hkInt16 pathingLowerThreshold;	// Offset: 14 Unk: 0
-	hkUint8 numDeactivationFrequencyPasses;	// Offset: 16 Unk: 0
-	hkUint8 deactivationVelocityScaleSquare;	// Offset: 17 Unk: 0
-	hkUint8 minimumPathingVelocityScaleSquare;	// Offset: 18 Unk: 0
-	hkUint8 spikingVelocityScaleThresholdSquared;	// Offset: 19 Unk: 0
-	hkUint8 minimumSpikingVelocityScaleSquared;	// Offset: 20 Unk: 0
-};
-
-// Class No.41
 // Mapped to c type: short
 class short {
 };
 
-// Class No.40
-// Mapped to c type: float
-class float {
+// Class No.56
+// Mapped to c type: hkaSkeleton::Partition
+class hkaSkeleton::Partition;	// [Undefined]
+
+// Class No.55
+// Mapped to c type: hkArray
+template<class tT=hkaSkeleton::Partition, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.39
-// Mapped to c type: hkInt16
-class hkInt16 : public short {
+// Class No.54
+// Mapped to c type: hkaSkeleton::LocalFrameOnBone
+class hkaSkeleton::LocalFrameOnBone;	// [Undefined]
+
+// Class No.53
+// Mapped to c type: hkArray
+template<class tT=hkaSkeleton::LocalFrameOnBone, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.38
-// Mapped to c type: hknpCollisionFlags::Enum
-class hknpCollisionFlags::Enum;	// [Undefined]
-
-// Class No.37
-// Mapped to c type: hkFlags
-template<class tBITS=hknpCollisionFlags::Enum, class tSTORAGE=int>
-class hkFlags {
-	int storage;	// Offset: 0 Unk: 0
+// Class No.52
+// Mapped to c type: hkArray
+template<class tT=hkStringPtr, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.36
-// Mapped to c type: unsigned int
-class unsigned int {
-};
-
-// Class No.35
-// Mapped to c type: hkUint64
-class hkUint64 : public unsigned long long {
-};
-
-// Class No.34
-// Mapped to c type: hknpSurfaceVelocity
-class hknpSurfaceVelocity;	// [Undefined]
-
-// Class No.33
-// Mapped to c type: hknpSurfaceVelocity*
-template<class tT=hknpSurfaceVelocity>
-class T* {
-};
-
-// Class No.32
-// Mapped to c type: hknpMaterial::MassChangerCategory
-class hknpMaterial::MassChangerCategory;	// [Undefined]
-
-// Class No.31
-// Mapped to c type: hkEnum
-template<class tENUM=hknpMaterial::MassChangerCategory, class tSTORAGE=hkUint8>
-class hkEnum {
-	hkUint8 storage;	// Offset: 0 Unk: 0
-};
-
-// Class No.30
+// Class No.51
 // Mapped to c type: hkReal
 class hkReal : public float {
 };
 
-// Class No.29
-// Mapped to c type: hknpMaterial::CombinePolicy
-class hknpMaterial::CombinePolicy;	// [Undefined]
-
-// Class No.28
-// Mapped to c type: hkEnum
-template<class tENUM=hknpMaterial::CombinePolicy, class tSTORAGE=hkUint8>
-class hkEnum {
-	hkUint8 storage;	// Offset: 0 Unk: 0
+// Class No.50
+// Mapped to c type: hkArray
+template<class tT=hkReal, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.27
-// Mapped to c type: hkHalf16
-class hkHalf16 {
-	hkInt16 value;	// Offset: 0 Unk: 0
+// Class No.49
+// Mapped to c type: hkQsTransform
+class hkQsTransform : public hkQsTransformf {
 };
 
-// Class No.26
-// Mapped to c type: hkUFloat8
-class hkUFloat8 {
-	hkUint8 value;	// Offset: 0 Unk: 0
+// Class No.48
+// Mapped to c type: hkArray
+template<class tT=hkQsTransform, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.25
-// Mapped to c type: hknpMaterial::TriggerType
-class hknpMaterial::TriggerType;	// [Undefined]
-
-// Class No.24
-// Mapped to c type: hkEnum
-template<class tENUM=hknpMaterial::TriggerType, class tSTORAGE=hkUint8>
-class hkEnum {
-	hkUint8 storage;	// Offset: 0 Unk: 0
+// Class No.47
+// Mapped to c type: hkaBone
+class hkaBone {
+	hkStringPtr name;	// Offset: 0 Unk: 0
+	hkBool lockTranslation;	// Offset: 8 Unk: 0
 };
 
-// Class No.23
-// Mapped to c type: hknpCollisionFlags
-class hknpCollisionFlags : public hkFlags<hknpCollisionFlags::Enum, int> {
+// Class No.46
+// Mapped to c type: hkArray
+template<class tT=hkaBone, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
 };
 
-// Class No.22
-// Mapped to c type: hkUint32
-class hkUint32 : public unsigned int {
+// Class No.45
+// Mapped to c type: hkInt16
+class hkInt16 : public short {
 };
 
-// Class No.21
+// Class No.44
+// Mapped to c type: hkArray
+template<class tT=hkInt16, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.43
+// Mapped to c type: hkaSkeleton
+class hkaSkeleton : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hkArray parentIndices;	// Offset: 32 Unk: 0
+	hkArray bones;	// Offset: 48 Unk: 0
+	hkArray referencePose;	// Offset: 64 Unk: 0
+	hkArray referenceFloats;	// Offset: 80 Unk: 0
+	hkArray floatSlots;	// Offset: 96 Unk: 0
+	hkArray localFrames;	// Offset: 112 Unk: 0
+	hkArray partitions;	// Offset: 128 Unk: 0
+};
+
+// Class No.42
+// Mapped to c type: unsigned int
+class unsigned int {
+};
+
+// Class No.41
 // Mapped to c type: unsigned long long
 class unsigned long long {
 };
 
-// Class No.20
-// Mapped to c type: unsigned char
-class unsigned char {
-};
-
-// Class No.19
-// Mapped to c type: char*
-class char* {
-};
-
-// Class No.18
-// Mapped to c type: int
-class int {
-};
-
-// Class No.17
-// Mapped to c type: void
-class void;	// [Undefined]
-
-// Class No.16
-// Mapped to c type: void*
-template<class tT=void>
-class T* {
-};
-
-// Class No.15
+// Class No.40
 // Mapped to c type: hkUlong
 class hkUlong : public unsigned long long {
 };
 
-// Class No.14
+// Class No.39
 // Mapped to c type: hkBaseObject
 class hkBaseObject {
 };
 
+// Class No.38
+// Mapped to c type: hkUint32
+class hkUint32 : public unsigned int {
+};
+
+// Class No.37
+// Mapped to c type: hclClothData::Platform
+class hclClothData::Platform;	// [Undefined]
+
+// Class No.36
+// Mapped to c type: hkEnum
+template<class tENUM=hclClothData::Platform, class tSTORAGE=hkUint32>
+class hkEnum {
+	hkUint32 storage;	// Offset: 0 Unk: 0
+};
+
+// Class No.35
+// Mapped to c type: hkBool
+class hkBool {
+	char bool;	// Offset: 0 Unk: 0
+};
+
+// Class No.34
+// Mapped to c type: hclAction
+class hclAction;	// [Undefined]
+
+// Class No.33
+// Mapped to c type: hclAction*
+template<class tT=hclAction>
+class T*;	// [Undefined]
+
+// Class No.32
+// Mapped to c type: hkArray
+template<class tT=T*<hclAction>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.31
+// Mapped to c type: hclStateTransition
+class hclStateTransition;	// [Undefined]
+
+// Class No.30
+// Mapped to c type: hclStateTransition*
+template<class tT=hclStateTransition>
+class T*;	// [Undefined]
+
+// Class No.29
+// Mapped to c type: hkArray
+template<class tT=T*<hclStateTransition>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.28
+// Mapped to c type: hclClothState
+class hclClothState : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hkArray operators;	// Offset: 32 Unk: 0
+	hkArray usedBuffers;	// Offset: 48 Unk: 0
+	hkArray usedTransformSets;	// Offset: 64 Unk: 0
+	hkArray usedSimCloths;	// Offset: 80 Unk: 0
+	hclStateDependencyGraph* dependencyGraph;	// Offset: 96 Unk: 0
+};
+
+// Class No.27
+// Mapped to c type: hclClothState*
+template<class tT=hclClothState>
+class T* {
+};
+
+// Class No.26
+// Mapped to c type: hkArray
+template<class tT=T*<hclClothState>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.25
+// Mapped to c type: hclOperator
+class hclOperator : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	unsigned int operatorID;	// Offset: 32 Unk: 0
+	unsigned int type;	// Offset: 36 Unk: 0
+	hkArray usedBuffers;	// Offset: 40 Unk: 0
+	hkArray usedTransformSets;	// Offset: 56 Unk: 0
+};
+
+// Class No.24
+// Mapped to c type: hclOperator*
+template<class tT=hclOperator>
+class T* {
+};
+
+// Class No.23
+// Mapped to c type: hkArray
+template<class tT=T*<hclOperator>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.22
+// Mapped to c type: hclTransformSetDefinition
+class hclTransformSetDefinition : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hkInt32 type;	// Offset: 32 Unk: 0
+	hkUint32 numTransforms;	// Offset: 36 Unk: 0
+};
+
+// Class No.21
+// Mapped to c type: hclTransformSetDefinition*
+template<class tT=hclTransformSetDefinition>
+class T* {
+};
+
+// Class No.20
+// Mapped to c type: hkArray
+template<class tT=T*<hclTransformSetDefinition>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.19
+// Mapped to c type: hclBufferDefinition
+class hclBufferDefinition : public hkReferencedObject {
+	hkStringPtr meshName;	// Offset: 24 Unk: 0
+	hkStringPtr bufferName;	// Offset: 32 Unk: 0
+	hkInt32 type;	// Offset: 40 Unk: 0
+	hkInt32 subType;	// Offset: 44 Unk: 0
+	hkUint32 numVertices;	// Offset: 48 Unk: 0
+	hkUint32 numTriangles;	// Offset: 52 Unk: 0
+	hclBufferLayout bufferLayout;	// Offset: 56 Unk: 0
+};
+
+// Class No.18
+// Mapped to c type: hclBufferDefinition*
+template<class tT=hclBufferDefinition>
+class T* {
+};
+
+// Class No.17
+// Mapped to c type: hkArray
+template<class tT=T*<hclBufferDefinition>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
+// Class No.16
+// Mapped to c type: hclSimClothData
+class hclSimClothData : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hclSimClothData::OverridableSimulationInfo simulationInfo;	// Offset: 32 Unk: 0
+	hkArray particleDatas;	// Offset: 64 Unk: 0
+	hkArray fixedParticles;	// Offset: 80 Unk: 0
+	hkBool doNormals;	// Offset: 96 Unk: 0
+	hkArray simOpIds;	// Offset: 104 Unk: 0
+	hkArray simClothPoses;	// Offset: 120 Unk: 0
+	hkArray staticConstraintSets;	// Offset: 136 Unk: 0
+	hkArray antiPinchConstraintSets;	// Offset: 152 Unk: 0
+	hclSimClothData::CollidableTransformMap collidableTransformMap;	// Offset: 168 Unk: 0
+	hkArray perInstanceCollidables;	// Offset: 208 Unk: 0
+	hkReal maxParticleRadius;	// Offset: 224 Unk: 0
+	hkArray staticCollisionMasks;	// Offset: 232 Unk: 0
+	hkArray actions;	// Offset: 248 Unk: 0
+	hkReal totalMass;	// Offset: 264 Unk: 0
+	hclSimClothData::TransferMotionData transferMotionData;	// Offset: 268 Unk: 0
+	hkBool transferMotionEnabled;	// Offset: 316 Unk: 0
+	hkBool landscapeCollisionEnabled;	// Offset: 317 Unk: 0
+	hclSimClothData::LandscapeCollisionData landscapeCollisionData;	// Offset: 320 Unk: 0
+	hkUint32 numLandscapeCollidableParticles;	// Offset: 344 Unk: 0
+	hkArray triangleIndices;	// Offset: 352 Unk: 0
+	hkArray triangleFlips;	// Offset: 368 Unk: 0
+	hkBool pinchDetectionEnabled;	// Offset: 384 Unk: 0
+	hkArray perParticlePinchDetectionEnabledFlags;	// Offset: 392 Unk: 0
+	hkArray collidablePinchingDatas;	// Offset: 408 Unk: 0
+	hkUint16 minPinchedParticleIndex;	// Offset: 424 Unk: 0
+	hkUint16 maxPinchedParticleIndex;	// Offset: 426 Unk: 0
+	hkUint32 maxCollisionPairs;	// Offset: 428 Unk: 0
+	hclVirtualCollisionPointsData virtualCollisionPointsData;	// Offset: 432 Unk: 0
+};
+
+// Class No.15
+// Mapped to c type: hclSimClothData*
+template<class tT=hclSimClothData>
+class T* {
+};
+
+// Class No.14
+// Mapped to c type: hkArray
+template<class tT=T*<hclSimClothData>, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
 // Class No.13
-// Mapped to c type: hkUint8
-class hkUint8 : public unsigned char {
+// Mapped to c type: hclClothData
+class hclClothData : public hkReferencedObject {
+	hkStringPtr name;	// Offset: 24 Unk: 0
+	hkArray simClothDatas;	// Offset: 32 Unk: 0
+	hkArray bufferDefinitions;	// Offset: 48 Unk: 0
+	hkArray transformSetDefinitions;	// Offset: 64 Unk: 0
+	hkArray operators;	// Offset: 80 Unk: 0
+	hkArray clothStateDatas;	// Offset: 96 Unk: 0
+	hkArray stateTransitions;	// Offset: 112 Unk: 0
+	hkArray actions;	// Offset: 128 Unk: 0
+	hkBool generatedAtRuntime;	// Offset: 144 Unk: 0
+	hkEnum targetPlatform;	// Offset: 148 Unk: 0
 };
 
 // Class No.12
-// Mapped to c type: hkStringPtr
-class hkStringPtr {
-	char* stringAndFlag;	// Offset: 0 Unk: 0
+// Mapped to c type: char
+class char {
 };
 
 // Class No.11
-// Mapped to c type: hknpConstraintCinfo
-class hknpConstraintCinfo;	// [Undefined]
-
-// Class No.10
-// Mapped to c type: hkArray
-template<class tT=hknpConstraintCinfo, class tAllocator=hkContainerHeapAllocator>
-class hkArray {
-	void* m_data;	// Offset: 0 Unk: 0
-	int m_size;	// Offset: 8 Unk: 0
-	int m_capacityAndFlags;	// Offset: 12 Unk: 0
-};
-
-// Class No.9
-// Mapped to c type: hknpPhysicsSystemData::bodyCinfoWithAttachment
-class hknpPhysicsSystemData::bodyCinfoWithAttachment : public hknpBodyCinfo {
-	int attachedBody;	// Offset: 176 Unk: 0
-};
-
-// Class No.8
-// Mapped to c type: hkArray
-template<class tT=hknpPhysicsSystemData::bodyCinfoWithAttachment, class tAllocator=hkContainerHeapAllocator>
-class hkArray {
-	void* m_data;	// Offset: 0 Unk: 0
-	int m_size;	// Offset: 8 Unk: 0
-	int m_capacityAndFlags;	// Offset: 12 Unk: 0
-};
-
-// Class No.7
-// Mapped to c type: hknpMotionProperties
-class hknpMotionProperties {
-	hkUint32 isExclusive;	// Offset: 0 Unk: 15
-	hknpCollisionFlags flags;	// Offset: 4 Unk: 0
-	hkReal gravityFactor;	// Offset: 8 Unk: 0
-	hkReal timeFactor;	// Offset: 12 Unk: 0
-	hkReal maxLinearSpeed;	// Offset: 16 Unk: 0
-	hkReal maxAngularSpeed;	// Offset: 20 Unk: 0
-	hkReal linearDamping;	// Offset: 24 Unk: 0
-	hkReal angularDamping;	// Offset: 28 Unk: 0
-	hkReal solverStabilizationSpeedThreshold;	// Offset: 32 Unk: 0
-	hkReal solverStabilizationSpeedReduction;	// Offset: 36 Unk: 0
-	hknpMotionProperties::DeactivationSettings deactivationSettings;	// Offset: 40 Unk: 0
-	hknpMotionProperties::FullCastSettings fullCastSettings;	// Offset: 64 Unk: 0
-};
-
-// Class No.6
-// Mapped to c type: hkArray
-template<class tT=hknpMotionProperties, class tAllocator=hkContainerHeapAllocator>
-class hkArray {
-	void* m_data;	// Offset: 0 Unk: 0
-	int m_size;	// Offset: 8 Unk: 0
-	int m_capacityAndFlags;	// Offset: 12 Unk: 0
-};
-
-// Class No.5
-// Mapped to c type: hkContainerHeapAllocator
-class hkContainerHeapAllocator;	// [Undefined]
-
-// Class No.4
-// Mapped to c type: hknpMaterial
-class hknpMaterial {
-	hkStringPtr name;	// Offset: 0 Unk: 4
-	hkUint32 isExclusive;	// Offset: 8 Unk: 0
-	hknpCollisionFlags flags;	// Offset: 12 Unk: 0
-	hkEnum triggerType;	// Offset: 16 Unk: 0
-	hkUFloat8 triggerManifoldTolerance;	// Offset: 17 Unk: 0
-	hkHalf16 dynamicFriction;	// Offset: 18 Unk: 0
-	hkHalf16 staticFriction;	// Offset: 20 Unk: 0
-	hkHalf16 restitution;	// Offset: 22 Unk: 0
-	hkEnum frictionCombinePolicy;	// Offset: 24 Unk: 0
-	hkEnum restitutionCombinePolicy;	// Offset: 25 Unk: 0
-	hkReal weldingTolerance;	// Offset: 28 Unk: 0
-	hkReal maxContactImpulse;	// Offset: 32 Unk: 0
-	hkReal fractionOfClippedImpulseToApply;	// Offset: 36 Unk: 0
-	hkEnum massChangerCategory;	// Offset: 40 Unk: 0
-	hkHalf16 massChangerHeavyObjectFactor;	// Offset: 42 Unk: 0
-	hkHalf16 softContactForceFactor;	// Offset: 44 Unk: 0
-	hkHalf16 softContactDampFactor;	// Offset: 46 Unk: 0
-	hkUFloat8 softContactSeparationVelocity;	// Offset: 48 Unk: 0
-	hknpSurfaceVelocity* surfaceVelocity;	// Offset: 56 Unk: 0
-	hkHalf16 disablingCollisionsBetweenCvxCvxDynamicObjectsDistance;	// Offset: 64 Unk: 0
-	hkUint64 userData;	// Offset: 72 Unk: 3
-};
-
-// Class No.3
-// Mapped to c type: hkArray
-template<class tT=hknpMaterial, class tAllocator=hkContainerHeapAllocator>
-class hkArray {
-	void* m_data;	// Offset: 0 Unk: 0
-	int m_size;	// Offset: 8 Unk: 0
-	int m_capacityAndFlags;	// Offset: 12 Unk: 0
-};
-
-// Class No.2
 // Mapped to c type: hkReferencedObject
 class hkReferencedObject : public hkBaseObject {
 	hkUlong sizeAndFlags;	// Offset: 8 Unk: 0
 	hkUlong refCount;	// Offset: 16 Unk: 0
 };
 
+// Class No.10
+// Mapped to c type: char*
+class char* {
+};
+
+// Class No.9
+// Mapped to c type: hkRefVariant
+class hkRefVariant {
+	void* ptr;	// Offset: 0 Unk: 0
+};
+
+// Class No.8
+// Mapped to c type: hkStringPtr
+class hkStringPtr {
+	char* stringAndFlag;	// Offset: 0 Unk: 0
+};
+
+// Class No.7
+// Mapped to c type: int
+class int {
+};
+
+// Class No.6
+// Mapped to c type: void
+class void;	// [Undefined]
+
+// Class No.5
+// Mapped to c type: void*
+template<class tT=void>
+class T* {
+};
+
+// Class No.4
+// Mapped to c type: hkContainerHeapAllocator
+class hkContainerHeapAllocator;	// [Undefined]
+
+// Class No.3
+// Mapped to c type: hkRootLevelContainer::NamedVariant
+class hkRootLevelContainer::NamedVariant {
+	hkStringPtr name;	// Offset: 0 Unk: 0
+	hkStringPtr className;	// Offset: 8 Unk: 0
+	hkRefVariant variant;	// Offset: 16 Unk: 0
+};
+
+// Class No.2
+// Mapped to c type: hkArray
+template<class tT=hkRootLevelContainer::NamedVariant, class tAllocator=hkContainerHeapAllocator>
+class hkArray {
+	void* m_data;	// Offset: 0 Unk: 0
+	int m_size;	// Offset: 8 Unk: 0
+	int m_capacityAndFlags;	// Offset: 12 Unk: 0
+};
+
 // Class No.1
-// Mapped to c type: hknpPhysicsSystemData
-class hknpPhysicsSystemData : public hkReferencedObject {
-	hkArray materials;	// Offset: 24 Unk: 0
-	hkArray motionProperties;	// Offset: 40 Unk: 0
-	hkArray bodyCinfos;	// Offset: 56 Unk: 0
-	hkArray constraintCinfos;	// Offset: 72 Unk: 0
-	hkStringPtr name;	// Offset: 88 Unk: 0
-	hkUint8 microStepMultiplier;	// Offset: 96 Unk: 0
+// Mapped to c type: hkRootLevelContainer
+class hkRootLevelContainer {
+	hkArray namedVariants;	// Offset: 0 Unk: 0
 };
 

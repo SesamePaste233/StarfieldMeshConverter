@@ -7,9 +7,13 @@ bool hktypes::hclMoveParticlesOperator::FromInstance(const hkreflex::hkClassInst
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator") {
-		std::cout << "hclMoveParticlesOperator::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclMoveParticlesOperator::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclMoveParticlesOperator") {
+		std::cout << "hclMoveParticlesOperator::FromInstance: Expecting hclMoveParticlesOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -24,9 +28,13 @@ bool hktypes::hclMoveParticlesOperator::VertexParticlePair::FromInstance(const h
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
-		std::cout << "hclMoveParticlesOperator::VertexParticlePair::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclMoveParticlesOperator::VertexParticlePair::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
+		std::cout << "hclMoveParticlesOperator::VertexParticlePair::FromInstance: Expecting hclMoveParticlesOperator::VertexParticlePair but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -39,9 +47,13 @@ bool hktypes::hclMoveParticlesOperator::ToInstance(hkreflex::hkClassInstance* in
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator") {
-		std::cout << "hclMoveParticlesOperator::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclMoveParticlesOperator::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclMoveParticlesOperator") {
+		std::cout << "hclMoveParticlesOperator::ToInstance: Expecting hclMoveParticlesOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -56,9 +68,13 @@ bool hktypes::hclMoveParticlesOperator::VertexParticlePair::ToInstance(hkreflex:
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
-		std::cout << "hclMoveParticlesOperator::VertexParticlePair::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclMoveParticlesOperator::VertexParticlePair::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclMoveParticlesOperator::VertexParticlePair") {
+		std::cout << "hclMoveParticlesOperator::VertexParticlePair::ToInstance: Expecting hclMoveParticlesOperator::VertexParticlePair but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

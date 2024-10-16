@@ -10,9 +10,13 @@ bool hktypes::hclStateDependencyGraph::FromInstance(const hkreflex::hkClassInsta
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph") {
-		std::cout << "hclStateDependencyGraph::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStateDependencyGraph::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStateDependencyGraph") {
+		std::cout << "hclStateDependencyGraph::FromInstance: Expecting hclStateDependencyGraph but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -29,9 +33,13 @@ bool hktypes::hclStateDependencyGraph::Branch::FromInstance(const hkreflex::hkCl
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
-		std::cout << "hclStateDependencyGraph::Branch::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStateDependencyGraph::Branch::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
+		std::cout << "hclStateDependencyGraph::Branch::FromInstance: Expecting hclStateDependencyGraph::Branch but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -46,9 +54,13 @@ bool hktypes::hclStateDependencyGraph::ToInstance(hkreflex::hkClassInstance* ins
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph") {
-		std::cout << "hclStateDependencyGraph::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStateDependencyGraph::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStateDependencyGraph") {
+		std::cout << "hclStateDependencyGraph::ToInstance: Expecting hclStateDependencyGraph but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -65,9 +77,13 @@ bool hktypes::hclStateDependencyGraph::Branch::ToInstance(hkreflex::hkClassInsta
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
-		std::cout << "hclStateDependencyGraph::Branch::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStateDependencyGraph::Branch::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStateDependencyGraph::Branch") {
+		std::cout << "hclStateDependencyGraph::Branch::ToInstance: Expecting hclStateDependencyGraph::Branch but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

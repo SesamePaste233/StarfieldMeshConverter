@@ -6,9 +6,13 @@ bool hktypes::hkQsTransform::FromInstance(const hkreflex::hkClassInstance* insta
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkQsTransform") {
-		std::cout << "hkQsTransform::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkQsTransform::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkQsTransform") {
+		std::cout << "hkQsTransform::FromInstance: Expecting hkQsTransform but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -20,9 +24,13 @@ bool hktypes::hkQsTransform::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkQsTransform") {
-		std::cout << "hkQsTransform::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkQsTransform::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkQsTransform") {
+		std::cout << "hkQsTransform::ToInstance: Expecting hkQsTransform but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

@@ -8,9 +8,13 @@ bool hktypes::hclGatherAllVerticesOperator::FromInstance(const hkreflex::hkClass
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclGatherAllVerticesOperator") {
-		std::cout << "hclGatherAllVerticesOperator::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclGatherAllVerticesOperator::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
+		std::cout << "hclGatherAllVerticesOperator::FromInstance: Expecting hclGatherAllVerticesOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -27,9 +31,13 @@ bool hktypes::hclGatherAllVerticesOperator::ToInstance(hkreflex::hkClassInstance
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclGatherAllVerticesOperator") {
-		std::cout << "hclGatherAllVerticesOperator::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclGatherAllVerticesOperator::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclGatherAllVerticesOperator") {
+		std::cout << "hclGatherAllVerticesOperator::ToInstance: Expecting hclGatherAllVerticesOperator but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

@@ -8,9 +8,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::FromInstance(const hkreflex::hkCla
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
-		std::cout << "hclStandardLinkConstraintSetMx::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStandardLinkConstraintSetMx::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
+		std::cout << "hclStandardLinkConstraintSetMx::FromInstance: Expecting hclStandardLinkConstraintSetMx but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -24,9 +28,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::FromInstance(const hkreflex
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
-		std::cout << "hclStandardLinkConstraintSetMx::Batch::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStandardLinkConstraintSetMx::Batch::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
+		std::cout << "hclStandardLinkConstraintSetMx::Batch::FromInstance: Expecting hclStandardLinkConstraintSetMx::Batch but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -42,9 +50,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::FromInstance(const hkrefle
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
-		std::cout << "hclStandardLinkConstraintSetMx::Single::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStandardLinkConstraintSetMx::Single::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
+		std::cout << "hclStandardLinkConstraintSetMx::Single::FromInstance: Expecting hclStandardLinkConstraintSetMx::Single but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -55,9 +67,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::ToInstance(hkreflex::hkClassInstan
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
-		std::cout << "hclStandardLinkConstraintSetMx::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStandardLinkConstraintSetMx::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx") {
+		std::cout << "hclStandardLinkConstraintSetMx::ToInstance: Expecting hclStandardLinkConstraintSetMx but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -71,9 +87,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::Batch::ToInstance(hkreflex::hkClas
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
-		std::cout << "hclStandardLinkConstraintSetMx::Batch::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStandardLinkConstraintSetMx::Batch::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Batch") {
+		std::cout << "hclStandardLinkConstraintSetMx::Batch::ToInstance: Expecting hclStandardLinkConstraintSetMx::Batch but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -89,9 +109,13 @@ bool hktypes::hclStandardLinkConstraintSetMx::Single::ToInstance(hkreflex::hkCla
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
-		std::cout << "hclStandardLinkConstraintSetMx::Single::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hclStandardLinkConstraintSetMx::Single::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hclStandardLinkConstraintSetMx::Single") {
+		std::cout << "hclStandardLinkConstraintSetMx::Single::ToInstance: Expecting hclStandardLinkConstraintSetMx::Single but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

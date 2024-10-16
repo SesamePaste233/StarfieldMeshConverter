@@ -230,7 +230,7 @@ namespace utils {
 
 	std::string readString(std::istream& file, int counts = 1);
 
-	const uint8_t* readBytes(std::istream& file, size_t bytes);
+	uint8_t* readBytes(std::istream& file, size_t bytes);
 
 	template<_base_type_t T>
 	T readFromBuffer(const uint8_t* buffer, size_t& offset, bool big_endian = false) {

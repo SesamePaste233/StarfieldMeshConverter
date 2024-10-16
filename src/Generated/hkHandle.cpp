@@ -6,9 +6,13 @@ bool hktypes::hkHandle<hkUint32, 2147483647>::FromInstance(const hkreflex::hkCla
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkHandle") {
-		std::cout << "hkHandle::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkHandle::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkHandle") {
+		std::cout << "hkHandle::FromInstance: Expecting hkHandle but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -21,9 +25,13 @@ bool hktypes::hkHandle<hkUint32, 2147483647>::ToInstance(hkreflex::hkClassInstan
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkHandle") {
-		std::cout << "hkHandle::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkHandle::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkHandle") {
+		std::cout << "hkHandle::ToInstance: Expecting hkHandle but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 

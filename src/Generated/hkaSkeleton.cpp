@@ -14,9 +14,13 @@ bool hktypes::hkaSkeleton::FromInstance(const hkreflex::hkClassInstance* instanc
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkaSkeleton") {
-		std::cout << "hkaSkeleton::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkaSkeleton::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkaSkeleton") {
+		std::cout << "hkaSkeleton::FromInstance: Expecting hkaSkeleton but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -36,9 +40,13 @@ bool hktypes::hkaSkeleton::LocalFrameOnBone::FromInstance(const hkreflex::hkClas
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkaSkeleton::LocalFrameOnBone") {
-		std::cout << "hkaSkeleton::LocalFrameOnBone::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkaSkeleton::LocalFrameOnBone::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkaSkeleton::LocalFrameOnBone") {
+		std::cout << "hkaSkeleton::LocalFrameOnBone::FromInstance: Expecting hkaSkeleton::LocalFrameOnBone but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -49,9 +57,13 @@ bool hktypes::hkaSkeleton::Partition::FromInstance(const hkreflex::hkClassInstan
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkaSkeleton::Partition") {
-		std::cout << "hkaSkeleton::Partition::FromInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkaSkeleton::Partition::FromInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkaSkeleton::Partition") {
+		std::cout << "hkaSkeleton::Partition::FromInstance: Expecting hkaSkeleton::Partition but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -62,9 +74,13 @@ bool hktypes::hkaSkeleton::ToInstance(hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkaSkeleton") {
-		std::cout << "hkaSkeleton::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkaSkeleton::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkaSkeleton") {
+		std::cout << "hkaSkeleton::ToInstance: Expecting hkaSkeleton but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -84,9 +100,13 @@ bool hktypes::hkaSkeleton::LocalFrameOnBone::ToInstance(hkreflex::hkClassInstanc
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkaSkeleton::LocalFrameOnBone") {
-		std::cout << "hkaSkeleton::LocalFrameOnBone::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkaSkeleton::LocalFrameOnBone::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkaSkeleton::LocalFrameOnBone") {
+		std::cout << "hkaSkeleton::LocalFrameOnBone::ToInstance: Expecting hkaSkeleton::LocalFrameOnBone but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
@@ -97,9 +117,13 @@ bool hktypes::hkaSkeleton::Partition::ToInstance(hkreflex::hkClassInstance* inst
 	auto class_instance = dynamic_cast<hkreflex::hkClassRecordInstance*>(instance);
 
 #ifndef NO_HK_TYPENAME_CHECK
-	if (class_instance && class_instance->type->type_name != "hkaSkeleton::Partition") {
-		std::cout << "hkaSkeleton::Partition::ToInstance: Wrong type!" << std::endl;
+	if (!class_instance) {
+		std::cout << "hkaSkeleton::Partition::ToInstance: hkClassRecordInstance is nullptr!" << std::endl;
 		throw;
+	}
+	if (class_instance->type->type_name != "hkaSkeleton::Partition") {
+		std::cout << "hkaSkeleton::Partition::ToInstance: Expecting hkaSkeleton::Partition but got " << class_instance->type->type_name << std::endl;
+		return false;
 	}
 #endif // NO_HK_TYPENAME_CHECK
 
