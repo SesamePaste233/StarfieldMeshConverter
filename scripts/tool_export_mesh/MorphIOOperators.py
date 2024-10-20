@@ -144,6 +144,12 @@ class ExportCustomMorph(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		self.filename = "morph.dat"
+		
+		_obj = context.active_object
+		if _obj:
+			self.filename = utils.sanitize_filename(_obj.name) + '.dat'
+		else:
+			self.filename = "morph.dat"
 
 		if os.path.isdir(os.path.dirname(self.filepath)):
 			self.filepath = os.path.join(os.path.dirname(self.filepath),self.filename)

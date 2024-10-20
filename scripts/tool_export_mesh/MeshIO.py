@@ -205,10 +205,10 @@ def ImportMesh_Alt(file_path, options, context, operator, mesh_name_override = N
 	# Flip y axis
 	uv_data = dict['uv_coords']
 	uv_data[:, 1] = 1 - uv_data[:, 1]
-	
+
 	uv_layer.data.foreach_set("uv", dict['uv_coords'][vertex_indices].ravel())
 
-	if not np.isclose(dict['uv_coords_2'], 0).any():
+	if not np.isclose(dict['uv_coords_2'], 0).all():
 		uv_layer2 = mesh.uv_layers.new(name="UVMap2")
 		# Flip y axis
 		uv_data2 = dict['uv_coords_2']
@@ -217,9 +217,8 @@ def ImportMesh_Alt(file_path, options, context, operator, mesh_name_override = N
 		uv_layer2.data.foreach_set("uv", dict['uv_coords_2'][vertex_indices].ravel())
 
 	# Set the vertex colors
-	if not np.isclose(dict['vertex_color'], 0).any():
-		vertex_colors = mesh.color_attributes.new(name="Col", type='BYTE_COLOR', domain='CORNER')
-		vertex_colors.data.foreach_set("color", dict['vertex_color'].ravel())
+	vertex_colors = mesh.color_attributes.new(name="Col", type='BYTE_COLOR', domain='CORNER')
+	vertex_colors.data.foreach_set("color", dict['vertex_color'][vertex_indices].ravel())
 
 	if not dict['num_weightsPerVertex'] == 0:
 		weights = dict['weights']

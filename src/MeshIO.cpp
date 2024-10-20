@@ -1155,7 +1155,10 @@ bool mesh::MeshIO::LoadToNumpy(
 
 	if (ptr_color != nullptr) {
 		for (size_t i = 0; i < this->num_vert_colors; ++i) {
-			ptr_color[i * 4 + 0] = this->vert_colors[i].r / 255;
+			ptr_color[i * 4 + 0] = this->vert_colors[i].r / 255.f;
+			ptr_color[i * 4 + 1] = this->vert_colors[i].g / 255.f;
+			ptr_color[i * 4 + 2] = this->vert_colors[i].b / 255.f;
+			ptr_color[i * 4 + 3] = this->vert_colors[i].a / 255.f;
 		}
 	}
 
