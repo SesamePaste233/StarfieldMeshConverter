@@ -473,7 +473,7 @@ bool morph::MorphIO::LoadToNumpy(std::string& json_header_data, float* delta_pos
 
 	// Memset (needs pre-allocated ptrs from numpy)
 	std::memset(delta_positions, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
-	std::memset(target_colors, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
+	//std::memset(target_colors, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
 	std::memset(delta_normals, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
 	std::memset(delta_tangents, 0, this->num_vertices * this->num_shape_keys * 3 * sizeof(float));
 

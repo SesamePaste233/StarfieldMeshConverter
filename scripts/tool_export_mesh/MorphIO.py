@@ -28,10 +28,10 @@ def IsMorphObject(obj):
 	j = name.find(']')
 	return j > i
 
-def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False, use_colors = False, use_normals = False):
+def ImportMorphFromNumpy(filepath, operator, debug_delta_normal = False, force_import_on_active = False, use_colors = False, use_normals = False, base_vertex_bytecolor = 0):
 	import_path = filepath
 	
-	data = MeshConverter.ImportMorphAsNumpy(import_path)
+	data = MeshConverter.ImportMorphAsNumpy(import_path, base_vert_bytecolor=base_vertex_bytecolor)
 
 	vert_count = data["numVertices"]
 	shape_keys = list(data["shapeKeys"])

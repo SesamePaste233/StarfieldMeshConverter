@@ -15,10 +15,19 @@ class ImportCustomMorph(bpy.types.Operator):
 	filepath: bpy.props.StringProperty(subtype="FILE_PATH")
 	filename: bpy.props.StringProperty(default='morph.dat')
 	filter_glob: bpy.props.StringProperty(default="*.dat", options={'HIDDEN'})
+
 	use_colors: bpy.props.BoolProperty(
 		name="Import colors",
 		description="Import colors as attributes.",
 		default=False
+	)
+
+	base_vertex_bytecolor: bpy.props.IntProperty(
+		name="Base Vertex Byte Color",
+		description="Base vertex byte color for morph data.",
+		default=191,
+		min=0,
+		max=255
 	)
 
 	use_normals: bpy.props.BoolProperty(
@@ -37,9 +46,23 @@ class ImportCustomMorph(bpy.types.Operator):
 		description="Debug option. DO NOT USE.",
 		default=False
 	)
+
+	def draw(self, context):
+		layout = self.layout
+		layout.prop(self, "use_colors")
+		box = layout.box()
+		if self.use_colors:
+			box.enabled = True
+		box.prop(self, "base_vertex_bytecolor")
+
+		layout.prop(self, "use_normals")
+
+		layout.label(text="Debug Options:")
+		layout.prop(self, "debug_delta_normal")
+		layout.prop(self, "debug_delta_tangent")
 	
 	def execute(self, context):
-		return MorphIO.ImportMorphFromNumpy(self.filepath, self, self.debug_delta_normal, use_colors=self.use_colors, use_normals=self.use_normals)
+		return MorphIO.ImportMorphFromNumpy(self.filepath, self, self.debug_delta_normal, use_colors=self.use_colors, use_normals=self.use_normals, base_vertex_bytecolor=self.base_vertex_bytecolor)
 
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
@@ -144,7 +167,7 @@ class ExportCustomMorph(bpy.types.Operator):
 
 	def invoke(self, context, event):
 		self.filename = "morph.dat"
-		
+
 		_obj = context.active_object
 		if _obj:
 			self.filename = utils.sanitize_filename(_obj.name) + '.dat'

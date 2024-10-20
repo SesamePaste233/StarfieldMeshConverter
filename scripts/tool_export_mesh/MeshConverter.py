@@ -315,7 +315,7 @@ def ImportMeshAsNumpy(input_file: str) -> dict:
 def ImportMorphAsJson(input_file: str) -> str:
     return _dll_import_morph(input_file.encode('utf-8')).decode('utf-8')
 
-def ImportMorphAsNumpy(input_file: str) -> dict:
+def ImportMorphAsNumpy(input_file: str, base_vert_bytecolor: int = 0) -> dict:
     morph_header_json_str = _dll_import_morph_header(input_file.encode('utf-8')).decode('utf-8')
     morph_header = json.loads(morph_header_json_str)
     del morph_header_json_str
@@ -326,7 +326,7 @@ def ImportMorphAsNumpy(input_file: str) -> dict:
     np_type = np.float32
 
     delta_pos = np.zeros(size, dtype=np_type)
-    target_colors = np.zeros(size, dtype=np_type)
+    target_colors = np.ones(size, dtype=np_type) * base_vert_bytecolor
     delta_norm = np.zeros(size, dtype=np_type)
     delta_tangent = np.zeros(size, dtype=np_type)
 
