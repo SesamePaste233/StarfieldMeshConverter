@@ -106,7 +106,7 @@ class MorphAttrFactory:
 		
 		return self.from_mesh_data_fn(attr, shapekey_name, mesh)
 
-	def to_mesh_data(self, attr, mesh:bpy.types.Mesh, shapekey_name:str) -> None:
+	def to_mesh_data(self, mesh:bpy.types.Mesh, shapekey_name:str) -> None:
 		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=True)
 		if not attr:
 			print(f"Shapekey name {shapekey_name} invalid.")
