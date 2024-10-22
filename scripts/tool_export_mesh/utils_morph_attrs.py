@@ -5,7 +5,7 @@ import utils_common as utils
 import numpy as np
 
 _data_type_element_prop_ = {
-    "FLOAT_VECTOR": (3, np.float32, "vector"),
+    "FLOAT_VECTOR": (3, np.float64, "vector"),
     "FLOAT_COLOR": (4, np.float32, "color"),
 }
 
@@ -104,7 +104,7 @@ class MorphAttrFactory:
 			print(f"Shapekey name {shapekey_name} invalid.")
 			return
 		
-		self.from_mesh_data_fn(attr, shapekey_name, mesh)
+		return self.from_mesh_data_fn(attr, shapekey_name, mesh)
 
 	def to_mesh_data(self, attr, mesh:bpy.types.Mesh, shapekey_name:str) -> None:
 		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=True)
@@ -112,7 +112,7 @@ class MorphAttrFactory:
 			print(f"Shapekey name {shapekey_name} invalid.")
 			return
 		
-		self.to_mesh_data_fn(attr, shapekey_name, mesh)
+		return self.to_mesh_data_fn(attr, shapekey_name, mesh)
 
 	def gather(self, mesh:bpy.types.Mesh, shapekey_name:str) -> np.ndarray:
 		attr = self.validate(mesh, shapekey_name, remove_invalid=True, create_if_invalid=True)
@@ -161,14 +161,14 @@ class MorphAttrFactory:
 		if _prop := _data_type_element_prop_[self.type]:
 			data_size, np_type, data_entry = _prop
 		else:
-			raise ValueError(f"MorphAttrFactory.gather(): Unimplemented data type {self.type}")
+			raise ValueError(f"MorphAttrFactory.set_data(): Unimplemented data type {self.type}")
 
 		if self.domain == "CORNER":
 			attr.data.foreach_set(data_entry, data.ravel())
 		elif self.domain == "POINT":
 			attr.data.foreach_set(data_entry, data.ravel())
 		else:
-			raise ValueError(f"MorphAttrFactory.gather(): Unimplemented domain {self.domain}")
+			raise ValueError(f"MorphAttrFactory.set_data(): Unimplemented domain {self.domain}")
 		
 		return True
 
@@ -210,9 +210,97 @@ class MorphAttrFactory:
 		return self.set_data(mesh, shapekey_name, populated_data, create_if_not_exist)
 
 
+def _morph_normals_from_mesh_data(attr:bpy.types.Attribute, shapekey_name:str, mesh:bpy.types.Mesh):
+	data_size, np_type, data_entry = _data_type_element_prop_["FLOAT_VECTOR"]
+
+	raw_normals = np.empty((len(mesh.loops) * data_size), dtype=np_type)
+
+	mesh.calc_normals_split()
+
+	mesh.loops.foreach_get('normal', raw_normals.ravel())
+
+	attr.data.foreach_set(data_entry, raw_normals.ravel())
+
+	return raw_normals
+
+def _morph_normals_to_mesh_data(attr:bpy.types.Attribute, shapekey_name:str, mesh:bpy.types.Mesh):
+	data_size, np_type, data_entry = _data_type_element_prop_["FLOAT_VECTOR"]
+
+	raw_normals = np.empty((len(mesh.loops) * data_size), dtype=np_type)
+
+	attr.data.foreach_get(data_entry, raw_normals.ravel())
+
+	raw_normals = raw_normals.astype(np.float64)
+
+	raw_normals = raw_normals / np.linalg.norm(raw_normals, axis=1)[:, np.newaxis]
+
+	mesh.normals_split_custom_set(raw_normals)
+
+	return raw_normals
+
+def _morph_target_colors_from_mesh_data(attr:bpy.types.Attribute, shapekey_name:str, mesh:bpy.types.Mesh):
+	data_size, np_type, data_entry = _data_type_element_prop_["FLOAT_COLOR"]
+
+	vertex_indices = np.empty(len(mesh.loops), dtype=np.int32)
+	mesh.loops.foreach_get('vertex_index', vertex_indices)
+
+	mesh_color_attr = mesh.attributes.active_color
+	color_domain = mesh_color_attr.domain
+
+	if color_domain == 'POINT':
+		colors = np.empty((len(mesh.vertices), data_size), dtype = np_type)
+	elif color_domain == 'CORNER':
+		colors = np.empty((len(mesh.loops), data_size), dtype = np_type)
+
+	mesh_color_attr.data.foreach_get('color', colors.ravel())
+	
+	if color_domain == 'POINT':
+		colors = colors[vertex_indices]
+
+	attr.data.foreach_set(data_entry, colors.ravel())
+
+	return colors
+
+def _morph_target_colors_to_mesh_data(attr:bpy.types.Attribute, shapekey_name:str, mesh:bpy.types.Mesh):
+	data_size, np_type, data_entry = _data_type_element_prop_["FLOAT_COLOR"]
+
+	vertex_indices = np.empty(len(mesh.loops), dtype=np.int32)
+	mesh.loops.foreach_get('vertex_index', vertex_indices)
+
+	mesh_color_attr = mesh.attributes.active_color
+
+	if not mesh_color_attr or mesh_color_attr == attr:
+		return None
+
+	color_domain = mesh_color_attr.domain
+
+	raw_colors = np.empty((len(mesh.loops), data_size), dtype = np_type)
+
+	attr.data.foreach_get(data_entry, raw_colors.ravel())
+
+	colors = np.empty((len(mesh.vertices), data_size), dtype = np_type)
+	if color_domain == 'POINT':
+		colors[vertex_indices] = raw_colors
+
+	mesh_color_attr.data.foreach_set('color', colors.ravel())
+
+	return raw_colors
+
 _morph_attr_factory_list_ = {
-	"morph_normals": MorphAttrFactory("NRM", "CORNER", "FLOAT_VECTOR"),
-	"morph_target_colors": MorphAttrFactory("COL", "CORNER", "FLOAT_COLOR"),
+	"morph_normals": MorphAttrFactory(
+		"NRM", 
+		"CORNER", 
+		"FLOAT_VECTOR", 
+		from_mesh_data_fn=_morph_normals_from_mesh_data, 
+		to_mesh_data_fn=_morph_normals_to_mesh_data
+	),
+	"morph_target_colors": MorphAttrFactory(
+		"COL", 
+		"CORNER", 
+		"FLOAT_COLOR",
+		from_mesh_data_fn=_morph_target_colors_from_mesh_data,
+		to_mesh_data_fn=_morph_target_colors_to_mesh_data
+	),
 }
 
 def MorphNormals():

@@ -241,7 +241,7 @@ def ImportMesh_Alt(file_path, options, context, operator, mesh_name_override = N
 	utils_blender.SetActiveObject(obj)
 	obj.data.use_auto_smooth = True
 
-	#utils_blender.AverageCustomNormals(obj)
+	utils_blender.MergeCustomNormals(obj)
 
 	return {'FINISHED'}
 
@@ -263,6 +263,7 @@ def MeshFromJson(json_data, options, context, operator, mesh_name_override = Non
 	obj = bpy.context.selected_objects[0]
 
 	utils_blender.AverageCustomNormals(obj)
+	utils_blender.MergeCustomNormals(obj)
 
 	if not obj:
 		operator.report({'WARNING'}, f"Unknown error. Contact the author for assistance.")

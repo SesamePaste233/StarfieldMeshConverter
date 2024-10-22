@@ -264,7 +264,7 @@ def TransferShapekeys(source_obj:bpy.types.Object, target_obj:bpy.types.Object, 
 
         target_shapekey = target_obj.data.shape_keys.key_blocks[shape_key_name]
 
-        RBFTransfer(source, target, scale = 74, epsilon = 3, neighbours = 8, smoothing = 0, use_normals = False)
+        RBFTransfer(source, target, scale = 74, epsilon = 3, neighbours = 6, smoothing = 0, use_normals = False)
 
         if dont_create_if_unobvious:
             if np.max(np.abs(target.data)) < 0.001:

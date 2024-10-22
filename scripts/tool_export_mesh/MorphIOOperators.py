@@ -51,9 +51,11 @@ class ImportCustomMorph(bpy.types.Operator):
 		layout = self.layout
 		layout.prop(self, "use_colors")
 		box = layout.box()
+		box.prop(self, "base_vertex_bytecolor")
 		if self.use_colors:
 			box.enabled = True
-		box.prop(self, "base_vertex_bytecolor")
+		else:
+			box.enabled = False
 
 		layout.prop(self, "use_normals")
 

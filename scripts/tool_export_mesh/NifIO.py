@@ -66,6 +66,7 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 				continue
 
 			imported_obj = utils_blender.GetActiveObject()
+			imported_obj['Material_Path'] = data['mat_path']
 			_objects.append(imported_obj)
 			_objects[-1].name = geo_name
 			utils_blender.SetBSGeometryName(_objects[-1], geo_name)
@@ -388,6 +389,10 @@ def ExportNif(options, context, operator, head_object_mode = 'None'):
 		if mesh_obj.data.materials and len(mesh_obj.data.materials) > 0 and mesh_obj.data.materials[0]:
 			mat = mesh_obj.data.materials[0]
 			mat_path = mat.name
+			
+			if 'Material_Path' in mesh_obj.keys():
+				mat_path = mesh_obj['Material_Path']
+
 			if export_material and utils_material.is_mat(mat):
 				sub_folder_name = utils.sanitize_filename(mesh_obj.name)
 				mesh_obj_mat_folder = os.path.join(mat_folder, nif_name, sub_folder_name)

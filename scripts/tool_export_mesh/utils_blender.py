@@ -1299,23 +1299,12 @@ def get_active_obj_proxy(triangulation_method = 'None'):
 	return ObjectBMeshProxy(GetActiveObject(), triangulation_method)
 
 def AverageCustomNormals(obj:bpy.types.Object):
-	original_active = SetActiveObject(obj)
+	with get_obj_scope(obj, True, True):
+		bpy.ops.mesh.average_normals(average_type='CUSTOM_NORMAL')
 
-	old_mode = obj.mode
-
-	if obj.mode != 'EDIT':
-		bpy.ops.object.mode_set(mode='EDIT')
-
-	bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
-	bpy.ops.mesh.select_all(action='SELECT')
-	bpy.ops.mesh.average_normals(average_type='CUSTOM_NORMAL')
-	bpy.ops.mesh.select_all(action='DESELECT')
-
-	if old_mode != 'EDIT':
-		bpy.ops.object.mode_set(mode=old_mode)
-
-	if original_active != obj:
-		SetActiveObject(original_active)
+def MergeCustomNormals(obj:bpy.types.Object):
+	with get_obj_scope(obj, True, True):
+		bpy.ops.mesh.merge_normals()
 
 def ApplyShapekey(obj: bpy.types.Object, target_sk_n: str, use_relative = True):
     
