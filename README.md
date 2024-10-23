@@ -2,8 +2,8 @@
 A blender plugin that exports models, morph, geometry and physics data for Starfield in a single click. This plugin is designed to work with blender version 3.5 or 3.6, imcompatible with blender 4.0+.
 
 ## Discord Community
-https://discord.gg/TZ2Fvb7EQg (permanant access)
-https://discord.gg/dUuUcJ6G8t (temporary access)
+* https://discord.gg/TZ2Fvb7EQg (permanant access)
+* https://discord.gg/dUuUcJ6G8t (temporary access)
 
 ## Mod Page
 https://www.nexusmods.com/starfield/mods/4360
