@@ -1,6 +1,6 @@
-#include "Generated\hkBitFieldStorage.h"
+#include "Generated/hkBitFieldStorage.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 template<>
 bool hktypes::hkBitFieldStorage<hkArray<hkUint32, hkContainerHeapAllocator>>::FromInstance(const hkreflex::hkClassInstance* instance) {

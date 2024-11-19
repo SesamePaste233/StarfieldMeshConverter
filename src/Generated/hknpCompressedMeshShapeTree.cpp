@@ -1,6 +1,6 @@
-#include "Generated\hknpCompressedMeshShapeTree.h"
+#include "Generated/hknpCompressedMeshShapeTree.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hknpCompressedMeshShapeTree::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

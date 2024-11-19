@@ -1,6 +1,6 @@
-#include "Generated\hkRotationImpl.h"
+#include "Generated/hkRotationImpl.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 template<>
 bool hktypes::hkRotationImpl<float>::FromInstance(const hkreflex::hkClassInstance* instance) {

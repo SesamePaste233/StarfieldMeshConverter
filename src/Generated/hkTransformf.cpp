@@ -1,7 +1,7 @@
-#include "Generated\hkTransformf.h"
+#include "Generated/hkTransformf.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hkTransformf::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassArrayInstance*>(instance);

@@ -1,8 +1,8 @@
-#include "Generated\hclBonePlanesConstraintSet.h"
+#include "Generated/hclBonePlanesConstraintSet.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclBonePlanesConstraintSet::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

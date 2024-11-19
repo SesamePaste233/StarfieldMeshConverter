@@ -1,9 +1,9 @@
-#include "Generated\hclObjectSpaceSkinOperator.h"
+#include "Generated/hclObjectSpaceSkinOperator.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclObjectSpaceSkinOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

@@ -5,7 +5,11 @@ namespace utils{
 	bool IDataAccessProfiler::Access(size_t offset, size_t byte_size)
 	{
 		if (offset + byte_size > size) {
+#ifdef _WIN32
 			throw std::exception("Access out of range");
+#else
+			throw std::runtime_error("Access out of range");
+#endif
 			return false;
 		}
 
@@ -22,7 +26,11 @@ namespace utils{
 	bool ODataAccessProfiler::Access(size_t offset, size_t byte_size)
 	{
 		if (offset + byte_size > size) {
+#ifdef _WIN32
 			throw std::exception("Access out of range");
+#else
+			throw std::runtime_error("Access out of range");
+#endif
 			return false;
 		}
 
@@ -205,7 +213,11 @@ namespace utils{
 			return *this;
 		}
 		if (!this->_is_owner) {
+#ifdef _WIN32
 			throw std::exception("Cannot weld to non-owner");
+#else
+			throw std::runtime_error("Cannot weld to non-owner");
+#endif
 		}
 		// Allocate new buffer
 		auto new_buffer = new uint8_t[this->size + other.size];
@@ -224,7 +236,11 @@ namespace utils{
 			return DataAccessor();
 		}
 		if (!accessors[0]._is_owner) {
+#ifdef _WIN32
 			throw std::exception("Cannot weld to non-owner");
+#else
+			throw std::runtime_error("Cannot weld to non-owner");
+#endif
 		}
 		// Allocate new buffer
 		size_t total_size = 0;
@@ -250,10 +266,18 @@ namespace utils{
 			return DataAccessor();
 		}
 		if (!accessors[0]._is_owner) {
+#ifdef _WIN32
 			throw std::exception("Cannot weld to non-owner");
+#else
+			throw std::runtime_error("Cannot weld to non-owner");
+#endif
 		}
 		if (!this->_is_owner) {
+#ifdef _WIN32
 			throw std::exception("Cannot weld to non-owner");
+#else
+			throw std::runtime_error("Cannot weld to non-owner");
+#endif
 		}
 		// Allocate new buffer
 		size_t total_size = this->size;
@@ -283,7 +307,11 @@ namespace utils{
 		}
 
 		if (!this->is_valid()) {
+#ifdef _WIN32
 			throw std::exception("Cannot deep copy invalid accessor");
+#else
+			throw std::runtime_error("Cannot deep copy invalid accessor");
+#endif
 		}
 		auto new_buffer = new uint8_t[size];
 		std::memcpy(const_cast<uint8_t*>(new_buffer), this->data, size);
@@ -294,7 +322,11 @@ namespace utils{
 	DataAccessor DataAccessor::make_reference()
 	{
 		if (!this->is_valid()) {
+#ifdef _WIN32
 			throw std::exception("Cannot make reference to invalid accessor");
+#else
+			throw std::runtime_error("Cannot make reference to invalid accessor");
+#endif
 		}
 		auto rtn = DataAccessor();
 		rtn.start = this->start;

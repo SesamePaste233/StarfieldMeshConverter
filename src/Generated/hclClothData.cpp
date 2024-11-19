@@ -1,16 +1,16 @@
-#include "Generated\hclClothData.h"
+#include "Generated/hclClothData.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclClothData::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

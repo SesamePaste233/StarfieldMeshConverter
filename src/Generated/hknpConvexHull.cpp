@@ -1,10 +1,10 @@
-#include "Generated\hknpConvexHull.h"
+#include "Generated/hknpConvexHull.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hknpConvexHull::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

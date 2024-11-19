@@ -1,6 +1,6 @@
-#include "Generated\hknpCollisionControl.h"
+#include "Generated/hknpCollisionControl.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hknpCollisionControl::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

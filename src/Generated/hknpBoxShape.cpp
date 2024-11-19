@@ -1,7 +1,7 @@
-#include "Generated\hknpBoxShape.h"
+#include "Generated/hknpBoxShape.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hknpBoxShape::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

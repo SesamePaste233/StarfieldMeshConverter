@@ -1,11 +1,11 @@
-#include "Generated\hkRefPtr.h"
+#include "Generated/hkRefPtr.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 template<>
 bool hktypes::hkRefPtr<hknpShape>::FromInstance(const hkreflex::hkClassInstance* instance) {

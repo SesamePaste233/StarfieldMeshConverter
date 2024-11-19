@@ -1,6 +1,6 @@
-#include "Generated\hkRotationf.h"
+#include "Generated/hkRotationf.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hkRotationf::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

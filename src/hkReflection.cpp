@@ -64,7 +64,11 @@ void hkreflex::hkClassBase::assert_equals(hkClassBase* other)
 		return;
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception("Class definition and instantiation mismatch!");
+#else
+		throw std::runtime_error("Class definition and instantiation mismatch!");
+#endif
 	}
 	if (this->parent_class) {
 		this->parent_class->assert_equals(other->parent_class);
@@ -645,12 +649,20 @@ hkreflex::hkClassInstance* hkreflex::AllocateInstance(hkreflex::hkClassBase* typ
 {
 	auto kind = type->kind;
 	if (kind == hkClassBase::TypeKind::Inherited) {
+#ifdef _WIN32
 		_ASSERT(type->parent_class != nullptr);
+#else
+		assert(type->parent_class != nullptr);
+#endif
 		type->_instantiated = true;
 		type = type->parent_class;
 		kind = type->kind;
 		if (kind == hkClassBase::TypeKind::Inherited) {
+#ifdef _WIN32
 			_ASSERT(type->parent_class != nullptr);
+#else
+			assert(type->parent_class != nullptr);
+#endif
 			type->_instantiated = true;
 			type = type->parent_class;
 			kind = type->kind;
@@ -692,12 +704,20 @@ void hkreflex::hkClassStringInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassStringInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
 	if (value != other_instance->value)
+#ifdef _WIN32
 		throw std::exception("Value mismatch");
+#else
+		throw std::runtime_error("Value mismatch");
+#endif
 }
 
 void hkreflex::hkClassStringInstance::CollectSerializeClasses(std::vector<hkClassBase*>& classes)
@@ -724,14 +744,22 @@ size_t hkreflex::hkClassStringInstance::Build(utils::DataAccessor& data)
 		value = "";
 		if (ptr) {
 			auto char_classes = ref_context->GetClassByName("char");
+#ifdef _WIN32
 			_ASSERT(char_classes.size() == 1);
+#else
+			assert(char_classes.size() == 1);
+#endif
 			char_type = char_classes[0];
 
 			this->data_block = ref_context->indexed_blocks[ptr];
 			this->data_block->BuildInstances();
 			for (auto instance : this->data_block->m_instances) {
 				auto int_instance = dynamic_cast<hkClassIntInstance*>(instance);
+#ifdef _WIN32
 				_ASSERT(int_instance && int_instance->type->size == 1);
+#else
+				assert(int_instance && int_instance->type->size == 1);
+#endif
 				value += (char)int_instance->value;
 			}
 			this->data_block->_dumped = true;
@@ -751,7 +779,11 @@ uint64_t hkreflex::hkClassStringInstance::Serialize(utils::DataAccessor data, ut
 	hkphysics::hkReflDataSerializer* ref_data = dynamic_cast<hkphysics::hkReflDataSerializer*>(ref_context);
 	size_t cur_pos = 0;
 	if (this->type->format & 0x10) {
+#ifdef _WIN32
 		_ASSERT(value.size() == (this->type->format >> 16));
+#else
+		assert(value.size() == (this->type->format >> 16));
+#endif
 		utils::writeStringToAccessor(data, cur_pos, value);
 	}
 	else {
@@ -840,12 +872,20 @@ void hkreflex::hkClassBoolInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassBoolInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
 	if (value != other_instance->value)
+#ifdef _WIN32
 		throw std::exception("Value mismatch");
+#else
+		throw std::runtime_error("Value mismatch");
+#endif
 }
 
 size_t hkreflex::hkClassBoolInstance::Build(utils::DataAccessor& data)
@@ -864,7 +904,11 @@ size_t hkreflex::hkClassBoolInstance::Build(utils::DataAccessor& data)
 		value = utils::readFromAccessor<uint32_t>(data, cur_pos, is_big_endian);
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Unknown bool size at offset: " + std::to_string(data - ref_context->GetDataPtr())).c_str());
+#else
+		throw std::runtime_error(("Unknown bool size at offset: " + std::to_string(data - ref_context->GetDataPtr())).c_str());
+#endif
 	}
 
 	return cur_pos;
@@ -890,7 +934,11 @@ uint64_t hkreflex::hkClassBoolInstance::Serialize(utils::DataAccessor data, util
 		utils::writeToAccessor(data, cur_pos, uint32_t(value), is_big_endian);
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Unknown bool size: " + std::to_string(size)).c_str());
+#else
+		throw std::runtime_error(("Unknown bool size: " + std::to_string(size)).c_str());
+#endif
 	}
 	return size;
 }
@@ -906,7 +954,11 @@ hkreflex::hkClassIntInstance::hkClassIntInstance(hkClassBase* type, hkphysics::h
 	is_signed = (format & 0x200);
 	byte_length = (format >> 10) / 8;
 	c_type = type->ctype_name;
+#ifdef _WIN32
 	_ASSERT(byte_length == type->size);
+#else
+	assert(byte_length == type->size);
+#endif
 }
 
 bool hkreflex::hkClassIntInstance::equals(hkClassInstance* other)
@@ -928,17 +980,29 @@ void hkreflex::hkClassIntInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassIntInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
 	if (is_signed) {
 		if (svalue != other_instance->svalue)
+#ifdef _WIN32
 			throw std::exception("Value mismatch");
+#else
+			throw std::runtime_error("Value mismatch");
+#endif
 	}
 	else {
 		if (value != other_instance->value)
+#ifdef _WIN32
 			throw std::exception("Value mismatch");
+#else
+			throw std::runtime_error("Value mismatch");
+#endif
 	}
 }
 
@@ -948,7 +1012,11 @@ size_t hkreflex::hkClassIntInstance::Build(utils::DataAccessor& data)
 
 	size_t size = byte_length;
 	if (size != 1 && size != 2 && size != 4 && size != 8) {
+#ifdef _WIN32
 		throw std::exception("Unknown int size");
+#else
+		throw std::runtime_error("Unknown int size");
+#endif
 	}
 
 	if (is_signed) {
@@ -966,7 +1034,11 @@ size_t hkreflex::hkClassIntInstance::Build(utils::DataAccessor& data)
 			svalue = utils::readFromAccessor<int64_t>(data, cur_pos, is_big_endian);
 			break;
 		default:
+#ifdef _WIN32
 			throw std::exception("Unknown int size");
+#else
+			throw std::runtime_error("Unknown int size");
+#endif
 		}
 
 	}
@@ -985,7 +1057,11 @@ size_t hkreflex::hkClassIntInstance::Build(utils::DataAccessor& data)
 			value = utils::readFromAccessor<uint64_t>(data, cur_pos, is_big_endian);
 			break;
 		default:
+#ifdef _WIN32
 			throw std::exception("Unknown int size");
+#else
+			throw std::runtime_error("Unknown int size");
+#endif
 		}
 	}
 
@@ -1025,7 +1101,11 @@ uint64_t hkreflex::hkClassIntInstance::Serialize(utils::DataAccessor data, utils
 	size_t cur_pos = 0;
 	size_t size = byte_length;
 	if (size != 1 && size != 2 && size != 4 && size != 8) {
+#ifdef _WIN32
 		throw std::exception("Unknown int size");
+#else
+		throw std::runtime_error("Unknown int size");
+#endif
 	}
 
 	if (is_signed) {
@@ -1043,7 +1123,11 @@ uint64_t hkreflex::hkClassIntInstance::Serialize(utils::DataAccessor data, utils
 			utils::writeToAccessor(data, cur_pos, int64_t(svalue), is_big_endian);
 			break;
 		default:
+#ifdef _WIN32
 			throw std::exception("Unknown int size");
+#else
+			throw std::runtime_error("Unknown int size");
+#endif
 		}
 
 	}
@@ -1062,7 +1146,11 @@ uint64_t hkreflex::hkClassIntInstance::Serialize(utils::DataAccessor data, utils
 			utils::writeToAccessor(data, cur_pos, uint64_t(value), is_big_endian);
 			break;
 		default:
+#ifdef _WIN32
 			throw std::exception("Unknown int size");
+#else
+			throw std::runtime_error("Unknown int size");
+#endif
 		}
 	}
 
@@ -1088,7 +1176,11 @@ void hkreflex::hkClassPointerInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassPointerInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
@@ -1114,12 +1206,21 @@ size_t hkreflex::hkClassPointerInstance::Build(utils::DataAccessor& data)
 		}
 		else {
 			this->data_block = ref_context->indexed_blocks[in_document_ptr];
+#ifdef _WIN32
 			_ASSERT(this->data_block->m_block_type == hkIndexedDataBlock::Type::Pointer);
 			_ASSERT(this->data_block->m_num_instances == 1);
+#else
+			assert(this->data_block->m_block_type == hkIndexedDataBlock::Type::Pointer);
+			assert(this->data_block->m_num_instances == 1);
+#endif
 			//_ASSERT(this->type->is_parent_of(this->data_block->m_data_type));
 			this->data_block->BuildInstances();
 			this->ptr_instance = this->data_block->m_instances[0];
+#ifdef _WIN32
 			_ASSERT(this->ptr_instance->type == this->data_block->m_data_type);
+#else
+			assert(this->ptr_instance->type == this->data_block->m_data_type);
+#endif
 		}
 	}
 	return 8;
@@ -1193,12 +1294,20 @@ void hkreflex::hkClassFloatInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassFloatInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
 	if (value != other_instance->value)
+#ifdef _WIN32
 		throw std::exception("Value mismatch");
+#else
+		throw std::runtime_error("Value mismatch");
+#endif
 }
 
 size_t hkreflex::hkClassFloatInstance::Build(utils::DataAccessor& data)
@@ -1226,11 +1335,19 @@ size_t hkreflex::hkClassFloatInstance::Build(utils::DataAccessor& data)
 			cur_pos += 8;
 		}
 		else {
+#ifdef _WIN32
 			throw std::exception("Unknown float size");
+#else
+			throw std::runtime_error("Unknown float size");
+#endif
 		}
 		break;
 	default:
+#ifdef _WIN32
 		throw std::exception("Unknown float size");
+#else
+		throw std::runtime_error("Unknown float size");
+#endif
 	}
 
 	return cur_pos;
@@ -1266,11 +1383,19 @@ uint64_t hkreflex::hkClassFloatInstance::Serialize(utils::DataAccessor data, uti
 			cur_pos += 8;
 		}
 		else {
+#ifdef _WIN32
 			throw std::exception("Unknown float size");
+#else
+			throw std::runtime_error("Unknown float size");
+#endif
 		}
 		break;
 	default:
+#ifdef _WIN32
 		throw std::exception("Unknown float size");
+#else
+		throw std::runtime_error("Unknown float size");
+#endif
 	}
 
 	return cur_pos;
@@ -1303,15 +1428,27 @@ void hkreflex::hkClassRecordInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassRecordInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
 	if (record_instances.size() != other_instance->record_instances.size())
+#ifdef _WIN32
 		throw std::exception("Size mismatch");
+#else
+		throw std::runtime_error("Size mismatch");
+#endif
 	for (int i = 0; i < record_instances.size(); ++i) {
 		if (record_instances[i].field_name != other_instance->record_instances[i].field_name)
+#ifdef _WIN32
 			throw std::exception("Field name mismatch");
+#else
+			throw std::runtime_error("Field name mismatch");
+#endif
 		record_instances[i].instance->assert_equals(other_instance->record_instances[i].instance);
 	}
 }
@@ -1364,7 +1501,11 @@ size_t hkreflex::hkClassRecordInstance::Build(utils::DataAccessor& data)
 		if (type->size == 8) {
 			size_t cur_pos = 0;
 			auto virtual_func = utils::readFromAccessor<uint64_t>(data_ptr, cur_pos);
+#ifdef _WIN32
 			_ASSERT(virtual_func == 0);
+#else
+			assert(virtual_func == 0);
+#endif
 		}
 	}
 
@@ -1495,7 +1636,11 @@ std::string hkreflex::hkClassRecordInstance::GetStringByFieldName(const std::str
 {
 	auto instance = GetInstanceByFieldName(field_name);
 	if (!instance) {
+#ifdef _WIN32
 		throw std::exception(("Field not found: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field not found: " + field_name).c_str());
+#endif
 		return "";
 	}
 
@@ -1503,7 +1648,11 @@ std::string hkreflex::hkClassRecordInstance::GetStringByFieldName(const std::str
 		return dynamic_cast<hkreflex::hkClassStringInstance*>(instance)->value;
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Field is not string: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field is not string: " + field_name).c_str());
+#endif
 		return "";
 	}
 }
@@ -1512,7 +1661,11 @@ int64_t hkreflex::hkClassRecordInstance::GetIntByFieldName(const std::string& fi
 {
 	auto instance = GetInstanceByFieldName(field_name);
 	if (!instance) {
+#ifdef _WIN32
 		throw std::exception(("Field not found: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field not found: " + field_name).c_str());
+#endif
 		return 0;
 	}
 
@@ -1521,7 +1674,11 @@ int64_t hkreflex::hkClassRecordInstance::GetIntByFieldName(const std::string& fi
 		return int_instance->svalue;
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Field is not signed int: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field is not signed int: " + field_name).c_str());
+#endif
 		return 0;
 	}
 }
@@ -1530,7 +1687,11 @@ uint64_t hkreflex::hkClassRecordInstance::GetUIntByFieldName(const std::string& 
 {
 	auto instance = GetInstanceByFieldName(field_name);
 	if (!instance) {
+#ifdef _WIN32
 		throw std::exception(("Field not found: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field not found: " + field_name).c_str());
+#endif
 		return 0;
 	}
 
@@ -1539,7 +1700,11 @@ uint64_t hkreflex::hkClassRecordInstance::GetUIntByFieldName(const std::string& 
 		return int_instance->value;
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Field is not unsigned int: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field is not unsigned int: " + field_name).c_str());
+#endif
 		return 0;
 	}
 }
@@ -1548,7 +1713,11 @@ double hkreflex::hkClassRecordInstance::GetFloatByFieldName(const std::string& f
 {
 	auto instance = GetInstanceByFieldName(field_name);
 	if (!instance) {
+#ifdef _WIN32
 		throw std::exception(("Field not found: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field not found: " + field_name).c_str());
+#endif
 		return 0;
 	}
 
@@ -1557,7 +1726,11 @@ double hkreflex::hkClassRecordInstance::GetFloatByFieldName(const std::string& f
 		return float_instance->value;
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Field is not float: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field is not float: " + field_name).c_str());
+#endif
 		return 0;
 	}
 }
@@ -1566,7 +1739,11 @@ bool hkreflex::hkClassRecordInstance::GetBoolByFieldName(const std::string& fiel
 {
 	auto instance = GetInstanceByFieldName(field_name);
 	if (!instance) {
+#ifdef _WIN32
 		throw std::exception(("Field not found: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field not found: " + field_name).c_str());
+#endif
 		return false;
 	}
 
@@ -1575,7 +1752,11 @@ bool hkreflex::hkClassRecordInstance::GetBoolByFieldName(const std::string& fiel
 		return bool_instance->value;
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception(("Field is not bool: " + field_name).c_str());
+#else
+		throw std::runtime_error(("Field is not bool: " + field_name).c_str());
+#endif
 		return false;
 	}
 }
@@ -1584,12 +1765,20 @@ void hkreflex::hkClassArrayInstance::assert_equals(hkClassInstance* other)
 {
 	auto other_instance = dynamic_cast<hkClassArrayInstance*>(other);
 	if (other_instance == nullptr)
+#ifdef _WIN32
 		throw std::exception("Type mismatch");
+#else
+		throw std::runtime_error("Type mismatch");
+#endif
 
 	type->assert_equals(other_instance->type);
 
 	if (array_instances.size() != other_instance->array_instances.size())
+#ifdef _WIN32
 		throw std::exception("Size mismatch");
+#else
+		throw std::runtime_error("Size mismatch");
+#endif
 	for (int i = 0; i < array_instances.size(); ++i) {
 		array_instances[i]->assert_equals(other_instance->array_instances[i]);
 	}
@@ -1640,8 +1829,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 			}
 
 			auto float_instance = dynamic_cast<hkClassFloatInstance*>(instance);
-
+#ifdef _WIN32
 			_ASSERT(float_instance);
+#else
+			assert(float_instance);
+#endif
 
 			float_array[i] = float_instance->value;
 
@@ -1670,7 +1862,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 
 			auto float_instance = dynamic_cast<hkClassFloatInstance*>(instance);
 
+#ifdef _WIN32
 			_ASSERT(float_instance);
+#else
+			assert(float_instance);
+#endif
 
 			float_array[i] = float_instance->value;
 
@@ -1698,8 +1894,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 			}
 
 			auto float_instance = dynamic_cast<hkClassFloatInstance*>(instance);
-
+#ifdef _WIN32
 			_ASSERT(float_instance);
+#else
+			assert(float_instance);
+#endif
 
 			float_array[i] = float_instance->value;
 
@@ -1744,7 +1943,11 @@ size_t hkreflex::hkClassArrayInstance::Build(utils::DataAccessor& data)
 		in_document_ptr = utils::readFromAccessor<uint32_t>(data, cur_pos);
 		if (in_document_ptr) {
 			data_block = ref_context->indexed_blocks[in_document_ptr];
+#ifdef _WIN32
 			_ASSERT(data_block->m_data_type == element_type);
+#else
+			assert(data_block->m_data_type == element_type);
+#endif
 			data_block->BuildInstances();
 			array_instances = data_block->m_instances;
 		}
@@ -1931,7 +2134,11 @@ uint64_t hkreflex::hkClassArrayInstance::Serialize(utils::DataAccessor data, uti
 			}
 		}
 		else {
+#ifdef _WIN32
 			throw std::exception("Unknown array type");
+#else
+			throw std::runtime_error("Unknown array type");
+#endif
 		}
 	}
 	return cur_pos;
@@ -2046,7 +2253,11 @@ void hkreflex::hkClassArrayInstance::resize(size_t num)
 		}	
 	}
 	else {
+#ifdef _WIN32
 		throw std::exception("Unknown array type");
+#else
+		throw std::runtime_error("Unknown array type");
+#endif
 	}
 	return;
 }

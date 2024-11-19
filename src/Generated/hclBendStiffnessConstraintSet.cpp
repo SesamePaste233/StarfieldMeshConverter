@@ -1,8 +1,8 @@
-#include "Generated\hclBendStiffnessConstraintSet.h"
+#include "Generated/hclBendStiffnessConstraintSet.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclBendStiffnessConstraintSet::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

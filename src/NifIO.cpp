@@ -155,7 +155,11 @@ bool nif::NifIO::ReadHeader(std::istream& file)
 		// Read the groups
 		this->header.num_groups = utils::read<uint32_t>(file)[0];
 		for (int i = 0; i < this->header.num_groups; i++) {
+#ifdef _WIN32
 			throw std::exception("Not implemented");
+#else
+			throw std::runtime_error("Not implemented");
+#endif
 		}
 	}
 	catch (std::exception& e) {
@@ -229,7 +233,11 @@ bool nif::NifIO::WriteHeader(std::ostream& file)
 		// Write the groups
 		utils::writeAsHex(file, this->header.num_groups);
 		for (int i = 0; i < this->header.num_groups; i++) {
+#ifdef _WIN32
 			throw std::exception("Not implemented");
+#else
+			throw std::runtime_error("Not implemented");
+#endif
 		}
 	}
 	catch (std::exception& e) {
@@ -324,7 +332,11 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 		block = new BSBound();
 	}
 	else if (type_name == "bhkPhysicsSystem") {
+#ifdef _WIN32
 		_ASSERT(block_bytes != -1);
+#else
+		assert(block_bytes != -1);
+#endif
 		block = new bhkPhysicsSystem(block_bytes);
 		dynamic_cast<bhkPhysicsSystem*>(block)->RTTI = type_name;
 	}
@@ -332,7 +344,11 @@ nif::NiNodeBase* nif::NifIO::CreateBlock(const std::string type_name, const uint
 		block = new bhkNPCollisionObject();
 	}
 	else {
+#ifdef _WIN32
 		_ASSERT(block_bytes != -1);
+#else
+		assert(block_bytes != -1);
+#endif
 		block = new BinaryBlock(block_bytes);
 		dynamic_cast<BinaryBlock*>(block)->RTTI = type_name;
 	}
@@ -712,8 +728,11 @@ uint32_t nif::NifIO::NiStringManager::FindString(const std::string& str) const
 
 void nif::NifIO::NiStringManager::MoveString(const std::vector<uint32_t> new_order)
 {
+#ifdef _WIN32
 	_ASSERT(new_order.size() == header->num_strings);
-
+#else
+	assert(new_order.size() == header->num_strings);
+#endif
 	std::vector<std::string> new_strings;
 	std::unordered_map<uint32_t, std::vector<uint32_t>> new_refs;
 

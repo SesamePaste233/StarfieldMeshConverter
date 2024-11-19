@@ -1,6 +1,6 @@
-#include "Generated\hclBufferUsage.h"
+#include "Generated/hclBufferUsage.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hclBufferUsage::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

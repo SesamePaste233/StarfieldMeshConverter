@@ -1,6 +1,6 @@
-#include "Generated\hkQuaternion.h"
+#include "Generated/hkQuaternion.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hkQuaternion::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

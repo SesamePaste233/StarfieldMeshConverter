@@ -1,7 +1,7 @@
-#include "Generated\hknpMassDistribution.h"
+#include "Generated/hknpMassDistribution.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hknpMassDistribution::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

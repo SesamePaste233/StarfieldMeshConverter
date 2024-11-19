@@ -1,8 +1,8 @@
-#include "Generated\hclStandardLinkConstraintSetMx.h"
+#include "Generated/hclStandardLinkConstraintSetMx.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclStandardLinkConstraintSetMx::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

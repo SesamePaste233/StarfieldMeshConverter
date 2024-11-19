@@ -1,10 +1,18 @@
 #include "Utils.h"
+#ifndef _WIN32
+#include <cassert>
+#include <cmath>
+#endif
 
 const wchar_t* utils::charToWchar(const char* c)
 {
 	const size_t cSize = strlen(c) + 1;
 	wchar_t* wc = new wchar_t[cSize];
+#ifdef _WIN32
 	mbsrtowcs_s(nullptr, wc, cSize, &c, cSize, nullptr);
+#else
+	mbsrtowcs(wc, &c, cSize, nullptr);
+#endif
 
 	return wc;
 }
@@ -223,7 +231,11 @@ uint8_t* utils::readBytes(std::istream& file, size_t bytes)
 	auto pos = file.tellg();
 	if (pos + std::streampos(bytes) > file.seekg(0, std::ios::end).tellg()) {
 		std::cout << "File read error: out of range" << std::endl;
+#ifdef _WIN32
 		throw std::exception("File read error: out of range");
+#else
+		throw std::runtime_error("File read error: out of range");
+#endif
 	}
 
 	file.seekg(pos);
@@ -310,7 +322,11 @@ std::vector<uint32_t> utils::binary_positions(uint32_t* n, uint32_t length)
 
 uint32_t* utils::positions_to_binary(std::vector<uint32_t> pos)
 {
+#ifdef _WIN32
 	_ASSERT(pos.size() <= 128);
+#else
+	assert(pos.size() <= 128);
+#endif
 	uint32_t* binary = new uint32_t[4];
 	memset(binary, 0, 4 * sizeof(uint32_t));
 	for (int i = 0; i < pos.size(); i++) {
@@ -321,7 +337,11 @@ uint32_t* utils::positions_to_binary(std::vector<uint32_t> pos)
 
 uint32_t* utils::fill_binary(uint32_t n)
 {
+#ifdef _WIN32
 	_ASSERT(n <= 128);
+#else
+	assert(n <= 128);
+#endif
 	uint32_t* binary = new uint32_t[4];
 	memset(binary, 0, 4 * sizeof(uint32_t));
 	for (int i = 0; i < n; i++) {

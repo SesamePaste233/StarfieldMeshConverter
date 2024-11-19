@@ -1,8 +1,8 @@
-#include "Generated\hclBufferDefinition.h"
+#include "Generated/hclBufferDefinition.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclBufferDefinition::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

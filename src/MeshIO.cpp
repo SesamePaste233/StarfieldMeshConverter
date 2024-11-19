@@ -1,6 +1,15 @@
 #include "MeshIO.h"
 #include "Seb.h"
 
+#ifndef _WIN32
+typedef int HRESULT;
+#define S_OK 0
+#define E_FAIL -1
+#endif
+#ifndef _WIN32
+#define FAILED(hr) ((hr) < 0)
+#endif
+
 using namespace DirectX;
 using namespace mesh;
 using json = nlohmann::json;
@@ -559,8 +568,10 @@ bool MeshIO::GeometryFromJson(const json& jsonData, float scale_factor) {
 	return true;
 }
 
+#ifdef _WIN32
 bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_factor)
 {
+
 	WaveFrontReader<uint16_t> wfr;
 
 	if (wfr.Load(utils::charToWchar(filename.c_str())) != S_OK) {
@@ -597,6 +608,7 @@ bool mesh::MeshIO::GeometryFromOBJ(const std::string filename, float scale_facto
 
 	return true;
 }
+#endif
 
 bool MeshIO::LoadFromString(const std::string json_data, const float scale_factor, const uint32_t options) {
 	this->Clear();
@@ -642,7 +654,7 @@ bool MeshIO::LoadFromNumpyJson(const nlohmann::json& jsonData,
 
 	std::cout << "Loading mesh from numpy..." << std::endl;
 
-	this->num_positions = jsonData["num_verts"] * 3;
+	this->num_positions = static_cast<int>(jsonData["num_verts"].get<int>()) * 3;
 	this->num_vertices = jsonData["num_verts"];
 
 	if (this->num_vertices > uint16_t(-1)) {
@@ -1380,10 +1392,14 @@ class com_exception : public std::exception
 public:
 	com_exception(HRESULT hr) : result(hr) {}
 
-	virtual const char* what() const override
+	virtual const char* what() const noexcept override
 	{
 		static char s_str[64] = {};
+#ifdef _WIN32
 		sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
+#else
+		sprintf(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
+#endif
 		return s_str;
 	}
 
@@ -1681,7 +1697,7 @@ bool MeshIO::GenerateMeshlets() {
 	std::vector<uint8_t> uniqueVertexIB;
 	std::vector<MeshletTriangle> primitiveIndices;
 
-	if (FAILED(ComputeMeshlets(indices.data(), this->num_triangles,
+	if (FAILED(DirectX::ComputeMeshlets(indices.data(), this->num_triangles,
 		DX_positions.data(), this->num_vertices,
 		nullptr,
 		meshlets, uniqueVertexIB, primitiveIndices, max_vertices, max_prims)))

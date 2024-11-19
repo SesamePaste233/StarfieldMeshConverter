@@ -1,6 +1,6 @@
-#include "Generated\hkReferencedObject.h"
+#include "Generated/hkReferencedObject.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hkReferencedObject::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

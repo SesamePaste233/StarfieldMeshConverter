@@ -1,7 +1,7 @@
-#include "Generated\hclTaperedCapsuleShape.h"
+#include "Generated/hclTaperedCapsuleShape.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclTaperedCapsuleShape::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

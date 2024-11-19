@@ -1,8 +1,8 @@
-#include "Generated\hkFlags.h"
+#include "Generated/hkFlags.h"
 
-#include "Generated\hknpCollisionFlags.h"
-#include "Generated\hknpCollisionControl.h"
-#include "Generated\hknpShape.h"
+#include "Generated/hknpCollisionFlags.h"
+#include "Generated/hknpCollisionControl.h"
+#include "Generated/hknpShape.h"
 
 template<>
 bool hktypes::hkFlags<hknpCollisionFlags::Enum, int>::FromInstance(const hkreflex::hkClassInstance* instance) {

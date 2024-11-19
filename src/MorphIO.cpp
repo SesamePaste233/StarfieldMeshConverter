@@ -30,8 +30,11 @@ bool MorphIO::Deserialize(const std::string filename)
 
 	// Read unknown uint32_t
 	this->num_axis = utils::read<uint32_t>(file)[0];
-
+#ifdef _WIN32
 	_ASSERT(num_axis == 3);
+#else
+	assert(num_axis == 3);
+#endif
 
 	// Read number of vertices
 	this->num_vertices = utils::read<uint32_t>(file)[0];
@@ -51,8 +54,11 @@ bool MorphIO::Deserialize(const std::string filename)
 	// Read number of rows
 	this->num_morph_data = utils::read<uint32_t>(file)[0];
 	this->num_offsets = utils::read<uint32_t>(file)[0];
-
+#ifdef _WIN32
 	_ASSERT(num_vertices == num_offsets);
+#else
+	assert(num_vertices == num_offsets);
+#endif
 
 	for (int i = 0; i < this->num_morph_data; i++) {
 		morph_data _morph_data;
@@ -125,7 +131,11 @@ bool MorphIO::Deserialize(const std::string filename)
 		_morph_key_indices = utils::binary_positions((uint32_t*)this->offsets_list[i]._marker, 4);
 
 		if (_morph_key_indices.size() != 0) {
+#ifdef _WIN32
 			_ASSERT(_morph_key_indices.back() < this->num_shape_keys);
+#else
+			assert(_morph_key_indices.back() < this->num_shape_keys);
+#endif
 		}
 
 		for (int j = 0; j < size; j++) {
@@ -150,7 +160,11 @@ bool MorphIO::Deserialize(const std::string filename)
 	}
 
 	if (this->num_morph_data != 1) {
+#ifdef _WIN32
 		_ASSERT(size_morph_data == this->num_morph_data);
+#else
+		assert(size_morph_data == this->num_morph_data);
+#endif
 	}
 
 	return true;
@@ -588,8 +602,11 @@ bool morph::MorphIO::read_header(const std::string filename, std::string& header
 
 	// Read unknown uint32_t
 	auto num_axis = utils::read<uint32_t>(file)[0];
-
+#ifdef _WIN32
 	_ASSERT(num_axis == 3);
+#else
+	assert(num_axis == 3);
+#endif
 
 	// Read number of vertices
 	auto num_vertices = utils::read<uint32_t>(file)[0];

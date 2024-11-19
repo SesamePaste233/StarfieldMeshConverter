@@ -1,4 +1,4 @@
-#include "Generated\hkVector4f.h"
+#include "Generated/hkVector4f.h"
 
 
 bool hktypes::hkVector4f::FromInstance(const hkreflex::hkClassInstance* instance) {

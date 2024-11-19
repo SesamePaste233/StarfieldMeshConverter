@@ -1,6 +1,6 @@
-#include "Generated\hknpCollisionFlags.h"
+#include "Generated/hknpCollisionFlags.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hknpCollisionFlags::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

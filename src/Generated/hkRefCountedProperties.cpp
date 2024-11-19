@@ -1,8 +1,8 @@
-#include "Generated\hkRefCountedProperties.h"
+#include "Generated/hkRefCountedProperties.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hkRefCountedProperties::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

@@ -1,8 +1,8 @@
-#include "Generated\hclSimpleMeshBoneDeformOperator.h"
+#include "Generated/hclSimpleMeshBoneDeformOperator.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclSimpleMeshBoneDeformOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

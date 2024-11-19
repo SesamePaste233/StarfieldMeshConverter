@@ -1,6 +1,6 @@
-#include "Generated\hkMatrix4.h"
+#include "Generated/hkMatrix4.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 bool hktypes::hkMatrix4::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

@@ -1,9 +1,9 @@
-#include "Generated\hkRelArray.h"
+#include "Generated/hkRelArray.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\hknpConvexHull.h"
-#include "Generated\hknpConvexHull.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/hknpConvexHull.h"
+#include "Generated/hknpConvexHull.h"
 
 template<>
 bool hktypes::hkRelArray<hkFloat3>::FromInstance(const hkreflex::hkClassInstance* instance) {

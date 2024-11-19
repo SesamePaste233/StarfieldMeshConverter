@@ -1,4 +1,4 @@
-#include "Generated\hkBool.h"
+#include "Generated/hkBool.h"
 
 
 bool hktypes::hkBool::FromInstance(const hkreflex::hkClassInstance* instance) {

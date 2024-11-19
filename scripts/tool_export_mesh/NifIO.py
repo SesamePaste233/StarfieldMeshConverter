@@ -2,6 +2,7 @@ import os
 import json
 import bpy
 import mathutils
+from sys import platform
 
 import MeshIO
 import MorphIO
@@ -51,6 +52,9 @@ def TraverseNodeRecursive(armature_dict:dict, parent_node, collection, root_dict
 					if os.path.isfile(mesh_filepath):
 						break
 			
+			if not os.path.isfile(mesh_filepath) and not platform.startswith('win'):
+				mesh_filepath = mesh_filepath.replace("\\", "/")
+
 			lod += 1
 			if not os.path.isfile(mesh_filepath) and not use_internal_geom_data:
 				operator.report({'WARNING'}, f'{mesh_filepath} doesn\'t exist. Please make sure you have the geometry files as loose files.')

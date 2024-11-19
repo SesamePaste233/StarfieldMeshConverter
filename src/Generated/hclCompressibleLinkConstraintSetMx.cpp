@@ -1,8 +1,8 @@
-#include "Generated\hclCompressibleLinkConstraintSetMx.h"
+#include "Generated/hclCompressibleLinkConstraintSetMx.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclCompressibleLinkConstraintSetMx::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

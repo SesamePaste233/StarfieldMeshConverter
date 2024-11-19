@@ -1,9 +1,9 @@
-#include "Generated\hkcdDefaultStaticMeshTree.h"
+#include "Generated/hkcdDefaultStaticMeshTree.h"
 
-#include "Generated\hkcdStaticMeshTree.h"
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/hkcdStaticMeshTree.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hkcdDefaultStaticMeshTree::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

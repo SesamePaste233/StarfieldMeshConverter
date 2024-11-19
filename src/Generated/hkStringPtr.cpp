@@ -1,4 +1,4 @@
-#include "Generated\hkStringPtr.h"
+#include "Generated/hkStringPtr.h"
 
 
 bool hktypes::hkStringPtr::FromInstance(const hkreflex::hkClassInstance* instance) {

@@ -1,6 +1,6 @@
-#include "Generated\hkMatrix3Impl.h"
+#include "Generated/hkMatrix3Impl.h"
 
-#include "Generated\.h"
+#include "Generated/.h"
 
 template<>
 bool hktypes::hkMatrix3Impl<float>::FromInstance(const hkreflex::hkClassInstance* instance) {

@@ -197,7 +197,11 @@ void amain() {
 	return;
 }
 
+#ifdef _WIN32
 void main() {
+#else
+int main() {
+#endif
 	hkphysics::hkReflDataDeserializer data;
 
 	//data.Deserialize("C:\\repo\\MeshConverter\\UnkBlocks\\bhkPhysicsSystem\\bed_double01-bhkPhysicsSystem_3.bin", true);
@@ -223,7 +227,11 @@ void main() {
 	std::ofstream file1("C:\\repo\\MeshConverter\\include\\Generated\\Instances.txt");
 	file1 << instances;
 	file1.close();
+#ifdef _WIN32
 	return;
+#else
+	return 0;
+#endif
 }
 void ____main() {
 	hkphysics::hkReflDataDeserializer data;

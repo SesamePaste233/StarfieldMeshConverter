@@ -1,8 +1,8 @@
-#include "Generated\hclBoneSpaceSkinPNOperator.h"
+#include "Generated/hclBoneSpaceSkinPNOperator.h"
 
-#include "Generated\.h"
-#include "Generated\.h"
-#include "Generated\.h"
+#include "Generated/.h"
+#include "Generated/.h"
+#include "Generated/.h"
 
 bool hktypes::hclBoneSpaceSkinPNOperator::FromInstance(const hkreflex::hkClassInstance* instance) {
 	auto class_instance = dynamic_cast<const hkreflex::hkClassRecordInstance*>(instance);

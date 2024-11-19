@@ -4,8 +4,16 @@ import json
 import numpy as np
 
 # Load the DLL
-_dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
-print("Loaded DLL from: ", os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
+import sys
+
+if sys.platform.startswith('win'):
+    _dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
+    print("Loaded DLL from: ", os.path.join(os.path.dirname(__file__),'MeshConverter.dll'))
+else:
+    _dll = ctypes.CDLL(os.path.join(os.path.dirname(__file__),'MeshConverterLinux.so'))
+
+    print("Loaded DLL from: ", os.path.join(os.path.dirname(__file__),'MeshConverter.so'))
+
 print(_dll)
 # Define the function signature
 _dll_export_mesh = _dll.ExportMesh
